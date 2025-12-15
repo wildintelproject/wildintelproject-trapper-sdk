@@ -145,7 +145,7 @@ class HTTPUploader(TrapperAPIComponent):
     async def _init_upload(self, client: httpx.AsyncClient, path: str, size: int, file_hash: str) -> Dict[str, Any]:
         """Inicializar sesión de upload en el servidor"""
         response = await client.post(
-            f"{self._client.base_url}/uploader/upload/init",
+            f"{self._client.base_url}uploader/upload/init",
             json={"path": path, "size": size, "file_hash": file_hash},
             cookies={"sessionid": self.session_id},
         )
@@ -170,7 +170,7 @@ class HTTPUploader(TrapperAPIComponent):
                     if self.progress_callback:
                         self.progress_callback("chunk_progress", {"chunk": index, "bytes": len(buf)})
 
-        url = f"{self._client.base_url}/uploader/upload/chunk/{index}"
+        url = f"{self._client.base_url}uploader/upload/chunk/{index}"
         response = await client.put(
             url,
             params={"path": remote_path, "offset": offset, "size": size, "hash": chunk_hash},
@@ -211,7 +211,7 @@ class HTTPUploader(TrapperAPIComponent):
         """Finalizar upload en servidor"""
         chunk_hashes = self.meta["chunk_hashes"]
         response = await client.post(
-            f"{self._client.base_url}/uploader/upload/complete",
+            f"{self._client.base_url}uploader/upload/complete",
             json={"path": remote_path, "size": size, "file_hash": file_hash, "chunk_hashes": chunk_hashes},
             cookies={"sessionid": self.session_id}
         )
