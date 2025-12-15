@@ -59,7 +59,7 @@ class HTTPUploader(TrapperAPIComponent):
         data = r.json()
         if self.progress_callback:
             self.progress_callback("login", {"username": data.get("username")})
-        self.session_id = data["results"]["sessionid"]
+        self.session_id = data["results"][0]["sessionid"]
         return self.session_id
 
     async def _compute_hashes(self, path: str) -> tuple[str, List[str]]:
