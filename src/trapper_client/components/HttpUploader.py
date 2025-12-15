@@ -49,13 +49,18 @@ class HTTPUploader(TrapperAPIComponent):
     _meta_lock: asyncio.Lock = attr.ib(factory=asyncio.Lock)
 
     async def _login(self) -> str:
-        """Login y obtención de session_id usando TrapperAPIComponent"""
-        r = self._client.post("/uploader/auth/login",
-                              body={"username": self.login, "password": self.password})
+        """
+        Login y obtención de session_id usando TrapperAPIComponent
+        """
+        r = self._client.post(
+            "/uploader/auth/login",
+            body={"username": self._client.user_name, "password": self._client.user_password}
+        )
         data = r.json()
         if self.progress_callback:
             self.progress_callback("login", {"username": data.get("username")})
-        return data["sessionid"]
+        self.session_id = data["sessionid"]
+        return self.session_id
 
     async def _compute_hashes(self, path: str) -> tuple[str, List[str]]:
         """Calcular hash completo y por chunk"""
