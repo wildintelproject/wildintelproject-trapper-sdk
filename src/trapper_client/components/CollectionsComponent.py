@@ -121,6 +121,59 @@ T
         res = self._client.get_all_pages(endpoint, query)
         return self._schema(**res)
 
+
+    def trigger_collection(
+        self,
+        collection_id: int,
+        payload: Dict[str, Any],
+        endpoint: str | None = None,
+        raise_on_error: bool = True,
+    ):
+        """
+        Trigger collection processing on the server.
+
+        Parameters
+        ----------
+        collection_id : int
+            Collection ID.
+        payload : dict
+            Payload sent to the server.
+
+            Example
+            -------
+            payload = {
+                "yaml_file": "package_123.yaml",
+                "zip_file": "package_123.zip",
+                "remove_zip": False
+            }
+
+        endpoint : str, optional
+            Optional endpoint override.
+        raise_on_error : bool, optional
+            Whether to raise on API error.
+
+        Returns
+        -------
+        requests.Response
+        """
+
+        actual_endpoint = (
+            endpoint
+            or f"{self._endpoint}/{collection_id}/trigger"
+        )
+
+        self._client.logger.info(
+            "Triggering collection %s with payload %s",
+            collection_id,
+            payload,
+        )
+
+        return self._client.post(
+            endpoint=actual_endpoint,
+            body=payload,
+            raise_on_error=raise_on_error,
+        )
+
     def get_by_classification_project(self, project_id: int, query: dict = None) -> T:
         """
         Retrieve collections associated with a classification project.

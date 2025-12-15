@@ -36,6 +36,7 @@ class APIClientBase:
     user_password: str = attr.ib(repr=False)
     verify_ssl: bool = attr.ib(repr=False, default=True)
     base_url: str = attr.ib(repr=False, default="https://wildintel-trap.uhu.es")
+    logger = attr.field(repr=False, default=logger)
 
     name = "trapper_api_client"
     user_id: str = "me"
