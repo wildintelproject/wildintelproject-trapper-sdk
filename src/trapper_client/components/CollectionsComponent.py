@@ -30,7 +30,7 @@ class CollectionsComponent(TrapperAPIComponent):
         Initialize the component with collections endpoint and schema.
         """
         self._endpoint = "/storage/api/collections"
-        "/api/collections",  # ViewSet principal para collections
+        #"/api/collections",  # ViewSet principal para collections
         #"/api/collections_ondemand",  # ViewSet para collections on-demand
         #"/api/collections_map",  # ViewSet para collections con mapas
         #"/api/collections_append",  # ViewSet para añadir recursos a collections
@@ -124,9 +124,7 @@ T
 
     def trigger_collection(
         self,
-        collection_id: int,
         payload: Dict[str, Any],
-        endpoint: str | None = None,
         raise_on_error: bool = True,
     ):
         """
@@ -157,19 +155,10 @@ T
         requests.Response
         """
 
-        actual_endpoint = (
-            endpoint
-            or f"{self._endpoint}/{collection_id}/trigger"
-        )
-
-        self._client.logger.info(
-            "Triggering collection %s with payload %s",
-            collection_id,
-            payload,
-        )
+        endpoint = f"{self._endpoint}/process/trigger"
 
         return self._client.post(
-            endpoint=actual_endpoint,
+            endpoint=endpoint,
             body=payload,
             raise_on_error=raise_on_error,
         )
