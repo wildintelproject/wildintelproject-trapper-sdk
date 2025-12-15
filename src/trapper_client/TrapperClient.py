@@ -11,6 +11,7 @@ import logging
 
 from trapper_client.APIClientBase import APIClientBase
 from trapper_client.components.ClassificatorsComponent import ClassificatorsComponent
+from trapper_client.components.HttpUploader import HTTPUploader
 from trapper_client.components.ResourcesComponent import ResourcesComponent
 from trapper_client.components.CollectionsComponent import CollectionsComponent
 from trapper_client.components.LocationsComponent import LocationsComponent
@@ -94,6 +95,7 @@ class TrapperClient:
         self.observations: ObservationsComponent = ObservationsComponent(self.raw)
         self.aiobservations: AIObservationsComponent = AIObservationsComponent(self.raw)
         self.userobservations: UserObservationsComponent = UserObservationsComponent(self.raw)
+        self.uploaders: HTTPUploader = HTTPUploader(self.raw)
 
 
         self.classificators: ClassificatorsComponent = ClassificatorsComponent(self.raw)
