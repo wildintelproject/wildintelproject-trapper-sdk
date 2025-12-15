@@ -155,7 +155,7 @@ T
         requests.Response
         """
 
-        endpoint = f"{self._endpoint}/process/trigger"
+        endpoint = f"{self._endpoint}/process/"
 
         return self._client.post(
             endpoint=endpoint,
