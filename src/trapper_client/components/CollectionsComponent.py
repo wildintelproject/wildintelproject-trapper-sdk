@@ -155,7 +155,7 @@ T
         requests.Response
         """
 
-        endpoint = f"{self._endpoint}/process/"
+        endpoint = f"/storage/api/collection/process/"
 
         return self._client.post(
             endpoint=endpoint,
