@@ -6,9 +6,11 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Dict, Any, Callable, TypeVar, List, Set, Union
+from urllib.parse import urlparse
 
 import requests
 from pydantic import BaseModel
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from trapper_client import Schemas
 from trapper_client.Reports import Report
@@ -62,6 +64,30 @@ class MediaComponent(TrapperAPIComponent):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
 
+    @retry(
+        stop=stop_after_attempt(5),  # hasta 5 intentos
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+        retry=retry_if_exception_type(requests.RequestException),
+        reraise=True,
+    )
+    def _download_media_with_retry(
+            self,
+            session: requests.Session,
+            url: str,
+    ) -> bytes:
+        """
+        Descarga un media con reintentos automáticos.
+        """
+        response = session.get(
+            url,
+            verify=self._client.verify_ssl,
+            stream=True,
+            timeout=30,  # MUY importante poner timeout
+        )
+        response.raise_for_status()
+        return response.content
+
+
     def _download_trapper_media_list(self, media_list: Schemas.TrapperMediaList, zip_filename_base: str = None) -> List[
         str]:
         """
@@ -83,6 +109,22 @@ class MediaComponent(TrapperAPIComponent):
         MAX_ZIP_SIZE = 2 * 1024 ** 3  # 2 GB
         import tempfile, requests, zipfile
         temp_dir = Path(tempfile.mkdtemp(prefix="trapper_client_"))
+
+        r = self._client.post(
+            "/account/login/",
+            body={"username": self._client.user_name, "password": self._client.user_password}
+        )
+        data = r.json()
+
+        session_id = data["results"][0]["sessionid"]
+
+        session = requests.Session()
+        session.cookies.set(
+            "sessionid",
+            session_id,
+            domain=urlparse(self._client.base_url).hostname,
+            path="/"
+        )
 
         if zip_filename_base is None:
             zip_filename_base = "trapper_media_export"
@@ -114,7 +156,12 @@ class MediaComponent(TrapperAPIComponent):
             zip_internal_path = os.path.join(deployment_id, file_name + file_ext)
 
             try:
-                response = requests.get(str(file_url))
+                response = session.get(
+                    str(file_url),
+                    verify=self._client.verify_ssl,
+                    stream=True
+                )
+                #response = requests.get(str(file_url))
                 response.raise_for_status()
                 file_data = response.content
                 file_size = len(file_data)
