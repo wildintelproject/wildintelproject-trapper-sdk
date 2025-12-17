@@ -163,7 +163,43 @@ def test_trapper_client_media_download_cp(trapper_client):
             except Exception as e:
                 logging.warning(f"No se pudo borrar `{folder}`: {e}")
 
-def _test_trapper_client_media_download_cp_zip(trapper_client):
+def test_trapper_client_media_download_one(trapper_client):
+
+    folder = None
+
+    try:
+        mediaID = 3107027
+        cp_id = 33
+        output = Path("/tmp")
+        filename = trapper_client.media.download_one(
+            cp_id, m_id=mediaID, destination_folder=output, download_private=True
+        )
+
+        logging.info(filename)
+        folder = Path(filename)
+        assert folder.exists() and folder.is_dir(), f"El resultado `{folder}` no existe o no es un directorio"
+
+        try:
+            folder.resolve().relative_to(output.resolve())
+        except Exception:
+            assert False, f"El directorio `{folder}` no está dentro de `output` `{output}`"
+
+        assert any(p.is_file() for p in folder.iterdir()), f"El directorio `{folder}` no contiene ficheros"
+        assert True
+    except Exception as e:
+        print(f"Error fetching research project: {e}")
+        assert False, f"Exception occurred: {e}"
+    finally:
+        if folder and folder.exists():
+            import shutil
+
+            try:
+                shutil.rmtree(folder)
+            except Exception as e:
+                logging.warning(f"No se pudo borrar `{folder}`: {e}")
+
+
+def test_trapper_client_media_download_cp_zip(trapper_client):
     file_path = None
     try:
         cp_id = 33
@@ -199,7 +235,7 @@ def _test_trapper_client_media_download_cp_zip(trapper_client):
             except Exception as e:
                 logging.warning(f"No se pudo borrar `{file_path}`: {e}")
 
-def _test_trapper_client_media_get_all(trapper_client):
+def test_trapper_client_media_get_all(trapper_client):
     try:
         deployments = trapper_client.media.get_all()
     except NotImplementedError as e:

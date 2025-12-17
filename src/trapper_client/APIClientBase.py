@@ -78,6 +78,52 @@ class APIClientBase:
         else:
             raise ValueError("No se ha configurado ni token ni usuario/clave")
 
+    def get_authenticated_session(self) -> requests.Session:
+        """
+        Returns a requests.Session() authenticated either via:
+        - Token (Authorization header)
+        - Username/password (login form, Django session)
+        """
+        self.session = requests.Session()
+
+        if self.access_token:
+            # Token auth
+            self.session.headers.update({"Authorization": f"Token {self.access_token}"})
+            logger.debug("Using token authentication")
+            return self.session
+        elif self.user_name and self.user_password:
+
+            # Form login (Django)
+            login_url = self.base_url.rstrip("/") + "/account/login/"
+            # Primero obtener CSRF
+            r = self.session.get(login_url, verify=self.verify_ssl)
+            csrf_token = self.session.cookies.get("csrftoken")
+            if not csrf_token:
+                raise ValueError("No CSRF token found during login")
+
+            payload = {
+                "login": self.user_name,
+                "password": self.user_password,
+                "csrfmiddlewaretoken": csrf_token,
+            }
+            headers = {"Referer": login_url}
+
+            r = self.session.post(
+                login_url,
+                data=payload,
+                headers=headers,
+                verify=self.verify_ssl,
+                allow_redirects=True,
+            )
+
+            if "sessionid" not in self.session.cookies:
+                raise ValueError("Login failed: no sessionid cookie")
+
+            logger.debug(f"Authenticated session via login, sessionid={self.session.cookies['sessionid']}")
+            return self.session
+        else:
+            raise ValueError("No access token or username/password configured")
+
     def make_request(
         self,
         endpoint: str,

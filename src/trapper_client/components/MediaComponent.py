@@ -64,123 +64,6 @@ class MediaComponent(TrapperAPIComponent):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
 
-    @retry(
-        stop=stop_after_attempt(5),  # hasta 5 intentos
-        wait=wait_exponential(multiplier=1, min=2, max=30),
-        retry=retry_if_exception_type(requests.RequestException),
-        reraise=True,
-    )
-    def _download_media_with_retry(
-            self,
-            session: requests.Session,
-            url: str,
-    ) -> bytes:
-        """
-        Descarga un media con reintentos automáticos.
-        """
-        response = session.get(
-            url,
-            verify=self._client.verify_ssl,
-            stream=True,
-            timeout=30,  # MUY importante poner timeout
-        )
-        response.raise_for_status()
-        return response.content
-
-
-    def _download_trapper_media_list(self, media_list: Schemas.TrapperMediaList, zip_filename_base: str = None) -> List[
-        str]:
-        """
-        Download media files and organize them into ZIP files.
-
-        Parameters
-        ----------
-        media_list : Schemas.TrapperMediaList
-            List of media items to download.
-        zip_filename_base : str, optional
-            Base name for the ZIP files. Defaults to "trapper_media_export".
-
-        Returns
-        -------
-        List[str]
-            List of paths to the created ZIP files.
-        """
-
-        MAX_ZIP_SIZE = 2 * 1024 ** 3  # 2 GB
-        import tempfile, requests, zipfile
-        temp_dir = Path(tempfile.mkdtemp(prefix="trapper_client_"))
-
-        r = self._client.post(
-            "/account/login/",
-            body={"username": self._client.user_name, "password": self._client.user_password}
-        )
-        data = r.json()
-
-        session_id = data["results"][0]["sessionid"]
-
-        session = requests.Session()
-        session.cookies.set(
-            "sessionid",
-            session_id,
-            domain=urlparse(self._client.base_url).hostname,
-            path="/"
-        )
-
-        if zip_filename_base is None:
-            zip_filename_base = "trapper_media_export"
-
-        zip_filename_base = os.path.join(temp_dir, zip_filename_base)
-
-        zip_files = []
-        zip_index = 1
-        current_zip_size = 0
-        zip_writer = None
-
-        def start_new_zip():
-            nonlocal zip_index, zip_writer, current_zip_size
-            zip_name = f"{zip_filename_base}_{zip_index:03}.zip"
-            zip_writer = zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED)
-            zip_files.append(zip_name)
-            current_zip_size = 0
-            return zip_name
-
-        # Iniciar el primer zip
-        start_new_zip()
-
-        for media in media_list.results:
-            file_url = media.filePath
-            file_name = f"{media.mediaID}:{media.fileName}"
-            deployment_id = media.deploymentID
-            mediatype = media.fileMediatype or "image/jpeg"
-            file_ext = ".jpg" if mediatype == "image/jpeg" else ""
-            zip_internal_path = os.path.join(deployment_id, file_name + file_ext)
-
-            try:
-                response = session.get(
-                    str(file_url),
-                    verify=self._client.verify_ssl,
-                    stream=True
-                )
-                #response = requests.get(str(file_url))
-                response.raise_for_status()
-                file_data = response.content
-                file_size = len(file_data)
-
-                if current_zip_size + file_size > MAX_ZIP_SIZE:
-                    zip_writer.close()
-                    zip_index += 1
-                    start_new_zip()
-
-                zip_writer.writestr(zip_internal_path, file_data)
-                current_zip_size += file_size
-
-            except Exception as e:
-                print(f"❌ Error descargando {file_name}: {e}")
-
-        if zip_writer:
-            zip_writer.close()
-
-        return temp_dir
 
     def get_by_classification_project(self, cp_id: int, query: dict = None) -> T:
         """
@@ -338,8 +221,13 @@ class MediaComponent(TrapperAPIComponent):
 
         return Schemas.TrapperMediaList(**{"pagination": pagination, "results": filtered})
 
+    #
+    # Download
+    #
 
-    def download(self, cp_id: int, m_id:Union[int, "TrapperMedia"], destination_folder: Path, filename_overwrite:str=None) -> Path:
+    def download(self, cp_id: int, m_id:Union[int, "TrapperMedia"], destination_folder: Path
+                 , filename_overwrite:str=None
+                 , session = None, download_private:bool = False) -> Path:
         """
         Download a single media file.
         Parameters
@@ -358,11 +246,15 @@ class MediaComponent(TrapperAPIComponent):
             Path to the downloaded media file.
         """
 
+        logger.debug(f"Starting download of media {m_id} from classification project {cp_id} to folder {destination_folder}")
+
         if not isinstance(m_id, int):
             media = m_id
             if cp_id is not None:
                 raise ValueError("Si se pasa un TrapperMedia, no se debe especificar cp_id.")
         else:
+            logger.debug(f"Getting trapper media for id {m_id} from classification project {cp_id}")
+
             media = self.get_by_media_id(cp_id, m_id)
 
             if media.results is None or len(media.results) == 0:
@@ -370,10 +262,10 @@ class MediaComponent(TrapperAPIComponent):
 
             media = media.results[0]
 
-        return self._download_media(media, destination_folder, filename_overwrite)
+        return self._download_media(media, destination_folder, filename_overwrite, session, download_private)
 
     def download_one(self, cp_id: int, m_id:Union[int, "TrapperMedia"], destination_folder: Path,
-                     filename_overwrite:str=None) -> Path:
+                     filename_overwrite:str=None, session = None, download_private:bool = False) -> Path:
         """
         Download a single media file.
         Parameters
@@ -391,7 +283,7 @@ class MediaComponent(TrapperAPIComponent):
         Path
             Path to the downloaded media file.
         """
-        return self.download(cp_id, m_id, destination_folder, filename_overwrite)
+        return self.download(cp_id, m_id, destination_folder, filename_overwrite, session, download_private)
 
     def download_many(
         self,
@@ -400,6 +292,7 @@ class MediaComponent(TrapperAPIComponent):
         destination_folder: Path,
         compress: bool = False,
         max_workers=2,
+        download_private:bool = False,
         callback: callable = None
     ) -> (Path, Report):
 
@@ -430,6 +323,9 @@ class MediaComponent(TrapperAPIComponent):
 
         out_put_dir =self._create_random_subfolder(destination_folder, prefix=f"trapper_download_media_{cp_id}")
 
+        if download_private:
+            session = self._create_authenticated_session()
+
         def _notify(event: str, sid: int, name, total=None, step=None):
             if callback:
                 try:
@@ -442,7 +338,7 @@ class MediaComponent(TrapperAPIComponent):
         def _worker(item):
             media_id = item if isinstance(item, int) else item.mediaID
             _notify("start", media_id, "Downloading file", total=None, step=0)
-            return self.download(cp_id, item, out_put_dir)
+            return self.download(cp_id, item, out_put_dir, None, session, download_private)
 
         _notify("start", cp_id, "Downloading medias",  total=len(medias), step=0)
 
@@ -471,7 +367,9 @@ class MediaComponent(TrapperAPIComponent):
         return out_put_dir, report
 
     def download_by_classification_project(self, cp_id: int, query: dict = None, destination_folder: Path=None,
-                                    compress: bool = False, workers = 2, callback: callable = None) -> (Path, Report):
+                                    compress: bool = False, workers = 2,download_private: bool = False
+                                    ,callback: callable = None
+                                    ) -> (Path, Report):
         """
         Download all media from a specific classification project.
         Parameters
@@ -499,10 +397,11 @@ class MediaComponent(TrapperAPIComponent):
         out_put_dir =self._create_random_subfolder(destination_folder, prefix=f"trapper_download_media_{cp_id}")
         results = self.get_by_classification_project(cp_id, query)
 
-        return self.download_many(None, results.results, out_put_dir, compress, workers, callback)
+        return self.download_many(None, results.results, out_put_dir, compress, workers, download_private, callback)
 
     def download_by_collection(self, cp_id: int, c_id:int, query: dict = None, destination_folder: Path=None,
-                                           compress: bool = False, workers = 2, callback: callable = None) -> (Path, Report):
+                                           compress: bool = False, workers = 2, download_private:bool=False
+                               ,callback: callable = None) -> (Path, Report):
         """
         Download all media from a specific classification project and collection.
 
@@ -535,52 +434,68 @@ class MediaComponent(TrapperAPIComponent):
         out_put_dir = self._create_random_subfolder(destination_folder, prefix=f"trapper_download_media_{cp_id}")
         results = self.get_by_collection(cp_id, c_id, query)
 
-        return self.download_many(None, results.results, out_put_dir, compress, workers, callback)
+        return self.download_many(None, results.results, out_put_dir, compress, workers, download_private,callback)
 
-    def _download_media(self, media:TrapperMedia,destination_folder: Path, filename_overwrite:str=None) -> Path:
-        """
-        Download a single media file.
-        Parameters
-        ----------
-        media : TrapperMedia
-            The media item to download.
-        destination_folder : Path
-            Folder to save the downloaded media.
-        filename_overwrite : str, optional
-            If provided, the downloaded file will be saved with this name.
-        Returns
-        -------
-        Path
-            Path to the downloaded media file.
-        """
-        logger.debug(
-            f"MediaID: {media.mediaID}, FileName: {media.fileName}, DeploymentID: {media.deploymentID}, FilePath: {media.filePath}"
-        )
+    def _download_media(
+        self,
+        media: TrapperMedia,
+        destination_folder: Path,
+        filename_overwrite: str = None,
+        session: requests.Session = None,
+        download_private:bool = False,
+    ) -> Path:
+        logger.debug(f"Downloading MediaID={media.mediaID}, public={media.filePublic}, url={media.filePath}")
 
-
-        if media.filePublic is True:
-            package_url = media.filePath
-        else:
-            raise Exception("Media no es público, no se puede descargar directamente.")
-
-        resp = requests.get(package_url, stream=True, timeout=60)
-        resp.raise_for_status()
-        filename = media.fileName
-
-        if filename_overwrite:
-            filename = filename_overwrite
-
-        # Asegurar que la carpeta destino existe
         os.makedirs(destination_folder, exist_ok=True)
-        destination_path = os.path.join(destination_folder, filename)
 
-        # Guardar el contenido por chunks
+        filename = filename_overwrite or media.fileName
+        destination_path = Path(destination_folder) / filename
+
+        if session is None and not download_private:
+            session = requests.Session()
+        else:
+            logger.debug("Getting authenticated session for private media download")
+            session = self._create_authenticated_session()
+
+        file_bytes = self._download_url(session, str(media.filePath))
+
         with open(destination_path, "wb") as f:
-            for chunk in resp.iter_content(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
+            f.write(file_bytes)
 
-        return Path(destination_path)
+        return destination_path
+
+
+    @retry(
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+        retry=retry_if_exception_type(requests.RequestException),
+        reraise=True,
+    )
+    def _download_url(
+        self,
+        session: requests.Session,
+        url: str,
+    ) -> bytes:
+        logger.debug("Downloading URL: {url}")
+
+        response = session.get(
+            url,
+            verify=self._client.verify_ssl,
+            stream=True,
+            timeout=30,
+        )
+        response.raise_for_status()
+        return response.content
+
+    def _create_authenticated_session(self) -> requests.Session:
+        logger.debug("Creating authenticated session")
+        try:
+            r= self._client.get_authenticated_session()
+        except Exception as e:
+            logger.error(f"Error creating authenticated session: {str(e)}")
+            raise e
+        logger.debug(f"Authentication response data: {r}")
+        return r
 
     def _create_random_subfolder(self, destination_folder: Path, prefix:str="trapper_") -> Path:
         """
