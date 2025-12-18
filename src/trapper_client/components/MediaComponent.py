@@ -227,7 +227,7 @@ class MediaComponent(TrapperAPIComponent):
 
     def download(self, cp_id: int, m_id:Union[int, "TrapperMedia"], destination_folder: Path
                  , filename_overwrite:str=None
-                 , session = None, download_private:bool = False) -> Path:
+                 , session = None) -> Path:
         """
         Download a single media file.
         Parameters
@@ -262,10 +262,10 @@ class MediaComponent(TrapperAPIComponent):
 
             media = media.results[0]
 
-        return self._download_media(media, destination_folder, filename_overwrite, session, download_private)
+        return self._download_media(media, destination_folder, filename_overwrite, session)
 
     def download_one(self, cp_id: int, m_id:Union[int, "TrapperMedia"], destination_folder: Path,
-                     filename_overwrite:str=None, session = None, download_private:bool = False) -> Path:
+                     filename_overwrite:str=None, session = None) -> Path:
         """
         Download a single media file.
         Parameters
@@ -283,7 +283,7 @@ class MediaComponent(TrapperAPIComponent):
         Path
             Path to the downloaded media file.
         """
-        return self.download(cp_id, m_id, destination_folder, filename_overwrite, session, download_private)
+        return self.download(cp_id, m_id, destination_folder, filename_overwrite, session)
 
     def download_many(
         self,
@@ -292,7 +292,6 @@ class MediaComponent(TrapperAPIComponent):
         destination_folder: Path,
         compress: bool = False,
         max_workers=2,
-        download_private:bool = False,
         callback: callable = None
     ) -> (Path, Report):
 
@@ -320,11 +319,8 @@ class MediaComponent(TrapperAPIComponent):
             Report object with details of the download process.
         """
         report:Report = Report(title=f"Downloading {len(medias)} media(s)")
-
         out_put_dir =self._create_random_subfolder(destination_folder, prefix=f"trapper_download_media_{cp_id}")
-
-        if download_private:
-            session = self._create_authenticated_session()
+        session = requests.Session()
 
         def _notify(event: str, sid: int, name, total=None, step=None):
             if callback:
@@ -338,7 +334,7 @@ class MediaComponent(TrapperAPIComponent):
         def _worker(item):
             media_id = item if isinstance(item, int) else item.mediaID
             _notify("start", media_id, "Downloading file", total=None, step=0)
-            return self.download(cp_id, item, out_put_dir, None, session, download_private)
+            return self.download(cp_id, item, out_put_dir, None, session)
 
         _notify("start", cp_id, "Downloading medias",  total=len(medias), step=0)
 
@@ -367,7 +363,7 @@ class MediaComponent(TrapperAPIComponent):
         return out_put_dir, report
 
     def download_by_classification_project(self, cp_id: int, query: dict = None, destination_folder: Path=None,
-                                    compress: bool = False, workers = 2,download_private: bool = False
+                                    compress: bool = False, workers = 2
                                     ,callback: callable = None
                                     ) -> (Path, Report):
         """
@@ -397,11 +393,10 @@ class MediaComponent(TrapperAPIComponent):
         out_put_dir =self._create_random_subfolder(destination_folder, prefix=f"trapper_download_media_{cp_id}")
         results = self.get_by_classification_project(cp_id, query)
 
-        return self.download_many(None, results.results, out_put_dir, compress, workers, download_private, callback)
+        return self.download_many(None, results.results, out_put_dir, compress, workers, callback)
 
     def download_by_collection(self, cp_id: int, c_id:int, query: dict = None, destination_folder: Path=None,
-                                           compress: bool = False, workers = 2, download_private:bool=False
-                               ,callback: callable = None) -> (Path, Report):
+                                    compress: bool = False, workers = 2, callback: callable = None) -> (Path, Report):
         """
         Download all media from a specific classification project and collection.
 
@@ -434,7 +429,7 @@ class MediaComponent(TrapperAPIComponent):
         out_put_dir = self._create_random_subfolder(destination_folder, prefix=f"trapper_download_media_{cp_id}")
         results = self.get_by_collection(cp_id, c_id, query)
 
-        return self.download_many(None, results.results, out_put_dir, compress, workers, download_private,callback)
+        return self.download_many(None, results.results, out_put_dir, compress, workers, callback)
 
     def _download_media(
         self,
@@ -442,20 +437,18 @@ class MediaComponent(TrapperAPIComponent):
         destination_folder: Path,
         filename_overwrite: str = None,
         session: requests.Session = None,
-        download_private:bool = False,
     ) -> Path:
         logger.debug(f"Downloading MediaID={media.mediaID}, public={media.filePublic}, url={media.filePath}")
+
+        if not media.filePublic:
+            raise (Exception("Media is private, cannot download without authentication."))
 
         os.makedirs(destination_folder, exist_ok=True)
 
         filename = filename_overwrite or media.fileName
         destination_path = Path(destination_folder) / filename
 
-        if session is None and not download_private:
-            session = requests.Session()
-        else:
-            logger.debug("Getting authenticated session for private media download")
-            session = self._create_authenticated_session()
+        session = session or requests.Session()
 
         file_bytes = self._download_url(session, str(media.filePath))
 
@@ -463,7 +456,6 @@ class MediaComponent(TrapperAPIComponent):
             f.write(file_bytes)
 
         return destination_path
-
 
     @retry(
         stop=stop_after_attempt(5),
@@ -487,15 +479,6 @@ class MediaComponent(TrapperAPIComponent):
         response.raise_for_status()
         return response.content
 
-    def _create_authenticated_session(self) -> requests.Session:
-        logger.debug("Creating authenticated session")
-        try:
-            r= self._client.get_authenticated_session()
-        except Exception as e:
-            logger.error(f"Error creating authenticated session: {str(e)}")
-            raise e
-        logger.debug(f"Authentication response data: {r}")
-        return r
 
     def _create_random_subfolder(self, destination_folder: Path, prefix:str="trapper_") -> Path:
         """

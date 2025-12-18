@@ -1,7 +1,10 @@
 import logging
+import zipfile
 from pathlib import Path
 
 import pytest
+import yaml
+
 from trapper_client.Schemas import TrapperMedia
 from .helpers import validate_objects, run_test_by_filters
 
@@ -11,6 +14,17 @@ logger = logging.getLogger(__name__)
 # pytest -o log_cli=true --log-cli-level=DEBUG
 #
 
+@pytest.fixture(scope="session")
+def media_download_cases():
+    path = Path(__file__).parent / "data" / "media_download_cases.yaml"
+    with path.open() as f:
+        return yaml.safe_load(f)
+
+@pytest.fixture(scope="session")
+def download_cp_cases():
+    path = Path(__file__).parent / "data" / "download_cp_cases.yaml"
+    with path.open() as f:
+        return yaml.safe_load(f)
 
 # Función común de validación de deployments
 def _validate_objects(deployments, expected_type=TrapperMedia):
@@ -119,20 +133,68 @@ def test_trapper_client_media_get_by_mediaid(trapper_client):
         print(f"Error fetching research project: {e}")
         assert False, f"Exception occurred: {e}"
 
-# python
-def test_trapper_client_media_download(trapper_client):
-    try:
-        mediaID = 3107568
-        cp_id = 33
-        filename = trapper_client.media.download(cp_id, mediaID, "/tmp")
-        logging.debug(filename)
+#
+# Download tests
+#
+
+def test_trapper_client_media_download_by_case(trapper_client, tmp_path, media_download_cases):
+    cp_id = media_download_cases["classification_project"]
+
+    for case in media_download_cases["cases"]:
+        logger.info(f"Testing download case: {case}")
+        media_id = case["media_id"]
+        expect = case["expect"]
+
+        if "raises" in expect:
+            with pytest.raises(eval(expect["raises"])):
+                trapper_client.media.download(cp_id, media_id, tmp_path)
+            continue
+
+        filename = trapper_client.media.download(cp_id, media_id, tmp_path)
         file_path = Path(filename)
-        assert file_path.exists() and file_path.is_file(), f"El fichero descargado {file_path} no existe o no es un fichero"
-        file_path.unlink()
-        assert True
-    except Exception as e:
-        print(f"Error fetching research project: {e}")
-        assert False, f"Exception occurred: {e}"
+        assert file_path.is_file()
+
+
+def test_trapper_client_media_download_cp_cases(trapper_client, tmp_path, download_cp_cases):
+    cp_id = download_cp_cases["classification_project"]
+
+    for case in download_cp_cases["cases"]:
+        logger.info(f"Testing download case: {case}")
+
+
+
+
+        compress = case.get("compress", False)
+        expect = case["expect"]
+
+        (filename, report) = trapper_client.media.download_by_classification_project(
+            cp_id,
+            query=None,
+            destination_folder=tmp_path,
+            compress=compress
+        )
+
+        file_path = Path(filename)
+
+        # Validaciones generales
+        if expect.get("is_file"):
+            assert file_path.is_file(), f"El fichero `{file_path}` no existe o no es un fichero"
+        if expect.get("is_dir"):
+            assert file_path.is_dir(), f"El directorio `{file_path}` no existe o no es un directorio"
+
+        # Validación suffix
+        if "suffix" in expect:
+            assert file_path.suffix.lower() == expect["suffix"], f"El fichero `{file_path}` no tiene la extensión {expect['suffix']}"
+
+        # Validación de contenido
+        if expect.get("contains_files"):
+            assert any(p.is_file() for p in file_path.iterdir()), f"El directorio `{file_path}` no contiene ficheros"
+        if expect.get("zip_contains_files"):
+            assert zipfile.is_zipfile(file_path), f"El fichero `{file_path}` no es un zip válido"
+            with zipfile.ZipFile(file_path) as z:
+                names = z.namelist()
+                assert any(not n.endswith("/") for n in names), f"El zip `{file_path}` no contiene ficheros"
+
 
 def test_trapper_client_media_download_cp(trapper_client):
     folder = None
@@ -162,42 +224,6 @@ def test_trapper_client_media_download_cp(trapper_client):
                 shutil.rmtree(folder)
             except Exception as e:
                 logging.warning(f"No se pudo borrar `{folder}`: {e}")
-
-def test_trapper_client_media_download_one(trapper_client):
-
-    folder = None
-
-    try:
-        mediaID = 3107027
-        cp_id = 33
-        output = Path("/tmp")
-        filename = trapper_client.media.download_one(
-            cp_id, m_id=mediaID, destination_folder=output, download_private=True
-        )
-
-        logging.info(filename)
-        folder = Path(filename)
-        assert folder.exists() and folder.is_dir(), f"El resultado `{folder}` no existe o no es un directorio"
-
-        try:
-            folder.resolve().relative_to(output.resolve())
-        except Exception:
-            assert False, f"El directorio `{folder}` no está dentro de `output` `{output}`"
-
-        assert any(p.is_file() for p in folder.iterdir()), f"El directorio `{folder}` no contiene ficheros"
-        assert True
-    except Exception as e:
-        print(f"Error fetching research project: {e}")
-        assert False, f"Exception occurred: {e}"
-    finally:
-        if folder and folder.exists():
-            import shutil
-
-            try:
-                shutil.rmtree(folder)
-            except Exception as e:
-                logging.warning(f"No se pudo borrar `{folder}`: {e}")
-
 
 def test_trapper_client_media_download_cp_zip(trapper_client):
     file_path = None
