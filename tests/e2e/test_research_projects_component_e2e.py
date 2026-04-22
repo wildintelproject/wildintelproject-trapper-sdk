@@ -5,7 +5,7 @@ Requires environment variables:
     WILDINTEL_BASE_URL, WILDINTEL_ACCESS_TOKEN, WILDINTEL_SMOKE_ENABLED=1
 
 Optional:
-    WILDINTEL_PROJECT_PK     — pk of an existing research project
+    WILDINTEL_RPROJECT_PK     — pk of an existing research project
     WILDINTEL_COLLECTION_PK  — pk of an existing project-collection link
 """
 from __future__ import annotations
@@ -26,7 +26,7 @@ class TestResearchProjectsComponentE2E(ComponentE2ETestBase):
     component_class = ResearchProjectsComponent
     schema = ResearchProject
     export_schema = ResearchProject     # sin export_schema propio usa schema
-    env_pk_var = "WILDINTEL_PROJECT_PK"
+    env_pk_var = "WILDINTEL_RPROJECT_PK"
 
 
 # ── tests específicos de colecciones ─────────────────────────────────────────
@@ -37,12 +37,13 @@ def projects(real_api_base):
 
 
 def _project_pk() -> str:
-    return os.getenv("WILDINTEL_PROJECT_PK", "").strip()
+    return os.getenv("WILDINTEL_RPROJECT_PK", "").strip()
 
+def _project_collection_pk() -> str:
+    return os.getenv("WILDINTEL_RPROJECT_COLLECTION", "").strip()
 
 def _collection_pk() -> str:
     return os.getenv("WILDINTEL_COLLECTION_PK", "").strip()
-
 
 class TestResearchProjectCollectionsE2E:
 
@@ -177,7 +178,7 @@ class TestResearchProjectCollectionsE2E:
     def test_find_project_collection_returns_correct_schema(self, projects):
         """find_project_collection() devuelve instancia de ResearchProjectCollection."""
         project_pk = _project_pk()
-        collection_pk = _collection_pk()
+        collection_pk = _project_collection_pk()
         if not project_pk or not collection_pk:
             pytest.skip("Set WILDINTEL_PROJECT_PK and WILDINTEL_COLLECTION_PK to run this test")
 
@@ -193,7 +194,7 @@ class TestResearchProjectCollectionsE2E:
     def test_find_project_collection_validate_false_returns_model(self, projects):
         """find_project_collection() con validate=False devuelve modelo sin validar."""
         project_pk = _project_pk()
-        collection_pk = _collection_pk()
+        collection_pk = _project_collection_pk()
         if not project_pk or not collection_pk:
             pytest.skip("Set WILDINTEL_PROJECT_PK and WILDINTEL_COLLECTION_PK to run this test")
 
@@ -214,3 +215,34 @@ class TestResearchProjectCollectionsE2E:
 
         with pytest.raises(Exception):
             projects.find_project_collection(project_pk=int(pk), pk=999999999)
+
+    @pytest.mark.e2e
+    def test_find_project_collection_returns_model(self, projects):
+        """find_collection_in_project()  devuelve intr."""
+        project_pk = _project_pk()
+        collection_pk = _collection_pk()
+        if not project_pk or not collection_pk:
+            pytest.skip("Set WILDINTEL_RPROJECT_PK and WILDINTEL_COLLECTION_PK to run this test")
+
+        result = projects.find_collection_in_project(
+            project_pk=int(project_pk),
+            collection_pk=int(collection_pk),
+        )
+
+        assert isinstance(result, int)
+
+    @pytest.mark.e2e
+    def test_find_project_collection_returns_nonel(self, projects):
+        """find_collection_in_project()  devuelve None."""
+        project_pk = _project_pk()
+        collection_pk = 9999999999
+        if not project_pk or not collection_pk:
+            pytest.skip("Set WILDINTEL_RPROJECT_PK and WILDINTEL_COLLECTION_PK to run this test")
+
+        result = projects.find_collection_in_project(
+            project_pk=int(project_pk),
+            collection_pk=int(collection_pk),
+            validate=False,
+        )
+
+        assert result is None

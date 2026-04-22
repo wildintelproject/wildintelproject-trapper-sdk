@@ -85,6 +85,10 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         """
 
         return self.get(
+            query=query,
+            page=page,
+            page_size=page_size,
+            validate=validate,
             overwrite_endpoint=f"research/api/project/{project_pk}/collections",
             overwrite_schema=ResearchProjectCollection,
             **kwargs,
@@ -126,11 +130,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
 
         Args:
             project_pk: Research project primary key.
-            pk: Project-collection link primary key.
-            query: Base query parameters.
-            validate: Whether to validate the payload with Pydantic.
-            **kwargs: Extra query parameters merged into ``query``.
-
+            pk: Project-collection link primary key. NOT collection pk
         Returns:
             ``ResearchProjectCollection`` when ``validate=True``.
             Otherwise, raw dict-like payload.
@@ -167,3 +167,39 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
             overwrite_schema=ResearchProjectCollection,
             **kwargs,
         )
+
+    def find_collection_in_project(
+            self,
+            project_pk: int,
+            collection_pk: int,
+            **kwargs,
+    ) -> int | None:
+        """Check whether a collection is linked to a research project.
+
+        Iterates the project-collection links lazily and returns the pk of the
+        link record if found, or ``None`` if the collection is not linked to
+        the project.
+
+        Args:
+            project_pk: Research project primary key.
+            collection_pk: Collection primary key to search for.
+            **kwargs: Extra query parameters passed to the underlying request.
+
+        Returns:
+            The pk of the project-collection link if found, otherwise ``None``.
+
+        Example::
+
+            link_pk = client.research_projects.find_collection_in_project(
+                project_pk=7,
+                collection_pk=42,
+            )
+            if link_pk:
+                print(f"Collection 42 is linked via pk={link_pk}")
+            else:
+                print("Collection 42 is not in this project")
+        """
+        for link in self.where_project_collections(project_pk=project_pk, **kwargs):
+            if link.collection_pk == collection_pk:
+                return link.pk
+        return None
