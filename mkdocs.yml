@@ -1,0 +1,24 @@
+site_name: trapper_api_client
+site_description: Cliente Python para la API de Trapper
+site_url: https://example.com/trapper_api_client
+repo_name: trapper_client
+
+theme:
+  name: material
+
+nav:
+  - Inicio: index.md
+  - Instalacion: installation.md
+  - Uso: usage.md
+  - Testing: testing.md
+  - API Reference: api.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: true
+            show_root_heading: true

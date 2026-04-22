@@ -1,0 +1,30 @@
+# .github/workflows/tests.yml
+name: Tests
+
+on:
+  push:
+    branches: [main, develop, refactor]
+  pull_request:
+    branches: [main, develop, refactor]
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv sync --dev
+
+      - name: Run tests
+        run: uv run pytest tests/ -v --tb=short
