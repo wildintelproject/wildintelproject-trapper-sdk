@@ -83,29 +83,11 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         Returns:
             Paginated result containing ``ResearchProjectCollection`` items.
         """
-        endpoint = f"research/api/project/{project_pk}/collections"
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        q.setdefault("page", page)
-        q.setdefault("page_size", page_size)
 
-        data = self.client.get(endpoint, query=q)
-        rows = data.get("results", [])
-        parsed = [
-            ResearchProjectCollection.model_validate(r)
-            if validate
-            else ResearchProjectCollection.model_construct(**r)
-            for r in rows
-        ]
-
-        return PaginatedResult[ResearchProjectCollection](
-            pagination={
-                "page": data.get("pagination", {}).get("page", 1),
-                "page_size": data.get("pagination", {}).get("page_size", len(parsed)),
-                "pages": data.get("pagination", {}).get("pages", 1),
-                "count": data.get("pagination", {}).get("count", len(parsed)),
-            },
-            results=parsed,
+        return self.get(
+            overwrite_endpoint=f"research/api/project/{project_pk}/collections",
+            overwrite_schema=ResearchProjectCollection,
+            **kwargs,
         )
 
     def where_project_collections(
@@ -126,9 +108,11 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         Returns:
             Lazy ``APIQuery`` iterator yielding project collections.
         """
-        endpoint = f"research/api/project/{project_pk}/collections"
-        q = self._merge_query(query, kwargs)
-        return APIQuery(client=self.client, endpoint=endpoint, query=q or {}, page_size=page_size)
+        return self.where(
+            overwrite_endpoint=f"research/api/project/{project_pk}/collections",
+            overwrite_schema=ResearchProjectCollection,
+            **kwargs,
+        )
 
     def find_project_collection(
         self,
@@ -151,14 +135,12 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
             ``ResearchProjectCollection`` when ``validate=True``.
             Otherwise, raw dict-like payload.
         """
-        endpoint = f"research/api/project/{project_pk}/collections/{pk}"
-        q = self._merge_query(query, kwargs)
-        data = self.client.get(endpoint, query=q)
-        if validate:
-            return ResearchProjectCollection.model_validate(data)
-        if isinstance(data, dict):
-            return ResearchProjectCollection.model_construct(**data)
-        return data
+        return self.find(
+            pk=pk,
+            overwrite_endpoint=f"research/api/project/{project_pk}/collections",
+            overwrite_schema=ResearchProjectCollection,
+            **kwargs,
+        )
 
     def get_all_project_collections(
         self,
@@ -180,25 +162,8 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         Returns:
             Paginated result containing merged ``ResearchProjectCollection`` items.
         """
-        endpoint = f"research/api/project/{project_pk}/collections"
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        q.setdefault("page_size", page_size)
-
-        data = self.client.get_all(endpoint, query=q)
-        rows = data.get("results", [])
-        parsed = [
-            ResearchProjectCollection.model_validate(r)
-            if validate
-            else ResearchProjectCollection.model_construct(**r)
-            for r in rows
-        ]
-        return PaginatedResult[ResearchProjectCollection](
-            pagination={
-                "page": data.get("pagination", {}).get("page", 1),
-                "page_size": data.get("pagination", {}).get("page_size", len(parsed)),
-                "pages": data.get("pagination", {}).get("pages", 1),
-                "count": data.get("pagination", {}).get("count", len(parsed)),
-            },
-            results=parsed,
+        return self.get_all(
+            overwrite_endpoint=f"research/api/project/{project_pk}/collections",
+            overwrite_schema=ResearchProjectCollection,
+            **kwargs,
         )
