@@ -209,7 +209,7 @@ class DeploymentExport(BaseModel):
     session: str | None = Field(None, alias="session")
     array: str | None = Field(None, alias="array")
     comments: str | None = Field(None, alias="deploymentComments")
-    tags: str | None = Field(None, alias="tagNames")
+    tags: list[str] = Field(default_factory=list)
 
     # ── validators ────────────────────────────────────────────────────────────
 
