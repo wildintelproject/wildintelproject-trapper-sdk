@@ -111,7 +111,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         page_size: int = 50,
         validate: bool = True,
         **kwargs,
-    ) -> APIQuery:
+    ) -> APIQuery[Resource]:
         """Return a lazy iterator over resources belonging to a collection.
 
         Fetches pages on demand from
@@ -133,18 +133,17 @@ class ResourcesComponent(TrapperComponent[Resource]):
             for res in client.resources.where_by_collection(5, status="Public"):
                 print(res.pk, res.name)
         """
-        q = dict(query or {})
-        q.update(kwargs)
         endpoint = f"{self.endpoint.rstrip('/')}/collection/{collection_pk}"
-        return APIQuery(
-            client=self.client,
-            endpoint=endpoint,
-            query=q,
+
+        return self.where(
+            query=query,
             filter_fn=filter_fn,
             page_size=page_size,
-            schema=self.schema,
             validate=validate,
+            overwrite_endpoint=endpoint,
+            **kwargs
         )
+
 
     def get_by_collection(
         self,
@@ -173,12 +172,15 @@ class ResourcesComponent(TrapperComponent[Resource]):
             page = client.resources.get_by_collection(5, page=2, page_size=25)
             print(page.pagination.count, len(page.results))
         """
-        q = self._merge_query(query, kwargs) or {}
-        q.setdefault("page", page)
-        q.setdefault("page_size", page_size)
         endpoint = f"{self.endpoint.rstrip('/')}/collection/{collection_pk}"
-        data = self.client.get(endpoint, query=q)
-        return self._to_paginated(data, validate=validate)
+        return self.get(
+            query=query,
+            page=page,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=endpoint,
+            **kwargs
+        )
 
     def get_all_by_collection(
         self,
@@ -205,18 +207,21 @@ class ResourcesComponent(TrapperComponent[Resource]):
             page = client.resources.get_all_by_collection(5)
             print(page.pagination.count, len(page.results))
         """
-        q = dict(self._merge_query(query, kwargs) or {})
-        q.setdefault("page_size", page_size)
         endpoint = f"{self.endpoint.rstrip('/')}/collection/{collection_pk}"
-        data = self.client.get_all(endpoint, query=q)
-        return self._to_paginated(data, validate=validate)
+        return self.get_all(
+            query=query,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=endpoint,
+            **kwargs
+        )
 
     def find_by_collection(
         self,
         collection_pk: int,
         resource_pk: int | str,
         validate: bool = True,
-    ) -> Resource | dict:
+    ) -> Resource:
         """Retrieve a single resource by PK within a specific collection.
 
         Args:
@@ -234,9 +239,13 @@ class ResourcesComponent(TrapperComponent[Resource]):
             res = client.resources.find_by_collection(collection_pk=5, resource_pk=123)
             print(res.pk, res.name)
         """
-        endpoint = f"{self.endpoint.rstrip('/')}/collection/{collection_pk}/{resource_pk}"
-        data = self.client.get(endpoint, query=None)
-        return self._to_model(data, validate=validate)
+        endpoint = f"{self.endpoint.rstrip('/')}/collection/{collection_pk}/"
+
+        return self.find(
+            pk=resource_pk,
+            validate=validate,
+            overwrite_endpoint=endpoint,
+        )
 
     # ── location sub-endpoint ─────────────────────────────────────────────────
 
@@ -248,7 +257,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         page_size: int = 50,
         validate: bool = True,
         **kwargs,
-    ) -> APIQuery:
+    ) -> APIQuery[Resource]:
         """Return a lazy iterator over resources at a specific location.
 
         Fetches pages on demand from
@@ -270,17 +279,14 @@ class ResourcesComponent(TrapperComponent[Resource]):
             for res in client.resources.where_by_location(42):
                 print(res.pk, res.name)
         """
-        q = dict(query or {})
-        q.update(kwargs)
         endpoint = f"{self.endpoint.rstrip('/')}/location/{location_pk}"
-        return APIQuery(
-            client=self.client,
-            endpoint=endpoint,
-            query=q,
+        return self.where(
+            query=query,
             filter_fn=filter_fn,
             page_size=page_size,
-            schema=self.schema,
             validate=validate,
+            overwrite_endpoint=endpoint,
+            **kwargs
         )
 
     def get_by_location(
@@ -310,12 +316,17 @@ class ResourcesComponent(TrapperComponent[Resource]):
             page = client.resources.get_by_location(42, page_size=10)
             print(len(page.results))
         """
-        q = self._merge_query(query, kwargs) or {}
-        q.setdefault("page", page)
-        q.setdefault("page_size", page_size)
+
         endpoint = f"{self.endpoint.rstrip('/')}/location/{location_pk}"
-        data = self.client.get(endpoint, query=q)
-        return self._to_paginated(data, validate=validate)
+
+        return self.get(
+            query=query,
+            page=page,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=endpoint,
+            **kwargs
+        )
 
     def get_all_by_location(
         self,
@@ -342,18 +353,22 @@ class ResourcesComponent(TrapperComponent[Resource]):
             page = client.resources.get_all_by_location(42)
             print(page.pagination.count)
         """
-        q = dict(self._merge_query(query, kwargs) or {})
-        q.setdefault("page_size", page_size)
+
         endpoint = f"{self.endpoint.rstrip('/')}/location/{location_pk}"
-        data = self.client.get_all(endpoint, query=q)
-        return self._to_paginated(data, validate=validate)
+        return self.get_all(
+            query=query,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=endpoint,
+            **kwargs
+        )
 
     def find_by_location(
         self,
         location_pk: int,
         resource_pk: int | str,
         validate: bool = True,
-    ) -> Resource | dict:
+    ) -> Resource:
         """Retrieve a single resource by PK at a specific location.
 
         Args:
@@ -371,6 +386,10 @@ class ResourcesComponent(TrapperComponent[Resource]):
             res = client.resources.find_by_location(location_pk=42, resource_pk=99)
             print(res.pk, res.name)
         """
-        endpoint = f"{self.endpoint.rstrip('/')}/location/{location_pk}/{resource_pk}"
-        data = self.client.get(endpoint, query=None)
-        return self._to_model(data, validate=validate)
+        endpoint = f"{self.endpoint.rstrip('/')}/location/{location_pk}"
+
+        return self.find(
+            pk=resource_pk,
+            validate=validate,
+            overwrite_endpoint=endpoint,
+        )
