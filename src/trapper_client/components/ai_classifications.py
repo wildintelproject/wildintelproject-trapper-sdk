@@ -10,7 +10,7 @@ from typing import Any, Dict
 from pydantic import BaseModel
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import AIClassificationRecord, PaginatedResult, AIClassificationRecordExport, \
+from trapper_client.schemas import AIClassificationRecord,  AIClassificationRecordExport, \
     AIClassificationRecordExportTrapper, AIClassificationRecordExportCamTrap
 
 
@@ -65,47 +65,32 @@ class AIClassificationsComponent(TrapperComponent[AIClassificationRecord]):
 
     def export(
             self,
-            classification_prokect_pk:int,
+            classification_project_pk: int,
             query: Dict[str, Any] | None = None,
             file: str | Path | None = None,
             validate: bool = True,
-            overwrite_endpoint: str | None = None,
             **kwargs,
     ) -> Path | list[BaseModel]:
-        """
-        Export resource data as CSV or as a list of parsed models.
-
-        If ``export_endpoint`` is defined on the component, it is used instead of
-        ``endpoint`` to fetch the data. This allows components to use a dedicated
-        export endpoint (e.g. ``/geomap/api/locations/export/``) when available.
-
-        If ``file`` is provided, results are written to CSV and the path is returned.
-        If ``file`` is None, a list of parsed models is returned instead.
-
-        If ``export_schema`` is defined on the component, it is used for parsing;
-        otherwise ``schema`` is used as fallback.
-
-        If ``validate`` is False, the raw API export endpoint is used directly
-        (only meaningful when ``file`` is provided).
+        """Export AI classification results for a project to CSV or model list.
 
         Args:
+            classification_project_pk: Classification project primary key.
             query: Base query parameters.
-            file: Output CSV path. If None, returns a list of models.
+            file: Output CSV path. If ``None``, returns a list of models.
             validate: Whether to parse results with Pydantic.
             **kwargs: Extra query params merged into ``query``.
 
         Returns:
             ``Path`` when ``file`` is provided, otherwise ``list[BaseModel]``.
         """
-        endpoint = self.export_endpoint.format(project_pk=classification_prokect_pk)
-
+        endpoint = self.export_endpoint.format(project_pk=classification_project_pk)
         q = self._merge_query(query, kwargs)
+
         if not validate:
             return self.client.export_all(endpoint, query=q, file=file)
 
         raw_data = self.client.get_all(endpoint, query=q)
         rows_raw = raw_data.get("results", [])
-
         items = [self._validate_ai_export_record(row) for row in rows_raw]
 
         if file is None:
@@ -116,24 +101,28 @@ class AIClassificationsComponent(TrapperComponent[AIClassificationRecord]):
         self.client._write_csv(rows, output_path)
         return output_path
 
+    def _validate_ai_export_record(self, row: dict) -> AIClassificationRecordExport:
+        """Parse one export row into the correct schema based on its fields.
 
-        """return super().export(
-            query=query,
-            file=file,
-            validate=validate,
-            overwrite_endpoint= endpoint,
-            **kwargs,
-        )"""
+        Args:
+            row: Raw row dict from the API export endpoint.
 
-    def _validate_ai_export_record(self,row: dict):
+        Returns:
+            ``AIClassificationRecordExportTrapper`` if ``_id`` field is present,
+            otherwise ``AIClassificationRecordExportCamTrap``.
+        """
         row = self._clean_row(row)
         if "_id" in row:
             return AIClassificationRecordExportTrapper.model_validate(row)
-        else:
-            return AIClassificationRecordExportCamTrap.model_validate(row)
+        return AIClassificationRecordExportCamTrap.model_validate(row)
 
-    def _clean_row(self,row: dict) -> dict:
-        return {
-            k: (None if v == "" else v)
-            for k, v in row.items()
-        }
+    def _clean_row(self, row: dict) -> dict:
+        """Replace empty strings with ``None`` in a row dict.
+
+        Args:
+            row: Raw row dict.
+
+        Returns:
+            Cleaned dict with empty strings replaced by ``None``.
+        """
+        return {k: (None if v == "" else v) for k, v in row.items()}
