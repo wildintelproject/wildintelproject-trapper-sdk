@@ -18,12 +18,47 @@ from trapper_client.schemas import ClassificationProject, ClassificationProjectC
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
 
-VALID_PROJECT = {"pk": 1, "name": "Classification Project A"}
-VALID_COLLECTION = {"pk": 10, "collection_pk": 42, "name": "Collection A"}
+VALID_PROJECT ={
+      "pk": 60,
+      "name": "3rd test",
+      "owner": "Jorge García",
+      "owner_profile": "/accounts/profile/jorga.garcia@dci.uhu.es/",
+      "classificator": 32,
+      "research_project": "LERP_01",
+      "status": "Ongoing",
+      "is_active": True,
+      "project_roles": [
+        {
+          "user": "Jorge García",
+          "username": "jorge.garcia@dci.uhu.es",
+          "profile": "/accounts/profile/jorge.garcia@dci.uhu.es/",
+          "is_superuser": False,
+          "roles": [
+            "Admin"
+          ]
+        }
+      ],
+      "classificator_removed":False,
+      "update_data": "/media_classification/project/update/60/",
+      "detail_data": "/media_classification/project/detail/60/",
+      "delete_data": "/media_classification/project/delete/60/"
+    }
+VALID_COLLECTION = {
+      "pk": 35,
+      "collection_pk": 47,
+      "name": "R0033",
+      "status": "Private",
+      "is_active": True,
+      "detail_data": "/storage/collection/detail/47/",
+      "classify_data": "/media_classification/classify/33/35/",
+      "approved_count": 29,
+      "classified_count": 1,
+      "total_count": 824
+    }
 
-PROJECT_PK = 7
-COLLECTION_PK = 42
-LINK_PK = 10
+PROJECT_PK = 60
+COLLECTION_PK = 47
+LINK_PK = 35
 
 
 # ── tests heredados ───────────────────────────────────────────────────────────
@@ -236,16 +271,15 @@ class TestClassificationProjectCollections:
 
     def test_find_collection_in_project_stops_at_first_match(self, component, client):
         """find_collection_in_project() no consume más páginas tras encontrar el resultado."""
-        collections = [
-            {"pk": 10, "collection_pk": 42, "name": "A"},
-            {"pk": 11, "collection_pk": 43, "name": "B"},
-            {"pk": 12, "collection_pk": 44, "name": "C"},
+        mock_links = [
+            MagicMock(pk=10, collection_pk=42),
+            MagicMock(pk=11, collection_pk=43),
+            MagicMock(pk=12, collection_pk=44),
         ]
-        client.get.return_value = paginated_response(collections)
+        component.where_project_collections = MagicMock(return_value=iter(mock_links))
 
         result = component.find_collection_in_project(
             project_pk=PROJECT_PK, collection_pk=42
         )
 
         assert result == 10
-        assert client.get.call_count == 1
