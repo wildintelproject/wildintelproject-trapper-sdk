@@ -9,10 +9,11 @@ from typing import Any, Dict
 
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import ClassificationResultRecord, PaginatedResult
+from trapper_client.schemas import ClassificationRecordExport, PaginatedResult, ClassificationRecord, \
+    ClassificationRecordExport
 
 
-class ClassificationsComponent(TrapperComponent[ClassificationResultRecord]):
+class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
     """
     Component for ``/media_classification/api/classifications``.
 
@@ -60,15 +61,19 @@ class ClassificationsComponent(TrapperComponent[ClassificationResultRecord]):
     schema = ClassificationRecord
     export_schema = ClassificationRecordExport
 
+    def _resolve_export_endpoint(self, project_pk: int) -> str:
+        """Build the export endpoint for a given project pk."""
+        return self.export_endpoint.format(project_pk=project_pk)
+
     def get_project_results(
-        self,
-        project_pk: int,
-        query: Dict[str, Any] | None = None,
-        page: int = 1,
-        page_size: int = 50,
-        validate: bool = True,
-        **kwargs,
-    ) -> PaginatedResult[ClassificationResultRecord]:
+            self,
+            project_pk: int,
+            query: Dict[str, Any] | None = None,
+            page: int = 1,
+            page_size: int = 50,
+            validate: bool = True,
+            **kwargs,
+    ) -> PaginatedResult[ClassificationRecordExport]:
         """Fetch one page of observation rows for a classification project.
 
         Args:
@@ -82,68 +87,67 @@ class ClassificationsComponent(TrapperComponent[ClassificationResultRecord]):
         Returns:
             Paginated result containing ``ClassificationResultRecord`` items.
         """
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        q.setdefault("page", page)
-        q.setdefault("page_size", page_size)
-        endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-        data = self.client.get(endpoint, query=q)
-        return self._to_paginated(data, validate=validate)
+        return self.get(
+            query=query,
+            page=page,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=self._resolve_export_endpoint(project_pk),
+            **kwargs,
+        )
 
     def where_project_results(
-        self,
-        project_pk: int,
-        query: Dict[str, Any] | None = None,
-        page_size: int = 50,
-        **kwargs,
-    ) -> APIQuery:
+            self,
+            project_pk: int,
+            query: Dict[str, Any] | None = None,
+            page_size: int = 50,
+            validate: bool = True,
+            **kwargs,
+    ) -> APIQuery[ClassificationRecordExport]:
         """Return a lazy iterator over observation rows for a project.
 
         Args:
             project_pk: Classification project primary key.
             query: Base query parameters.
             page_size: Number of items requested per API page.
+            validate: Whether to validate each row with Pydantic.
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Lazy ``APIQuery`` iterator yielding observation rows.
+            Lazy ``APIQuery[ClassificationResultRecord]`` iterator.
         """
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        q["project_pk"] = project_pk
-        return APIQuery(client=self.client, endpoint=self.endpoint, query=q, page_size=page_size)
+        return self.where(
+            query=query,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=self._resolve_export_endpoint(project_pk),
+            **kwargs,
+        )
 
     def export_project_results(
-        self,
-        project_pk: int,
-        query: Dict[str, Any] | None = None,
-        file: str | Path | None = None,
-        validate: bool = True,
-        **kwargs,
-    ) -> Path:
-        """Export observation rows for one project to CSV.
+            self,
+            project_pk: int,
+            query: Dict[str, Any] | None = None,
+            file: str | Path | None = None,
+            validate: bool = True,
+            **kwargs,
+    ) -> Path | list[ClassificationRecordExport]:
+        """Export observation rows for one project to CSV or model list.
 
         Args:
             project_pk: Classification project primary key.
             query: Base query parameters.
-            file: Output CSV file path. If ``None``, a temp file is created.
-            validate: If ``True``, validates rows before writing CSV.
+            file: Output CSV file path. If ``None``, returns a list of models.
+            validate: Whether to validate rows with Pydantic.
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Path to the generated CSV file.
+            ``Path`` when ``file`` is provided, otherwise ``list[BaseModel]``.
         """
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-
-        if not validate:
-            return self.client.export_all(endpoint, query=q, file=file)
-
-        data = self.client.get_all(endpoint, query=q)
-        parsed = self._to_paginated(data, validate=True)
-        output_path = self.client._select_file(file)
-        rows = [item.model_dump(mode="json") for item in parsed.results]
-        self.client._write_csv(rows, output_path)
-        return output_path
-
+        return self.export(
+            query=query,
+            file=file,
+            validate=validate,
+            overwrite_endpoint=self._resolve_export_endpoint(project_pk),
+            **kwargs,
+        )
