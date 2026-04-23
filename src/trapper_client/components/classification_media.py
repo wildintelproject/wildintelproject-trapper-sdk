@@ -7,22 +7,16 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import tempfile
 import zipfile
-from importlib.metadata import entry_points
 from pathlib import Path
 from typing import Any, Dict, List
 
-from attr.setters import validate
 from pydantic import BaseModel
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from trapper_client.components.classification_project_collections import ClassificationProjectsCollectionsComponent
-#from trapper_api_client.components.collections import CollectionsComponent
-from trapper_client.components.research_projects import ResearchProjectsComponent
-from trapper_client.components.classification_projects import ClassificationProjectsComponent
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import MediaRecord, PaginatedResult, ClassificationProject, ResearchProject, \
-    ResearchProjectCollection
+from trapper_client.components.classification_project_collections import ClassificationProjectsCollectionsComponent
+from trapper_client.schemas import MediaRecord, PaginatedResult
 
 
 class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
@@ -32,45 +26,43 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
     Retrieve, filter, and export classification media data from Trapper.
 
     **Main endpoints:**
-    - ``GET /media_classification/api/media/{project_pk}``: media export for one classification project
+
+    - ``GET /media_classification/api/media/{project_pk}``: media for one classification project
 
     **Available filter fields:**
 
     | Parameter                | Type                  | Description                                                         |
     |--------------------------|----------------------|---------------------------------------------------------------------|
-    | project                  | PK                   | Auto — filtrado por URL (project_pk), no necesita pasarlo           |
-    | owner                    | boolean              | true = resources donde el usuario es owner o manager                |
+    | owner                    | boolean              | true = resources where the user is owner or manager                 |
     | deployment               | list of PKs          | Filter by deployment PKs                                            |
     | collection               | list of PKs          | Filter by collection PKs                                            |
     | locations_map            | comma-separated PKs  | Filter by location PKs                                              |
     | rdate_from / rdate_to    | date                 | date_recorded range                                                 |
     | rtime_from / rtime_to    | HH:MM                | Time-of-day range on date_recorded                                  |
     | ftype                    | choice               | Filter by resource type (IMAGE, VIDEO, etc.)                        |
-    | classified               | boolean              | Clasificado por usuario                                             |
-    | classified_ai            | boolean              | Clasificado por IA                                                  |
-    | approved                 | boolean              | Clasificación aprobada                                              |
-    | bboxes                   | boolean              | Tiene bboxes                                                        |
+    | classified               | boolean              | Classified by user                                                  |
+    | classified_ai            | boolean              | Classified by AI                                                    |
+    | approved                 | boolean              | Classification approved                                             |
+    | bboxes                   | boolean              | Has bounding boxes                                                  |
     | species                  | list of PKs          | Filter by species PKs                                               |
     | observation_type         | choice               | Filter by observation type                                          |
     | sex                      | choice               | Filter by sex                                                       |
     | age                      | choice               | Filter by age                                                       |
 
-    ** Available extra param: **
+    **Available extra params:**
 
-    |--------------------|-------------|----------|-------------|
-    | Parameter          | Type        | Default  | Description |
-    |--------------------|-------------|----------|-------------|
-    | trapper_url        | Bool        | True     | Incluye URLs absolutas a TrapPer para cada media
-    | trapper_url_token  | Bool        | True     |	Incluye tokens de acceso en las URLs
-    | private_human      | Bool        | True	  | Incluye URL de preview de humanos
-    | private_vehicle    | Bool        | True     |	Incluye URL de preview de vehículos
-    | private_species    | List	       | []	      | Lista de especies a ocultar
+    | Parameter          | Type   | Default | Description                                      |
+    |--------------------|--------|---------|--------------------------------------------------|
+    | trapper_url        | bool   | True    | Include absolute Trapper URLs for each media     |
+    | trapper_url_token  | bool   | True    | Include access tokens in URLs                    |
+    | private_human      | bool   | True    | Include human preview URL                        |
+    | private_vehicle    | bool   | True    | Include vehicle preview URL                      |
+    | private_species    | list   | []      | List of species to hide                          |
 
-    ** Example:: **
+    **Examples:**
 
         # Get one page of media
         page = client.classification_media.get_project_media(project_pk=7, page_size=200)
-        print(page.pagination, len(page.results))
 
         # Iterate over all media in a project
         for row in client.classification_media.where_project_media(project_pk=7, deployment=12):
@@ -78,9 +70,6 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
 
         # Export all media to CSV
         client.classification_media.export_project_media(project_pk=7, file="/tmp/media.csv")
-
-        # Get a specific media record by ID
-        media = client.classification_media.get_project_media_by_id(project_pk=7, media_id=123)
 
         # Get media from a specific collection
         page = client.classification_media.get_collection_media(project_pk=7, collection_pk=5)
@@ -90,22 +79,177 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
             print(row)
 
         # Export collection media to CSV
-        client.classification_media.export_collection_media(project_pk=7, collection_pk=5, file="/tmp/collection_media.csv")
-
-        # Download individual media files
-        path = client.classification_media.download_media_file(media_id=42)
+        client.classification_media.export_collection_media(
+            project_pk=7, collection_pk=5, file="/tmp/collection_media.csv"
+        )
 
         # Download all media files from a project
-        files = client.classification_media.download_project_media_files(project_pk=7, output_dir="/tmp/media")
+        files = client.classification_media.download_project_media_files(
+            project_pk=7, output_dir="/tmp/media"
+        )
 
-        # Download all media files from a collection
+        # Download all media files from a collection (parallel + compressed)
         files = client.classification_media.download_collection_media_files(
-            project_pk=7, collection_pk=5, output_dir="/tmp/collection_media"
+            project_pk=7, collection_pk=5, output_dir="/tmp/collection_media",
+            parallel=True, compress=True,
         )
     """
 
     endpoint = "media_classification/api/media/{project_pk}"
     schema = MediaRecord
+
+    # ── internal helpers ──────────────────────────────────────────────────────
+
+    def _resolve_endpoint(self, project_pk: int) -> str:
+        """Build the media endpoint for a given project pk.
+
+        Args:
+            project_pk: Classification project primary key.
+
+        Returns:
+            Resolved endpoint string.
+        """
+        return self.endpoint.replace("{project_pk}", str(project_pk))
+
+    def _resolve_collection_pk(self, project_pk: int, collection_pk: int) -> int:
+        """Resolve the intermediate collection pk used by the classification project.
+
+        Iterates the project-collection links to find the link pk corresponding
+        to the given storage collection pk.
+
+        Args:
+            project_pk: Classification project primary key.
+            collection_pk: Storage collection primary key.
+
+        Returns:
+            The intermediate link pk if found, otherwise the original ``collection_pk``.
+        """
+        cp_collections = ClassificationProjectsCollectionsComponent(self.client)
+        all_links = cp_collections.get_all_classification_project(project_pk=project_pk)
+        for link in all_links.results:
+            if link.collection_pk == collection_pk:
+                return link.pk
+        return collection_pk
+
+    def _extract_media_id(self, media: Any) -> int | None:
+        """Extract a media identifier from a dict or Pydantic model.
+
+        Args:
+            media: Raw row as ``dict`` or model-like object with ``model_dump``.
+
+        Returns:
+            Parsed media ID as ``int`` when present and valid, otherwise ``None``.
+        """
+        candidates = ("id", "resource_id", "resource", "mediaID", "media_id", "pk")
+
+        if isinstance(media, dict):
+            values = media
+        elif hasattr(media, "model_dump"):
+            values = media.model_dump(mode="python")
+        else:
+            return None
+
+        for key in candidates:
+            value = values.get(key)
+            if value is not None:
+                try:
+                    return int(value)
+                except (TypeError, ValueError):
+                    continue
+        return None
+
+    def _compress_files(
+        self,
+        files: list[Path],
+        archive_file: str | Path | None = None,
+    ) -> Path:
+        """Compress a list of files into a ZIP archive.
+
+        Args:
+            files: File paths to include in the archive.
+            archive_file: Target ZIP path. If ``None``, a temp file is created.
+
+        Returns:
+            Path to the created ZIP archive.
+        """
+        if archive_file is None:
+            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+            archive_path = Path(tmp.name)
+            tmp.close()
+        else:
+            archive_path = Path(archive_file)
+
+        archive_path.parent.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(archive_path, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for file_path in files:
+                if file_path.exists() and file_path.is_file():
+                    zf.write(file_path, arcname=file_path.name)
+        return archive_path
+
+    def _download_media_ids(
+        self,
+        media_ids: list[int],
+        output_path: Path,
+        parallel: bool = False,
+        max_workers: int = 4,
+        compress: bool = False,
+        archive_file: str | Path | None = None,
+        retry_attempts: int = 3,
+        retry_min_wait: float = 0.5,
+        retry_max_wait: float = 8.0,
+    ) -> list[Path]:
+        """Download a list of media files by ID, with optional parallelism and compression.
+
+        Args:
+            media_ids: List of media/resource primary keys to download.
+            output_path: Directory where files will be saved.
+            parallel: Whether to use threaded parallel downloads.
+            max_workers: Maximum worker threads when ``parallel`` is enabled.
+            compress: Whether to create a ZIP archive from downloaded files.
+            archive_file: Target ZIP path when ``compress=True``.
+            retry_attempts: Maximum number of attempts per file.
+            retry_min_wait: Minimum exponential backoff delay in seconds.
+            retry_max_wait: Maximum exponential backoff delay in seconds.
+
+        Returns:
+            List of paths to successfully downloaded files.
+        """
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        def _download_one(media_id: int) -> Path:
+            return self.download_media_file(
+                media_id=media_id,
+                file_field="file",
+                file=output_path / f"media_{media_id}",
+                retry_attempts=retry_attempts,
+                retry_min_wait=retry_min_wait,
+                retry_max_wait=retry_max_wait,
+            )
+
+        downloaded: list[Path] = []
+
+        if parallel and len(media_ids) > 1:
+            workers = max(1, min(max_workers, len(media_ids)))
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                futures = [executor.submit(_download_one, mid) for mid in media_ids]
+                for future in as_completed(futures):
+                    try:
+                        downloaded.append(future.result())
+                    except Exception:
+                        continue
+        else:
+            for media_id in media_ids:
+                try:
+                    downloaded.append(_download_one(media_id))
+                except Exception:
+                    continue
+
+        if compress and downloaded:
+            self._compress_files(downloaded, archive_file=archive_file)
+
+        return downloaded
+
+    # ── project media ─────────────────────────────────────────────────────────
 
     def get_project_media(
         self,
@@ -127,55 +271,44 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Paginated result containing ``MediaRecord`` items for the requested page.
+            ``PaginatedResult[MediaRecord]`` for the requested page.
         """
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        q["project_pk"] = project_pk
-        q.setdefault("page", page)
-        q.setdefault("page_size", page_size)
-
-        endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-        q.pop("project_pk", None)
-        data = self.client.get(endpoint, query=q)
-        return self._to_paginated(data, validate=validate)
+        return self.get(
+            query=query,
+            page=page,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=self._resolve_endpoint(project_pk),
+            **kwargs,
+        )
 
     def where_project_media(
         self,
         project_pk: int,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
-        validate : bool = True,
+        validate: bool = True,
         **kwargs,
-    ) -> APIQuery:
+    ) -> APIQuery[MediaRecord]:
         """Return a lazy iterator over media rows for a classification project.
 
         Args:
             project_pk: Classification project primary key.
             query: Base query parameters.
             page_size: Number of items requested per API page.
+            validate: Whether to validate each row with Pydantic.
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Lazy ``APIQuery`` iterator yielding project media rows.
+            Lazy ``APIQuery[MediaRecord]`` iterator yielding media rows.
         """
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        q["project_pk"] = project_pk
-        endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-        q.pop("project_pk", None)
-
-        """return       self,
-        client,
-        endpoint: str,
-        query: dict[str, Any] | None = None,
-        schema: type[TModel] | None = None,
-        filter_fn: Callable[[TModel | dict], bool] | None = None,
-        page_size: int = 50,
-        validate: bool = True
-        """
-        return APIQuery(client=self.client, endpoint=endpoint, query=q, page_size=page_size, schema=self.schema, validate=validate)
-
+        return self.where(
+            query=query,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=self._resolve_endpoint(project_pk),
+            **kwargs,
+        )
 
     def export_project_media(
         self,
@@ -184,37 +317,28 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         file: str | Path | None = None,
         validate: bool = True,
         **kwargs,
-    ) -> Path:
-        """Export media rows of one classification project to CSV.
+    ) -> Path | list[BaseModel]:
+        """Export all media rows for a classification project to CSV or model list.
 
         Args:
             project_pk: Classification project primary key.
             query: Base query parameters.
-            file: Output CSV file path. If ``None``, a temp file is created.
-            validate: If ``True``, validates rows before writing CSV.
+            file: Output CSV file path. If ``None``, returns a list of models.
+            validate: Whether to validate rows with Pydantic before writing.
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Path to the generated CSV file.
+            ``Path`` to the generated CSV when ``file`` is provided,
+            otherwise ``list[MediaRecord]``.
         """
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        q["project_pk"] = project_pk
+        return self.export(
+            query=query,
+            file=file,
+            validate=validate,
+            overwrite_endpoint=self._resolve_endpoint(project_pk),
+            **kwargs,
+        )
 
-        endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-        q.pop("project_pk", None)
-
-        if not validate:
-            return self.client.export_all(endpoint, query=q, file=file)
-
-        data = self.client.get_all(endpoint, query=q)
-        parsed = self._to_paginated(data, validate=True)
-        output_path = self.client._select_file(file)
-        rows = [item.model_dump(mode="json") for item in parsed.results]
-        self.client._write_csv(rows, output_path)
-        return output_path
-
-    """ es un find pq devuelve solo uno"""
     def get_project_media_by_id(
         self,
         project_pk: int,
@@ -223,223 +347,30 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         validate: bool = True,
         **kwargs,
     ) -> MediaRecord | None:
-        """Get one media record from a classification project by media/resource ID.
+        """Find one media record within a project by its media/resource ID.
 
-        Tries common server-side filter names first and, if needed, falls back
-        to local matching over project media pages.
+        Iterates project media lazily and returns the first matching record.
 
         Args:
             project_pk: Classification project primary key.
             media_id: Target media/resource identifier.
             query: Base query parameters.
-            validate: Whether to validate each candidate row with Pydantic.
+            validate: Whether to validate the matching row with Pydantic.
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
             Matching ``MediaRecord`` if found, otherwise ``None``.
         """
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-
-        # Try likely server-side filters first, then fallback to local matching.
-        for key in ("id", "resource", "resource_id", "mediaID", "media_id"):
-            qq = dict(q)
-            qq[key] = media_id
-            endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-            data = self.client.get(endpoint, query=qq)
-            result = self._to_paginated(data, validate=validate)
-            if result.results:
-                return result.results[0]
-
-        for row in self.where_project_media(project_pk=project_pk, query=q, page_size=200):
-            row_id = self._extract_media_id(row)
-            if row_id == media_id:
-                return self._to_model(row, validate=validate)
+        for row in self.where_project_media(
+            project_pk=project_pk,
+            query=query,
+            page_size=200,
+            validate=validate,
+            **kwargs,
+        ):
+            if self._extract_media_id(row) == media_id:
+                return row
         return None
-
-    def _extract_media_id(self, media: Any) -> int | None:
-        """Extract a media identifier from dict or Pydantic-like records.
-
-        Args:
-            media: Raw row as ``dict`` or model-like object with ``model_dump``.
-
-        Returns:
-            Parsed media ID as ``int`` when present and valid, otherwise ``None``.
-        """
-        candidates = ("id", "resource_id", "resource", "mediaID", "media_id", "pk")
-
-        values: Dict[str, Any]
-        if isinstance(media, dict):
-            values = media
-        elif hasattr(media, "model_dump"):
-            values = media.model_dump(mode="python")
-        else:
-            return None
-
-        for key in candidates:
-            value = values.get(key)
-            if value is not None:
-                try:
-                    return int(value)
-                except (TypeError, ValueError):
-                    continue
-        return None
-
-    def _compress_files(self, files: list[Path], archive_file: str | Path | None = None) -> Path:
-        """Compress downloaded files into a ZIP archive.
-
-        Args:
-            files: File paths to include in the archive.
-            archive_file: Target ZIP path. If ``None``, a temp ZIP is created.
-
-        Returns:
-            Path to the created ZIP archive.
-        """
-        if archive_file is None:
-            tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
-            archive_path = Path(tmp.name)
-            tmp.close()
-        else:
-            archive_path = Path(archive_file)
-
-        archive_path.parent.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(archive_path, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
-            for file_path in files:
-                if file_path.exists() and file_path.is_file():
-                    zf.write(file_path, arcname=file_path.name)
-        return archive_path
-
-    def get_collection_media(
-        self,
-        project_pk: int,
-        collection_pk: int,
-        query: Dict[str, Any] | None = None,
-        page: int = 1,
-        page_size: int = 50,
-        validate: bool = True,
-        **kwargs,
-    ) -> PaginatedResult[MediaRecord]:
-        """Get one page of media rows for a collection within a project.
-
-        Args:
-            project_pk: Classification project primary key.
-            collection_pk: Collection primary key used for filtering.
-            query: Base query parameters.
-            page: Page number to fetch.
-            page_size: Number of items per page.
-            validate: Whether to validate each row with Pydantic.
-            **kwargs: Extra query parameters merged into ``query``.
-
-        Returns:
-            Paginated result containing collection ``MediaRecord`` items.
-        """
-
-        collection_pk = self._intermediate_collection_pk(project_pk, collection_pk) or collection_pk
-        endpoint = self.endpoint.format(project_pk=str(project_pk))
-
-        q = dict(query or {})
-        q["collection"] = collection_pk
-
-        return self.get(query=q, page=page, page_size=page_size, validate=validate,overwrite_endpoint=endpoint, **kwargs)
-
-    def where_collection_media(
-        self,
-        project_pk: int,
-        collection_pk: int,
-        query: Dict[str, Any] | None = None,
-        page_size: int = 50,
-        **kwargs,
-    ) -> APIQuery:
-        """Return a lazy iterator over collection media rows.
-
-        Args:
-            project_pk: Classification project primary key.
-            collection_pk: Collection primary key used for filtering.
-            query: Base query parameters.
-            page_size: Number of items requested per API page.
-            **kwargs: Extra query parameters merged into ``query``.
-
-        Returns:
-            Lazy ``APIQuery`` iterator yielding collection media rows.
-        """
-
-        collection_pk = self._intermediate_collection_pk(project_pk, collection_pk) or collection_pk
-        endpoint = self.endpoint.format(project_pk=str(project_pk))
-
-        q = dict(query or {})
-        q["collection"] = collection_pk
-
-        return self.where(query=q, page_size=page_size,overwrite_endpoint=endpoint, **kwargs)
-
-
-    def export_collection_media(
-        self,
-        project_pk: int,
-        collection_pk: int,
-        query: Dict[str, Any] | None = None,
-        file: str | Path | None = None,
-        validate: bool = True,
-        **kwargs,
-    ) -> Path | List[BaseModel]:
-        """Export all media rows for a collection in a project to CSV.
-
-        Args:
-            project_pk: Classification project primary key.
-            collection_pk: Collection primary key used for filtering.
-            query: Base query parameters.
-            file: Output CSV file path. If ``None``, a temp file is created.
-            validate: If ``True``, validates rows before writing CSV.
-            **kwargs: Extra query parameters merged into ``query``.
-
-        Returns:
-            Path to the generated CSV file.
-        """
-        collection_pk = self._intermediate_collection_pk(project_pk, collection_pk) or collection_pk
-        endpoint = self.endpoint.format(project_pk=str(project_pk))
-
-        q = dict(query or {})
-        q["collection"] = collection_pk
-
-        return self.export(query=q, file=file,validate=validate,overwrite_endpoint=endpoint, **kwargs)
-
-    def download_media_file(
-        self,
-        media_id: int,
-        file_field: str = "file",
-        file: str | Path | None = None,
-        retry_attempts: int = 3,
-        retry_min_wait: float = 0.5,
-        retry_max_wait: float = 8.0,
-    ) -> Path:
-        """Download one media file with retry support.
-
-        Args:
-            media_id: Resource/media primary key used by the storage endpoint.
-            file_field: Media field name (for example: ``file``, ``pfile``,
-                ``tfile``, ``efile``).
-            file: Output file path. If ``None``, a temp file is created.
-            retry_attempts: Maximum number of attempts for transient failures.
-            retry_min_wait: Minimum exponential backoff delay in seconds.
-            retry_max_wait: Maximum exponential backoff delay in seconds.
-
-        Returns:
-            Path to the downloaded media file.
-        """
-        endpoint = f"storage/api/resource/media/{media_id}/{file_field}/"
-        output_path = self.client._select_file(file)
-
-        @retry(
-            reraise=True,
-            stop=stop_after_attempt(retry_attempts),
-            wait=wait_exponential(multiplier=1, min=retry_min_wait, max=retry_max_wait),
-            retry=retry_if_exception_type(Exception),
-        )
-        def _download_once() -> Path:
-            response = self.client.make_request(endpoint=endpoint, method="GET", raise_on_error=True)
-            output_path.write_bytes(response.content)
-            return output_path
-
-        return _download_once()
 
     def download_project_media_files(
         self,
@@ -457,70 +388,143 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
     ) -> list[Path]:
         """Download all media files for one classification project.
 
-        Supports optional parallel downloads, retry strategy per file, and
-        optional ZIP compression of downloaded files.
-
         Args:
             project_pk: Classification project primary key.
-            output_dir: Directory where files are stored. Defaults to current dir.
-            query: Base query parameters used to filter source media rows.
-            parallel: Whether to enable threaded parallel downloads.
+            output_dir: Directory where files are saved. Defaults to current dir.
+            query: Base query parameters used to filter media rows.
+            parallel: Whether to use threaded parallel downloads.
             max_workers: Maximum worker threads when ``parallel`` is enabled.
             compress: Whether to create a ZIP archive from downloaded files.
-            archive_file: Target ZIP path when ``compress=True``. If ``None``,
-                a default archive name is generated.
+            archive_file: Target ZIP path when ``compress=True``.
             retry_attempts: Maximum number of attempts per file download.
             retry_min_wait: Minimum exponential backoff delay in seconds.
             retry_max_wait: Maximum exponential backoff delay in seconds.
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            List of downloaded file paths.
+            List of paths to successfully downloaded files.
         """
         q = self._merge_query(query, kwargs)
-        endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-        data = self.client.get_all(endpoint, query=q)
+        data = self.client.get_all(self._resolve_endpoint(project_pk), query=q)
         result = self._to_paginated(data, validate=False)
+        media_ids = [mid for mid in (self._extract_media_id(r) for r in result.results) if mid]
 
-        output_path = Path(output_dir or ".")
-        output_path.mkdir(parents=True, exist_ok=True)
+        if archive_file is None and compress:
+            archive_file = Path(output_dir or ".") / f"project_{project_pk}_media.zip"
 
-        media_ids = [media_id for media_id in (self._extract_media_id(row) for row in result.results) if media_id]
+        return self._download_media_ids(
+            media_ids=media_ids,
+            output_path=Path(output_dir or "."),
+            parallel=parallel,
+            max_workers=max_workers,
+            compress=compress,
+            archive_file=archive_file,
+            retry_attempts=retry_attempts,
+            retry_min_wait=retry_min_wait,
+            retry_max_wait=retry_max_wait,
+        )
 
-        downloaded_files: list[Path] = []
+    # ── collection media ──────────────────────────────────────────────────────
 
-        def _download_one(media_id: int) -> Path:
-            return self.download_media_file(
-                media_id=media_id,
-                file_field="file",
-                file=output_path / f"media_{media_id}",
-                retry_attempts=retry_attempts,
-                retry_min_wait=retry_min_wait,
-                retry_max_wait=retry_max_wait,
-            )
+    def get_collection_media(
+        self,
+        project_pk: int,
+        collection_pk: int,
+        query: Dict[str, Any] | None = None,
+        page: int = 1,
+        page_size: int = 50,
+        validate: bool = True,
+        **kwargs,
+    ) -> PaginatedResult[MediaRecord]:
+        """Fetch one page of media rows for a collection within a project.
 
-        if parallel and len(media_ids) > 1:
-            workers = max(1, min(max_workers, len(media_ids)))
-            with ThreadPoolExecutor(max_workers=workers) as executor:
-                futures = [executor.submit(_download_one, media_id) for media_id in media_ids]
-                for future in as_completed(futures):
-                    try:
-                        downloaded_files.append(future.result())
-                    except Exception:
-                        continue
-        else:
-            for media_id in media_ids:
-                try:
-                    downloaded_files.append(_download_one(media_id))
-                except Exception:
-                    continue
+        Args:
+            project_pk: Classification project primary key.
+            collection_pk: Storage collection primary key.
+            query: Base query parameters.
+            page: Page number to fetch.
+            page_size: Number of items per page.
+            validate: Whether to validate each row with Pydantic.
+            **kwargs: Extra query parameters merged into ``query``.
 
-        if compress and downloaded_files:
-            if archive_file is None:
-                archive_file = output_path / f"project_{project_pk}_media.zip"
-            self._compress_files(downloaded_files, archive_file=archive_file)
+        Returns:
+            ``PaginatedResult[MediaRecord]`` for the requested page.
+        """
+        link_pk = self._resolve_collection_pk(project_pk, collection_pk)
+        q = self._merge_query(query, kwargs)
+        q["collection"] = link_pk
+        return self.get(
+            query=q,
+            page=page,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=self._resolve_endpoint(project_pk),
+        )
 
-        return downloaded_files
+    def where_collection_media(
+        self,
+        project_pk: int,
+        collection_pk: int,
+        query: Dict[str, Any] | None = None,
+        page_size: int = 50,
+        validate: bool = True,
+        **kwargs,
+    ) -> APIQuery[MediaRecord]:
+        """Return a lazy iterator over media rows for a collection within a project.
+
+        Args:
+            project_pk: Classification project primary key.
+            collection_pk: Storage collection primary key.
+            query: Base query parameters.
+            page_size: Number of items requested per API page.
+            validate: Whether to validate each row with Pydantic.
+            **kwargs: Extra query parameters merged into ``query``.
+
+        Returns:
+            Lazy ``APIQuery[MediaRecord]`` iterator yielding collection media rows.
+        """
+        link_pk = self._resolve_collection_pk(project_pk, collection_pk)
+        q = self._merge_query(query, kwargs)
+        q["collection"] = link_pk
+        return self.where(
+            query=q,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=self._resolve_endpoint(project_pk),
+        )
+
+    def export_collection_media(
+        self,
+        project_pk: int,
+        collection_pk: int,
+        query: Dict[str, Any] | None = None,
+        file: str | Path | None = None,
+        validate: bool = True,
+        **kwargs,
+    ) -> Path | list[BaseModel]:
+        """Export all media rows for a collection within a project to CSV or model list.
+
+        Args:
+            project_pk: Classification project primary key.
+            collection_pk: Storage collection primary key.
+            query: Base query parameters.
+            file: Output CSV file path. If ``None``, returns a list of models.
+            validate: Whether to validate rows with Pydantic before writing.
+            **kwargs: Extra query parameters merged into ``query``.
+
+        Returns:
+            ``Path`` to the generated CSV when ``file`` is provided,
+            otherwise ``list[MediaRecord]``.
+        """
+        link_pk = self._resolve_collection_pk(project_pk, collection_pk)
+        q = self._merge_query(query, kwargs)
+        q["collection"] = link_pk
+        return self.export(
+            query=q,
+            file=file,
+            validate=validate,
+            overwrite_endpoint=self._resolve_endpoint(project_pk),
+        )
 
     def download_collection_media_files(
         self,
@@ -539,83 +543,87 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
     ) -> list[Path]:
         """Download all media files for one collection within a project.
 
-        Supports optional parallel downloads, retry strategy per file, and
-        optional ZIP compression of downloaded files.
-
         Args:
             project_pk: Classification project primary key.
-            collection_pk: Collection primary key used for filtering.
-            output_dir: Directory where files are stored. Defaults to current dir.
-            query: Base query parameters used to filter source media rows.
-            parallel: Whether to enable threaded parallel downloads.
+            collection_pk: Storage collection primary key.
+            output_dir: Directory where files are saved. Defaults to current dir.
+            query: Base query parameters used to filter media rows.
+            parallel: Whether to use threaded parallel downloads.
             max_workers: Maximum worker threads when ``parallel`` is enabled.
             compress: Whether to create a ZIP archive from downloaded files.
-            archive_file: Target ZIP path when ``compress=True``. If ``None``,
-                a default archive name is generated.
+            archive_file: Target ZIP path when ``compress=True``.
             retry_attempts: Maximum number of attempts per file download.
             retry_min_wait: Minimum exponential backoff delay in seconds.
             retry_max_wait: Maximum exponential backoff delay in seconds.
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            List of downloaded file paths.
+            List of paths to successfully downloaded files.
         """
+        link_pk = self._resolve_collection_pk(project_pk, collection_pk)
         q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        q.setdefault("collection", collection_pk)
+        q["collection"] = link_pk
 
-        endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-        data = self.client.get_all(endpoint, query=q)
+        data = self.client.get_all(self._resolve_endpoint(project_pk), query=q)
         result = self._to_paginated(data, validate=False)
+        media_ids = [mid for mid in (self._extract_media_id(r) for r in result.results) if mid]
 
-        output_path = Path(output_dir or ".")
-        output_path.mkdir(parents=True, exist_ok=True)
-
-        media_ids = [media_id for media_id in (self._extract_media_id(row) for row in result.results) if media_id]
-
-        downloaded_files: list[Path] = []
-
-        def _download_one(media_id: int) -> Path:
-            return self.download_media_file(
-                media_id=media_id,
-                file_field="file",
-                file=output_path / f"media_{media_id}",
-                retry_attempts=retry_attempts,
-                retry_min_wait=retry_min_wait,
-                retry_max_wait=retry_max_wait,
+        if archive_file is None and compress:
+            archive_file = (
+                Path(output_dir or ".")
+                / f"project_{project_pk}_collection_{collection_pk}_media.zip"
             )
 
-        if parallel and len(media_ids) > 1:
-            workers = max(1, min(max_workers, len(media_ids)))
-            with ThreadPoolExecutor(max_workers=workers) as executor:
-                futures = [executor.submit(_download_one, media_id) for media_id in media_ids]
-                for future in as_completed(futures):
-                    try:
-                        downloaded_files.append(future.result())
-                    except Exception:
-                        continue
-        else:
-            for media_id in media_ids:
-                try:
-                    downloaded_files.append(_download_one(media_id))
-                except Exception:
-                    continue
+        return self._download_media_ids(
+            media_ids=media_ids,
+            output_path=Path(output_dir or "."),
+            parallel=parallel,
+            max_workers=max_workers,
+            compress=compress,
+            archive_file=archive_file,
+            retry_attempts=retry_attempts,
+            retry_min_wait=retry_min_wait,
+            retry_max_wait=retry_max_wait,
+        )
 
-        if compress and downloaded_files:
-            if archive_file is None:
-                archive_file = output_path / f"project_{project_pk}_collection_{collection_pk}_media.zip"
-            self._compress_files(downloaded_files, archive_file=archive_file)
+    # ── file download ─────────────────────────────────────────────────────────
 
-        return downloaded_files
+    def download_media_file(
+        self,
+        media_id: int,
+        file_field: str = "file",
+        file: str | Path | None = None,
+        retry_attempts: int = 3,
+        retry_min_wait: float = 0.5,
+        retry_max_wait: float = 8.0,
+    ) -> Path:
+        """Download one media file with retry support.
 
+        Args:
+            media_id: Resource/media primary key used by the storage endpoint.
+            file_field: Media field name (e.g. ``file``, ``pfile``, ``tfile``).
+            file: Output file path. If ``None``, a temp file is created.
+            retry_attempts: Maximum number of download attempts.
+            retry_min_wait: Minimum exponential backoff delay in seconds.
+            retry_max_wait: Maximum exponential backoff delay in seconds.
 
-    def _intermediate_collection_pk(self, cp_pk:int, collection_pk:int) -> int:
-        cp_c_c: ClassificationProjectsCollectionsComponent = ClassificationProjectsCollectionsComponent(self.client)
-        cp_c = cp_c_c.get_all_classification_project(project_pk=cp_pk)
+        Returns:
+            Path to the downloaded media file.
+        """
+        endpoint = f"storage/api/resource/media/{media_id}/{file_field}/"
+        output_path = self.client._select_file(file)
 
-        for collection in cp_c.results:
-            if collection.collection_pk == collection_pk:
-                collection_pk = collection.pk
-                break
+        @retry(
+            reraise=True,
+            stop=stop_after_attempt(retry_attempts),
+            wait=wait_exponential(multiplier=1, min=retry_min_wait, max=retry_max_wait),
+            retry=retry_if_exception_type(Exception),
+        )
+        def _download_once() -> Path:
+            response = self.client.make_request(
+                endpoint=endpoint, method="GET", raise_on_error=True
+            )
+            output_path.write_bytes(response.content)
+            return output_path
 
-        return collection_pk
+        return _download_once()
