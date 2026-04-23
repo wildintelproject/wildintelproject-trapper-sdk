@@ -71,8 +71,13 @@ class TrapperComponent(Generic[TModel]):
             Parsed model instance.
         """
         target = schema or self.schema
-        if isinstance(row, target):
-            return row
+        # isinstance falla con Union/Annotated — solo comprobamos si es clase concreta
+        try:
+            if isinstance(row, target):
+                return row
+        except TypeError:
+            pass  # target es Union o Annotated, no se puede usar con isinstance
+
         if validate:
             return target.model_validate(row)
         if isinstance(row, dict):
