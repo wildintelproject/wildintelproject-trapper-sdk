@@ -1,11 +1,11 @@
 """
 Component for the /api/cs/projects/ (classification projects) resource.
 """
-from typing import Dict, Any, Callable
+from typing import Dict, Any
 
 from trapper_client import APIQuery
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import ClassificationProject, CollectionCP, PaginatedResult
+from trapper_client.schemas import ClassificationProject, PaginatedResult, ClassificationProjectCollection
 
 
 class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
@@ -17,7 +17,9 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
     **Main endpoints:**
 
     - ``GET /media_classification/api/projects``: (listado, paginado y filtrable por query params)
-    -  ``GET /media_classification/api/projects/{id}``: (detalle de un proyecto de clasificación)
+    - ``GET /media_classification/api/projects/{id}``: (detalle de un proyecto de clasificación)
+    - ``GET /media_classification/api/project/{pk}/collections`: collecions en un proyecto de clasificación
+
 
 
     **Available filter fields:**
@@ -42,3 +44,158 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
 
     endpoint = "/media_classification/api/projects"
     schema = ClassificationProject
+    endpoint_collections="/media_classification/api/project/{project_pk}/collections"
+
+    def _collections_entrypoint(self, pk: int):
+        return self.endpoint_collections.format(project_pk=pk)
+
+    def get_project_collections(
+        self,
+        project_pk: int,
+        query: Dict[str, Any] | None = None,
+        page: int = 1,
+        page_size: int = 50,
+        validate: bool = True,
+        **kwargs,
+    ) -> PaginatedResult[ClassificationProjectCollection]:
+        """Fetch one page of collections linked to a classification project.
+
+        Args:
+            project_pk: Classification project primary key.
+            query: Base query parameters.
+            page: Page number to fetch.
+            page_size: Number of items per page.
+            validate: Whether to validate each row with Pydantic.
+            **kwargs: Extra query parameters merged into ``query``.
+
+        Returns:
+            Paginated result containing ``ClassificationProjectCollection`` items.
+        """
+
+        return self.get(
+            query=query,
+            page=page,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=self._collections_entrypoint(project_pk),
+            overwrite_schema=ClassificationProjectCollection,
+            **kwargs,
+        )
+
+    def where_project_collections(
+        self,
+        project_pk: int,
+        query: Dict[str, Any] | None = None,
+        page_size: int = 50,
+        validate: bool = True,
+        **kwargs,
+    ) -> APIQuery[ClassificationProjectCollection]:
+        """Return a lazy iterator over collections linked to a project.
+
+        Args:
+            project_pk: Classification project primary key.
+            query: Base query parameters.
+            page_size: Number of items requested per API page.
+            **kwargs: Extra query parameters merged into ``query``.
+
+        Returns:
+            Lazy ``APIQuery`` iterator yielding project collections.
+        """
+        return self.where(
+            query=query,
+            page_size=page_size,
+            overwrite_endpoint=self._collections_entrypoint(project_pk),
+            overwrite_schema=ClassificationProjectCollection,
+            validate=validate,
+            **kwargs,
+        )
+
+    def find_project_collection(
+        self,
+        project_pk: int,
+        pk: int | str,
+        query: Dict[str, Any] | None = None,
+        validate: bool = True,
+        **kwargs,
+    ) -> ClassificationProjectCollection:
+        """Retrieve one project-collection link by primary key.
+
+        Args:
+            project_pk: Classification project primary key.
+            pk: Project-collection link primary key. NOT collection pk
+        Returns:
+            ``ClassificationProjectCollection``
+        """
+        return self.find(
+            pk=pk,
+            overwrite_endpoint=self._collections_entrypoint(project_pk),
+            overwrite_schema=ClassificationProjectCollection,
+            validate=validate,
+            query=query,
+            **kwargs,
+        )
+
+    def get_all_project_collections(
+        self,
+        project_pk: int,
+        query: Dict[str, Any] | None = None,
+        page_size: int = 50,
+        validate: bool = True,
+        **kwargs,
+    ) -> PaginatedResult[ClassificationProjectCollection]:
+        """Fetch all pages of collections linked to a classification project.
+
+        Args:
+            project_pk: Classification project primary key.
+            query: Base query parameters.
+            page_size: Number of items requested per API page.
+            validate: Whether to validate each row with Pydantic.
+            **kwargs: Extra query parameters merged into ``query``.
+
+        Returns:
+            Paginated result containing merged ``ClassificationProjectCollection`` items.
+        """
+        return self.get_all(
+            query=query,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=self._collections_entrypoint(project_pk),
+            overwrite_schema=ClassificationProjectCollection,
+            **kwargs,
+        )
+
+    def find_collection_in_project(
+            self,
+            project_pk: int,
+            collection_pk: int,
+            **kwargs,
+    ) -> int | None:
+        """Check whether a collection is linked to a classification project.
+
+        Iterates the project-collection links lazily and returns the pk of the
+        link record if found, or ``None`` if the collection is not linked to
+        the project.
+
+        Args:
+            project_pk: Classification project primary key.
+            collection_pk: Collection primary key to search for.
+            **kwargs: Extra query parameters passed to the underlying request.
+
+        Returns:
+            The pk of the project-collection link if found, otherwise ``None``.
+
+        Example::
+
+            link_pk = client.classificacion_projects.find_collection_in_project(
+                project_pk=7,
+                collection_pk=42,
+            )
+            if link_pk:
+                print(f"Collection 42 is linked via pk={link_pk}")
+            else:
+                print("Collection 42 is not in this project")
+        """
+        for link in self.where_project_collections(project_pk=project_pk, **kwargs):
+            if link.collection_pk == collection_pk:
+                return link.pk
+        return None

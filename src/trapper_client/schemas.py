@@ -796,3 +796,14 @@ class ClassificationProject(TrapperSchema):
     detail_data: str
     delete_data: str
 
+class ClassificationProjectCollection(TrapperSchema):
+    pk: int
+    collection_pk: int
+    name: str
+    status: str
+    is_active: bool
+    detail_data: str | None = None
+    classify_data: str | None = None
+    approved_count: int = 0
+    classified_count: int = 0
+    total_count: int = 0
