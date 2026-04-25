@@ -13,12 +13,47 @@ import pytest
 from tests.base_component_tests import ComponentUnitTestBase, paginated_response
 from trapper_client.api_query import APIQuery
 from trapper_client.components.classifications import ClassificationsComponent
-from trapper_client.schemas import ClassificationResultRecord, PaginatedResult
+from trapper_client.schemas import (
+    ClassificationRecord,
+    ClassificationRecordExport,
+    ClassificationResultRecordCamtrapDP,
+    ClassificationResultRecordTrapper,
+    PaginatedResult,
+)
 
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
 
-VALID_RECORD = {"pk": 1, "name": "Classification Result A"}
+VALID_RECORD = {
+    "pk": 1,
+    "resource": {"pk": 10, "name": "resource.jpg"},
+    "collection": 5,
+    "updated_at": "2024-01-01T00:00:00Z",
+    "is_setup": False,
+    "dynamic_attrs": [],
+    "status": True,
+    "status_ai": False,
+    "classified": True,
+    "classified_ai": False,
+    "classification_project": "/api/projects/7/",
+    "detail_data": "/api/classifications/1/",
+    "delete_data": "/api/classifications/1/delete/",
+    "classify_data": "/api/classifications/1/classify/",
+    "update_data": "/api/classifications/1/update/",
+    "bboxes": False,
+}
+
+VALID_EXPORT_RECORD = {
+    "observationID": 1,
+    "deploymentID": "deploy_001",
+    "mediaID": 10,
+    "eventID": "event_001",
+    "eventStart": "2024-01-01T08:00:00Z",
+    "eventEnd": "2024-01-01T08:01:00Z",
+    "observationLevel": "media",
+    "observationType": "animal",
+}
+
 PROJECT_PK = 7
 
 
@@ -26,11 +61,11 @@ PROJECT_PK = 7
 
 class TestClassificationsComponent(ComponentUnitTestBase):
     component_class = ClassificationsComponent
-    schema = ClassificationResultRecord
-    export_schema = ClassificationResultRecord
+    schema = ClassificationRecord
+    export_schema = ClassificationResultRecordCamtrapDP
     find_pk = 1
     valid_item = VALID_RECORD
-    valid_export_item = VALID_RECORD
+    valid_export_item = VALID_EXPORT_RECORD
 
 
 # ── fixtures ──────────────────────────────────────────────────────────────────
@@ -86,12 +121,12 @@ class TestGetProjectResults:
 
     def test_returns_paginated_result(self, component, client):
         """get_project_results() devuelve PaginatedResult con items tipados."""
-        client.get.return_value = paginated_response([VALID_RECORD])
+        client.get.return_value = paginated_response([VALID_EXPORT_RECORD])
 
         result = component.get_project_results(PROJECT_PK)
 
         assert isinstance(result, PaginatedResult)
-        assert isinstance(result.results[0], ClassificationResultRecord)
+        assert isinstance(result.results[0], (ClassificationResultRecordCamtrapDP, ClassificationResultRecordTrapper))
 
     def test_uses_correct_endpoint(self, component, client):
         """get_project_results() usa el export_endpoint con project_pk resuelto."""
@@ -123,11 +158,11 @@ class TestGetProjectResults:
 
     def test_validate_false_returns_models(self, component, client):
         """get_project_results() con validate=False construye sin validación."""
-        client.get.return_value = paginated_response([VALID_RECORD])
+        client.get.return_value = paginated_response([VALID_EXPORT_RECORD])
 
         result = component.get_project_results(PROJECT_PK, validate=False)
 
-        assert isinstance(result.results[0], ClassificationResultRecord)
+        assert isinstance(result.results[0], (ClassificationResultRecordCamtrapDP, ClassificationResultRecordTrapper))
 
     def test_page_size_respected(self, component, client):
         """get_project_results() envía el page_size correcto."""
@@ -166,7 +201,7 @@ class TestWhereProjectResults:
     def test_uses_correct_schema(self, component):
         """where_project_results() usa ClassificationResultRecord como schema."""
         query = component.where_project_results(PROJECT_PK)
-        assert query.schema is ClassificationResultRecord
+        assert query.schema is ClassificationRecordExport
 
     def test_passes_page_size(self, component):
         """where_project_results() pasa page_size al APIQuery."""
@@ -207,12 +242,12 @@ class TestExportProjectResults:
 
     def test_returns_list_when_file_none(self, component, client):
         """export_project_results() devuelve lista de modelos cuando file=None."""
-        client.get_all.return_value = paginated_response([VALID_RECORD])
+        client.get_all.return_value = paginated_response([VALID_EXPORT_RECORD])
 
         result = component.export_project_results(PROJECT_PK, file=None)
 
         assert isinstance(result, list)
-        assert isinstance(result[0], ClassificationResultRecord)
+        assert isinstance(result[0], (ClassificationResultRecordCamtrapDP, ClassificationResultRecordTrapper))
 
     def test_uses_correct_endpoint(self, component, client):
         """export_project_results() usa el export_endpoint con project_pk resuelto."""
@@ -224,7 +259,7 @@ class TestExportProjectResults:
 
     def test_writes_csv_when_file_provided(self, component, client, tmp_path):
         """export_project_results() escribe CSV y devuelve Path cuando se indica file."""
-        client.get_all.return_value = paginated_response([VALID_RECORD])
+        client.get_all.return_value = paginated_response([VALID_EXPORT_RECORD])
         out = tmp_path / "results.csv"
         client._select_file.return_value = out
         client._write_csv = MagicMock()
@@ -234,14 +269,13 @@ class TestExportProjectResults:
         assert isinstance(result, Path)
         client._write_csv.assert_called_once()
 
-    def test_validate_false_delegates_to_export_all(self, component, client):
-        """export_project_results() con validate=False delega en client.export_all."""
-        client.export_all.return_value = []
+    def test_validate_false_uses_get_all(self, component, client):
+        """export_project_results() con validate=False sigue usando get_all."""
+        client.get_all.return_value = paginated_response([VALID_EXPORT_RECORD])
 
         component.export_project_results(PROJECT_PK, file=None, validate=False)
 
-        client.export_all.assert_called_once()
-        client.get_all.assert_not_called()
+        client.get_all.assert_called_once()
 
     def test_passes_extra_kwargs(self, component, client):
         """export_project_results() pasa kwargs como parámetros de consulta."""

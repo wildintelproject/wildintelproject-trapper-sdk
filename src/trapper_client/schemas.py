@@ -738,12 +738,9 @@ class ClassificationResultRecordTrapper(TrapperSchema):
     }
 
 
-ClassificationRecordExport = Annotated[
-    Union[
-        AIClassificationRecordExportCamTrap,
-        AIClassificationRecordExportTrapper
-    ],
-    Field(discriminator="_id")
+ClassificationRecordExport = Union[
+    ClassificationResultRecordCamtrapDP,
+    ClassificationResultRecordTrapper,
 ]
 
 class ClassificationAggRecord(TrapperSchema):

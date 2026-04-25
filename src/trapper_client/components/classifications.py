@@ -93,6 +93,7 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
             page_size=page_size,
             validate=validate,
             overwrite_endpoint=self._resolve_export_endpoint(project_pk),
+            overwrite_schema=self.export_schema,
             **kwargs,
         )
 
@@ -121,6 +122,7 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
             page_size=page_size,
             validate=validate,
             overwrite_endpoint=self._resolve_export_endpoint(project_pk),
+            overwrite_schema=self.export_schema,
             **kwargs,
         )
 

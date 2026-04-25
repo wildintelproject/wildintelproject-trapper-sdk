@@ -38,11 +38,12 @@ dev = [
 package = true
 
 [tool.hatch.build.targets.wheel]
-packages = ["trapper_client"]
+packages = ["src/trapper_client"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 env_files = [".env"]
+pythonpath = ["."]
 
 markers = [
     "unit: Unit tests with no HTTP calls",
