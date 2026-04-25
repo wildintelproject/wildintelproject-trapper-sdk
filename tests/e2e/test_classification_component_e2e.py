@@ -18,7 +18,13 @@ import pytest
 from tests.base_component_tests import ComponentE2ETestBase
 from trapper_client.api_query import APIQuery
 from trapper_client.components.classifications import ClassificationsComponent
-from trapper_client.schemas import ClassificationRecordExport, PaginatedResult
+from trapper_client.schemas import (
+    ClassificationRecord,
+    ClassificationRecordExport,
+    ClassificationResultRecordCamtrapDP,
+    ClassificationResultRecordTrapper,
+    PaginatedResult,
+)
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -33,10 +39,13 @@ def _project_pk() -> str:
 
 # ── tests heredados ───────────────────────────────────────────────────────────
 
+_EXPORT_TYPES = (ClassificationResultRecordCamtrapDP, ClassificationResultRecordTrapper)
+
+
 class TestClassificationsComponentE2E(ComponentE2ETestBase):
     component_class = ClassificationsComponent
-    schema = ClassificationResultRecord
-    export_schema = ClassificationResultRecord
+    schema = ClassificationRecord
+    export_schema = ClassificationRecordExport
     env_pk_var = "WILDINTEL_CLASSIFICATION_RESULT_PK"
 
 
@@ -74,7 +83,7 @@ class TestProjectResultsE2E:
         if not result.results:
             pytest.skip("No classification results available for this project")
 
-        assert all(isinstance(row, ClassificationResultRecord) for row in result.results)
+        assert all(isinstance(row, _EXPORT_TYPES) for row in result.results)
 
     @pytest.mark.e2e
     def test_get_project_results_page_size_respected(self, component):
@@ -99,7 +108,7 @@ class TestProjectResultsE2E:
         if not result.results:
             pytest.skip("No classification results available for this project")
 
-        assert all(isinstance(row, ClassificationResultRecord) for row in result.results)
+        assert all(isinstance(row, _EXPORT_TYPES) for row in result.results)
 
     @pytest.mark.e2e
     def test_get_project_results_passes_filter(self, component):
@@ -140,7 +149,7 @@ class TestProjectResultsE2E:
         if not items:
             pytest.skip("No classification results available for this project")
 
-        assert all(isinstance(row, ClassificationResultRecord) for row in items)
+        assert all(isinstance(row, _EXPORT_TYPES) for row in items)
 
     @pytest.mark.e2e
     def test_where_project_results_context_manager_exhausts_on_exit(self, component):
