@@ -1,0 +1,3 @@
+# ResearchProjectsCollectionsComponent
+
+::: trapper_client.components.research_project_collections.ResearchProjectsCollectionsComponent

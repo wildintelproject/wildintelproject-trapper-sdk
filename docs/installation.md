@@ -1,17 +1,35 @@
-# Instalacion
+# Installation
 
-## Con uv
+## Requirements
 
-```bash
-cd /home/ijfviana/Documentos/Programacion/trapper-project/trapper_api_client
-uv sync --group dev
-```
+- Python **3.10** or newer
+- A running Trapper instance with API access
 
-## Dependencias de docs
+## Install with pip
 
 ```bash
-cd /home/ijfviana/Documentos/Programacion/trapper-project/trapper_api_client
-uv sync --group dev
-uv run mkdocs build
+pip install trapper-client
 ```
 
+## Install with uv
+
+```bash
+uv add trapper-client
+```
+
+## Install for development
+
+Clone the repository and install the package in editable mode together with the dev dependencies:
+
+```bash
+git clone https://github.com/trapper-project/trapper-client.git
+cd trapper-client
+uv sync
+```
+
+## Build the documentation
+
+```bash
+uv run mkdocs serve   # live preview at http://127.0.0.1:8000
+uv run mkdocs build   # static output in site/
+```

@@ -1,0 +1,3 @@
+# ClassificationProjectsCollectionsComponent
+
+::: trapper_client.components.classification_project_collections.ClassificationProjectsCollectionsComponent
