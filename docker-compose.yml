@@ -1,0 +1,6 @@
+services:
+  trapper-client:
+    build: .
+    container_name: trapper_client
+    environment:
+      - PYTHONUNBUFFERED=1
