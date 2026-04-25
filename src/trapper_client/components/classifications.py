@@ -9,8 +9,7 @@ from typing import Any, Dict
 
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import ClassificationRecordExport, PaginatedResult, ClassificationRecord, \
-    ClassificationRecordExport
+from trapper_client.schemas import ClassificationRecord, ClassificationRecordExport, PaginatedResult
 
 
 class ClassificationsComponent(TrapperComponent[ClassificationRecord]):

@@ -1,13 +1,13 @@
 # Location Schemas
 
-::: trapper_client.schemas.Location
+::: trapper_client.schemas.locations.Location
 
-::: trapper_client.schemas.LocationExport
+::: trapper_client.schemas.locations.LocationExport
 
-::: trapper_client.schemas.LocationGeoJsonFeatureCollection
+::: trapper_client.schemas.locations.LocationGeoJsonFeatureCollection
 
-::: trapper_client.schemas.LocationGeoJsonFeature
+::: trapper_client.schemas.locations.LocationGeoJsonFeature
 
-::: trapper_client.schemas.LocationGeoJsonGeometry
+::: trapper_client.schemas.locations.LocationGeoJsonGeometry
 
-::: trapper_client.schemas.LocationGeoJsonProperties
+::: trapper_client.schemas.locations.LocationGeoJsonProperties

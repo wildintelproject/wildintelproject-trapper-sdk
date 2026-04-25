@@ -1,7 +1,7 @@
 # Common Schemas
 
-::: trapper_client.schemas.TrapperSchema
+::: trapper_client.schemas.base.TrapperSchema
 
-::: trapper_client.schemas.Pagination
+::: trapper_client.schemas.base.Pagination
 
-::: trapper_client.schemas.PaginatedResult
+::: trapper_client.schemas.base.PaginatedResult

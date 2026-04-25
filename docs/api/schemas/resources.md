@@ -1,3 +1,3 @@
 # Resource Schemas
 
-::: trapper_client.schemas.Resource
+::: trapper_client.schemas.resources.Resource

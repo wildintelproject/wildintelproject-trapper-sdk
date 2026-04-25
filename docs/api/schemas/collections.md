@@ -1,5 +1,5 @@
 # Collection Schemas
 
-::: trapper_client.schemas.Collection
+::: trapper_client.schemas.collections.Collection
 
-::: trapper_client.schemas.CollectionCP
+::: trapper_client.schemas.collections.CollectionCP

@@ -1,19 +1,21 @@
 # Classification Schemas
 
-::: trapper_client.schemas.ClassificationRecord
+::: trapper_client.schemas.classifications.ClassificationRecord
 
-::: trapper_client.schemas.ClassificationResultRecordCamtrapDP
+::: trapper_client.schemas.classifications.ClassificationResultRecordCamtrapDP
 
-::: trapper_client.schemas.ClassificationResultRecordTrapper
+::: trapper_client.schemas.classifications.ClassificationResultRecordTrapper
 
-::: trapper_client.schemas.ClassificationAggRecord
+::: trapper_client.schemas.classifications.ClassificationAggRecord
 
-::: trapper_client.schemas.ClassificationProject
+::: trapper_client.schemas.classifications.ClassificationProject
 
-::: trapper_client.schemas.ClassificationProjectCollection
+::: trapper_client.schemas.classifications.ClassificationProjectCollection
 
-::: trapper_client.schemas.MediaRecord
+::: trapper_client.schemas.classifications.MediaRecord
 
-::: trapper_client.schemas.ResultsDataPackageResponse
+::: trapper_client.schemas.classifications.ResultsDataPackageResponse
 
-::: trapper_client.schemas.ResultsDataPackageData
+::: trapper_client.schemas.classifications.ResultsDataPackageData
+
+::: trapper_client.schemas.classifications.BBox

@@ -1,5 +1,5 @@
 # Deployment Schemas
 
-::: trapper_client.schemas.Deployment
+::: trapper_client.schemas.deployments.Deployment
 
-::: trapper_client.schemas.DeploymentExport
+::: trapper_client.schemas.deployments.DeploymentExport
