@@ -173,6 +173,8 @@ class AIClassificationRecordExportTrapper(BaseModel):
             if parsed and isinstance(parsed[0], list):
                 return [BBox(x=b[0], y=b[1], width=b[2], height=b[3]) for b in parsed]
             return parsed
+        if isinstance(v, list) and v and isinstance(v[0], list):
+            return [BBox(x=b[0], y=b[1], width=b[2], height=b[3]) for b in v]
         return v
 
 

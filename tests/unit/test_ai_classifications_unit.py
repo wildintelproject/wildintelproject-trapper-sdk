@@ -130,7 +130,7 @@ PROJECT_PK = 7
 class TestAIClassificationsComponent(ComponentUnitTestBase):
     component_class = AIClassificationsComponent
     schema = AIClassificationRecord
-    export_schema = AIClassificationRecord
+    export_schema = AIClassificationRecordExportTrapper
     find_pk = 1
     valid_item = VALID_RECORD
     valid_export_item = VALID_EXPORT_TRAPPER
