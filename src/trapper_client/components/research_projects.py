@@ -7,7 +7,9 @@ from typing import Any, Dict
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
 from trapper_client.schemas import PaginatedResult, ResearchProject, ResearchProjectCollection
-
+from trapper_client.components.research_project_collections  import (
+    ResearchProjectsCollectionsComponent,
+)
 
 class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
     """
@@ -61,6 +63,10 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
     endpoint = "research/api/projects"
     schema = ResearchProject
 
+    def __init__(self, client):
+        super().__init__(client)
+        self.collections = ResearchProjectsCollectionsComponent(client)
+
     def get_project_collections(
         self,
         project_pk: int,
@@ -83,16 +89,8 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         Returns:
             Paginated result containing ``ResearchProjectCollection`` items.
         """
-
-        return self.get(
-            query=query,
-            page=page,
-            page_size=page_size,
-            validate=validate,
-            overwrite_endpoint=f"research/api/project/{project_pk}/collections",
-            overwrite_schema=ResearchProjectCollection,
-            **kwargs,
-        )
+        return self.collections.get_project(project_pk=project_pk, query=query, page=page, page_size=page_size,
+                                            validate=validate, **kwargs)
 
     def where_project_collections(
         self,
@@ -112,11 +110,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         Returns:
             Lazy ``APIQuery`` iterator yielding project collections.
         """
-        return self.where(
-            overwrite_endpoint=f"research/api/project/{project_pk}/collections",
-            overwrite_schema=ResearchProjectCollection,
-            **kwargs,
-        )
+        return self.collections.where_project(project_pk=project_pk, query=query, page_size=page_size,**kwargs)
 
     def find_project_collection(
         self,
@@ -131,16 +125,14 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         Args:
             project_pk: Research project primary key.
             pk: Project-collection link primary key. NOT collection pk
+            query: Base query parameters.
+            validate: Whether to validate each row with Pydantic.
+
         Returns:
             ``ResearchProjectCollection`` when ``validate=True``.
             Otherwise, raw dict-like payload.
         """
-        return self.find(
-            pk=pk,
-            overwrite_endpoint=f"research/api/project/{project_pk}/collections",
-            overwrite_schema=ResearchProjectCollection,
-            **kwargs,
-        )
+        return self.collections.find_project(project_pk=project_pk, pk=pk, query=query, validate=validate,**kwargs)
 
     def get_all_project_collections(
         self,
@@ -162,11 +154,8 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         Returns:
             Paginated result containing merged ``ResearchProjectCollection`` items.
         """
-        return self.get_all(
-            overwrite_endpoint=f"research/api/project/{project_pk}/collections",
-            overwrite_schema=ResearchProjectCollection,
-            **kwargs,
-        )
+        return self.collections.get_all_project(project_pk=project_pk, query=query, page_size=page_size,
+                                                validate=validate,**kwargs)
 
     def find_collection_in_project(
             self,
@@ -199,7 +188,8 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
             else:
                 print("Collection 42 is not in this project")
         """
-        for link in self.where_project_collections(project_pk=project_pk, **kwargs):
-            if link.collection_pk == collection_pk:
-                return link.pk
-        return None
+        return self.collections.find_collection_in_project(
+            project_pk=project_pk,
+            collection_pk=collection_pk,
+            **kwargs,
+        )
