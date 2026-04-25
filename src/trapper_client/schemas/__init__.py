@@ -1,0 +1,94 @@
+"""
+Pydantic schemas used by Trapper components.
+
+These models keep a permissive ``extra='allow'`` config so they can parse
+API payloads even when fields vary across Trapper deployments.
+"""
+from .base import Pagination, PaginatedResult, TrapperSchema, TTrapperSchema
+from .locations import (
+    Location,
+    LocationExport,
+    LocationGeoJsonGeometry,
+    LocationGeoJsonProperties,
+    LocationGeoJsonFeature,
+    LocationGeoJsonFeatureCollection,
+)
+from .deployments import Deployment, DeploymentExport
+from .resources import Resource
+from .collections import Collection, CollectionCP
+from .research_projects import ResearchProject, ResearchProjectCollection, ResearchProjectRole
+from .classifications import (
+    BBox,
+    ClassificationAggRecord,
+    ClassificationProject,
+    ClassificationProjectCollection,
+    ClassificationRecord,
+    ClassificationRecordExport,
+    ClassificationResource,
+    ClassificationResultRecordCamtrapDP,
+    ClassificationResultRecordTrapper,
+    DynamicAttr,
+    DynamicAttrValue,
+    MediaRecord,
+    ResultsDataPackageData,
+    ResultsDataPackageResponse,
+    TrapperClassificationProjectRole,
+)
+from .ai_classifications import (
+    AIClassificationRecord,
+    AIClassificationRecordExport,
+    AIClassificationRecordExportCamTrap,
+    AIClassificationRecordExportTrapper,
+    AIObservationAttr,
+    ResourceAI,
+)
+
+__all__ = [
+    # base
+    "Pagination",
+    "PaginatedResult",
+    "TrapperSchema",
+    "TTrapperSchema",
+    # locations
+    "Location",
+    "LocationExport",
+    "LocationGeoJsonGeometry",
+    "LocationGeoJsonProperties",
+    "LocationGeoJsonFeature",
+    "LocationGeoJsonFeatureCollection",
+    # deployments
+    "Deployment",
+    "DeploymentExport",
+    # resources
+    "Resource",
+    # collections
+    "Collection",
+    "CollectionCP",
+    # research projects
+    "ResearchProject",
+    "ResearchProjectCollection",
+    "ResearchProjectRole",
+    # classifications
+    "BBox",
+    "ClassificationAggRecord",
+    "ClassificationProject",
+    "ClassificationProjectCollection",
+    "ClassificationRecord",
+    "ClassificationRecordExport",
+    "ClassificationResource",
+    "ClassificationResultRecordCamtrapDP",
+    "ClassificationResultRecordTrapper",
+    "DynamicAttr",
+    "DynamicAttrValue",
+    "MediaRecord",
+    "ResultsDataPackageData",
+    "ResultsDataPackageResponse",
+    "TrapperClassificationProjectRole",
+    # ai classifications
+    "AIClassificationRecord",
+    "AIClassificationRecordExport",
+    "AIClassificationRecordExportCamTrap",
+    "AIClassificationRecordExportTrapper",
+    "AIObservationAttr",
+    "ResourceAI",
+]

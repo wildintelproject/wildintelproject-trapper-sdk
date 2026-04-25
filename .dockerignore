@@ -1,0 +1,16 @@
+.venv
+site
+.git
+.gitignore
+.idea
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.coverage
+dist
+*.egg-info
+tests
+docs
+mkdocs.yml
+README.md
