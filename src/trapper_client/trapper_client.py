@@ -66,6 +66,9 @@ from trapper_client.components import (
     ClassificationResultsAggComponent,
     ClassificationPackageComponent,
     AIClassificationsComponent,
+    UserClassificationsComponent,
+    ClassificationsMapComponent,
+    ClassificatorsComponent,
     CollectionsComponent,
     DeploymentsComponent,
     LocationsComponent,
@@ -96,6 +99,9 @@ class TrapperClient(APIClientBase):
     * :attr:`classification_results_agg` - :class:`~trapper_api_client.components.ClassificationResultsAggComponent`
     * :attr:`classification_package` - :class:`~trapper_api_client.components.ClassificationPackageComponent`
     * :attr:`ai_classifications` - :class:`~trapper_api_client.components.AIClassificationsComponent`
+    * :attr:`user_classifications` — :class:`~trapper_api_client.components.UserClassificationsComponent`
+    * :attr:`classifications_map` — :class:`~trapper_api_client.components.ClassificationsMapComponent`
+    * :attr:`classificators` — :class:`~trapper_api_client.components.ClassificatorsComponent`
 
     Also inherits all low-level helpers from :class:`~trapper_api_client.api_client_base.APIClientBase`
     (``get``, ``post``, ``patch``, ``put``, ``delete``, ``get_all``, ``export_all``, …) and
@@ -158,6 +164,9 @@ class TrapperClient(APIClientBase):
         self.classification_results_agg: ClassificationResultsAggComponent = ClassificationResultsAggComponent(self)
         self.classification_package: ClassificationPackageComponent = ClassificationPackageComponent(self)
         self.ai_classifications: AIClassificationsComponent = AIClassificationsComponent(self)
+        self.user_classifications: UserClassificationsComponent = UserClassificationsComponent(self)
+        self.classifications_map: ClassificationsMapComponent = ClassificationsMapComponent(self)
+        self.classificators: ClassificatorsComponent = ClassificatorsComponent(self)
 
     # ── Generic helper ────────────────────────────────────────────────────────
 

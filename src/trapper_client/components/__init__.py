@@ -17,6 +17,9 @@ from trapper_client.components.classification_media import ClassificationMediaCo
 from trapper_client.components.classification_results_agg import ClassificationResultsAggComponent
 from trapper_client.components.classification_package import ClassificationPackageComponent
 from trapper_client.components.ai_classifications import AIClassificationsComponent
+from trapper_client.components.user_classifications import UserClassificationsComponent
+from trapper_client.components.classifications_map import ClassificationsMapComponent
+from trapper_client.components.classificators import ClassificatorsComponent
 from trapper_client.schemas import (
     Pagination,
     PaginatedResult,
@@ -49,6 +52,9 @@ __all__ = [
     "ClassificationResultsAggComponent",
     "ClassificationPackageComponent",
     "AIClassificationsComponent",
+    "UserClassificationsComponent",
+    "ClassificationsMapComponent",
+    "ClassificatorsComponent",
     "Pagination",
     "PaginatedResult",
     "TrapperSchema",

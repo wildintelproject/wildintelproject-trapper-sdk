@@ -47,6 +47,11 @@ from .user_classifications import (
     UserClassificationRecord,
     UserObservationAttr,
 )
+from .classifications_map import (
+    ResourceClassificationMap,
+    ClassificationMapRecord,
+)
+from .classificators import ClassificatorRecord
 
 __all__ = [
     # base
@@ -100,4 +105,9 @@ __all__ = [
     "UserClassificationRecord",
     "UserObservationAttr",
     "ResourceUser",
+    # classifications map
+    "ClassificationMapRecord",
+    "ResourceClassificationMap",
+    # classificators
+    "ClassificatorRecord",
 ]
