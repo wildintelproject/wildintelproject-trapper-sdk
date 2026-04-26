@@ -42,6 +42,11 @@ from .ai_classifications import (
     AIObservationAttr,
     ResourceAI,
 )
+from .user_classifications import (
+    ResourceUser,
+    UserClassificationRecord,
+    UserObservationAttr,
+)
 
 __all__ = [
     # base
@@ -91,4 +96,8 @@ __all__ = [
     "AIClassificationRecordExportTrapper",
     "AIObservationAttr",
     "ResourceAI",
+    # user classifications
+    "UserClassificationRecord",
+    "UserObservationAttr",
+    "ResourceUser",
 ]
