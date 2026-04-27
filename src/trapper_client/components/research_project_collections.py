@@ -51,7 +51,7 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
             page_size=page_size,
             validate=validate,
             overwrite_endpoint=entrypoint,
-            kwargs=kwargs,
+            **kwargs,
         )
 
     def get_project(
@@ -73,7 +73,7 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
             page_size=page_size,
             validate=validate,
             overwrite_endpoint=entrypoint,
-            kwargs=kwargs,
+            **kwargs,
         )
 
     def get_all_project(
