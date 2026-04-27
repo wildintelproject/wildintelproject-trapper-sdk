@@ -18,6 +18,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+upload = [
+    "httpx>=0.27",
+    "aiofiles>=23.0",
+    "blake3>=0.4",
+]
 dev = ["pytest", "pytest-mock", "responses"]
 docs = [
     "mkdocs>=1.6",
