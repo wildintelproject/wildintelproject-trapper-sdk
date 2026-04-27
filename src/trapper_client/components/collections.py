@@ -458,3 +458,44 @@ class CollectionsComponent(TrapperComponent[Collection]):
             validate=validate,
             overwrite_endpoint=self._append_endpoint,
         )
+
+    def trigger_collection(
+            self,
+            payload: Dict[str, Any],
+            raise_on_error: bool = True,
+    ):
+        """
+        Trigger collection processing on the server.
+
+        Parameters
+        ----------
+        collection_id : int
+            Collection ID.
+        payload : dict
+            Payload sent to the server.
+
+            Example
+            -------
+            payload = {
+                "yaml_file": "package_123.yaml",
+                "zip_file": "package_123.zip",
+                "remove_zip": False
+            }
+
+        endpoint : str, optional
+            Optional endpoint override.
+        raise_on_error : bool, optional
+            Whether to raise on API error.
+
+        Returns
+        -------
+        requests.Response
+        """
+
+        endpoint = f"/storage/api/collection/process/"
+
+        return self._client.post(
+            endpoint=endpoint,
+            body=payload,
+            raise_on_error=raise_on_error,
+        )
