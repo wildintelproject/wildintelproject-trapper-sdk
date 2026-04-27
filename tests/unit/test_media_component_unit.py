@@ -21,7 +21,19 @@ from trapper_client.schemas import MediaRecord, PaginatedResult
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
 
-VALID_MEDIA = {"pk": 1, "id": 1, "name": "media_001.jpg"}
+VALID_MEDIA = {
+    "pk": 1,
+    "id": 1,
+    "mediaID": 1,
+    "deploymentID": "r0021-dona_00_01",
+    "captureMethod": "activityDetection",
+    "timestamp": "2022-07-20T13:16:42+02:00",
+    "filePath": "http://example.com/storage/media/1/pfile/",
+    "filePublic": False,
+    "fileName": "IMG_0001.jpg",
+    "fileMediatype": "image/jpeg",
+    "favorite": False,
+}
 PROJECT_PK = 7
 COLLECTION_PK = 5
 LINK_PK = 99
