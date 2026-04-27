@@ -14,7 +14,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-import requests
+import httpx
 
 from trapper_client.api_client_base import APIClientBase
 from trapper_client import err
@@ -28,8 +28,8 @@ def make_response(
     content: bytes | None = None,
     content_type: str = "application/json",
 ) -> MagicMock:
-    """Construye un mock de requests.Response."""
-    response = MagicMock(spec=requests.Response)
+    """Construye un mock de httpx.Response."""
+    response = MagicMock(spec=httpx.Response)
     response.status_code = status_code
     response.headers = {"Content-Type": content_type}
 
@@ -148,7 +148,7 @@ def test_validate_method_raises_for_invalid(token_client):
 def test_make_request_returns_response_on_success(token_client):
     """make_request() devuelve el Response cuando el status es 2xx."""
     mock_resp = make_response(200, json_data={"results": []})
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     result = token_client.make_request("/api/test/", method="GET")
 
@@ -158,38 +158,28 @@ def test_make_request_returns_response_on_success(token_client):
 def test_make_request_calls_session_with_correct_url(token_client):
     """make_request() construye la URL correctamente desde base_url y endpoint."""
     mock_resp = make_response(200, json_data={})
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     token_client.make_request("/api/locations/", method="GET")
 
-    call_kwargs = token_client.session.request.call_args.kwargs
+    call_kwargs = token_client._client.request.call_args.kwargs
     assert call_kwargs["url"] == "https://example.com/api/locations/"
 
 
-def test_make_request_sends_timeout(token_client):
-    """make_request() envía el timeout configurado."""
-    mock_resp = make_response(200, json_data={})
-    token_client.session.request = MagicMock(return_value=mock_resp)
-
-    token_client.make_request("/api/test/", method="GET")
-
-    assert token_client.session.request.call_args.kwargs["timeout"] == 30
+def test_client_is_configured_with_timeout(token_client):
+    """El httpx.Client se construye con el timeout configurado."""
+    assert token_client._client.timeout.read == 30
 
 
-def test_make_request_sends_verify_ssl(token_client):
-    """make_request() envía el valor de verify_ssl configurado."""
-    mock_resp = make_response(200, json_data={})
-    token_client.session.request = MagicMock(return_value=mock_resp)
-
-    token_client.make_request("/api/test/", method="GET")
-
-    assert token_client.session.request.call_args.kwargs["verify"] is True
+def test_client_is_configured_with_verify_ssl(token_client):
+    """verify_ssl queda almacenado en el cliente y se pasa al httpx.Client."""
+    assert token_client.verify_ssl is True
 
 
 def test_make_request_raises_on_404(token_client):
     """make_request() lanza excepción mapeada para 404."""
     mock_resp = make_response(404, json_data={"_error": {"message": "Not found"}})
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     with pytest.raises(Exception):
         token_client.make_request("/api/locations/999/", method="GET")
@@ -198,7 +188,7 @@ def test_make_request_raises_on_404(token_client):
 def test_make_request_returns_response_when_raise_on_error_false(token_client):
     """make_request() devuelve el Response en lugar de lanzar si raise_on_error=False."""
     mock_resp = make_response(404, json_data={"_error": {"message": "Not found"}})
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     result = token_client.make_request("/api/missing/", method="GET", raise_on_error=False)
 
@@ -214,7 +204,7 @@ def test_get_returns_paginated_dict(token_client):
         "results": [{"pk": 1}, {"pk": 2}],
     }
     mock_resp = make_response(200, json_data=payload)
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     result = token_client.get("/api/locations/")
 
@@ -226,11 +216,11 @@ def test_get_returns_paginated_dict(token_client):
 def test_get_merges_kwargs_into_query(token_client):
     """get() pasa kwargs adicionales como parámetros de consulta."""
     mock_resp = make_response(200, json_data={"pagination": {}, "results": []})
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     token_client.get("/api/locations/", page_size=25, search="test")
 
-    call_params = token_client.session.request.call_args.kwargs["params"]
+    call_params = token_client._client.request.call_args.kwargs["params"]
     assert call_params["page_size"] == 25
     assert call_params["search"] == "test"
 
@@ -238,7 +228,7 @@ def test_get_merges_kwargs_into_query(token_client):
 def test_get_wraps_list_response_in_envelope(token_client):
     """get() envuelve una lista JSON en el sobre pagination/results."""
     mock_resp = make_response(200, json_data=[{"pk": 1}, {"pk": 2}])
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     result = token_client.get("/api/locations/")
 
@@ -252,7 +242,7 @@ def test_get_one_returns_raw_dict(token_client):
     """get_one() devuelve el dict crudo del servidor sin envolver."""
     payload = {"pk": 42, "name": "Location A"}
     mock_resp = make_response(200, json_data=payload)
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     result = token_client.get_one("/api/locations/42/")
 
@@ -269,7 +259,7 @@ def test_get_all_pages_single_page(token_client):
         "results": [{"pk": 1}, {"pk": 2}, {"pk": 3}],
     }
     mock_resp = make_response(200, json_data=payload)
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     result = token_client.get_all_pages("/api/locations/")
 
@@ -286,7 +276,7 @@ def test_get_all_pages_merges_multiple_pages(token_client):
         "pagination": {"page": 2, "pages": 2, "page_size": 2, "count": 4},
         "results": [{"pk": 3}, {"pk": 4}],
     }
-    token_client.session.request = MagicMock(
+    token_client._client.request = MagicMock(
         side_effect=[
             make_response(200, json_data=page1),
             make_response(200, json_data=page2),
@@ -306,11 +296,11 @@ def test_get_all_pages_does_not_include_page_in_initial_query(token_client):
         "results": [{"pk": 1}],
     }
     mock_resp = make_response(200, json_data=payload)
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     token_client.get_all_pages("/api/locations/", query={"page": 3, "page_size": 10})
 
-    call_params = token_client.session.request.call_args.kwargs["params"]
+    call_params = token_client._client.request.call_args.kwargs["params"]
     assert "page" not in call_params
 
 
@@ -323,7 +313,7 @@ def test_export_returns_list_when_file_is_none_and_json(token_client):
         "results": [{"pk": 1, "name": "A"}, {"pk": 2, "name": "B"}],
     }
     mock_resp = make_response(200, json_data=payload)
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     result = token_client.export("/api/locations/export/", file=None)
 
@@ -338,7 +328,7 @@ def test_export_writes_csv_when_file_provided(token_client, tmp_path):
         "results": [{"pk": 1, "name": "A"}, {"pk": 2, "name": "B"}],
     }
     mock_resp = make_response(200, json_data=payload)
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     out = tmp_path / "output.csv"
     result = token_client.export("/api/locations/export/", file=out)
@@ -354,7 +344,7 @@ def test_export_writes_direct_csv_response(token_client, tmp_path):
     """export() escribe CSV directamente cuando el servidor devuelve text/csv."""
     csv_content = b"pk,name\n1,Alpha\n2,Beta\n"
     mock_resp = make_response(200, content=csv_content, content_type="text/csv")
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     out = tmp_path / "output.csv"
     result = token_client.export("/api/locations/export/", file=out)
@@ -555,9 +545,9 @@ def test_handle_error_returns_response_when_not_raising(token_client):
 def test_http_verb_shortcuts_call_make_request(token_client, verb, method):
     """post/patch/put/delete() llaman a make_request con el método correcto."""
     mock_resp = make_response(200, json_data={})
-    token_client.session.request = MagicMock(return_value=mock_resp)
+    token_client._client.request = MagicMock(return_value=mock_resp)
 
     getattr(token_client, verb)("/api/test/", body={"key": "value"})
 
-    call_kwargs = token_client.session.request.call_args.kwargs
+    call_kwargs = token_client._client.request.call_args.kwargs
     assert call_kwargs["method"] == method

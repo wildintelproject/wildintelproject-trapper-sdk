@@ -5,7 +5,7 @@ import zipfile
 
 from pathlib import Path
 from typing import Dict, Any
-import requests
+import httpx
 import attr
 from typing_extensions import Literal
 from trapper_client import err
@@ -41,7 +41,7 @@ class APIClientBase:
     base_url: str = attr.ib(repr=False, default="https://trapper_api_client-trap.uhu.es")
     logger = attr.ib(repr=False, default=logger)
     timeout: int = attr.ib(default=30)
-    session: requests.Session = attr.ib(factory=requests.Session, repr=False)
+    _client: httpx.Client = attr.ib(init=False, repr=False)
     name = "trapper_api_client"
     user_id: str = "me"
 
@@ -56,6 +56,7 @@ class APIClientBase:
         """
         if not self.access_token and not (self.user_name and self.user_password):
             raise ValueError("Token or user/password must be provided for authentication")
+        self._client = httpx.Client(verify=self.verify_ssl, timeout=self.timeout)
 
     def make_request(
         self,
@@ -64,7 +65,7 @@ class APIClientBase:
         query: Dict[str, Any] | None = None,
         body: Dict[str, Any] | None = None,
         raise_on_error=True,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """Send one HTTP request to the Trapper API.
 
         Args:
@@ -75,7 +76,7 @@ class APIClientBase:
             raise_on_error: Whether to raise mapped API exceptions.
 
         Returns:
-            Raw ``requests.Response`` object.
+            Raw ``httpx.Response`` object.
         """
         self._validate_method(method)
         r = self._send_request(endpoint=endpoint, method=method, query=query, body=body)
@@ -314,7 +315,7 @@ class APIClientBase:
         query: Dict[str, Any] | None = None,
         body: Dict[str, Any] | None = None,
         raise_on_error: bool = True,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """Perform a ``POST`` request.
 
         Args:
@@ -324,7 +325,7 @@ class APIClientBase:
             raise_on_error: Whether to raise mapped API exceptions.
 
         Returns:
-            Raw ``requests.Response``.
+            Raw ``httpx.Response``.
         """
         return self.make_request(endpoint, method="POST", query=query, body=body, raise_on_error=raise_on_error)
 
@@ -334,7 +335,7 @@ class APIClientBase:
         query: Dict[str, Any] | None = None,
         body: Dict[str, Any] | None = None,
         raise_on_error: bool = True,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """Perform a ``PATCH`` request.
 
         Args:
@@ -344,7 +345,7 @@ class APIClientBase:
             raise_on_error: Whether to raise mapped API exceptions.
 
         Returns:
-            Raw ``requests.Response``.
+            Raw ``httpx.Response``.
         """
         return self.make_request(endpoint, method="PATCH", query=query, body=body, raise_on_error=raise_on_error)
 
@@ -354,7 +355,7 @@ class APIClientBase:
         query: Dict[str, Any] | None = None,
         body: Dict[str, Any] | None = None,
         raise_on_error: bool = True,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """Perform a ``PUT`` request.
 
         Args:
@@ -364,7 +365,7 @@ class APIClientBase:
             raise_on_error: Whether to raise mapped API exceptions.
 
         Returns:
-            Raw ``requests.Response``.
+            Raw ``httpx.Response``.
         """
         return self.make_request(endpoint, method="PUT", query=query, body=body, raise_on_error=raise_on_error)
 
@@ -374,7 +375,7 @@ class APIClientBase:
         query: Dict[str, Any] | None = None,
         body: Dict[str, Any] | None = None,
         raise_on_error: bool = True,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """Perform a ``DELETE`` request.
 
         Args:
@@ -384,7 +385,7 @@ class APIClientBase:
             raise_on_error: Whether to raise mapped API exceptions.
 
         Returns:
-            Raw ``requests.Response``.
+            Raw ``httpx.Response``.
         """
         return self.make_request(endpoint, method="DELETE", query=query, body=body, raise_on_error=raise_on_error)
 
@@ -443,7 +444,7 @@ class APIClientBase:
         method: str,
         query: Dict[str, Any] | None,
         body: Dict[str, Any] | None,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """Send low-level HTTP request using the configured session.
 
         Args:
@@ -453,7 +454,7 @@ class APIClientBase:
             body: JSON request body.
 
         Returns:
-            Raw ``requests.Response``.
+            Raw ``httpx.Response``.
         """
         headers, auth = self._auth()
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
@@ -462,15 +463,13 @@ class APIClientBase:
         self.logger.debug(f"Query: {query}")
         self.logger.debug(f"Body: {body}")
 
-        return self.session.request(
+        return self._client.request(
             method=method,
             url=url,
             headers=headers,
             auth=auth,
             params=query,
             json=body,
-            timeout=self.timeout,
-            verify=self.verify_ssl,
         )
 
     def _select_file(self, file: str | Path | None) -> Path:
@@ -492,7 +491,7 @@ class APIClientBase:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         return output_path
 
-    def is_csv(self, response: requests.Response) -> bool:
+    def is_csv(self, response: httpx.Response) -> bool:
         """Check whether response contains CSV payload.
 
         Args:
@@ -504,7 +503,7 @@ class APIClientBase:
         content_type = response.headers.get("Content-Type", "").lower()
         return "text/csv" in content_type
 
-    def is_zip(self, response: requests.Response) -> bool:
+    def is_zip(self, response: httpx.Response) -> bool:
         """Check whether response contains ZIP payload.
 
         Args:
@@ -516,7 +515,7 @@ class APIClientBase:
         content_type = response.headers.get("Content-Type", "").lower()
         return "application/zip" in content_type or response.content[:4] == b"PK\x03\x04"
 
-    def is_gzip(self, response: requests.Response) -> bool:
+    def is_gzip(self, response: httpx.Response) -> bool:
         """Check whether response contains gzip payload.
 
         Args:
@@ -528,7 +527,7 @@ class APIClientBase:
         content_type = response.headers.get("Content-Type", "").lower()
         return "gzip" in content_type or response.content[:2] == b"\x1f\x8b"
 
-    def is_bzip2(self, response: requests.Response) -> bool:
+    def is_bzip2(self, response: httpx.Response) -> bool:
         """Check whether response contains bzip2 payload.
 
         Args:
@@ -540,7 +539,7 @@ class APIClientBase:
         content_type = response.headers.get("Content-Type", "").lower()
         return "bzip2" in content_type or response.content[:2] == b"BZ"
 
-    def is_json(self, response: requests.Response) -> bool:
+    def is_json(self, response: httpx.Response) -> bool:
         """Check whether response contains JSON payload.
 
         Args:
@@ -552,7 +551,7 @@ class APIClientBase:
         content_type = response.headers.get("Content-Type", "").lower()
         return "application/json" in content_type
 
-    def _handle_success(self, response: requests.Response) -> Dict[str, Any]:
+    def _handle_success(self, response: httpx.Response) -> Dict[str, Any]:
         """Normalize successful response into a common dictionary structure.
 
         Args:
@@ -575,7 +574,7 @@ class APIClientBase:
         self.logger.warning(f"Received response with unsupported content type: {content_type}")
         raise ValueError(f"Unsupported content type: {content_type}")
 
-    def _handle_json_response(self, response: requests.Response) -> Dict[str, Any]:
+    def _handle_json_response(self, response: httpx.Response) -> Dict[str, Any]:
         """Normalize JSON response into pagination/results envelope.
 
         Args:
@@ -601,7 +600,7 @@ class APIClientBase:
             "results": rows,
         }
 
-    def _handle_csv_response(self, response: requests.Response) -> Dict[str, Any]:
+    def _handle_csv_response(self, response: httpx.Response) -> Dict[str, Any]:
         """Parse CSV-like response formats into pagination/results envelope.
 
         Args:
@@ -649,7 +648,7 @@ class APIClientBase:
             writer.writeheader()
             writer.writerows(rows)
 
-    def _extract_csv_text(self, response: requests.Response) -> str:
+    def _extract_csv_text(self, response: httpx.Response) -> str:
         """Extract CSV text from plain, ZIP, gzip or bzip2 responses.
 
         Args:
@@ -690,7 +689,7 @@ class APIClientBase:
 
         raise err.APIError(f"Unsupported CSV content type or format: {content_type}")
 
-    def _handle_error(self, response: requests.Response, raise_on_error: bool) -> requests.Response:
+    def _handle_error(self, response: httpx.Response, raise_on_error: bool) -> httpx.Response:
         """Handle non-2xx responses and optionally raise mapped errors.
 
         Args:
