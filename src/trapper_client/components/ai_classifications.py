@@ -69,7 +69,7 @@ class AIClassificationsComponent(TrapperComponent[AIClassificationRecord]):
             query: Dict[str, Any] | None = None,
             file: str | Path | None = None,
             validate: bool = True,
-            **kwargs,
+            **kwargs: Any,
     ) -> Path | list[BaseModel]:
         """Export AI classification results for a project to CSV or model list.
 

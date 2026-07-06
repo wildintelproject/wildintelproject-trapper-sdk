@@ -56,7 +56,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[ClassificationProjectCollection]:
         """Fetch one page of collections linked to a classification project.
 
@@ -88,7 +88,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[ClassificationProjectCollection]:
         """Return a lazy iterator over collections linked to a project.
 
@@ -116,7 +116,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         pk: int | str,
         query: Dict[str, Any] | None = None,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> ClassificationProjectCollection:
         """Retrieve one project-collection link by primary key.
 
@@ -141,7 +141,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[ClassificationProjectCollection]:
         """Fetch all pages of collections linked to a classification project.
 
@@ -168,7 +168,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             self,
             project_pk: int,
             collection_pk: int,
-            **kwargs,
+            **kwargs: Any,
     ) -> int | None:
         """Check whether a collection is linked to a classification project.
 

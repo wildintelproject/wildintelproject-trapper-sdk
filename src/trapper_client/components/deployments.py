@@ -59,42 +59,47 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
     schema = Deployment
     export_schema = DeploymentExport
 
-    #def by_collection(
-    #    self,
-    #    collection_id: int,
-    #    query: Dict[str, Any] | None = None,
-    #    page_size: int = 50,
-    #) -> APIQuery:
-    """Return a lazy iterator over deployments filtered by collection.
+    def by_collection(
+        self,
+        collection_id: int,
+        query: Dict[str, Any] | None = None,
+        page_size: int = 50,
+        **kwargs: Any,
+    ) -> APIQuery[Deployment]:
+        """Return a lazy iterator over deployments filtered by collection.
 
-    Args:
-        collection_id: Collection primary key (mapped to ``colls`` param).
-        query: Base query parameters.
-        page_size: Number of items requested per API page.
+        Args:
+            collection_id: Collection primary key (mapped to ``colls`` param).
+            query: Base query parameters.
+            page_size: Number of items requested per API page.
+            **kwargs: Extra query parameters merged into ``query``.
 
-    Returns:
-        Lazy ``APIQuery`` iterator yielding deployments.
-    """
-    #    q = dict(query or {})
-    #    q["colls"] = collection_id
-    #    return APIQuery(client=self.client, endpoint=self.endpoint, query=q, page_size=page_size)
+        Returns:
+            Lazy ``APIQuery`` iterator yielding deployments.
+        """
+        q = dict(query or {})
+        q["colls"] = collection_id
+        return self.where(query=q, page_size=page_size, **kwargs)
 
-    #def export_by_collection(
-    #    self,
-    #    collection_id: int,
-    #    query: Dict[str, Any] | None = None,
-    #    file: str | Path | None = None,
-    #) -> Path:
-    """Export deployments of a collection to CSV.
+    def export_by_collection(
+        self,
+        collection_id: int,
+        query: Dict[str, Any] | None = None,
+        file: str | Path | None = None,
+        **kwargs: Any,
+    ) -> Path | list[DeploymentExport]:
+        """Export deployments of a collection to CSV.
 
-    Args:
-        collection_id: Collection primary key (mapped to ``colls`` param).
-        query: Base query parameters.
-        file: Output CSV file path. If ``None``, a temp file is created.
+        Args:
+            collection_id: Collection primary key (mapped to ``colls`` param).
+            query: Base query parameters.
+            file: Output CSV file path. If ``None``, returns a list of models.
+            **kwargs: Extra query parameters merged into ``query``.
 
-    Returns:
-        Path to the generated CSV file.
-    """
-    #    q = dict(query or {})
-    #    q["colls"] = collection_id
-    #    return self.export(query=q, file=file)
+        Returns:
+            ``Path`` to the generated CSV when ``file`` is provided,
+            otherwise ``list[DeploymentExport]``.
+        """
+        q = dict(query or {})
+        q["colls"] = collection_id
+        return self.export(query=q, file=file, **kwargs)

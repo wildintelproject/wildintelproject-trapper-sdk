@@ -77,7 +77,7 @@ uv add trapper-client
 ```bash
 git clone https://github.com/trapper-project/trapper-client.git
 cd trapper-client
-uv sync
+setup.sh
 ```
 
 ## ⚡ Usage

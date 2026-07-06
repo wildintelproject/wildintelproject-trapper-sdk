@@ -25,6 +25,32 @@ COLLECTION_PK = 3
 RESOURCE_PK = 10
 
 
+# ── endpoints reales (regresión) ──────────────────────────────────────────────
+#
+# Los tests de cada sub-endpoint (ondemand/map/append) solo comprueban que el
+# APIQuery/llamada use `component._X_endpoint`, lo cual es auto-referencial y
+# no detecta si esa constante apunta al recurso equivocado. Estos tests fijan
+# los valores reales de las rutas del servidor Trapper (`storage/urls.py`).
+
+def test_ondemand_endpoint_matches_server_route():
+    """_ondemand_endpoint debe apuntar a collections_ondemand, no a collections_append."""
+    assert CollectionsComponent._ondemand_endpoint == "storage/api/collections_ondemand"
+
+
+def test_append_endpoint_matches_server_route():
+    assert CollectionsComponent._append_endpoint == "storage/api/collections_append"
+
+
+def test_map_endpoint_matches_server_route():
+    assert CollectionsComponent._map_endpoint == "storage/api/collections_map"
+
+
+def test_ondemand_and_append_endpoints_are_distinct():
+    """Regresión: _ondemand_endpoint estaba duplicado con _append_endpoint,
+    haciendo que where_ondemand/get_ondemand/etc. leyeran el recurso equivocado."""
+    assert CollectionsComponent._ondemand_endpoint != CollectionsComponent._append_endpoint
+
+
 # ── tests heredados ───────────────────────────────────────────────────────────
 
 class TestCollectionsComponent(ComponentUnitTestBase):

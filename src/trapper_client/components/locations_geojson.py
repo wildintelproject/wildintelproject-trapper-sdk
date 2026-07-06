@@ -1,5 +1,5 @@
 """
-Component for the /api/locations/geojson/ resource.
+Component for the /geomap/api/locations/geojson/ resource.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ _NOT_SUPPORTED = (
 
 class LocationsGeoJsonComponent(TrapperComponent[LocationGeoJsonFeatureCollection]):
     """
-    Component for the ``/api/locations/geojson/`` resource.
+    Component for the ``/geomap/api/locations/geojson/`` resource.
 
     This endpoint returns a GeoJSON FeatureCollection (not paginated).
     Use :meth:`get` as the primary method. All other inherited methods
@@ -85,14 +85,14 @@ class LocationsGeoJsonComponent(TrapperComponent[LocationGeoJsonFeatureCollectio
 
     """
 
-    endpoint = "api/locations/geojson/"
+    endpoint = "geomap/api/locations/geojson/"
     schema = LocationGeoJsonFeatureCollection
 
     def get(
         self,
         collection_id: int | None = None,
         query: Dict[str, Any] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Fetch locations as a GeoJSON FeatureCollection.
 
@@ -110,19 +110,19 @@ class LocationsGeoJsonComponent(TrapperComponent[LocationGeoJsonFeatureCollectio
             q["colls"] = collection_id
         return self.client.get(self.endpoint, query=q)
 
-    def get_all(self, **kwargs) -> None:  # type: ignore[override]
+    def get_all(self, **kwargs: Any) -> None:  # type: ignore[override]
         raise NotImplementedError(_NOT_SUPPORTED)
 
-    def all(self, **kwargs) -> None:  # type: ignore[override]
+    def all(self, **kwargs: Any) -> None:  # type: ignore[override]
         raise NotImplementedError(_NOT_SUPPORTED)
 
-    def where(self, **kwargs) -> None:  # type: ignore[override]
+    def where(self, **kwargs: Any) -> None:  # type: ignore[override]
         raise NotImplementedError(_NOT_SUPPORTED)
 
-    def find(self, pk, **kwargs) -> None:  # type: ignore[override]
+    def find(self, pk, **kwargs: Any) -> None:  # type: ignore[override]
         raise NotImplementedError(_NOT_SUPPORTED)
 
-    def export(self, **kwargs) -> None:  # type: ignore[override]
+    def export(self, **kwargs: Any) -> None:  # type: ignore[override]
         raise NotImplementedError(_NOT_SUPPORTED)
 
     def create(self, body) -> None:  # type: ignore[override]

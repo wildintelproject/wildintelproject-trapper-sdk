@@ -166,6 +166,24 @@ def test_make_request_calls_session_with_correct_url(token_client):
     assert call_kwargs["url"] == "https://example.com/api/locations/"
 
 
+def test_make_request_uses_absolute_url_as_is(token_client):
+    """make_request() no antepone base_url cuando endpoint ya es una URL absoluta.
+
+    Necesario para descargar ficheros de media: el campo ``filePath`` que
+    devuelve la API ya es una URL absoluta completa (con el token de acceso
+    ``?rt=`` embebido para recursos privados); anteponerle base_url de nuevo
+    generaría una URL rota.
+    """
+    mock_resp = make_response(200, json_data={})
+    token_client._client.request = MagicMock(return_value=mock_resp)
+
+    absolute_url = "https://media.example.org/storage/resource/media/1/file/?rt=tok123"
+    token_client.make_request(absolute_url, method="GET")
+
+    call_kwargs = token_client._client.request.call_args.kwargs
+    assert call_kwargs["url"] == absolute_url
+
+
 def test_client_is_configured_with_timeout(token_client):
     """El httpx.Client se construye con el timeout configurado."""
     assert token_client._client.timeout.read == 30

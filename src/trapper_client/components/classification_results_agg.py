@@ -13,15 +13,15 @@ from trapper_client.schemas import ClassificationAggRecord, PaginatedResult
 
 class ClassificationResultsAggComponent(TrapperComponent[ClassificationAggRecord]):
     """
-    Component for ``/media_classification/api/classifications/results/agg/{project_pk}``.
+    Component for ``/media_classification/api/classifications/results/agg/{project_pk}/``.
 
     Available endpoints:
-    - ``GET /media_classification/api/classifications/results/agg/{project_pk}``
+    - ``GET /media_classification/api/classifications/results/agg/{project_pk}/``
 
     This endpoint returns CSV (gzip) by default, or GeoJSON when ``geojson=True``.
     """
 
-    endpoint = "media_classification/api/classifications/results/agg/{project_pk}"
+    endpoint = "media_classification/api/classifications/results/agg/{project_pk}/"
     schema = ClassificationAggRecord
 
     def get_project_results_agg(
@@ -31,7 +31,7 @@ class ClassificationResultsAggComponent(TrapperComponent[ClassificationAggRecord
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[ClassificationAggRecord]:
         """Fetch one page of aggregated results for a project.
 
@@ -61,7 +61,7 @@ class ClassificationResultsAggComponent(TrapperComponent[ClassificationAggRecord
         query: Dict[str, Any] | None = None,
         file: str | Path | None = None,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> Path:
         """Export aggregated results of one project to CSV.
 

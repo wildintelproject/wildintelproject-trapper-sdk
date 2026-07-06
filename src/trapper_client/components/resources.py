@@ -110,7 +110,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         filter_fn: Callable[[Resource | dict], bool] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[Resource]:
         """Return a lazy iterator over resources belonging to a collection.
 
@@ -152,7 +152,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Resource]:
         """Fetch one page of resources belonging to a collection.
 
@@ -188,7 +188,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Resource]:
         """Fetch all pages of resources belonging to a collection.
 
@@ -256,7 +256,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         filter_fn: Callable[[Resource | dict], bool] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[Resource]:
         """Return a lazy iterator over resources at a specific location.
 
@@ -296,7 +296,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Resource]:
         """Fetch one page of resources at a specific location.
 
@@ -334,7 +334,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Resource]:
         """Fetch all pages of resources at a specific location.
 

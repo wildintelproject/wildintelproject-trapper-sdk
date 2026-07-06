@@ -71,7 +71,7 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
             page: int = 1,
             page_size: int = 50,
             validate: bool = True,
-            **kwargs,
+            **kwargs: Any,
     ) -> PaginatedResult[ClassificationRecordExport]:
         """Fetch one page of observation rows for a classification project.
 
@@ -102,7 +102,7 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
             query: Dict[str, Any] | None = None,
             page_size: int = 50,
             validate: bool = True,
-            **kwargs,
+            **kwargs: Any,
     ) -> APIQuery[ClassificationRecordExport]:
         """Return a lazy iterator over observation rows for a project.
 
@@ -131,7 +131,7 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
             query: Dict[str, Any] | None = None,
             file: str | Path | None = None,
             validate: bool = True,
-            **kwargs,
+            **kwargs: Any,
     ) -> Path | list[ClassificationRecordExport]:
         """Export observation rows for one project to CSV or model list.
 

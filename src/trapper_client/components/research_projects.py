@@ -74,7 +74,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[ResearchProjectCollection]:
         """Fetch one page of collections linked to a research project.
 
@@ -97,7 +97,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         project_pk: int,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery:
         """Return a lazy iterator over collections linked to a project.
 
@@ -118,7 +118,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         pk: int | str,
         query: Dict[str, Any] | None = None,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> ResearchProjectCollection | Dict[str, Any]:
         """Retrieve one project-collection link by primary key.
 
@@ -140,7 +140,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[ResearchProjectCollection]:
         """Fetch all pages of collections linked to a research project.
 
@@ -161,7 +161,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
             self,
             project_pk: int,
             collection_pk: int,
-            **kwargs,
+            **kwargs: Any,
     ) -> int | None:
         """Check whether a collection is linked to a research project.
 

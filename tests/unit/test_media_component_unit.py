@@ -38,6 +38,7 @@ PROJECT_PK = 7
 COLLECTION_PK = 5
 LINK_PK = 99
 MEDIA_ID = 1
+FILE_URL = "http://example.com/storage/media/1/pfile/"
 
 
 # ── tests heredados ───────────────────────────────────────────────────────────
@@ -104,10 +105,10 @@ class TestResolveCollectionPk:
         mock_result.results = [mock_link]
 
         with patch(
-            "trapper_client.components.classification_media.ClassificationProjectsCollectionsComponent"
+            "trapper_client.components.classification_media.ClassificationProjectsComponent"
         ) as MockComp:
             instance = MockComp.return_value
-            instance.get_all_classification_project.return_value = mock_result
+            instance.get_all_project_collections.return_value = mock_result
 
             result = component._resolve_collection_pk(PROJECT_PK, COLLECTION_PK)
 
@@ -119,10 +120,10 @@ class TestResolveCollectionPk:
         mock_result.results = []
 
         with patch(
-            "trapper_client.components.classification_media.ClassificationProjectsCollectionsComponent"
+            "trapper_client.components.classification_media.ClassificationProjectsComponent"
         ) as MockComp:
             instance = MockComp.return_value
-            instance.get_all_classification_project.return_value = mock_result
+            instance.get_all_project_collections.return_value = mock_result
 
             result = component._resolve_collection_pk(PROJECT_PK, COLLECTION_PK)
 
@@ -483,23 +484,29 @@ class TestDownloadMediaFile:
         out = tmp_path / "media.jpg"
         client._select_file.return_value = out
 
-        result = component.download_media_file(media_id=MEDIA_ID, file=out)
+        result = component.download_media_file(file_url=FILE_URL, file=out)
 
         assert result == out
         assert out.read_bytes() == b"fake_image_data"
 
-    def test_download_media_file_uses_correct_endpoint(self, component, client, tmp_path):
-        """download_media_file() construye el endpoint con media_id y file_field."""
+    def test_download_media_file_uses_file_url_as_endpoint(self, component, client, tmp_path):
+        """download_media_file() usa file_url directamente como endpoint.
+
+        Regresión: antes reconstruía la ruta a partir de media_id/file_field
+        apuntando a un endpoint inexistente (storage/api/resource/media/...,
+        cuando la ruta real de Django es storage/resource/media/... sin
+        'api/', y sin el token de acceso ?rt= que exige esa vista para
+        recursos privados). file_url ya viene completo desde filePath.
+        """
         mock_response = MagicMock()
         mock_response.content = b"data"
         client.make_request.return_value = mock_response
         client._select_file.return_value = tmp_path / "media.jpg"
 
-        component.download_media_file(media_id=MEDIA_ID, file_field="pfile")
+        component.download_media_file(file_url=FILE_URL)
 
         called_endpoint = client.make_request.call_args[1]["endpoint"]
-        assert str(MEDIA_ID) in called_endpoint
-        assert "pfile" in called_endpoint
+        assert called_endpoint == FILE_URL
 
     def test_download_media_file_retries_on_failure(self, component, client, tmp_path):
         """download_media_file() reintenta en caso de fallo."""
@@ -510,58 +517,67 @@ class TestDownloadMediaFile:
         client._select_file.return_value = out
 
         result = component.download_media_file(
-            media_id=MEDIA_ID, file=out, retry_attempts=2
+            file_url=FILE_URL, file=out, retry_attempts=2
         )
 
         assert client.make_request.call_count == 2
         assert result == out
 
 
-# ── _download_media_ids ───────────────────────────────────────────────────────
+# ── _download_media_files ─────────────────────────────────────────────────────
 
-class TestDownloadMediaIds:
+class TestDownloadMediaFiles:
 
     @pytest.fixture
     def component(self):
         comp = ClassificationMediaComponent(MagicMock())
         comp.download_media_file = MagicMock(
-            side_effect=lambda media_id, file_field, file, **kw: file
+            side_effect=lambda file_url, file, **kw: file
         )
         return comp
 
-    def test_downloads_all_media_ids(self, component, tmp_path):
-        """_download_media_ids() descarga todos los media_ids indicados."""
-        result = component._download_media_ids(
-            media_ids=[1, 2, 3],
+    def test_downloads_all_media_rows(self, component, tmp_path):
+        """_download_media_files() descarga todos los pares (id, url) indicados."""
+        result = component._download_media_files(
+            media_rows=[(1, "http://x/1"), (2, "http://x/2"), (3, "http://x/3")],
             output_path=tmp_path,
         )
         assert component.download_media_file.call_count == 3
 
+    def test_passes_file_url_to_download_media_file(self, component, tmp_path):
+        """_download_media_files() pasa la url de cada fila, no el id."""
+        component._download_media_files(
+            media_rows=[(1, "http://x/1")],
+            output_path=tmp_path,
+        )
+        call_kwargs = component.download_media_file.call_args[1]
+        assert call_kwargs["file_url"] == "http://x/1"
+
     def test_returns_list_of_paths(self, component, tmp_path):
-        """_download_media_ids() devuelve lista de Path."""
-        result = component._download_media_ids(
-            media_ids=[1, 2],
+        """_download_media_files() devuelve lista de Path."""
+        result = component._download_media_files(
+            media_rows=[(1, "http://x/1"), (2, "http://x/2")],
             output_path=tmp_path,
         )
         assert isinstance(result, list)
 
     def test_skips_failed_downloads(self, component, tmp_path):
-        """_download_media_ids() ignora los ficheros que fallan."""
+        """_download_media_files() ignora los ficheros que fallan."""
         component.download_media_file.side_effect = [
             tmp_path / "media_1",
             Exception("error"),
             tmp_path / "media_3",
         ]
 
-        result = component._download_media_ids(
-            media_ids=[1, 2, 3],
+        result = component._download_media_files(
+            media_rows=[(1, "http://x/1"), (2, "http://x/2"), (3, "http://x/3")],
             output_path=tmp_path,
         )
 
         assert len(result) == 2
 
     def test_compresses_when_compress_true(self, component, tmp_path):
-        """_download_media_ids() crea ZIP cuando compress=True."""
+        """_download_media_files() crea ZIP cuando compress=True."""
         files = [tmp_path / f"media_{i}" for i in range(2)]
         for f in files:
             f.write_bytes(b"data")
@@ -570,8 +586,8 @@ class TestDownloadMediaIds:
         archive = tmp_path / "archive.zip"
         component._compress_files = MagicMock(return_value=archive)
 
-        component._download_media_ids(
-            media_ids=[1, 2],
+        component._download_media_files(
+            media_rows=[(1, "http://x/1"), (2, "http://x/2")],
             output_path=tmp_path,
             compress=True,
             archive_file=archive,
@@ -580,12 +596,12 @@ class TestDownloadMediaIds:
         component._compress_files.assert_called_once()
 
     def test_parallel_downloads(self, component, tmp_path):
-        """_download_media_ids() ejecuta descargas en paralelo."""
+        """_download_media_files() ejecuta descargas en paralelo."""
         files = [tmp_path / f"media_{i}" for i in range(3)]
         component.download_media_file.side_effect = files
 
-        result = component._download_media_ids(
-            media_ids=[1, 2, 3],
+        result = component._download_media_files(
+            media_rows=[(1, "http://x/1"), (2, "http://x/2"), (3, "http://x/3")],
             output_path=tmp_path,
             parallel=True,
             max_workers=2,
@@ -605,16 +621,16 @@ class TestDownloadProjectMediaFiles:
     @pytest.fixture
     def component(self, client):
         comp = ClassificationMediaComponent(client)
-        comp._download_media_ids = MagicMock(return_value=[])
+        comp._download_media_files = MagicMock(return_value=[])
         return comp
 
     def test_download_project_media_files_calls_download(self, component, client, tmp_path):
-        """download_project_media_files() llama a _download_media_ids."""
+        """download_project_media_files() llama a _download_media_files."""
         client.get_all.return_value = paginated_response([VALID_MEDIA])
 
         component.download_project_media_files(PROJECT_PK, output_dir=tmp_path)
 
-        component._download_media_ids.assert_called_once()
+        component._download_media_files.assert_called_once()
 
     def test_download_project_media_files_uses_correct_endpoint(self, component, client, tmp_path):
         """download_project_media_files() usa el endpoint del proyecto."""
@@ -633,7 +649,7 @@ class TestDownloadProjectMediaFiles:
             PROJECT_PK, output_dir=tmp_path, compress=True
         )
 
-        call_kwargs = component._download_media_ids.call_args[1]
+        call_kwargs = component._download_media_files.call_args[1]
         assert f"project_{PROJECT_PK}" in str(call_kwargs["archive_file"])
 
 
@@ -648,17 +664,17 @@ class TestDownloadCollectionMediaFiles:
     @pytest.fixture
     def component(self, client):
         comp = ClassificationMediaComponent(client)
-        comp._download_media_ids = MagicMock(return_value=[])
+        comp._download_media_files = MagicMock(return_value=[])
         comp._resolve_collection_pk = MagicMock(return_value=LINK_PK)
         return comp
 
     def test_download_collection_media_files_calls_download(self, component, client, tmp_path):
-        """download_collection_media_files() llama a _download_media_ids."""
+        """download_collection_media_files() llama a _download_media_files."""
         client.get_all.return_value = paginated_response([VALID_MEDIA])
 
         component.download_collection_media_files(PROJECT_PK, COLLECTION_PK, output_dir=tmp_path)
 
-        component._download_media_ids.assert_called_once()
+        component._download_media_files.assert_called_once()
 
     def test_download_collection_media_files_sends_collection_filter(self, component, client, tmp_path):
         """download_collection_media_files() envía el link_pk como filtro collection."""
@@ -677,7 +693,7 @@ class TestDownloadCollectionMediaFiles:
             PROJECT_PK, COLLECTION_PK, output_dir=tmp_path, compress=True
         )
 
-        call_kwargs = component._download_media_ids.call_args[1]
+        call_kwargs = component._download_media_files.call_args[1]
         archive_name = str(call_kwargs["archive_file"])
         assert f"project_{PROJECT_PK}" in archive_name
         assert f"collection_{COLLECTION_PK}" in archive_name

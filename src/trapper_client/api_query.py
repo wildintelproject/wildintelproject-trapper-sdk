@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import re
 import logging
-from typing import Callable, Iterator, Generic, TypeVar, Any
+from typing import TYPE_CHECKING, Callable, Iterator, Generic, TypeVar, Any
 
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from trapper_client.api_client_base import APIClientBase
 
 TModel = TypeVar("TModel", bound=BaseModel)
 logger = logging.getLogger(__name__)
@@ -25,7 +30,7 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
 
     def __init__(
         self,
-        client,
+        client: "APIClientBase",
         endpoint: str,
         query: dict[str, Any] | None = None,
         schema: type[TModel] | None = None,
@@ -122,7 +127,7 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
                 return raw_item
             # Otherwise continue to fetch the next item
 
-    def close(self):
+    def close(self) -> None:
         """Mark iterator as exhausted and clear internal buffers.
 
         Returns:

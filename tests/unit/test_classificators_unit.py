@@ -40,6 +40,13 @@ VALID_RECORD_MINIMAL = {
 }
 
 
+def test_endpoint_matches_server_route():
+    """Regresión: el endpoint apuntaba a /api/classificators, sin el prefijo
+    media_classification/ que registra la ruta real en el servidor Trapper
+    (media_classification/urls.py), lo que provocaba un 404 siempre."""
+    assert ClassificatorsComponent.endpoint == "/media_classification/api/classificators"
+
+
 # ── tests heredados (get / get_all / where / find / export) ──────────────────
 
 class TestClassificatorsComponent(ComponentUnitTestBase):

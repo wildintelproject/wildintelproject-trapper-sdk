@@ -61,6 +61,7 @@ from trapper_client.api_client_base import APIClientBase
 from trapper_client.api_query import APIQuery
 from trapper_client.components import (
     ClassificationProjectsComponent,
+    ClassificationsComponent,
     ClassificationMediaComponent,
     ClassificationRecordExport,
     ClassificationResultsAggComponent,
@@ -69,6 +70,10 @@ from trapper_client.components import (
     UserClassificationsComponent,
     ClassificationsMapComponent,
     ClassificatorsComponent,
+    SpeciesComponent,
+    MapsComponent,
+    SequencesComponent,
+    UsersComponent,
     CollectionsComponent,
     DeploymentsComponent,
     LocationsComponent,
@@ -95,19 +100,23 @@ class TrapperClient(APIClientBase):
     * :attr:`research_projects` — :class:`~trapper_api_client.components.ResearchProjectsComponent`
     * :attr:`classification_projects` — :class:`~trapper_api_client.components.ClassificationProjectsComponent`
     * :attr:`classification_media` — :class:`~trapper_api_client.components.ClassificationMediaComponent`
-    * :attr:`classification_results` - :class:`~trapper_api_client.components.ClassificationResultsComponent`
+    * :attr:`classification_results` - :class:`~trapper_api_client.components.ClassificationsComponent`
     * :attr:`classification_results_agg` - :class:`~trapper_api_client.components.ClassificationResultsAggComponent`
     * :attr:`classification_package` - :class:`~trapper_api_client.components.ClassificationPackageComponent`
     * :attr:`ai_classifications` - :class:`~trapper_api_client.components.AIClassificationsComponent`
     * :attr:`user_classifications` — :class:`~trapper_api_client.components.UserClassificationsComponent`
     * :attr:`classifications_map` — :class:`~trapper_api_client.components.ClassificationsMapComponent`
     * :attr:`classificators` — :class:`~trapper_api_client.components.ClassificatorsComponent`
+    * :attr:`species` — :class:`~trapper_api_client.components.SpeciesComponent`
+    * :attr:`maps` — :class:`~trapper_api_client.components.MapsComponent`
+    * :attr:`sequences` — :class:`~trapper_api_client.components.SequencesComponent`
+    * :attr:`users` — :class:`~trapper_api_client.components.UsersComponent`
 
     Also inherits all low-level helpers from :class:`~trapper_api_client.api_client_base.APIClientBase`
     (``get``, ``post``, ``patch``, ``put``, ``delete``, ``get_all``, ``export_all``, …) and
     the generic :meth:`where` method that returns a lazy :class:`~trapper_api_client.api_query.APIQuery`.
 
-    Args:
+    Attributes:
         access_token: Authentication token (takes precedence over user/password).
         user_name: Username for basic authentication.
         user_password: Password for basic authentication.
@@ -160,13 +169,17 @@ class TrapperClient(APIClientBase):
         self.research_projects: ResearchProjectsComponent = ResearchProjectsComponent(self)
         self.classification_projects: ClassificationProjectsComponent = ClassificationProjectsComponent(self)
         self.classification_media: ClassificationMediaComponent = ClassificationMediaComponent(self)
-        self.classification_results: ClassificationResultsComponent = ClassificationResultsComponent(self)
+        self.classification_results: ClassificationsComponent = ClassificationsComponent(self)
         self.classification_results_agg: ClassificationResultsAggComponent = ClassificationResultsAggComponent(self)
         self.classification_package: ClassificationPackageComponent = ClassificationPackageComponent(self)
         self.ai_classifications: AIClassificationsComponent = AIClassificationsComponent(self)
         self.user_classifications: UserClassificationsComponent = UserClassificationsComponent(self)
         self.classifications_map: ClassificationsMapComponent = ClassificationsMapComponent(self)
         self.classificators: ClassificatorsComponent = ClassificatorsComponent(self)
+        self.species: SpeciesComponent = SpeciesComponent(self)
+        self.maps: MapsComponent = MapsComponent(self)
+        self.sequences: SequencesComponent = SequencesComponent(self)
+        self.users: UsersComponent = UsersComponent(self)
 
     # ── Generic helper ────────────────────────────────────────────────────────
 

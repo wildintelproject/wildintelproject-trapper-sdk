@@ -80,3 +80,4 @@ fabric.properties
 /tests/.env
 !/.claude/
 /site/
+/.claude/

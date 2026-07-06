@@ -39,7 +39,7 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
         filter_fn: Callable | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[ResearchProjectCollection]:
         """Lazy iterator over collections linked to a research project."""
 
@@ -61,7 +61,7 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[ResearchProjectCollection]:
         """Fetch one page of collections for a research project."""
 
@@ -82,7 +82,7 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[ResearchProjectCollection]:
         """Fetch all collections for a research project."""
 
@@ -102,7 +102,7 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
         pk: int | str,
         query: Dict[str, Any] | None = None,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> ResearchProjectCollection | dict:
         """Retrieve a single project-collection link by PK."""
 
@@ -120,7 +120,7 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
         self,
         project_pk: int,
         collection_pk: int,
-        **kwargs,
+        **kwargs: Any,
     ) -> int | None:
         """Check whether a collection is linked to a research project."""
 

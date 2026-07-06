@@ -16,18 +16,3 @@ class Collection(TrapperSchema):
     update_data: Optional[str] = None
     detail_data: Optional[str] = None
     delete_data: Optional[str] = None
-
-
-class CollectionCP(TrapperSchema):
-    """Schema for a collection entry inside a classification project."""
-
-    pk: int
-    collection_pk: int
-    name: str
-    status: str
-    is_active: bool
-    detail_data: str
-    classify_data: str
-    approved_count: int
-    classified_count: int
-    total_count: int

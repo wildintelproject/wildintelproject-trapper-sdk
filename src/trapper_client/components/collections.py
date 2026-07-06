@@ -68,7 +68,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
 
     endpoint = "storage/api/collections"
     schema = Collection
-    _ondemand_endpoint = "storage/api/collections_append"
+    _ondemand_endpoint = "storage/api/collections_ondemand"
     _map_endpoint = "storage/api/collections_map"
     _append_endpoint = "storage/api/collections_append"
 
@@ -80,7 +80,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         filter_fn: Callable | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[Collection]:
         """Return a lazy iterator over on-demand collections for the current user.
 
@@ -116,7 +116,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Collection]:
         """Fetch one page of on-demand collections for the current user.
 
@@ -149,7 +149,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Collection]:
         """Fetch all pages of on-demand collections for the current user.
 
@@ -209,7 +209,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         filter_fn: Callable | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[Collection]:
         """Return a lazy iterator over map collections for the current user.
 
@@ -245,7 +245,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Collection]:
         """Fetch one page of map collections for the current user.
 
@@ -278,7 +278,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Collection]:
         """Fetch all pages of map collections for the current user.
 
@@ -338,7 +338,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         filter_fn: Callable | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[Collection]:
         """Return a lazy iterator over append collections for the current user.
 
@@ -374,7 +374,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Collection]:
         """Fetch one page of append collections for the current user.
 
@@ -407,7 +407,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[Collection]:
         """Fetch all pages of append collections for the current user.
 

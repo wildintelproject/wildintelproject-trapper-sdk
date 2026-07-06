@@ -15,7 +15,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
-from trapper_client.components.classification_project_collections import ClassificationProjectsCollectionsComponent
+from trapper_client.components.classification_projects import ClassificationProjectsComponent
 from trapper_client.schemas import MediaRecord, PaginatedResult
 
 
@@ -27,7 +27,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
 
     **Main endpoints:**
 
-    - ``GET /media_classification/api/media/{project_pk}``: media for one classification project
+    - ``GET /media_classification/api/media/{project_pk}/``: media for one classification project
 
     **Available filter fields:**
 
@@ -95,7 +95,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         )
     """
 
-    endpoint = "media_classification/api/media/{project_pk}"
+    endpoint = "media_classification/api/media/{project_pk}/"
     schema = MediaRecord
 
     # ── internal helpers ──────────────────────────────────────────────────────
@@ -124,8 +124,8 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         Returns:
             The intermediate link pk if found, otherwise the original ``collection_pk``.
         """
-        cp_collections = ClassificationProjectsCollectionsComponent(self.client)
-        all_links = cp_collections.get_all_classification_project(project_pk=project_pk)
+        classification_projects = ClassificationProjectsComponent(self.client)
+        all_links = classification_projects.get_all_project_collections(project_pk=project_pk)
         for link in all_links.results:
             if link.collection_pk == collection_pk:
                 return link.pk
@@ -158,6 +158,53 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
                     continue
         return None
 
+    def _extract_file_url(self, media: Any) -> str | None:
+        """Extract the ready-to-download file URL from a media row.
+
+        The media list endpoint already returns an absolute ``filePath`` URL
+        with the resource's access token embedded in the query string (e.g.
+        ``?rt=<token>``) whenever the server-side ``trapper_url``/
+        ``trapper_url_token`` flags are enabled (the client's default query).
+        Downloading via this URL is required for private resources: the
+        underlying Django view that serves media files is a plain view, not
+        part of the DRF API, so it ignores the ``Authorization`` header this
+        client sends and instead checks that ``rt`` query token.
+
+        Args:
+            media: Raw row as ``dict`` or model-like object with ``model_dump``.
+
+        Returns:
+            The file URL if present, otherwise ``None``.
+        """
+        candidates = ("filePath", "url", "fileURL", "file_url")
+
+        if isinstance(media, dict):
+            values = media
+        elif hasattr(media, "model_dump"):
+            values = media.model_dump(mode="python")
+        else:
+            return None
+
+        for key in candidates:
+            value = values.get(key)
+            if value:
+                return str(value)
+        return None
+
+    def _media_rows(self, rows: list[Any]) -> list[tuple[int, str]]:
+        """Build ``(media_id, file_url)`` pairs from raw media rows.
+
+        Rows missing either a resolvable id or a download URL are skipped.
+
+        Args:
+            rows: Raw rows as returned by the media list endpoint.
+
+        Returns:
+            List of ``(media_id, file_url)`` pairs.
+        """
+        pairs = ((self._extract_media_id(row), self._extract_file_url(row)) for row in rows)
+        return [(media_id, file_url) for media_id, file_url in pairs if media_id and file_url]
+
     def _compress_files(
         self,
         files: list[Path],
@@ -186,9 +233,9 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
                     zf.write(file_path, arcname=file_path.name)
         return archive_path
 
-    def _download_media_ids(
+    def _download_media_files(
         self,
-        media_ids: list[int],
+        media_rows: list[tuple[int, str]],
         output_path: Path,
         parallel: bool = False,
         max_workers: int = 4,
@@ -198,10 +245,12 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         retry_min_wait: float = 0.5,
         retry_max_wait: float = 8.0,
     ) -> list[Path]:
-        """Download a list of media files by ID, with optional parallelism and compression.
+        """Download a list of media files, with optional parallelism and compression.
 
         Args:
-            media_ids: List of media/resource primary keys to download.
+            media_rows: List of ``(media_id, file_url)`` pairs to download.
+                ``file_url`` must be the absolute URL from the row's
+                ``filePath`` field (see :meth:`_extract_file_url`).
             output_path: Directory where files will be saved.
             parallel: Whether to use threaded parallel downloads.
             max_workers: Maximum worker threads when ``parallel`` is enabled.
@@ -216,10 +265,9 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         """
         output_path.mkdir(parents=True, exist_ok=True)
 
-        def _download_one(media_id: int) -> Path:
+        def _download_one(media_id: int, file_url: str) -> Path:
             return self.download_media_file(
-                media_id=media_id,
-                file_field="file",
+                file_url=file_url,
                 file=output_path / f"media_{media_id}",
                 retry_attempts=retry_attempts,
                 retry_min_wait=retry_min_wait,
@@ -228,19 +276,19 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
 
         downloaded: list[Path] = []
 
-        if parallel and len(media_ids) > 1:
-            workers = max(1, min(max_workers, len(media_ids)))
+        if parallel and len(media_rows) > 1:
+            workers = max(1, min(max_workers, len(media_rows)))
             with ThreadPoolExecutor(max_workers=workers) as executor:
-                futures = [executor.submit(_download_one, mid) for mid in media_ids]
+                futures = [executor.submit(_download_one, mid, url) for mid, url in media_rows]
                 for future in as_completed(futures):
                     try:
                         downloaded.append(future.result())
                     except Exception:
                         continue
         else:
-            for media_id in media_ids:
+            for media_id, file_url in media_rows:
                 try:
-                    downloaded.append(_download_one(media_id))
+                    downloaded.append(_download_one(media_id, file_url))
                 except Exception:
                     continue
 
@@ -258,7 +306,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[MediaRecord]:
         """Fetch one page of media rows for a classification project.
 
@@ -288,7 +336,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[MediaRecord]:
         """Return a lazy iterator over media rows for a classification project.
 
@@ -316,7 +364,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         query: Dict[str, Any] | None = None,
         file: str | Path | None = None,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> Path | list[BaseModel]:
         """Export all media rows for a classification project to CSV or model list.
 
@@ -345,7 +393,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         media_id: int,
         query: Dict[str, Any] | None = None,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> MediaRecord | None:
         """Find one media record within a project by its media/resource ID.
 
@@ -384,7 +432,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         retry_attempts: int = 3,
         retry_min_wait: float = 0.5,
         retry_max_wait: float = 8.0,
-        **kwargs,
+        **kwargs: Any,
     ) -> list[Path]:
         """Download all media files for one classification project.
 
@@ -407,13 +455,13 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         q = self._merge_query(query, kwargs)
         data = self.client.get_all(self._resolve_endpoint(project_pk), query=q)
         result = self._to_paginated(data, validate=False)
-        media_ids = [mid for mid in (self._extract_media_id(r) for r in result.results) if mid]
+        media_rows = self._media_rows(result.results)
 
         if archive_file is None and compress:
             archive_file = Path(output_dir or ".") / f"project_{project_pk}_media.zip"
 
-        return self._download_media_ids(
-            media_ids=media_ids,
+        return self._download_media_files(
+            media_rows=media_rows,
             output_path=Path(output_dir or "."),
             parallel=parallel,
             max_workers=max_workers,
@@ -434,7 +482,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         page: int = 1,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[MediaRecord]:
         """Fetch one page of media rows for a collection within a project.
 
@@ -468,7 +516,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[MediaRecord]:
         """Return a lazy iterator over media rows for a collection within a project.
 
@@ -500,7 +548,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         query: Dict[str, Any] | None = None,
         file: str | Path | None = None,
         validate: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> Path | list[BaseModel]:
         """Export all media rows for a collection within a project to CSV or model list.
 
@@ -539,7 +587,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         retry_attempts: int = 3,
         retry_min_wait: float = 0.5,
         retry_max_wait: float = 8.0,
-        **kwargs,
+        **kwargs: Any,
     ) -> list[Path]:
         """Download all media files for one collection within a project.
 
@@ -566,7 +614,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
 
         data = self.client.get_all(self._resolve_endpoint(project_pk), query=q)
         result = self._to_paginated(data, validate=False)
-        media_ids = [mid for mid in (self._extract_media_id(r) for r in result.results) if mid]
+        media_rows = self._media_rows(result.results)
 
         if archive_file is None and compress:
             archive_file = (
@@ -574,8 +622,8 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
                 / f"project_{project_pk}_collection_{collection_pk}_media.zip"
             )
 
-        return self._download_media_ids(
-            media_ids=media_ids,
+        return self._download_media_files(
+            media_rows=media_rows,
             output_path=Path(output_dir or "."),
             parallel=parallel,
             max_workers=max_workers,
@@ -590,8 +638,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
 
     def download_media_file(
         self,
-        media_id: int,
-        file_field: str = "file",
+        file_url: str,
         file: str | Path | None = None,
         retry_attempts: int = 3,
         retry_min_wait: float = 0.5,
@@ -600,8 +647,12 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         """Download one media file with retry support.
 
         Args:
-            media_id: Resource/media primary key used by the storage endpoint.
-            file_field: Media field name (e.g. ``file``, ``pfile``, ``tfile``).
+            file_url: Absolute download URL for the file, as returned in a
+                media row's ``filePath`` field (see :meth:`_extract_file_url`).
+                Downloading via this URL — instead of guessing the storage
+                endpoint from a media id — is what makes this work for
+                private resources too, since it already carries the
+                resource's access token in the query string.
             file: Output file path. If ``None``, a temp file is created.
             retry_attempts: Maximum number of download attempts.
             retry_min_wait: Minimum exponential backoff delay in seconds.
@@ -610,7 +661,6 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         Returns:
             Path to the downloaded media file.
         """
-        endpoint = f"storage/api/resource/media/{media_id}/{file_field}/"
         output_path = self.client._select_file(file)
 
         @retry(
@@ -621,7 +671,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         )
         def _download_once() -> Path:
             response = self.client.make_request(
-                endpoint=endpoint, method="GET", raise_on_error=True
+                endpoint=file_url, method="GET", raise_on_error=True
             )
             output_path.write_bytes(response.content)
             return output_path

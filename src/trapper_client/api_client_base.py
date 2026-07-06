@@ -25,7 +25,7 @@ class APIClientBase:
     JSON or CSV responses (including CSV inside ZIP, gzip, or bzip2). CSV responses
     can be optionally normalized to JSON with pagination.
 
-    Args:
+    Attributes:
         access_token: Authentication token used for API requests.
         user_name: Username for basic authentication.
         user_password: Password for basic authentication.
@@ -64,7 +64,7 @@ class APIClientBase:
         method: Literal["GET", "POST", "PATCH", "DELETE", "PUT"],
         query: Dict[str, Any] | None = None,
         body: Dict[str, Any] | None = None,
-        raise_on_error=True,
+        raise_on_error: bool = True,
     ) -> httpx.Response:
         """Send one HTTP request to the Trapper API.
 
@@ -91,7 +91,7 @@ class APIClientBase:
         endpoint: str,
         query: Dict[str, Any] | None = None,
         raise_on_error: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Perform a ``GET`` request and normalize response payload.
 
@@ -113,7 +113,7 @@ class APIClientBase:
             endpoint: str,
             query: Dict[str, Any] | None = None,
             raise_on_error: bool = True,
-            **kwargs,
+            **kwargs: Any,
     ) -> Dict[str, Any]:
         """Perform a ``GET`` request and return the raw response dict without pagination wrapping.
 
@@ -138,7 +138,7 @@ class APIClientBase:
             endpoint: str,
             query: Dict[str, Any] | None = None,
             raise_on_error: bool = True,
-            **kwargs,
+            **kwargs: Any,
     ) -> Dict[str, Any]:
         """ get_one alias"""
 
@@ -155,7 +155,7 @@ class APIClientBase:
         query: Dict[str, Any] | None = None,
         raise_on_error: bool = True,
         file: str | Path | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> Path | list[dict]:
         """Export one response page to CSV or return raw results as a list.
 
@@ -207,7 +207,7 @@ class APIClientBase:
         endpoint: str,
         query: Dict[str, Any] | None = None,
         raise_on_error: bool = True,
-        **kwargs,
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Fetch and merge all pages from an endpoint.
 
@@ -448,7 +448,11 @@ class APIClientBase:
         """Send low-level HTTP request using the configured session.
 
         Args:
-            endpoint: API endpoint relative to ``base_url``.
+            endpoint: API endpoint relative to ``base_url``, or an already
+                absolute URL (``http://`` / ``https://``) — used as-is
+                without joining it to ``base_url``. Some Trapper responses
+                (e.g. media ``filePath``) already return absolute download
+                URLs with an access token embedded in the query string.
             method: HTTP method string.
             query: Query parameters.
             body: JSON request body.
@@ -457,7 +461,10 @@ class APIClientBase:
             Raw ``httpx.Response``.
         """
         headers, auth = self._auth()
-        url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        if endpoint.startswith("http://") or endpoint.startswith("https://"):
+            url = endpoint
+        else:
+            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
 
         self.logger.debug(f"{method} {url}")
         self.logger.debug(f"Query: {query}")

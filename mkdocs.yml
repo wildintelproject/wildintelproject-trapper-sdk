@@ -1,10 +1,73 @@
 site_name: trapper_client
 site_description: Cliente Python para la API de Trapper
-site_url: https://example.com/trapper_client
-repo_name: trapper_client
+site_url: https://ijfvianauhu.github.io/trapper-client/
+repo_url: https://github.com/ijfvianauhu/trapper-client
+repo_name: ijfvianauhu/trapper-client
+copyright: Copyright &copy; 2026 <a href="https://wildintel.eu/">WildINTEL</a>
+
+docs_dir: docs
+site_dir: site
 
 theme:
   name: material
+  language: en
+  logo: img/wildIntel_logo.webp
+  favicon: img/wildIntel_logo.webp
+
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ijfvianauhu/trapper-client
+      name: trapper-client on GitHub
+    - icon: fontawesome/solid/globe
+      link: https://wildintel.eu/
+      name: WildINTEL website
+
+extra_css:
+  - stylesheets/extras.css
+
+markdown_extensions:
+  - toc:
+      title: On this page
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji
+  - tables
+  - attr_list
+  - def_list
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 nav:
   - Inicio: index.md
@@ -27,12 +90,18 @@ nav:
           - Research Projects: api/components/research_projects.md
           - Research Project Collections: api/components/research_project_collections.md
           - Classification Projects: api/components/classification_projects.md
-          - Classification Project Collections: api/components/classification_project_collections.md
           - Classifications: api/components/classifications.md
           - AI Classifications: api/components/ai_classifications.md
           - Classification Media: api/components/classification_media.md
           - Classification Results Agg: api/components/classification_results_agg.md
           - Classification Package: api/components/classification_package.md
+          - User Classifications: api/components/user_classifications.md
+          - Classifications Map: api/components/classifications_map.md
+          - Classificators: api/components/classificators.md
+          - Species: api/components/species.md
+          - Maps: api/components/maps.md
+          - Sequences: api/components/sequences.md
+          - Users: api/components/users.md
       - Schemas:
           - Common: api/schemas/common.md
           - Locations: api/schemas/locations.md
@@ -42,6 +111,13 @@ nav:
           - Research Projects: api/schemas/research_projects.md
           - Classifications: api/schemas/classifications.md
           - AI Classifications: api/schemas/ai_classifications.md
+          - User Classifications: api/schemas/user_classifications.md
+          - Classifications Map: api/schemas/classifications_map.md
+          - Classificators: api/schemas/classificators.md
+          - Species: api/schemas/species.md
+          - Maps: api/schemas/maps.md
+          - Sequences: api/schemas/sequences.md
+          - Users: api/schemas/users.md
 
 plugins:
   - search

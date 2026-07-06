@@ -129,7 +129,7 @@ class TrapperComponent(Generic[TModel]):
         validate: bool = True,
         overwrite_endpoint: str | None = None,
         overwrite_schema: type[TModel] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[TModel]:
         """
         Fetch one specific page for this resource.
@@ -163,7 +163,7 @@ class TrapperComponent(Generic[TModel]):
         validate: bool = True,
         overwrite_endpoint: str | None = None,
         overwrite_schema: type[TModel] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> APIQuery[TModel]:
         """
         Return a lazy iterator over this endpoint.
@@ -193,7 +193,7 @@ class TrapperComponent(Generic[TModel]):
         validate: bool = True,
         overwrite_endpoint: str | None = None,
         overwrite_schema: type[TModel] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> PaginatedResult[TModel]:
         """
         Fetch all available pages for this resource.
@@ -223,7 +223,7 @@ class TrapperComponent(Generic[TModel]):
             validate: bool = True,
             overwrite_endpoint: str | None = None,
             overwrite_schema: type[TModel] | None = None,
-            **kwargs,
+            **kwargs: Any,
     ) -> Path | list[BaseModel]:
         """
         Export resource data as CSV or as a list of parsed models.
@@ -271,7 +271,7 @@ class TrapperComponent(Generic[TModel]):
             overwrite_endpoint: str | None = None,
             overwrite_schema: type[TModel] | None = None,
 
-            **kwargs,
+            **kwargs: Any,
     ) -> TModel:
         """
         Retrieve one item by primary key.

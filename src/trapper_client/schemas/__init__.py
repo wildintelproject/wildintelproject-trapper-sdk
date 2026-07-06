@@ -15,7 +15,7 @@ from .locations import (
 )
 from .deployments import Deployment, DeploymentExport
 from .resources import Resource
-from .collections import Collection, CollectionCP
+from .collections import Collection
 from .research_projects import ResearchProject, ResearchProjectCollection, ResearchProjectRole
 from .classifications import (
     BBox,
@@ -52,6 +52,10 @@ from .classifications_map import (
     ClassificationMapRecord,
 )
 from .classificators import ClassificatorRecord
+from .species import SpeciesRecord
+from .maps import MapRecord
+from .sequences import SequenceRecord
+from .users import UserRecord
 
 __all__ = [
     # base
@@ -73,7 +77,6 @@ __all__ = [
     "Resource",
     # collections
     "Collection",
-    "CollectionCP",
     # research projects
     "ResearchProject",
     "ResearchProjectCollection",
@@ -110,4 +113,12 @@ __all__ = [
     "ResourceClassificationMap",
     # classificators
     "ClassificatorRecord",
+    # species
+    "SpeciesRecord",
+    # maps
+    "MapRecord",
+    # sequences
+    "SequenceRecord",
+    # users
+    "UserRecord",
 ]

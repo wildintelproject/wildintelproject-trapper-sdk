@@ -10,13 +10,13 @@ from trapper_client.schemas import ClassificatorRecord
 
 class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
     """
-    Component for ``/api/classificators/``.
+    Component for ``/media_classification/api/classificators/``.
 
     Retrieve and filter classificators (AI/human classifier configurations) from Trapper.
 
     Main endpoints:
-    - ``GET /api/classificators``: List of classificators (paginated)
-    - ``GET /api/classificators/{pk}``: Single classificator detail
+    - ``GET /media_classification/api/classificators``: List of classificators (paginated)
+    - ``GET /media_classification/api/classificators/{pk}``: Single classificator detail
 
     **Available filter fields:**
 
@@ -29,5 +29,5 @@ class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
     through query parameters.
     """
 
-    endpoint = "/api/classificators"
+    endpoint = "/media_classification/api/classificators"
     schema = ClassificatorRecord
