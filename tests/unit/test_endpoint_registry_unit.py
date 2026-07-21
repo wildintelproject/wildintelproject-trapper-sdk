@@ -184,7 +184,12 @@ def test_registry_is_exhaustive():
 
     missing = []
     for _, module_name, _ in pkgutil.iter_modules(components_pkg.__path__):
-        if module_name in {"base"}:
+        # "base" defines no endpoints of its own. "http_uploader" is not a
+        # TrapperComponent/endpoint-based class at all (it's the optional,
+        # resumable chunked uploader) and its module-level `import aiofiles`/
+        # `import blake3` are only guaranteed by the optional "upload" extra,
+        # not by the base dependency set this test suite otherwise relies on.
+        if module_name in {"base", "http_uploader"}:
             continue
         module = importlib.import_module(f"trapper_client.components.{module_name}")
         for name in dir(module):
