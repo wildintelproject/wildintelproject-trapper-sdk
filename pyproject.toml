@@ -1,0 +1,64 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "wildintel-trapper-sdk"
+version = "0.1.0"
+description = "Typed Python SDK for the Trapper camera-trap data management API"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.27",
+    "attrs>=22.0",
+    "typing-extensions>=4.0",
+    "pydantic>=2.0",
+    "tenacity>=8.2",
+    "mkdocstrings[python]>=1.0.4",
+]
+
+[project.optional-dependencies]
+upload = [
+    "aiofiles>=23.0",
+    "blake3>=0.4",
+]
+dev = ["pytest", "pytest-mock", "responses"]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-mock",
+    "responses",
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "pytest-dotenv>=0.5.2",
+    "typer>=0.15",
+    "rich>=13.0",
+]
+
+[project.scripts]
+cli = "cli:app"
+
+[tool.uv]
+package = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/trapper_client"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"cli.py" = "cli.py"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+env_files = [".env"]
+pythonpath = ["."]
+
+markers = [
+    "unit: Unit tests with no HTTP calls",
+    "integration: Integration tests with mocked HTTP",
+    "e2e: Smoke tests against a real Trapper server",
+]

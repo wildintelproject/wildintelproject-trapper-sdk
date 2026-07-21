@@ -1,0 +1,172 @@
+site_name: wildintel-trapper-sdk
+site_description: Cliente Python para la API de Trapper
+site_url: https://wildintelproject.github.io/wildintelproject-trapper-sdk/
+repo_url: https://github.com/wildintelproject/wildintelproject-trapper-sdk
+repo_name: wildintelproject/wildintelproject-trapper-sdk
+copyright: Copyright &copy; 2026 <a href="https://wildintel.eu/">WildINTEL</a>
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: en
+  logo: img/WildINTEL_onlyCircle_25.png
+  favicon: img/WildINTEL_onlyCircle_25.png
+
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/wildintelproject/wildintelproject-trapper-sdk
+      name: wildintel-trapper-sdk on GitHub
+    - icon: fontawesome/brands/facebook
+      link: https://www.facebook.com/people/WildIntel/61556603674655/
+      name: WildINTEL on Facebook
+    - icon: simple/bluesky
+      link: https://bsky.app/profile/wildintel.bsky.social
+      name: WildINTEL on Bluesky
+    - icon: fontawesome/solid/globe
+      link: https://wildintel.eu/
+      name: WildINTEL website
+
+extra_css:
+  - stylesheets/extras.css
+  - stylesheets/termynal.css
+
+extra_javascript:
+  - javascripts/termynal.js
+  - javascripts/termynal-init.js
+
+markdown_extensions:
+  - toc:
+      title: On this page
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji
+  - tables
+  - attr_list
+  - def_list
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Inicio: index.md
+  - Instalacion: installation.md
+  - Uso: usage.md
+  - Component Guides:
+      - Locations: guide/locations.md
+      - Locations GeoJSON: guide/locations_geojson.md
+      - Deployments: guide/deployments.md
+      - Resources: guide/resources.md
+      - Collections: guide/collections.md
+      - Research Projects: guide/research_projects.md
+      - Classification Projects: guide/classification_projects.md
+      - Classifications: guide/classifications.md
+      - AI Classifications: guide/ai_classifications.md
+      - Classification Media: guide/classification_media.md
+      - Classification Results Agg: guide/classification_results_agg.md
+      - Classification Package: guide/classification_package.md
+      - User Classifications: guide/user_classifications.md
+      - Classifications Map: guide/classifications_map.md
+      - Classificators: guide/classificators.md
+      - Species: guide/species.md
+      - Maps: guide/maps.md
+      - Sequences: guide/sequences.md
+      - Users: guide/users.md
+  - Features: features.md
+  - Testing: testing.md
+  - API Reference:
+      - Overview: api/index.md
+      - TrapperClient: api/trapper_client.md
+      - APIClientBase: api/api_client_base.md
+      - APIQuery: api/api_query.md
+      - TrapperComponent: api/base_component.md
+      - Errors: api/errors.md
+      - Components:
+          - Locations: api/components/locations.md
+          - Locations GeoJSON: api/components/locations_geojson.md
+          - Deployments: api/components/deployments.md
+          - Resources: api/components/resources.md
+          - Collections: api/components/collections.md
+          - Research Projects: api/components/research_projects.md
+          - Research Project Collections: api/components/research_project_collections.md
+          - Classification Projects: api/components/classification_projects.md
+          - Classifications: api/components/classifications.md
+          - AI Classifications: api/components/ai_classifications.md
+          - Classification Media: api/components/classification_media.md
+          - Classification Results Agg: api/components/classification_results_agg.md
+          - Classification Package: api/components/classification_package.md
+          - User Classifications: api/components/user_classifications.md
+          - Classifications Map: api/components/classifications_map.md
+          - Classificators: api/components/classificators.md
+          - Species: api/components/species.md
+          - Maps: api/components/maps.md
+          - Sequences: api/components/sequences.md
+          - Users: api/components/users.md
+      - Schemas:
+          - Common: api/schemas/common.md
+          - Locations: api/schemas/locations.md
+          - Deployments: api/schemas/deployments.md
+          - Resources: api/schemas/resources.md
+          - Collections: api/schemas/collections.md
+          - Research Projects: api/schemas/research_projects.md
+          - Classifications: api/schemas/classifications.md
+          - AI Classifications: api/schemas/ai_classifications.md
+          - User Classifications: api/schemas/user_classifications.md
+          - Classifications Map: api/schemas/classifications_map.md
+          - Classificators: api/schemas/classificators.md
+          - Species: api/schemas/species.md
+          - Maps: api/schemas/maps.md
+          - Sequences: api/schemas/sequences.md
+          - Users: api/schemas/users.md
+  - About: about.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_object_full_path: false
+            show_category_heading: true
+            show_if_no_docstring: false
+            separate_signature: true
+            show_signature_annotations: true
+            members_order: source
+            filters: [ "!^_" ]

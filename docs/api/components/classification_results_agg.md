@@ -1,0 +1,3 @@
+# ClassificationResultsAggComponent
+
+::: trapper_client.components.classification_results_agg.ClassificationResultsAggComponent

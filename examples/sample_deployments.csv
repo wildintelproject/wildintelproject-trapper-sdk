@@ -1,0 +1,4 @@
+deploymentID,locationID,longitude,latitude,deploymentStart,deploymentEnd,cameraModel
+dona-001-dep-2026-01,dona-001,-6.442,37.132,2026-01-15T00:00:00,2026-03-15T00:00:00,Bushnell Core
+dona-002-dep-2026-01,dona-002,-6.438,37.129,2026-01-15T00:00:00,2026-03-15T00:00:00,Bushnell Core
+dona-003-dep-2026-01,dona-003,-6.311,36.958,2026-01-20T00:00:00,2026-03-20T00:00:00,Browning Spec Ops

@@ -1,0 +1,39 @@
+# .github/workflows/docs.yml
+name: Docs
+
+on:
+  push:
+    branches: [development, main]
+  workflow_run:
+    workflows: [Tests]        # espera a que pasen los tests
+    types: [completed]
+    branches: [main]
+
+jobs:
+  docs:
+    name: Build & Deploy Docs
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv sync --dev
+
+      - name: Build docs
+        run: uv run mkdocs build --strict
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site

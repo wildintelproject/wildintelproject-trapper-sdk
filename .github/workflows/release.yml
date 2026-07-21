@@ -1,0 +1,135 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g. 0.2.0)'
+        required: false
+        default: '0.0.0.dev0'
+
+jobs:
+  build:
+    name: Build sdist/wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set package version
+        run: uv version ${{ steps.ver.outputs.version }}
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # For a tag push, check out `development` (not the tag) so CHANGELOG.md
+      # can be promoted and committed straight back to it. `development` and
+      # `main` are expected to be identical at the moment a tag is cut (the
+      # tag is created from `main` right after merging everything in from
+      # `development`), so this is equivalent content-wise but gives us a
+      # branch to push to. workflow_dispatch (dev builds) keeps checking out
+      # whatever ref triggered it, as before.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ startsWith(github.ref, 'refs/tags/') && 'development' || github.ref }}
+          fetch-depth: 0
+
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Resolve version, date, and previous tag
+        id: relver
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+            PREV_TAG=$(git tag --sort=-creatordate | grep -vx "${GITHUB_REF_NAME}" | head -n1 || true)
+            echo "prev_tag=$PREV_TAG" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "date=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Promote "Upcoming release" to a dated, versioned CHANGELOG entry
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          python3 .github/scripts/promote_changelog.py \
+            --version "${{ steps.relver.outputs.version }}" \
+            --date "${{ steps.relver.outputs.date }}" \
+            --repo "${{ github.repository }}" \
+            --prev-tag "${{ steps.relver.outputs.prev_tag }}" \
+            --notes-out release_notes.txt
+
+      - name: Commit and push the promoted CHANGELOG.md to development
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "docs: promote Upcoming release to v${{ steps.relver.outputs.version }} in CHANGELOG.md"
+          git push origin HEAD:development
+
+      - name: Create stable release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          body_path: release_notes.txt
+
+      - name: Force-move dev tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git tag -f dev
+          git push origin dev --force
+
+      - name: Build dev release notes
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          {
+            echo "Development build — not for production use."
+            echo "Built from commit \`${{ github.sha }}\` on branch \`${{ github.ref_name }}\`."
+            echo ""
+            echo "---"
+            echo ""
+            awk '/^## Upcoming release/{found=1; next} found && /^## /{exit} found{print}' CHANGELOG.md
+          } > dev_release_notes.txt
+
+      - name: Create dev pre-release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: dev
+          name: Dev build (${{ inputs.version || github.sha }})
+          prerelease: true
+          make_latest: false
+          files: dist/*
+          body_path: dev_release_notes.txt
