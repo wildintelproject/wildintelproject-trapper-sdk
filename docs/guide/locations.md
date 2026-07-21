@@ -84,7 +84,7 @@ client.locations.import_locations(
       success. This method requires `timezone` up front specifically to prevent creating that
       kind of latent, hard-to-diagnose corruption.
 
-There's also a ready-to-run script: [`examples/import_locations.py`](https://github.com/wildintelproject/wildintel-trapper-sdk/blob/refactor/examples/import_locations.py).
+There's also a ready-to-run script: [`examples/import_locations.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_locations.py).
 
 ### What you get in the exception when the CSV itself is rejected
 

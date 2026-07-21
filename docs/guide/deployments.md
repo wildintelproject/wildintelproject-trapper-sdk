@@ -86,7 +86,7 @@ client.deployments.import_deployments(
 )
 ```
 
-There's also a ready-to-run script: [`examples/import_deployments.py`](https://github.com/wildintelproject/wildintel-trapper-sdk/blob/refactor/examples/import_deployments.py).
+There's also a ready-to-run script: [`examples/import_deployments.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_deployments.py).
 
 ### What you get in the exception when the CSV itself is rejected
 

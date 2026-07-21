@@ -23,4 +23,4 @@ client.users.export(file="users.csv")
 
 There's also a ready-to-run script showing this exact pattern (resolving a username to a pk, then
 using it to filter another component):
-[`examples/get_user_locations.py`](https://github.com/wildintelproject/wildintel-trapper-sdk/blob/refactor/examples/get_user_locations.py).
+[`examples/get_user_locations.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/get_user_locations.py).

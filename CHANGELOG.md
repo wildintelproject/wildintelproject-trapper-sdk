@@ -5,10 +5,10 @@ contains information about recent changes, including new features, bug fixes, an
 It is intended to help users and developers understand the evolution of the project over time.
 
 You can find release notes and source distributions on the
-[releases page](https://github.com/wildintelproject/wildintel-trapper-sdk/releases).
+[releases page](https://github.com/wildintelproject/wildintelproject-trapper-sdk/releases).
 
 To report a bug or request a new feature, please open an
-[issue](https://github.com/wildintelproject/wildintel-trapper-sdk/issues).
+[issue](https://github.com/wildintelproject/wildintelproject-trapper-sdk/issues).
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

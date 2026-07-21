@@ -32,7 +32,7 @@ sharing the same interface for pagination, filtering, and CSV export.
 
 ## 📚 Documentation
 
-**https://wildintelproject.github.io/wildintel-trapper-sdk/**
+**https://wildintelproject.github.io/wildintelproject-trapper-sdk/**
 
 ## 🚀 Quick start
 
@@ -63,13 +63,13 @@ client.classification_results.export_project_results(
 )
 ```
 
-See the [Usage guide](https://wildintelproject.github.io/wildintel-trapper-sdk/usage/) for the full
+See the [Usage guide](https://wildintelproject.github.io/wildintelproject-trapper-sdk/usage/) for the full
 set of access patterns, and the per-component guides for filters and write-access details.
 
 ### Install for development
 
 ```bash
-git clone https://github.com/wildintelproject/wildintel-trapper-sdk.git
+git clone https://github.com/wildintelproject/wildintelproject-trapper-sdk.git
 cd wildintel-trapper-sdk
 setup.sh
 ```

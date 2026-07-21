@@ -37,7 +37,7 @@ Clone the repository and install the package in editable mode together with the 
 <div class="termy">
 
 ```console
-$ git clone https://github.com/wildintelproject/wildintel-trapper-sdk.git
+$ git clone https://github.com/wildintelproject/wildintelproject-trapper-sdk.git
 Cloning into 'wildintel-trapper-sdk'...
 $ cd wildintel-trapper-sdk
 $ uv sync

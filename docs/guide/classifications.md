@@ -140,7 +140,7 @@ Set `retry_attempts=1` to disable retrying.
     approval, ...) to those existing rows — it's not a way to add brand-new observations from
     scratch.
 
-There's also a ready-to-run script: [`examples/import_classifications.py`](https://github.com/wildintelproject/wildintel-trapper-sdk/blob/refactor/examples/import_classifications.py).
+There's also a ready-to-run script: [`examples/import_classifications.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_classifications.py).
 It has a `--fetch N` mode that writes N *real* existing observation rows from your own project to
 a CSV (read-only, safe) — since a CSV with made-up `_id` values will always be rejected, this is the
 practical way to get something you can actually test with.

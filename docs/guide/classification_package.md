@@ -26,7 +26,7 @@ with open("camtrapdp_project_7.zip", "wb") as f:
 as-is via `client.make_request()`, never re-request it through a component method.
 
 There's also a ready-to-run script:
-[`examples/download_camtrapdp_for_classification_project.py`](https://github.com/wildintelproject/wildintel-trapper-sdk/blob/refactor/examples/download_camtrapdp_for_classification_project.py).
+[`examples/download_camtrapdp_for_classification_project.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/download_camtrapdp_for_classification_project.py).
 
 ## Generation/cache parameters
 
