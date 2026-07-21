@@ -15,6 +15,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Upcoming release
 
+## Released
+
+### [0.1.0](https://github.com/wildintelproject/wildintelproject-trapper-sdk/releases/tag/v0.1.0) - 2026-07-21
+
 ### Added
 - Write access for locations and deployments (`import_locations()`/`import_deployments()`), via the
   classic Trapper web UI's import forms over cookie/session authentication — the REST API is
@@ -51,6 +55,3 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Documentation restyled to match sibling WildINTEL projects (logo, colors, a "Documentation Map"
   on the index page).
 
-## Released
-
-No stable release yet.
