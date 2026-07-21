@@ -1,5 +1,8 @@
 import csv
+import html
 import io
+import json
+import re
 import tempfile
 import zipfile
 
@@ -57,6 +60,7 @@ class APIClientBase:
         if not self.access_token and not (self.user_name and self.user_password):
             raise ValueError("Token or user/password must be provided for authentication")
         self._client = httpx.Client(verify=self.verify_ssl, timeout=self.timeout)
+        self._web_csrf_token: str | None = None
 
     def make_request(
         self,
@@ -328,6 +332,321 @@ class APIClientBase:
             Raw ``httpx.Response``.
         """
         return self.make_request(endpoint, method="POST", query=query, body=body, raise_on_error=raise_on_error)
+
+    def post_multipart(
+        self,
+        endpoint: str,
+        data: Dict[str, Any] | None = None,
+        files: Dict[str, Any] | None = None,
+        query: Dict[str, Any] | None = None,
+        raise_on_error: bool = True,
+    ) -> httpx.Response:
+        """Perform a ``multipart/form-data`` ``POST`` request (e.g. file uploads).
+
+        Unlike :meth:`post`, the body is not sent as JSON: ``data`` supplies
+        the regular form fields and ``files`` the file part(s), matching what
+        ``httpx.Client.request(data=..., files=...)`` expects.
+
+        Args:
+            endpoint: API endpoint relative to ``base_url``.
+            data: Form fields to send alongside the file(s).
+            files: Mapping compatible with httpx's ``files`` parameter, e.g.
+                ``{"file": (filename, file_obj, content_type)}``.
+            query: Query parameters.
+            raise_on_error: Whether to raise mapped API exceptions.
+
+        Returns:
+            Raw ``httpx.Response``.
+        """
+        headers, auth = self._auth()
+        if endpoint.startswith("http://") or endpoint.startswith("https://"):
+            url = endpoint
+        else:
+            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+
+        self.logger.debug(f"POST(multipart) {url}")
+        self.logger.debug(f"Query: {query}")
+
+        response = self._client.request(
+            method="POST",
+            url=url,
+            headers=headers,
+            auth=auth,
+            params=query,
+            data=data,
+            files=files,
+        )
+
+        if 200 <= response.status_code < 300:
+            return response
+        return self._handle_error(response, raise_on_error)
+
+    # ── cookie/session auth (for classic, non-REST Django views) ──────────────
+
+    _CSRF_INPUT_RE = re.compile(
+        r'name=["\']csrfmiddlewaretoken["\']\s+value=["\']([^"\']+)["\']'
+    )
+
+    def _csrf_token_from_html(self, html_text: str) -> str | None:
+        """Scrape the CSRF token from a rendered Django form's hidden input.
+
+        Fallback for servers where the token isn't (also) exposed as a
+        ``csrftoken`` cookie — e.g. ``CSRF_USE_SESSIONS=True`` deployments,
+        or a cookie dropped somewhere between us and Django (reverse proxy,
+        an unfollowed redirect, ...).
+
+        Args:
+            html_text: Raw HTML body of a page containing ``{% csrf_token %}``.
+
+        Returns:
+            The token value if found, otherwise ``None``.
+        """
+        match = self._CSRF_INPUT_RE.search(html_text)
+        return match.group(1) if match else None
+
+    _ERROR_BLOCK_RE = re.compile(
+        r'class="[^"]*\b(?:alert-danger|errorlist|invalid-feedback)\b[^"]*"[^>]*>(.*?)</(?:div|ul|p|span)>',
+        re.IGNORECASE | re.DOTALL,
+    )
+    _TAG_RE = re.compile(r"<[^>]+>")
+    _FRICTIONLESS_REPORT_RE = re.compile(r"const\s+report\s*=\s*(\{.*?\});", re.DOTALL)
+
+    def _extract_frictionless_errors(
+        self, html_text: str, max_errors: int = 20
+    ) -> list[str] | None:
+        """Extract per-row/per-field validation messages from an embedded frictionless report.
+
+        ``common/table_errors.html`` (rendered on CSV/table import failures —
+        e.g. :meth:`~trapper_client.components.locations.LocationsComponent.import_locations`,
+        :meth:`~trapper_client.components.deployments.DeploymentsComponent.import_deployments`)
+        embeds the *full* validation report as a ``const report = {...};`` JSON
+        blob inside a ``<script type="module">``, meant to be rendered by a JS
+        widget (``frictionless-components``) — it never appears as plain HTML
+        text, so :meth:`_extract_html_error_text`'s tag-based extraction only
+        ever sees the generic "your table could not be imported" banner above
+        it, not the actual per-row reasons. This parses that JSON directly
+        instead.
+
+        Args:
+            html_text: Raw HTML response body.
+            max_errors: Maximum number of individual error messages to return.
+
+        Returns:
+            One message per validation error (row/column-level detail, e.g. a
+            blacklist collision with an existing ``locationID``, a missing
+            required value, ...), capped at ``max_errors``. ``None`` if no
+            parseable report was found (the page may not be a table-import
+            failure at all, or the server's template may have changed).
+        """
+        match = self._FRICTIONLESS_REPORT_RE.search(html_text)
+        if not match:
+            return None
+        try:
+            report = json.loads(match.group(1))
+        except json.JSONDecodeError:
+            return None
+
+        errors: list[Any] = list(report.get("errors", []))
+        for task in report.get("tasks", []):
+            errors.extend(task.get("errors", []))
+        if not errors:
+            return None
+
+        messages = []
+        for error in errors[:max_errors]:
+            if isinstance(error, str):
+                messages.append(error)
+            elif isinstance(error, dict):
+                messages.append(
+                    error.get("message") or error.get("note") or error.get("type") or str(error)
+                )
+            else:
+                messages.append(str(error))
+
+        if len(errors) > max_errors:
+            messages.append(f"(+{len(errors) - max_errors} more errors, truncated)")
+        return messages
+
+    def _extract_html_error_text(self, html_text: str, max_len: int = 2000) -> str:
+        """Best-effort extraction of a human-readable error from a Django page.
+
+        Session-based views (see :meth:`session_post_multipart`) return full
+        HTML pages on failure, not structured JSON. This tries, in order:
+
+        1. :meth:`_extract_frictionless_errors` — the specific per-row/per-field
+           validation errors, when the page is a table-import failure.
+        2. Common Bootstrap/Django error markup (``alert-danger``, ``errorlist``,
+           ``invalid-feedback``) — e.g. a form's ``clean()``/field validation
+           errors — stripped and deduplicated.
+        3. A plain-text snippet of the whole ``<body>``, if neither of the above
+           found anything (the page structure may differ from what's handled here).
+
+        Args:
+            html_text: Raw HTML response body.
+            max_len: Maximum length of the returned string.
+
+        Returns:
+            A short, human-readable error string.
+        """
+        frictionless_errors = self._extract_frictionless_errors(html_text)
+        if frictionless_errors:
+            return "; ".join(frictionless_errors)[:max_len]
+
+        blocks = self._ERROR_BLOCK_RE.findall(html_text)
+        if blocks:
+            texts = [" ".join(html.unescape(self._TAG_RE.sub(" ", b)).split()) for b in blocks]
+            texts = [t for t in texts if t]
+            if texts:
+                return " | ".join(dict.fromkeys(texts))[:max_len]
+
+        body_match = re.search(r"<body[^>]*>(.*)</body>", html_text, re.IGNORECASE | re.DOTALL)
+        body = body_match.group(1) if body_match else html_text
+        text = " ".join(html.unescape(self._TAG_RE.sub(" ", body)).split())
+        return text[:max_len]
+
+    def _csrf_cookie_value(self) -> str:
+        """Read the current CSRF token: from the cookie jar, or the cached
+        value scraped from HTML during :meth:`session_login` as a fallback.
+
+        Returns:
+            The CSRF token value.
+
+        Raises:
+            err.APIError: If no token is available from either source yet —
+                call :meth:`session_login` first.
+        """
+        token = self._client.cookies.get("csrftoken") or self._web_csrf_token
+        if not token:
+            raise err.APIError(
+                "No CSRF token available (no csrftoken cookie, and none scraped "
+                "from HTML yet) — call session_login() first"
+            )
+        return token
+
+    def session_login(self, force: bool = False) -> None:
+        """Authenticate a cookie-based web session (django-allauth login form).
+
+        Some Trapper features (e.g. the CSV/GPX bulk-import view under
+        ``geomap/location/import/``) are plain server-rendered HTML views
+        protected by ``LoginRequiredMixin``, not part of the token-authenticated
+        REST API. This performs the same GET (fetch CSRF cookie) → POST (submit
+        credentials) dance a browser does against django-allauth's login form,
+        storing the resulting ``sessionid`` cookie on this client's shared
+        ``httpx.Client`` for subsequent calls.
+
+        Warning:
+            Unlike the rest of this SDK — which targets a stable, versioned
+            REST API — this simulates an unversioned, server-rendered HTML
+            login form. It has no API contract behind it: a Trapper change to
+            the login page (field names, extra required fields, added 2FA/
+            CAPTCHA, a different auth flow) can break this silently, with no
+            deprecation notice. It follows redirects on the initial GET and
+            falls back to scraping the CSRF token from the rendered HTML when
+            no ``csrftoken`` cookie comes back (covers reverse proxies,
+            http->https bounces, and ``CSRF_USE_SESSIONS=True`` deployments)
+            — but that's still a workaround, not a guarantee: verify it
+            against your actual Trapper instance before relying on it, and
+            expect to need small fixes if the server's login flow differs
+            further from what's handled here.
+
+        Idempotent: does nothing if a session cookie is already present, unless
+        ``force=True``.
+
+        Note: this server has ``ACCOUNT_LOGIN_METHODS = {"email"}`` configured,
+        so ``user_name`` must be the account's email address — a plain
+        username will not authenticate here even if it works for the REST API.
+
+        Args:
+            force: Re-authenticate even if a session cookie is already present.
+
+        Raises:
+            ValueError: If ``user_name``/``user_password`` are not configured
+                (an access token alone cannot authenticate this HTML login form).
+            err.APIError: If the login attempt does not result in an
+                authenticated session (wrong credentials, changed login form, ...).
+        """
+        if not force and self._client.cookies.get("sessionid"):
+            return
+
+        if not (self.user_name and self.user_password):
+            raise ValueError(
+                "session_login() requires user_name/user_password — an access_token "
+                "alone cannot authenticate the web login form"
+            )
+
+        login_url = f"{self.base_url.rstrip('/')}/account/login/"
+        # follow_redirects=True here: some deployments redirect this GET
+        # (http->https, a reverse proxy, a trailing-slash/`next=` bounce, ...)
+        # before rendering the actual login form — and only the *rendered*
+        # response sets the CSRF cookie / embeds the csrfmiddlewaretoken
+        # input. The login POST below deliberately does NOT follow redirects,
+        # since a 302 there is how we detect a successful login.
+        login_page = self._client.get(login_url, follow_redirects=True)
+        csrf_token = self._client.cookies.get("csrftoken") or self._csrf_token_from_html(login_page.text)
+
+        if not csrf_token:
+            raise err.APIError(
+                f"Could not find a CSRF token at {login_page.url} (status "
+                f"{login_page.status_code}) — no csrftoken cookie and none embedded "
+                "in the page's HTML. The login form may have a different structure "
+                "on this server; inspect that URL in a browser to compare."
+            )
+        self._web_csrf_token = csrf_token
+
+        response = self._client.post(
+            str(login_page.url),
+            data={
+                "login": self.user_name,
+                "password": self.user_password,
+                "csrfmiddlewaretoken": csrf_token,
+            },
+            headers={"Referer": str(login_page.url)},
+        )
+
+        if response.status_code != 302 or not self._client.cookies.get("sessionid"):
+            raise err.APIError(
+                f"Web session login failed (status {response.status_code} from "
+                f"{response.url}) — check user_name/user_password (user_name must "
+                "be the account email on this server), or inspect the response body "
+                "for a rendered error message."
+            )
+
+    def session_post_multipart(
+        self,
+        endpoint: str,
+        data: Dict[str, Any] | None = None,
+        files: Dict[str, Any] | None = None,
+    ) -> httpx.Response:
+        """POST multipart/form-data to a classic (non-REST) Django view.
+
+        Authenticates a cookie-based web session first (see
+        :meth:`session_login`), since these views rely on Django's
+        session/CSRF machinery instead of the API's token auth. Unlike
+        :meth:`post_multipart`, the response is *not* JSON: these are
+        server-rendered HTML views, so the caller must interpret the raw
+        ``httpx.Response`` itself — typically a ``302`` redirect means
+        success, while a ``200`` re-renders the form (or an error page) with
+        validation errors embedded in the HTML.
+
+        Warning:
+            Same caveat as :meth:`session_login`: this targets an unversioned
+            HTML view, not a documented API contract, and has not been
+            validated against a live Trapper server. Treat it as a
+            best-effort workaround, not a stable integration point.
+
+        Args:
+            endpoint: Endpoint relative to ``base_url``.
+            data: Form fields, excluding ``csrfmiddlewaretoken`` (added automatically).
+            files: Mapping compatible with httpx's ``files`` parameter.
+
+        Returns:
+            Raw ``httpx.Response`` (redirects are not followed).
+        """
+        self.session_login()
+        url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        form_data = dict(data or {})
+        form_data["csrfmiddlewaretoken"] = self._csrf_cookie_value()
+        return self._client.post(url, data=form_data, files=files, headers={"Referer": url})
 
     def patch(
         self,

@@ -101,6 +101,10 @@ ENDPOINT_REGISTRY: list[tuple[type, str, str, str]] = [
      "/media_classification/api/project/{project_pk}/collections",
      "media_classification/urls.py: router.register(r'project/(?P<project_pk>\\d+)/collections', "
      "ClassificationProjectCollectionViewSet)"),
+    (ClassificationProjectsComponent, "endpoint_resources",
+     "media_classification/api/collection/{collection_pk}/resources/",
+     "media_classification/urls.py: router.register(r'collection/(?P<collection_pk>\\d+)/resources/$', "
+     "ClassificationResourcesViewSet) — trailing slash is mandatory"),
     (ClassificationsComponent, "endpoint", "/media_classification/api/classifications",
      "media_classification/urls.py: router.register(r'classifications', ClassificationViewSet)"),
     (ClassificationsComponent, "export_endpoint",
@@ -151,6 +155,7 @@ _ENDPOINT_ATTR_NAMES = {
     "endpoint",
     "export_endpoint",
     "endpoint_collections",
+    "endpoint_resources",
     "_ondemand_endpoint",
     "_map_endpoint",
     "_append_endpoint",

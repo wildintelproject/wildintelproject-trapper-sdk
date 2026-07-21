@@ -8,17 +8,44 @@ The test suite is split into three layers:
 | `integration` | Component tests with mocked HTTP responses | No |
 | `e2e` | Smoke tests against a real Trapper instance | Yes |
 
+The repository also ships a small `cli.py` that wraps `pytest` with these markers, so you don't need to remember the `-m`/`-k` flags:
+
+<div class="termy">
+
+```console
+$ uv run cli test unit
+╭──────────── wildintel-trapper-sdk — tests ────────────╮
+│ Suite: unit   Marcador: -m "unit"                      │
+╰─────────────────────────────────────────────────────────╯
+................................................... [100%]
+1100 passed in 2.10s
+```
+
+</div>
+
 ## Run unit and integration tests
 
-```bash
-uv run pytest tests -m "unit or integration" -q
+<div class="termy">
+
+```console
+$ uv run cli test all
+// Equivalent to:
+$ uv run pytest tests -m "unit or integration" -q
 ```
+
+</div>
 
 ## Run only unit tests
 
-```bash
-uv run pytest tests/unit -q
+<div class="termy">
+
+```console
+$ uv run cli test unit
+// Equivalent to:
+$ uv run pytest tests/unit -q
 ```
+
+</div>
 
 ## Run end-to-end tests
 
@@ -36,14 +63,34 @@ export WILDINTEL_TIMEOUT=30
 
 Then run:
 
-```bash
-uv run pytest tests/e2e -m e2e -q
+<div class="termy">
+
+```console
+$ uv run cli test e2e
+// Equivalent to:
+$ uv run pytest tests/e2e -m e2e -q
 ```
+
+</div>
 
 You can also copy `tests/env.example` to `tests/.env` and fill in the values — pytest will load it automatically.
 
+## Filter by keyword or get verbose output
+
+<div class="termy">
+
+```console
+$ uv run cli test unit -k import_locations -v
+```
+
+</div>
+
 ## Coverage
 
-```bash
-uv run pytest tests -m "unit or integration" --cov=src/trapper_client --cov-report=term-missing
+<div class="termy">
+
+```console
+$ uv run pytest tests -m "unit or integration" --cov=src/trapper_client --cov-report=term-missing
 ```
+
+</div>

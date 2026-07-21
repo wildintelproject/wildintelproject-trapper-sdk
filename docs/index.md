@@ -1,35 +1,70 @@
-# trapper_client
+# wildintel-trapper-sdk
 
-`trapper_client` is a typed Python client for the REST API of [Trapper](https://github.com/trapper-project/trapper), the open-source platform for managing and classifying camera-trap data.
+![WildINTEL](img/wildIntel_logo.webp){ style="display: block; margin: 0 auto;" }
+
+**wildintel-trapper-sdk** is a typed Python client for the REST API of
+[Trapper](https://gitlab.com/trapper-project/trapper), the open-source platform used to manage and
+classify camera-trap data: locations, deployments, media resources, storage collections, research
+projects, and both manual and AI-assisted classification results.
+
+Every Trapper resource is exposed as a typed Python component sharing the same interface for
+pagination, filtering, and export — plus write access for the two resources (locations,
+deployments) the REST API doesn't expose natively.
 
 ---
 
-## What is Trapper?
+## Documentation Map
 
-Trapper is a web application for handling large volumes of camera-trap data: locations, deployments, media resources, classification projects, and classification results — both manual and AI-assisted.
+**[Installation](installation.md)**
 
-`trapper_client` exposes all those resources as Python components with a consistent interface for pagination, filtering, and export.
+Installing the package with pip/uv, or setting up the repository for development.
 
----
+**[Usage](usage.md)**
 
-## Key features
+The six access patterns shared by every component (`get`, `get_all`/`all`, `where`, `find`,
+`export`), and the intermediate-table pk gotcha worth knowing about up front.
 
-- **One component per resource** — each endpoint has its own class with `get`, `get_all`, `where` (lazy iterator), `find`, and `export` methods.
-- **Fully typed** — Pydantic v2 models for every response; full autocompletion in any IDE.
-- **Transparent pagination** — `where()` fetches pages on demand; `get_all()` merges them into a single result.
-- **CSV export** — any component can dump its data directly to a file.
-- **Flexible authentication** — static token or username/password.
-- **Robust retries** — `tenacity` handles network failures on every request.
+**Component Guides**
+
+One guide per resource — Locations, Deployments, Classifications, Classification Projects,
+Resources, Collections, and more — see the sidebar for the full list.
+
+**[Features](features.md)**
+
+What the client covers in detail: reading data, typed models, the write-access workarounds for
+locations/deployments, chunked uploads and retries, authentication, and error handling.
+
+**[Testing](testing.md)**
+
+The three test layers (`unit`, `integration`, `e2e`) and how to run each.
+
+**[API Reference](api/index.md)**
+
+Full generated reference for every component, schema, and the low-level client.
+
+**[About](about.md)**
+
+Project background and WildINTEL funding.
 
 ---
 
 ## Installation
 
-```bash
-pip install trapper-client
-# or with uv:
-uv add trapper-client
+<div class="termy">
+
+```console
+$ pip install wildintel-trapper-sdk
+---> 100%
+Successfully installed wildintel-trapper-sdk
+
+// Or, with uv:
+$ uv add wildintel-trapper-sdk
+Resolved 1 package in 340ms
+Installed 1 package in 12ms
+ + wildintel-trapper-sdk==0.1.0
 ```
+
+</div>
 
 ---
 

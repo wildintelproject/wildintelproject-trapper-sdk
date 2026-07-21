@@ -107,6 +107,7 @@ class AIClassificationRecordExportCamTrap(TrapperSchema):
     @field_validator(
         "observationID",
         "bboxX", "bboxY", "bboxWidth", "bboxHeight", "classificationProbability",
+        "classificationTimestamp",
         mode="before",
     )
     @classmethod
@@ -164,6 +165,37 @@ class AIClassificationRecordExportTrapper(BaseModel):
     englishName: Optional[str] = None
 
     bboxes: Optional[List[BBox]] = None
+
+    @field_validator(
+        "lifeStage", "sex", "behavior", "individualID", "cameraSetupType",
+        "scientificName", "observationTags", "observationComments",
+        "classificationMethod", "classifiedBy", "englishName",
+        mode="before",
+    )
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
+
+    @field_validator(
+        "individualPositionRadius", "individualPositionAngle", "individualSpeed",
+        "bboxX", "bboxY", "bboxWidth", "bboxHeight",
+        "classificationProbability", "count", "countNew",
+        mode="before",
+    )
+    @classmethod
+    def empty_numeric_to_none(cls, v):
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
+
+    @field_validator("classificationTimestamp", mode="before")
+    @classmethod
+    def empty_datetime_to_none(cls, v):
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
 
     @field_validator("bboxes", mode="before")
     @classmethod

@@ -569,3 +569,424 @@ def test_http_verb_shortcuts_call_make_request(token_client, verb, method):
 
     call_kwargs = token_client._client.request.call_args.kwargs
     assert call_kwargs["method"] == method
+
+
+# ── post_multipart ────────────────────────────────────────────────────────────
+
+def test_post_multipart_sends_data_and_files(token_client):
+    """post_multipart() envía data y files a httpx.Client.request como POST."""
+    mock_resp = make_response(201, json_data={"data": {"message": "ok"}})
+    token_client._client.request = MagicMock(return_value=mock_resp)
+
+    files = {"file": ("obs.csv", b"a,b\n1,2", "text/csv")}
+    result = token_client.post_multipart("/api/import/", data={"approve": True}, files=files)
+
+    assert result is mock_resp
+    call_kwargs = token_client._client.request.call_args.kwargs
+    assert call_kwargs["method"] == "POST"
+    assert call_kwargs["data"] == {"approve": True}
+    assert call_kwargs["files"] is files
+
+
+def test_post_multipart_builds_url_from_base_url(token_client):
+    """post_multipart() construye la URL a partir de base_url y el endpoint."""
+    mock_resp = make_response(201, json_data={})
+    token_client._client.request = MagicMock(return_value=mock_resp)
+
+    token_client.post_multipart("/api/import/", data={}, files={})
+
+    call_kwargs = token_client._client.request.call_args.kwargs
+    assert call_kwargs["url"] == "https://example.com/api/import/"
+
+
+def test_post_multipart_raises_on_error(token_client):
+    """post_multipart() lanza una excepción mapeada si la respuesta falla."""
+    mock_resp = make_response(400, json_data={"_error": {"message": "Bad request"}})
+    token_client._client.request = MagicMock(return_value=mock_resp)
+
+    with pytest.raises(Exception):
+        token_client.post_multipart("/api/import/", data={}, files={})
+
+
+def test_post_multipart_returns_response_when_raise_on_error_false(token_client):
+    """post_multipart() devuelve la respuesta si raise_on_error=False."""
+    mock_resp = make_response(400, json_data={"_error": {"message": "Bad request"}})
+    token_client._client.request = MagicMock(return_value=mock_resp)
+
+    result = token_client.post_multipart("/api/import/", data={}, files={}, raise_on_error=False)
+
+    assert result is mock_resp
+
+
+# ── session auth (cookie/CSRF, para vistas Django clásicas) ──────────────────
+
+def _fake_login_get(client):
+    """Simula que el GET al login setea la cookie csrftoken."""
+    def _get(url, *a, **kw):
+        client._client.cookies.set("csrftoken", "csrf-abc")
+        return MagicMock()
+    return _get
+
+
+def _fake_login_post(client, status_code=302, set_sessionid=True):
+    """Simula que el POST de login setea la cookie sessionid en éxito."""
+    def _post(url, *a, **kw):
+        if set_sessionid:
+            client._client.cookies.set("sessionid", "session-abc")
+        resp = MagicMock()
+        resp.status_code = status_code
+        return resp
+    return _post
+
+
+def test_csrf_cookie_value_raises_if_missing(token_client):
+    """_csrf_cookie_value() lanza APIError si no hay cookie csrftoken."""
+    with pytest.raises(err.APIError):
+        token_client._csrf_cookie_value()
+
+
+def test_csrf_cookie_value_returns_cookie(token_client):
+    """_csrf_cookie_value() devuelve el valor de la cookie csrftoken."""
+    token_client._client.cookies.set("csrftoken", "abc123")
+
+    assert token_client._csrf_cookie_value() == "abc123"
+
+
+def test_csrf_cookie_value_falls_back_to_cached_web_token(token_client):
+    """_csrf_cookie_value() usa el token cacheado si no hay cookie csrftoken.
+
+    Cubre servidores con CSRF_USE_SESSIONS=True (u otros casos donde la
+    cookie no llega, p.ej. un proxy que la descarta) — el token scrapeado
+    del HTML durante session_login() se cachea y sigue funcionando.
+    """
+    token_client._web_csrf_token = "scraped-token"
+
+    assert token_client._csrf_cookie_value() == "scraped-token"
+
+
+def test_csrf_token_from_html_extracts_value(token_client):
+    """_csrf_token_from_html() extrae el value del input csrfmiddlewaretoken."""
+    html = '<form><input type="hidden" name="csrfmiddlewaretoken" value="abc123XYZ"></form>'
+
+    assert token_client._csrf_token_from_html(html) == "abc123XYZ"
+
+
+def test_csrf_token_from_html_returns_none_when_missing(token_client):
+    """_csrf_token_from_html() devuelve None si no encuentra el input."""
+    assert token_client._csrf_token_from_html("<html><body>no form here</body></html>") is None
+
+
+# ── _extract_html_error_text ──────────────────────────────────────────────────
+
+def test_extract_html_error_text_finds_alert_danger(token_client):
+    """_extract_html_error_text() extrae el texto de un bloque alert-danger (common/table_errors.html)."""
+    html = (
+        '<div class="alert alert-danger">'
+        "<p><strong>Error:</strong> Unfortunately, your table could not be imported.</p>"
+        "</div>"
+    )
+
+    result = token_client._extract_html_error_text(html)
+
+    assert "could not be imported" in result
+
+
+def test_extract_html_error_text_finds_django_form_errors(token_client):
+    """_extract_html_error_text() extrae errores de formulario (clean_research_project(), etc.)."""
+    html = (
+        '<ul class="errorlist">'
+        "<li>You have to select a research project.</li>"
+        "</ul>"
+    )
+
+    result = token_client._extract_html_error_text(html)
+
+    assert "You have to select a research project." in result
+
+
+def test_extract_html_error_text_deduplicates_blocks(token_client):
+    """_extract_html_error_text() no repite el mismo mensaje si aparece varias veces."""
+    html = (
+        '<div class="alert alert-danger">Same message</div>'
+        '<div class="alert alert-danger">Same message</div>'
+    )
+
+    result = token_client._extract_html_error_text(html)
+
+    assert result.count("Same message") == 1
+
+
+def test_extract_html_error_text_falls_back_to_body_text(token_client):
+    """_extract_html_error_text() cae a un snippet del <body> si no hay marcadores conocidos."""
+    html = "<html><head><title>Trapper</title></head><body>Something unexpected happened</body></html>"
+
+    result = token_client._extract_html_error_text(html)
+
+    assert "Something unexpected happened" in result
+    assert "Trapper" not in result  # el <head> no debe colarse
+
+
+def test_extract_html_error_text_respects_max_len(token_client):
+    """_extract_html_error_text() trunca a max_len caracteres."""
+    html = "<html><body>" + ("x" * 2000) + "</body></html>"
+
+    result = token_client._extract_html_error_text(html, max_len=50)
+
+    assert len(result) == 50
+
+
+# ── _extract_frictionless_errors (common/table_errors.html's embedded report) ─
+
+def _table_errors_page(report_json: str) -> str:
+    """Reconstruye la forma real de common/table_errors.html con un report embebido."""
+    return (
+        '<div class="alert alert-danger">'
+        "<p><strong>Error:</strong> Unfortunately, your table could not be imported; "
+        "correct all the errors listed below and try again. "
+        "Please note that the number of reported errors is limited to 100.</p>"
+        "</div>"
+        '<div class="col-md-12" style="padding:0;" id="report"></div>'
+        '<script type="module">\n'
+        f"    const report = {report_json};\n"
+        "    const element = document.getElementById(\"report\");\n"
+        "</script>"
+    )
+
+
+def test_extract_frictionless_errors_parses_embedded_report(token_client):
+    """_extract_frictionless_errors() extrae los mensajes de report.tasks[].errors[]."""
+    report = {
+        "valid": False,
+        "tasks": [
+            {
+                "errors": [
+                    {"type": "constraint-error", "message": "locationID 'dona-001' already exists"},
+                    {"type": "type-error", "message": "longitude must be a number"},
+                ]
+            }
+        ],
+    }
+    html = _table_errors_page(json.dumps(report))
+
+    result = token_client._extract_frictionless_errors(html)
+
+    assert result == [
+        "locationID 'dona-001' already exists",
+        "longitude must be a number",
+    ]
+
+
+def test_extract_frictionless_errors_includes_top_level_errors(token_client):
+    """_extract_frictionless_errors() también incluye report.errors[] de nivel superior."""
+    report = {"valid": False, "errors": [{"message": "top-level failure"}], "tasks": []}
+    html = _table_errors_page(json.dumps(report))
+
+    result = token_client._extract_frictionless_errors(html)
+
+    assert result == ["top-level failure"]
+
+
+def test_extract_frictionless_errors_falls_back_to_note_or_type(token_client):
+    """_extract_frictionless_errors() usa note o type si falta message."""
+    report = {"tasks": [{"errors": [{"type": "constraint-error", "note": "some note"}, {"type": "type-error"}]}]}
+    html = _table_errors_page(json.dumps(report))
+
+    result = token_client._extract_frictionless_errors(html)
+
+    assert result == ["some note", "type-error"]
+
+
+def test_extract_frictionless_errors_caps_at_max_errors(token_client):
+    """_extract_frictionless_errors() limita el número de mensajes devueltos."""
+    report = {"tasks": [{"errors": [{"message": f"error {i}"} for i in range(30)]}]}
+    html = _table_errors_page(json.dumps(report))
+
+    result = token_client._extract_frictionless_errors(html, max_errors=5)
+
+    assert len(result) == 6  # 5 mensajes + nota de truncado
+    assert result[:5] == [f"error {i}" for i in range(5)]
+    assert "more errors" in result[5]
+
+
+def test_extract_frictionless_errors_returns_none_when_no_report(token_client):
+    """_extract_frictionless_errors() devuelve None si la página no tiene report embebido."""
+    html = '<div class="alert alert-danger">Some other error</div>'
+
+    assert token_client._extract_frictionless_errors(html) is None
+
+
+def test_extract_frictionless_errors_returns_none_on_invalid_json(token_client):
+    """_extract_frictionless_errors() no revienta si el JSON embebido es inválido."""
+    html = _table_errors_page("{not valid json,,,}")
+
+    assert token_client._extract_frictionless_errors(html) is None
+
+
+def test_extract_frictionless_errors_returns_none_when_no_errors_present(token_client):
+    """_extract_frictionless_errors() devuelve None si el report no trae errores (caso raro)."""
+    html = _table_errors_page(json.dumps({"valid": True, "tasks": [{"errors": []}]}))
+
+    assert token_client._extract_frictionless_errors(html) is None
+
+
+def test_extract_html_error_text_prefers_frictionless_report(token_client):
+    """_extract_html_error_text() prioriza los errores del report sobre el banner genérico."""
+    report = {"tasks": [{"errors": [{"message": "locationID 'dona-001' already exists"}]}]}
+    html = _table_errors_page(json.dumps(report))
+
+    result = token_client._extract_html_error_text(html)
+
+    assert "already exists" in result
+    assert "could not be imported" not in result
+
+
+def test_session_login_raises_without_credentials(token_client):
+    """session_login() lanza ValueError si no hay user_name/user_password (solo token)."""
+    with pytest.raises(ValueError):
+        token_client.session_login()
+
+
+def test_session_login_skips_if_session_cookie_present(basic_auth_client):
+    """session_login() no repite el login si ya hay cookie sessionid."""
+    basic_auth_client._client.cookies.set("sessionid", "already-there")
+    basic_auth_client._client.get = MagicMock()
+    basic_auth_client._client.post = MagicMock()
+
+    basic_auth_client.session_login()
+
+    basic_auth_client._client.get.assert_not_called()
+    basic_auth_client._client.post.assert_not_called()
+
+
+def test_session_login_performs_get_then_post(basic_auth_client):
+    """session_login() hace GET (csrf) y luego POST con las credenciales."""
+    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
+
+    basic_auth_client.session_login()
+
+    basic_auth_client._client.get.assert_called_once()
+    basic_auth_client._client.post.assert_called_once()
+    post_kwargs = basic_auth_client._client.post.call_args.kwargs
+    assert post_kwargs["data"]["login"] == "user"
+    assert post_kwargs["data"]["password"] == "pass"
+    assert post_kwargs["data"]["csrfmiddlewaretoken"] == "csrf-abc"
+    assert basic_auth_client._client.cookies.get("sessionid") == "session-abc"
+
+
+def test_session_login_get_follows_redirects(basic_auth_client):
+    """session_login() sigue redirects en el GET inicial (http->https, proxy, ...).
+
+    Regresión: la primera versión no pasaba follow_redirects=True, así que si
+    el GET a /account/login/ devolvía un 30x (por ejemplo por un redirect a
+    https, o un proxy delante del servidor) nunca se llegaba a renderizar el
+    formulario real, y por tanto nunca se fijaba la cookie csrftoken.
+    """
+    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
+
+    basic_auth_client.session_login()
+
+    get_kwargs = basic_auth_client._client.get.call_args.kwargs
+    assert get_kwargs.get("follow_redirects") is True
+
+
+def test_session_login_falls_back_to_html_scraped_csrf_token(basic_auth_client):
+    """session_login() extrae el token del HTML si no hay cookie csrftoken."""
+    login_page = MagicMock()
+    login_page.text = (
+        '<form><input type="hidden" name="csrfmiddlewaretoken" value="html-token"></form>'
+    )
+    login_page.status_code = 200
+    basic_auth_client._client.get = MagicMock(return_value=login_page)
+
+    def fake_post(url, *a, **kw):
+        basic_auth_client._client.cookies.set("sessionid", "session-abc")
+        resp = MagicMock()
+        resp.status_code = 302
+        return resp
+
+    basic_auth_client._client.post = MagicMock(side_effect=fake_post)
+
+    basic_auth_client.session_login()
+
+    post_kwargs = basic_auth_client._client.post.call_args.kwargs
+    assert post_kwargs["data"]["csrfmiddlewaretoken"] == "html-token"
+    assert basic_auth_client._web_csrf_token == "html-token"
+
+
+def test_session_login_raises_clear_error_when_no_csrf_found(basic_auth_client):
+    """session_login() lanza un error explicativo si no hay cookie ni token en el HTML."""
+    login_page = MagicMock()
+    login_page.text = "<html><body>unexpected page</body></html>"
+    login_page.status_code = 200
+    login_page.url = "https://example.com/account/login/"
+    basic_auth_client._client.get = MagicMock(return_value=login_page)
+    basic_auth_client._client.post = MagicMock()
+
+    with pytest.raises(err.APIError, match="CSRF token"):
+        basic_auth_client.session_login()
+
+    basic_auth_client._client.post.assert_not_called()
+
+
+def test_session_login_raises_if_post_not_redirect(basic_auth_client):
+    """session_login() lanza APIError si el POST no devuelve un redirect."""
+    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._client.post = MagicMock(
+        side_effect=_fake_login_post(basic_auth_client, status_code=200, set_sessionid=False)
+    )
+
+    with pytest.raises(err.APIError):
+        basic_auth_client.session_login()
+
+
+def test_session_login_force_repeats_login(basic_auth_client):
+    """session_login(force=True) repite el login aunque ya haya sessionid."""
+    basic_auth_client._client.cookies.set("sessionid", "old-session")
+    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
+
+    basic_auth_client.session_login(force=True)
+
+    basic_auth_client._client.get.assert_called_once()
+    basic_auth_client._client.post.assert_called_once()
+
+
+def test_session_post_multipart_logs_in_first(basic_auth_client):
+    """session_post_multipart() hace login de sesión si aún no hay sessionid."""
+    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
+
+    basic_auth_client.session_post_multipart("/geomap/location/import/", data={}, files={})
+
+    basic_auth_client._client.get.assert_called_once()
+
+
+def test_session_post_multipart_sends_csrf_and_files(basic_auth_client):
+    """session_post_multipart() incluye csrfmiddlewaretoken y los files/data."""
+    basic_auth_client._client.cookies.set("sessionid", "existing-session")
+    basic_auth_client._client.cookies.set("csrftoken", "csrf-xyz")
+    basic_auth_client._client.post = MagicMock(return_value=MagicMock(status_code=302))
+
+    files = {"csv_file": ("locations.csv", b"a,b\n1,2", "text/csv")}
+    basic_auth_client.session_post_multipart(
+        "/geomap/location/import/", data={"ignore_DST": False}, files=files,
+    )
+
+    call_kwargs = basic_auth_client._client.post.call_args.kwargs
+    assert call_kwargs["data"]["csrfmiddlewaretoken"] == "csrf-xyz"
+    assert call_kwargs["data"]["ignore_DST"] is False
+    assert call_kwargs["files"] is files
+
+
+def test_session_post_multipart_returns_raw_response(basic_auth_client):
+    """session_post_multipart() devuelve la respuesta cruda (sin seguir redirects)."""
+    basic_auth_client._client.cookies.set("sessionid", "existing-session")
+    basic_auth_client._client.cookies.set("csrftoken", "csrf-xyz")
+    mock_resp = MagicMock(status_code=302)
+    basic_auth_client._client.post = MagicMock(return_value=mock_resp)
+
+    result = basic_auth_client.session_post_multipart("/geomap/location/import/", data={}, files={})
+
+    assert result is mock_resp

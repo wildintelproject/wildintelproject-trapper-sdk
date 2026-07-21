@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "trapper_client"
+name = "wildintel-trapper-sdk"
 version = "0.1.0"
-description = "Python client for the Trapper API"
+description = "Typed Python SDK for the Trapper camera-trap data management API"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

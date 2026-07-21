@@ -365,3 +365,42 @@ class TestCollectionAppend:
         result = component.find_append(1, validate=False)
 
         assert isinstance(result, Collection)
+
+
+# ── trigger_collection ────────────────────────────────────────────────────────
+
+class TestTriggerCollection:
+
+    @pytest.fixture
+    def client(self):
+        return MagicMock()
+
+    @pytest.fixture
+    def component(self, client):
+        return CollectionsComponent(client)
+
+    def test_calls_client_post(self, component, client):
+        """trigger_collection() llama a self.client.post (no self._client, que no existe)."""
+        payload = {"yaml_file": "package_123.yaml", "zip_file": "package_123.zip"}
+
+        component.trigger_collection(payload)
+
+        client.post.assert_called_once_with(
+            endpoint="/storage/api/collection/process/",
+            body=payload,
+            raise_on_error=True,
+        )
+
+    def test_passes_raise_on_error(self, component, client):
+        """trigger_collection() propaga raise_on_error a client.post."""
+        component.trigger_collection({}, raise_on_error=False)
+
+        assert client.post.call_args.kwargs["raise_on_error"] is False
+
+    def test_returns_client_post_result(self, component, client):
+        """trigger_collection() devuelve la respuesta de client.post."""
+        client.post.return_value = "response"
+
+        result = component.trigger_collection({})
+
+        assert result == "response"

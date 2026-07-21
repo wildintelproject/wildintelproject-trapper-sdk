@@ -13,6 +13,8 @@ class Pagination(BaseModel):
     page_size: int = 0
     pages: int = 1
     count: int = 0
+    total: int | None = None
+    filtered: int | None = None
 
 
 class TrapperSchema(BaseModel):

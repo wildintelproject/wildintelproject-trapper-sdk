@@ -236,6 +236,26 @@ class ComponentUnitTestBase:
         assert query.query["search"] == "test"
         assert query.query["owner"] is True
 
+    # ── all (alias de where) ──────────────────────────────────────────────────
+
+    def test_all_returns_api_query(self, component):
+        """all() devuelve un APIQuery, igual que where()."""
+        assert isinstance(component.all(), APIQuery)
+
+    def test_all_uses_component_endpoint(self, component):
+        """all() configura el endpoint del componente en el APIQuery."""
+        assert component.all().endpoint == component.endpoint
+
+    def test_all_uses_overwrite_endpoint(self, component):
+        """all() usa overwrite_endpoint cuando se especifica."""
+        assert component.all(overwrite_endpoint="/other/").endpoint == "/other/"
+
+    def test_all_passes_query_params(self, component):
+        """all() pasa los parámetros de query al APIQuery, igual que where()."""
+        query = component.all(search="test", owner=True)
+        assert query.query["search"] == "test"
+        assert query.query["owner"] is True
+
     # ── find ──────────────────────────────────────────────────────────────────
 
     def test_find_returns_model(self, component, client):

@@ -22,7 +22,7 @@ Usage::
         print(dep)
 
     # Resources of a storage collection
-    for res in client.collections.resources(pk=3):
+    for res in client.resources.where_by_collection(collection_pk=3):
         print(res)
 
     # Research projects

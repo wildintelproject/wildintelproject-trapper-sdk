@@ -1,8 +1,8 @@
-site_name: trapper_client
+site_name: wildintel-trapper-sdk
 site_description: Cliente Python para la API de Trapper
-site_url: https://ijfvianauhu.github.io/trapper-client/
-repo_url: https://github.com/ijfvianauhu/trapper-client
-repo_name: ijfvianauhu/trapper-client
+site_url: https://wildintelproject.github.io/wildintel-trapper-sdk/
+repo_url: https://github.com/wildintelproject/wildintel-trapper-sdk
+repo_name: wildintelproject/wildintel-trapper-sdk
 copyright: Copyright &copy; 2026 <a href="https://wildintel.eu/">WildINTEL</a>
 
 docs_dir: docs
@@ -11,8 +11,8 @@ site_dir: site
 theme:
   name: material
   language: en
-  logo: img/wildIntel_logo.webp
-  favicon: img/wildIntel_logo.webp
+  logo: img/WildINTEL_onlyCircle_25.png
+  favicon: img/WildINTEL_onlyCircle_25.png
 
   palette:
     - scheme: default
@@ -32,6 +32,7 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.top
+    - navigation.footer
     - search.highlight
     - content.code.copy
     - content.code.annotate
@@ -39,14 +40,25 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/ijfvianauhu/trapper-client
-      name: trapper-client on GitHub
+      link: https://github.com/wildintelproject/wildintel-trapper-sdk
+      name: wildintel-trapper-sdk on GitHub
+    - icon: fontawesome/brands/facebook
+      link: https://www.facebook.com/people/WildIntel/61556603674655/
+      name: WildINTEL on Facebook
+    - icon: simple/bluesky
+      link: https://bsky.app/profile/wildintel.bsky.social
+      name: WildINTEL on Bluesky
     - icon: fontawesome/solid/globe
       link: https://wildintel.eu/
       name: WildINTEL website
 
 extra_css:
   - stylesheets/extras.css
+  - stylesheets/termynal.css
+
+extra_javascript:
+  - javascripts/termynal.js
+  - javascripts/termynal-init.js
 
 markdown_extensions:
   - toc:
@@ -73,6 +85,27 @@ nav:
   - Inicio: index.md
   - Instalacion: installation.md
   - Uso: usage.md
+  - Component Guides:
+      - Locations: guide/locations.md
+      - Locations GeoJSON: guide/locations_geojson.md
+      - Deployments: guide/deployments.md
+      - Resources: guide/resources.md
+      - Collections: guide/collections.md
+      - Research Projects: guide/research_projects.md
+      - Classification Projects: guide/classification_projects.md
+      - Classifications: guide/classifications.md
+      - AI Classifications: guide/ai_classifications.md
+      - Classification Media: guide/classification_media.md
+      - Classification Results Agg: guide/classification_results_agg.md
+      - Classification Package: guide/classification_package.md
+      - User Classifications: guide/user_classifications.md
+      - Classifications Map: guide/classifications_map.md
+      - Classificators: guide/classificators.md
+      - Species: guide/species.md
+      - Maps: guide/maps.md
+      - Sequences: guide/sequences.md
+      - Users: guide/users.md
+  - Features: features.md
   - Testing: testing.md
   - API Reference:
       - Overview: api/index.md
@@ -118,6 +151,7 @@ nav:
           - Maps: api/schemas/maps.md
           - Sequences: api/schemas/sequences.md
           - Users: api/schemas/users.md
+  - About: about.md
 
 plugins:
   - search

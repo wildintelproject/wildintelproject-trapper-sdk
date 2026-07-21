@@ -1,6 +1,6 @@
 services:
-  trapper-client:
+  wildintel-trapper-sdk:
     build: .
-    container_name: trapper_client
+    container_name: wildintel_trapper_sdk
     environment:
       - PYTHONUNBUFFERED=1

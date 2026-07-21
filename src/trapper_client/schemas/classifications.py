@@ -62,6 +62,43 @@ class DynamicAttr(BaseModel):
     count: Optional[DynamicAttrValue] = None
 
 
+class ClassificationResourceClassificationData(BaseModel):
+    """Nested ``classification_data`` block inside a classification-resource row."""
+
+    pk: int
+    url: str
+    is_approved: bool
+    is_classified: bool
+
+
+class ClassificationResourceRecord(TrapperSchema):
+    """Schema for ``/media_classification/api/collection/{collection_pk}/resources/`` items."""
+
+    pk: int
+    name: str
+    thumbnail_url: str
+    url: str
+    mime: str
+    resource_type: str
+    date_recorded: datetime
+    sequence: str | None = None
+    classification_data: ClassificationResourceClassificationData
+
+
+class ClassificationImportData(TrapperSchema):
+    """Payload under ``data`` for the classification import endpoint response."""
+
+    message: str | None = None
+    errors: Any | None = None
+    task_id: str | None = None
+
+
+class ClassificationImportResponse(TrapperSchema):
+    """Schema for ``POST /media_classification/api/classifications/import/`` responses."""
+
+    data: ClassificationImportData | None = None
+
+
 class ClassificationRecord(TrapperSchema):
     """Schema for ``/media_classification/api/classifications`` items."""
 
@@ -150,6 +187,13 @@ class ClassificationResultRecordCamtrapDP(TrapperSchema):
             return None
         return v
 
+    @field_validator("classificationTimestamp", mode="before")
+    @classmethod
+    def empty_datetime_to_none(cls, v):
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
+
 
 class ClassificationResultRecordTrapper(TrapperSchema):
     """Trapper-flavoured row from ``/media_classification/api/classifications/results/{project_pk}``."""
@@ -209,6 +253,13 @@ class ClassificationResultRecordTrapper(TrapperSchema):
     )
     @classmethod
     def empty_numeric_to_none(cls, v):
+        if isinstance(v, str) and v.strip() == "":
+            return None
+        return v
+
+    @field_validator("classificationTimestamp", mode="before")
+    @classmethod
+    def empty_datetime_to_none(cls, v):
         if isinstance(v, str) and v.strip() == "":
             return None
         return v

@@ -306,3 +306,20 @@ class TestExport:
         result = component.export(PROJECT_PK, file=None)
 
         assert isinstance(result[0], AIClassificationRecordExportTrapper)
+
+
+# ── regresión: classificationTimestamp="" (mismo bug que en classifications) ─
+
+class TestAIClassificationTimestampEmptyString:
+
+    def test_trapper_flavor_accepts_empty_classification_timestamp(self):
+        """AIClassificationRecordExportTrapper acepta classificationTimestamp=''."""
+        row = {**VALID_EXPORT_TRAPPER, "classificationTimestamp": ""}
+        result = AIClassificationRecordExportTrapper.model_validate(row)
+        assert result.classificationTimestamp is None
+
+    def test_camtrap_flavor_accepts_empty_classification_timestamp(self):
+        """AIClassificationRecordExportCamTrap acepta classificationTimestamp=''."""
+        row = {**VALID_EXPORT_CAMTRAP, "classificationTimestamp": ""}
+        result = AIClassificationRecordExportCamTrap.model_validate(row)
+        assert result.classificationTimestamp is None

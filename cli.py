@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-trapper-client — CLI de gestión.
+wildintel-trapper-sdk — CLI de gestión.
 
 Uso:
     uv run cli test [unit|integration|e2e|all] [-k keyword] [-v]
@@ -41,7 +41,7 @@ ROOT_DIR   = _find_root()
 MKDOCS_CFG = ROOT_DIR / "mkdocs.yml"
 
 console = Console()
-app     = typer.Typer(help="trapper-client — herramienta de gestión.")
+app     = typer.Typer(help="wildintel-trapper-sdk — herramienta de gestión.")
 
 
 # ── Enums ─────────────────────────────────────────────────────────────────────
@@ -79,7 +79,7 @@ def test(
 
     console.print(Panel(
         f"[bold]Suite:[/bold] {suite.value}   [bold]Marcador:[/bold] -m \"{marker}\"",
-        title="trapper-client — tests",
+        title="wildintel-trapper-sdk — tests",
     ))
 
     if suite == TestSuite.e2e and not os.getenv("WILDINTEL_SMOKE_ENABLED"):

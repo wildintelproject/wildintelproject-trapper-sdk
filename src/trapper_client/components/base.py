@@ -117,6 +117,8 @@ class TrapperComponent(Generic[TModel]):
                 "page_size": raw_pagination.get("page_size", len(items)),
                 "pages": raw_pagination.get("pages", 1),
                 "count": raw_pagination.get("count", len(items)),
+                "total": raw_pagination.get("total"),
+                "filtered": raw_pagination.get("filtered"),
             }
         )
         return PaginatedResult[TModel](pagination=pagination, results=items)
@@ -184,6 +186,32 @@ class TrapperComponent(Generic[TModel]):
             page_size=page_size,
             schema=schema,
             validate=validate
+        )
+
+    def all(
+        self,
+        query: Dict[str, Any] | None = None,
+        filter_fn: Callable[[TModel | dict], bool] | None = None,
+        page_size: int = 50,
+        validate: bool = True,
+        overwrite_endpoint: str | None = None,
+        overwrite_schema: type[TModel] | None = None,
+        **kwargs: Any,
+    ) -> APIQuery[TModel]:
+        """
+        Alias for :meth:`where` — lazy iteration over every item on this endpoint.
+
+        Several docstrings across the SDK already document ``client.<resource>.all()``
+        as the idiomatic way to iterate all items; this method makes those examples work.
+        """
+        return self.where(
+            query=query,
+            filter_fn=filter_fn,
+            page_size=page_size,
+            validate=validate,
+            overwrite_endpoint=overwrite_endpoint,
+            overwrite_schema=overwrite_schema,
+            **kwargs,
         )
 
     def get_all(

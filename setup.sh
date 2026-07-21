@@ -12,7 +12,7 @@ warn() { echo -e "${YELLOW}  ⚠  $*${NC}"; }
 err()  { echo -e "${RED}  ✘  $*${NC}" >&2; }
 
 echo ""
-echo -e "${BOLD}==> trapper-client — setup${NC}"
+echo -e "${BOLD}==> wildintel-trapper-sdk — setup${NC}"
 echo ""
 
 # ── uv ────────────────────────────────────────────────────────────────────────
@@ -42,12 +42,16 @@ ok "Dependencias instaladas."
 # ── Resumen ───────────────────────────────────────────────────────────────────
 
 echo ""
-echo "==> Listo. Comandos disponibles:"
+echo "==> Listo. Activa el entorno virtual creado por uv:"
 echo ""
-echo "    uv run cli test              ← tests unit + integration (por defecto)"
-echo "    uv run cli test unit         ← solo unit"
-echo "    uv run cli test integration  ← solo integration"
-echo "    uv run cli test e2e          ← e2e (requiere un servidor Trapper real)"
-echo "    uv run cli docs serve        ← sirve la documentación en local"
-echo "    uv run cli docs build        ← genera el sitio estático en site/"
+echo "    source .venv/bin/activate"
+echo ""
+echo "==> Comandos disponibles (con el entorno activado, o con 'uv run' delante sin activarlo):"
+echo ""
+echo "    cli test              ← tests unit + integration (por defecto)"
+echo "    cli test unit         ← solo unit"
+echo "    cli test integration  ← solo integration"
+echo "    cli test e2e          ← e2e (requiere un servidor Trapper real)"
+echo "    cli docs serve        ← sirve la documentación en local"
+echo "    cli docs build        ← genera el sitio estático en site/"
 echo ""

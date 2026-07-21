@@ -58,12 +58,12 @@ class CollectionsComponent(TrapperComponent[Collection]):
         # Single collection by PK
         col = client.collections.find(42)
 
-        # Lazy iteration over resources within a collection
-        for res in client.collections.where_resources(pk=3):
+        # Lazy iteration over resources within a collection (see ResourcesComponent)
+        for res in client.resources.where_by_collection(collection_pk=3):
             print(res)
 
         # Export resources of a collection to CSV
-        client.collections.export_resources(pk=3, file="/tmp/resources.csv")
+        client.resources.export(file="/tmp/resources.csv", collections=3)
     """
 
     endpoint = "storage/api/collections"
@@ -494,7 +494,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
 
         endpoint = f"/storage/api/collection/process/"
 
-        return self._client.post(
+        return self.client.post(
             endpoint=endpoint,
             body=payload,
             raise_on_error=raise_on_error,
