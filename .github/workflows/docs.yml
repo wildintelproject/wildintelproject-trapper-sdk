@@ -3,7 +3,7 @@ name: Docs
 
 on:
   push:
-    branches: [develop, refactor, main]
+    branches: [development, main]
   workflow_run:
     workflows: [Tests]        # espera a que pasen los tests
     types: [completed]
