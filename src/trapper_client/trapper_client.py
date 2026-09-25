@@ -18,7 +18,7 @@ Usage::
     geojson = client.locations_geojson.get(collection_id=2)
 
     # Deployments filtered by collection
-    for dep in client.deployments.by_collection(5):
+    for dep in client.deployments.by_collection(5, research_project=3):
         print(dep)
 
     # Resources of a storage collection
@@ -133,14 +133,14 @@ class TrapperClient(APIClientBase):
             print(loc["location_id"], loc["name"])
 
         # Filter deployments by collection
-        for dep in client.deployments.by_collection(3):
+        for dep in client.deployments.by_collection(3, research_project=1):
             print(dep)
 
         # Export all locations to CSV
         path = client.locations.export(file="/tmp/locations.csv")
 
         # Generic endpoint with where()
-        for item in client.where("api/deployments/", query={"colls": 7}):
+        for item in client.where("api/deployments/", query={"research_project": 7}):
             print(item)
     """
 
@@ -209,7 +209,7 @@ class TrapperClient(APIClientBase):
 
         Example::
 
-            for item in client.where("api/deployments/", query={"colls": 7}):
+            for item in client.where("api/deployments/", query={"research_project": 7}):
                 print(item)
         """
         return APIQuery(

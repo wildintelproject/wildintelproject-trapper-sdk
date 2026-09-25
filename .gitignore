@@ -84,3 +84,12 @@ fabric.properties
 !/.claude/
 /site/
 /.claude/
+
+### Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+build/
+dist/

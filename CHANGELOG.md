@@ -15,6 +15,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Upcoming release
 
+### Added
+- `deployments.by_collection_with_counts()`: the deployments with at least one resource in a
+  collection, each with how many resources it has there.
+
+### Fixed
+- `deployments.by_collection()`/`export_by_collection()` returned every deployment on the server,
+  whichever collection was asked for: they sent a `colls` filter Trapper's deployment API doesn't
+  have (it silently ignores unknown parameters). They now check each candidate deployment
+  against the resource API, which does filter by collection and deployment — pass the usual
+  filters (e.g. `research_project=...`) to narrow the candidates. `by_collection()` now returns a
+  `list` instead of a lazy `APIQuery`. The docs also no longer list `collections` as a
+  deployment filter.
+
 ## Released
 
 ### [0.1.0](https://github.com/wildintelproject/wildintelproject-trapper-sdk/releases/tag/v0.1.0) - 2026-07-21

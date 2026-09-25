@@ -203,6 +203,6 @@ See the [Classifications guide](guide/classifications.md) for the full picture, 
 For any endpoint not covered by a component, use `client.where()` directly:
 
 ```python
-for item in client.where("api/deployments/", query={"colls": 7}):
+for item in client.where("api/deployments/", query={"research_project": 7}):
     print(item)
 ```

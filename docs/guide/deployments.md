@@ -18,7 +18,6 @@ below for the one write operation this component supports.
 | `sdate_from`, `sdate_to` | date (ISO) | Filter by start date range |
 | `edate_from`, `edate_to` | date (ISO) | Filter by end date range |
 | `classification_project` | int | Filter by classification project ID |
-| `collections` | int or list | Filter by collection ID(s) — mapped to the `colls` query param |
 | `correct_setup` | bool | Filter by setup correctness |
 | `correct_tstamp` | bool | Filter by timestamp correctness |
 | `search` | str | Search in `deployment_id` or owner username |
@@ -47,18 +46,34 @@ client.deployments.export(file="deployments.csv")
 
 See [Usage](../usage.md) if any of this looks unfamiliar — it's the same interface on every component.
 
+There is no collection filter: Trapper's deployment API has none, and it silently ignores any
+parameter it doesn't know (such as `colls`), returning every deployment instead. Use the shortcut
+below.
+
 ## Shortcut: by collection
 
-`by_collection()`/`export_by_collection()` map a collection ID to the `colls` query param for you:
+`by_collection()` returns the deployments with at least one resource in a collection. The
+deployment API can't filter by collection, but the resource API can filter by collection **and**
+deployment at once: every candidate deployment — whatever `where()` returns for the filters you
+pass — is checked with one single-item resource request, `max_workers` (8 by default) in parallel.
+Narrow the candidates, usually with `research_project`: with no filter, every deployment on the
+server is checked.
 
 ```python
-# All deployments in collection 5
-for dep in client.deployments.by_collection(5):
+# Deployments of research project 3 with images in collection 5
+for dep in client.deployments.by_collection(5, research_project=3):
     print(dep)
 
-# Export to CSV
-client.deployments.export_by_collection(5, file="deps.csv")
+# ...with how many images each one has there
+for dep, count in client.deployments.by_collection_with_counts(5, research_project=3):
+    print(dep.deployment_id, count)
+
+# Export them to CSV
+client.deployments.export_by_collection(5, research_project=3, file="deps.csv")
 ```
+
+`collection_id` is the storage collection's own pk — `collection_pk` in a classification project's
+collection list (`classification_projects.get_all_project_collections()`).
 
 ## Importing deployments (write access)
 

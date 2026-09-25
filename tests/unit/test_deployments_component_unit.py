@@ -11,6 +11,7 @@ from tests.base_component_tests import ComponentUnitTestBase, paginated_response
 from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.deployments import DeploymentsComponent
+from trapper_client.components.resources import ResourcesComponent
 from trapper_client.schemas import  Deployment, DeploymentExport
 
 class TestDeploymentsComponent(ComponentUnitTestBase):
@@ -30,12 +31,24 @@ class TestDeploymentsComponent(ComponentUnitTestBase):
 COLLECTION_ID = 5
 
 
-# ── by_collection / export_by_collection ──────────────────────────────────────
+# ── by_collection / by_collection_with_counts / export_by_collection ──────────
 #
-# Regresión: ambos métodos estaban comentados en el código (el `def` deshabilitado,
-# dejando solo el docstring como statement huérfano), pese a estar documentados como
-# ejemplo de uso en la propia clase y en TrapperClient. Cualquier llamada real a
-# client.deployments.by_collection(...) lanzaba AttributeError.
+# Regresión: by_collection enviaba el parámetro ``colls`` a /geomap/api/deployments,
+# un filtro que la API de Trapper no tiene (DeploymentFilter no declara ninguno por
+# colección) — Django lo ignoraba sin error y devolvía TODOS los deployments del
+# servidor, pidieras la colección que pidieras. Ahora cada deployment candidato se
+# comprueba contra la API de recursos, que sí filtra por colección y deployment.
+
+def _counts_by_deployment(counts):
+    """client.get replacement answering the single-item resource requests
+    with each deployment's own resource count in the collection."""
+    def fake_get(endpoint, query=None):
+        assert endpoint == ResourcesComponent.endpoint
+        assert query["collections"] == COLLECTION_ID
+        assert query["page_size"] == 1
+        return {"pagination": {"count": counts.get(query["deployments"], 0)}, "results": []}
+    return fake_get
+
 
 class TestByCollection:
 
@@ -45,26 +58,48 @@ class TestByCollection:
 
     @pytest.fixture
     def component(self, client):
-        return DeploymentsComponent(client)
+        component = DeploymentsComponent(client)
+        component.where = MagicMock(return_value=iter([
+            Deployment(pk=1, deployment_id="R0005-TATR_0001"),
+            Deployment(pk=2, deployment_id="R0005-TATR_0002"),  # named like it, but no images there
+            Deployment(pk=3, deployment_id="R0004-TATR_0003"),
+        ]))
+        return component
 
-    def test_by_collection_returns_api_query(self, component):
-        assert isinstance(component.by_collection(COLLECTION_ID), APIQuery)
+    def test_keeps_only_deployments_with_resources_in_the_collection(self, component, client):
+        client.get.side_effect = _counts_by_deployment({1: 120, 3: 5})
 
-    def test_by_collection_uses_component_endpoint(self, component):
-        query = component.by_collection(COLLECTION_ID)
-        assert query.endpoint == DeploymentsComponent.endpoint
+        result = component.by_collection(COLLECTION_ID, research_project=30)
 
-    def test_by_collection_maps_collection_id_to_colls_param(self, component):
-        query = component.by_collection(COLLECTION_ID)
-        assert query.query["colls"] == COLLECTION_ID
+        assert [d.pk for d in result] == [1, 3]
+        assert all(isinstance(d, Deployment) for d in result)
 
-    def test_by_collection_passes_extra_kwargs(self, component):
-        query = component.by_collection(COLLECTION_ID, status="Public")
-        assert query.query["status"] == "Public"
+    def test_never_sends_the_unsupported_colls_param(self, component, client):
+        client.get.side_effect = _counts_by_deployment({1: 1})
 
-    def test_by_collection_passes_page_size(self, component):
-        query = component.by_collection(COLLECTION_ID, page_size=25)
-        assert query._page_size == 25
+        component.by_collection(COLLECTION_ID, research_project=30)
+
+        candidates_query = component.where.call_args
+        assert "colls" not in (candidates_query.kwargs.get("query") or {})
+        assert "colls" not in candidates_query.kwargs
+
+    def test_candidates_come_from_where_with_the_given_filters(self, component, client):
+        client.get.side_effect = _counts_by_deployment({})
+
+        component.by_collection(COLLECTION_ID, query={"tags": 4}, page_size=25, research_project=30)
+
+        component.where.assert_called_once_with(query={"tags": 4}, page_size=25, research_project=30)
+
+    def test_with_counts_returns_each_deployments_resource_count(self, component, client):
+        client.get.side_effect = _counts_by_deployment({1: 120, 3: 5})
+
+        result = component.by_collection_with_counts(COLLECTION_ID, research_project=30, max_workers=1)
+
+        assert [(d.pk, n) for d, n in result] == [(1, 120), (3, 5)]
+
+    def test_no_match_is_an_empty_list(self, component, client):
+        client.get.side_effect = _counts_by_deployment({})
+        assert component.by_collection(COLLECTION_ID) == []
 
 
 class TestExportByCollection:
@@ -75,26 +110,31 @@ class TestExportByCollection:
 
     @pytest.fixture
     def component(self, client):
-        return DeploymentsComponent(client)
+        component = DeploymentsComponent(client)
+        component.where = MagicMock(return_value=iter([Deployment(pk=1), Deployment(pk=2)]))
+        client.get.side_effect = _counts_by_deployment({1: 10})
+        client.get_all.return_value = paginated_response([
+            {"_id": 1, "deploymentID": "dona_001", "latitude": 37.1, "longitude": -6.9},
+            {"_id": 2, "deploymentID": "dona_002", "latitude": 37.2, "longitude": -6.8},
+        ])
+        return component
 
-    def test_export_by_collection_uses_export_endpoint(self, component, client):
-        client.get_all.return_value = paginated_response([])
-        component.export_by_collection(COLLECTION_ID, file=None)
+    def test_uses_export_endpoint_without_colls(self, component, client):
+        component.export_by_collection(COLLECTION_ID, file=None, research_project=30)
         assert client.get_all.call_args[0][0] == DeploymentsComponent.export_endpoint
+        assert "colls" not in client.get_all.call_args[1]["query"]
+        assert client.get_all.call_args[1]["query"]["research_project"] == 30
 
-    def test_export_by_collection_maps_collection_id_to_colls_param(self, component, client):
-        client.get_all.return_value = paginated_response([])
-        component.export_by_collection(COLLECTION_ID, file=None)
-        call_params = client.get_all.call_args[1]["query"]
-        assert call_params["colls"] == COLLECTION_ID
-
-    def test_export_by_collection_returns_list_when_file_is_none(self, component, client):
-        client.get_all.return_value = paginated_response([{
-            "_id": 1, "deployment_id": "dona_001", "latitude": 37.1, "longitude": -6.9,
-        }])
+    def test_keeps_only_the_collections_deployments(self, component):
         result = component.export_by_collection(COLLECTION_ID, file=None)
-        assert isinstance(result, list)
+        assert [row.pk for row in result] == [1]
         assert isinstance(result[0], DeploymentExport)
+
+    def test_writes_the_filtered_rows_to_a_file(self, component, client, tmp_path):
+        client._select_file.return_value = tmp_path / "deps.csv"
+        component.export_by_collection(COLLECTION_ID, file=tmp_path / "deps.csv")
+        written = client._write_csv.call_args[0][0]
+        assert [row["pk"] if "pk" in row else row["_id"] for row in written] == [1]
 
 
 # ── import_deployments ────────────────────────────────────────────────────────

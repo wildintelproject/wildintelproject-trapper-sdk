@@ -5,6 +5,7 @@ Component for the /api/deployments/ resource.
 from __future__ import annotations
 
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack
 from pathlib import Path
 from typing import Any, Dict
@@ -14,6 +15,7 @@ from tenacity import Retrying
 from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
+from trapper_client.components.resources import ResourcesComponent
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
 from trapper_client.retry_utils import retrying_for_chunk_upload
 from trapper_client.schemas import Deployment, DeploymentExport
@@ -38,19 +40,18 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
     - ``sdate_from``, ``sdate_to`` (date): Filter by start date range (ISO format)
     - ``edate_from``, ``edate_to`` (date): Filter by end date range (ISO format)
     - ``classification_project`` (int): Filter by classification project ID
-    - ``collections`` (int or list): Filter by collection ID(s) (via ``colls`` param)
     - ``correct_setup`` (bool): Filter by setup correctness
     - ``correct_tstamp`` (bool): Filter by timestamp correctness
     - ``search`` (str): Search in deployment_id or owner__username
 
+    There is no collection filter: Trapper's deployment API has none (any
+    unknown parameter, such as ``colls``, is silently ignored and every
+    deployment comes back). Use :meth:`by_collection` instead.
+
     **Examples:**
 
-        # All deployments in collection 5
-        for dep in client.deployments.where(collections=5):
-            print(dep)
-
-        # Shortcut: deployments by collection
-        for dep in client.deployments.by_collection(5):
+        # Deployments with images in collection 5, among research project 3's
+        for dep in client.deployments.by_collection(5, research_project=3):
             print(dep)
 
         # Filter by location and date range
@@ -58,7 +59,7 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
             print(dep)
 
         # Export to CSV
-        client.deployments.export_by_collection(5, file="/tmp/deps.csv")
+        client.deployments.export_by_collection(5, research_project=3, file="/tmp/deps.csv")
 
     ``import_deployments()`` is different from the rest of this component: the
     REST API is read-only for deployments, so it simulates the classic web
@@ -281,47 +282,104 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
             )
         return False
 
+    def by_collection_with_counts(
+        self,
+        collection_id: int,
+        query: Dict[str, Any] | None = None,
+        page_size: int = 50,
+        max_workers: int = 8,
+        **kwargs: Any,
+    ) -> list[tuple[Deployment, int]]:
+        """Deployments with at least one resource in a collection, each with
+        how many resources it has there.
+
+        Trapper's deployment API can't filter by collection, but its
+        resource API can filter by collection AND deployment at once — so
+        every candidate deployment (whatever :meth:`where` returns for
+        ``query``/``kwargs``) is checked with one single-item resource
+        request, ``max_workers`` of them at a time. Narrow the candidates
+        (``research_project=...`` is the usual one): with no filter, every
+        deployment on the server is checked.
+
+        Args:
+            collection_id: Collection primary key (the storage collection's
+                own pk — ``collection_pk`` in a classification project's
+                collection list).
+            query: Base query parameters for the candidate deployments.
+            page_size: Page size used to list the candidates.
+            max_workers: How many resource requests run in parallel.
+            **kwargs: Extra query parameters merged into ``query``.
+
+        Returns:
+            ``(deployment, resource count)`` pairs, in candidate order.
+        """
+        candidates = list(self.where(query=query, page_size=page_size, **kwargs))
+
+        def resources_in_collection(deployment: Deployment) -> int:
+            data = self.client.get(
+                ResourcesComponent.endpoint,
+                query={"collections": collection_id, "deployments": deployment.pk, "page_size": 1},
+            )
+            return int((data.get("pagination") or {}).get("count") or 0)
+
+        with ThreadPoolExecutor(max_workers=max(1, max_workers)) as pool:
+            counts = list(pool.map(resources_in_collection, candidates))
+        return [(deployment, count) for deployment, count in zip(candidates, counts) if count]
+
     def by_collection(
         self,
         collection_id: int,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
+        max_workers: int = 8,
         **kwargs: Any,
-    ) -> APIQuery[Deployment]:
-        """Return a lazy iterator over deployments filtered by collection.
-
-        Args:
-            collection_id: Collection primary key (mapped to ``colls`` param).
-            query: Base query parameters.
-            page_size: Number of items requested per API page.
-            **kwargs: Extra query parameters merged into ``query``.
+    ) -> list[Deployment]:
+        """Deployments with at least one resource in a collection — see
+        :meth:`by_collection_with_counts`, which this wraps (and whose
+        advice about narrowing the candidates applies here too).
 
         Returns:
-            Lazy ``APIQuery`` iterator yielding deployments.
+            The matching deployments, in candidate order.
         """
-        q = dict(query or {})
-        q["colls"] = collection_id
-        return self.where(query=q, page_size=page_size, **kwargs)
+        return [
+            deployment
+            for deployment, _ in self.by_collection_with_counts(
+                collection_id, query=query, page_size=page_size, max_workers=max_workers, **kwargs,
+            )
+        ]
 
     def export_by_collection(
         self,
         collection_id: int,
         query: Dict[str, Any] | None = None,
         file: str | Path | None = None,
+        max_workers: int = 8,
         **kwargs: Any,
     ) -> Path | list[DeploymentExport]:
-        """Export deployments of a collection to CSV.
+        """Export the deployments with at least one resource in a collection.
+
+        Exports the candidate deployments (``query``/``kwargs``, same as
+        :meth:`by_collection`) and keeps only those :meth:`by_collection`
+        finds in the collection.
 
         Args:
-            collection_id: Collection primary key (mapped to ``colls`` param).
-            query: Base query parameters.
+            collection_id: Collection primary key.
+            query: Base query parameters for the candidate deployments.
             file: Output CSV file path. If ``None``, returns a list of models.
+            max_workers: How many resource requests run in parallel.
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
             ``Path`` to the generated CSV when ``file`` is provided,
             otherwise ``list[DeploymentExport]``.
         """
-        q = dict(query or {})
-        q["colls"] = collection_id
-        return self.export(query=q, file=file, **kwargs)
+        in_collection = {
+            deployment.pk
+            for deployment in self.by_collection(collection_id, query=query, max_workers=max_workers, **kwargs)
+        }
+        rows = [row for row in self.export(query=query, file=None, **kwargs) if row.pk in in_collection]
+        if file is None:
+            return rows
+        output_path = self.client._select_file(file)
+        self.client._write_csv([row.model_dump(mode="json") for row in rows], output_path)
+        return output_path
