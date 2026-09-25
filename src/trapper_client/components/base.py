@@ -8,9 +8,9 @@ import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, TypeVar, Union
 
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel
 
-from trapper_client.api_query import APIQuery
+from trapper_client.api_query import APIQuery, parse_row
 from trapper_client.schemas import PaginatedResult, Pagination
 
 if TYPE_CHECKING:
@@ -70,28 +70,7 @@ class TrapperComponent(Generic[TModel]):
         Returns:
             Parsed model instance.
         """
-        target = schema or self.schema
-        # isinstance falla con Union/Annotated — solo comprobamos si es clase concreta
-        try:
-            if isinstance(row, target):
-                return row
-        except TypeError:
-            pass  # target es Union o Annotated, no se puede usar con isinstance
-
-        if validate:
-            try:
-                return target.model_validate(row)
-            except AttributeError:
-                return TypeAdapter(target).validate_python(row)
-        if isinstance(row, dict):
-            try:
-                return target.model_construct(**row)
-            except AttributeError:
-                return TypeAdapter(target).validate_python(row)
-        try:
-            return target.model_construct(raw=row)
-        except AttributeError:
-            return TypeAdapter(target).validate_python(row)
+        return parse_row(row, schema or self.schema, validate)
 
     def _to_paginated(self, data: Dict[str, Any], validate: bool, schema: type[TModel] | None = None) -> PaginatedResult[TModel]:
         """

@@ -20,6 +20,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   collection, each with how many resources it has there.
 
 ### Fixed
+- `classification_results.where_project_results()` (and any other `where()` whose schema is a
+  `Union`, such as `ClassificationRecordExport`) failed on the first page with
+  `AttributeError: model_validate`: `APIQuery` called `model_validate`/`model_construct` on the
+  schema directly. It now parses rows the same way `get()` already did — through a `TypeAdapter`
+  for a `Union` or `Annotated` schema (always validated, as only validation can pick the member).
 - `deployments.by_collection()`/`export_by_collection()` returned every deployment on the server,
   whichever collection was asked for: they sent a `colls` filter Trapper's deployment API doesn't
   have (it silently ignores unknown parameters). They now check each candidate deployment

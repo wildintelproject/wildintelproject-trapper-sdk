@@ -4,13 +4,40 @@ import re
 import logging
 from typing import TYPE_CHECKING, Callable, Iterator, Generic, TypeVar, Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 
 if TYPE_CHECKING:
     from trapper_client.api_client_base import APIClientBase
 
 TModel = TypeVar("TModel", bound=BaseModel)
 logger = logging.getLogger(__name__)
+
+
+def parse_row(row: Any, schema: Any, validate: bool) -> Any:
+    """Parse one raw API row into ``schema``.
+
+    ``schema`` is usually a Pydantic model, but may also be a ``Union`` or
+    ``Annotated`` type (e.g. ``ClassificationRecordExport``), which has no
+    ``model_validate``/``model_construct``: those rows are always validated
+    through a ``TypeAdapter``, since only validation can pick the Union member.
+
+    Args:
+        row: Raw row payload from the API.
+        schema: Pydantic model or type the row is parsed into.
+        validate: Whether to run full Pydantic validation (models only).
+
+    Returns:
+        The parsed row (``row`` itself if it's already an instance of ``schema``).
+    """
+    if not (isinstance(schema, type) and issubclass(schema, BaseModel)):
+        return TypeAdapter(schema).validate_python(row)
+    if isinstance(row, schema):
+        return row
+    if validate:
+        return schema.model_validate(row)
+    if isinstance(row, dict):
+        return schema.model_construct(**row)
+    return schema.model_construct(raw=row)
 
 
 class APIQuery(Generic[TModel], Iterator[TModel | dict]):
@@ -96,14 +123,7 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
                 raw_results = response.get("results", [])
 
                 if self.schema:
-                    if self.validate:
-                        self._last_results = [self.schema.model_validate(row) for row in raw_results]
-                    else:
-                        self._last_results = [
-                            self.schema.model_construct(**row) if isinstance(row, dict)
-                            else self.schema.model_construct(raw=row)
-                            for row in raw_results
-                        ]
+                    self._last_results = [parse_row(row, self.schema, self.validate) for row in raw_results]
                 else:
                     self._last_results = raw_results
 

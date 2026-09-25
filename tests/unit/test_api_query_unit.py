@@ -308,3 +308,22 @@ def test_context_manager_does_not_suppress_exceptions():
     with pytest.raises(ValueError):
         with APIQuery(client, "/api/items/"):
             raise ValueError("test error")
+
+# ── Union schemas (e.g. ClassificationRecordExport) ───────────────────────────
+
+class OtherSchema(BaseModel):
+    code: str
+
+
+def test_union_schema_parses_each_row_into_its_member():
+    """A Union schema has no model_validate — rows are parsed via a TypeAdapter."""
+    client = make_client([single_page([{"pk": 1, "name": "Alpha"}, {"code": "X"}])])
+    items = list(APIQuery(client=client, endpoint="/api/items/", schema=ItemSchema | OtherSchema))
+    assert items == [ItemSchema(pk=1, name="Alpha"), OtherSchema(code="X")]
+
+
+def test_union_schema_is_validated_even_without_validate():
+    """Only validation can pick the Union member, so validate=False still validates."""
+    client = make_client([single_page([{"pk": "7", "name": "Alpha"}])])
+    items = list(APIQuery(client=client, endpoint="/api/items/", schema=ItemSchema | OtherSchema, validate=False))
+    assert items == [ItemSchema(pk=7, name="Alpha")]
