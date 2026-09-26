@@ -2834,14 +2834,14 @@ for loc in client.locations.all():
     print(loc[&quot;location_id&quot;], loc[&quot;name&quot;])
 
 # Filter deployments by collection
-for dep in client.deployments.by_collection(3):
+for dep in client.deployments.by_collection(3, research_project=1):
     print(dep)
 
 # Export all locations to CSV
 path = client.locations.export(file=&quot;/tmp/locations.csv&quot;)
 
 # Generic endpoint with where()
-for item in client.where(&quot;api/deployments/&quot;, query={&quot;colls&quot;: 7}):
+for item in client.where(&quot;api/deployments/&quot;, query={&quot;research_project&quot;: 7}):
     print(item)
 </code></pre></div>
 
@@ -3036,14 +3036,14 @@ for item in client.where(&quot;api/deployments/&quot;, query={&quot;colls&quot;:
 <a id="__codelineno-0-133" name="__codelineno-0-133"></a><span class="sd">            print(loc[&quot;location_id&quot;], loc[&quot;name&quot;])</span>
 <a id="__codelineno-0-134" name="__codelineno-0-134"></a>
 <a id="__codelineno-0-135" name="__codelineno-0-135"></a><span class="sd">        # Filter deployments by collection</span>
-<a id="__codelineno-0-136" name="__codelineno-0-136"></a><span class="sd">        for dep in client.deployments.by_collection(3):</span>
+<a id="__codelineno-0-136" name="__codelineno-0-136"></a><span class="sd">        for dep in client.deployments.by_collection(3, research_project=1):</span>
 <a id="__codelineno-0-137" name="__codelineno-0-137"></a><span class="sd">            print(dep)</span>
 <a id="__codelineno-0-138" name="__codelineno-0-138"></a>
 <a id="__codelineno-0-139" name="__codelineno-0-139"></a><span class="sd">        # Export all locations to CSV</span>
 <a id="__codelineno-0-140" name="__codelineno-0-140"></a><span class="sd">        path = client.locations.export(file=&quot;/tmp/locations.csv&quot;)</span>
 <a id="__codelineno-0-141" name="__codelineno-0-141"></a>
 <a id="__codelineno-0-142" name="__codelineno-0-142"></a><span class="sd">        # Generic endpoint with where()</span>
-<a id="__codelineno-0-143" name="__codelineno-0-143"></a><span class="sd">        for item in client.where(&quot;api/deployments/&quot;, query={&quot;colls&quot;: 7}):</span>
+<a id="__codelineno-0-143" name="__codelineno-0-143"></a><span class="sd">        for item in client.where(&quot;api/deployments/&quot;, query={&quot;research_project&quot;: 7}):</span>
 <a id="__codelineno-0-144" name="__codelineno-0-144"></a><span class="sd">            print(item)</span>
 <a id="__codelineno-0-145" name="__codelineno-0-145"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-146" name="__codelineno-0-146"></a>
@@ -3112,7 +3112,7 @@ for item in client.where(&quot;api/deployments/&quot;, query={&quot;colls&quot;:
 <a id="__codelineno-0-209" name="__codelineno-0-209"></a>
 <a id="__codelineno-0-210" name="__codelineno-0-210"></a><span class="sd">        Example::</span>
 <a id="__codelineno-0-211" name="__codelineno-0-211"></a>
-<a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">            for item in client.where(&quot;api/deployments/&quot;, query={&quot;colls&quot;: 7}):</span>
+<a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">            for item in client.where(&quot;api/deployments/&quot;, query={&quot;research_project&quot;: 7}):</span>
 <a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">                print(item)</span>
 <a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-215" name="__codelineno-0-215"></a>        <span class="k">return</span> <span class="n">APIQuery</span><span class="p">(</span>
@@ -3274,7 +3274,7 @@ Supports <code>{placeholder}</code> syntax.</p>
       </tbody>
     </table>
         <p>Example::</p>
-<div class="highlight"><pre><span></span><code>for item in client.where(&quot;api/deployments/&quot;, query={&quot;colls&quot;: 7}):
+<div class="highlight"><pre><span></span><code>for item in client.where(&quot;api/deployments/&quot;, query={&quot;research_project&quot;: 7}):
     print(item)
 </code></pre></div>
 
@@ -3343,7 +3343,7 @@ Supports <code>{placeholder}</code> syntax.</p>
 <a id="__codelineno-0-209" name="__codelineno-0-209"></a>
 <a id="__codelineno-0-210" name="__codelineno-0-210"></a><span class="sd">    Example::</span>
 <a id="__codelineno-0-211" name="__codelineno-0-211"></a>
-<a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">        for item in client.where(&quot;api/deployments/&quot;, query={&quot;colls&quot;: 7}):</span>
+<a id="__codelineno-0-212" name="__codelineno-0-212"></a><span class="sd">        for item in client.where(&quot;api/deployments/&quot;, query={&quot;research_project&quot;: 7}):</span>
 <a id="__codelineno-0-213" name="__codelineno-0-213"></a><span class="sd">            print(item)</span>
 <a id="__codelineno-0-214" name="__codelineno-0-214"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-215" name="__codelineno-0-215"></a>    <span class="k">return</span> <span class="n">APIQuery</span><span class="p">(</span>

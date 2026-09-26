@@ -2821,11 +2821,6 @@ below for the one write operation this component supports.</p>
 <td>Filter by classification project ID</td>
 </tr>
 <tr>
-<td><code>collections</code></td>
-<td>int or list</td>
-<td>Filter by collection ID(s) — mapped to the <code>colls</code> query param</td>
-</tr>
-<tr>
 <td><code>correct_setup</code></td>
 <td>bool</td>
 <td>Filter by setup correctness</td>
@@ -2862,15 +2857,29 @@ below for the one write operation this component supports.</p>
 <a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>See <a href="../../usage/">Usage</a> if any of this looks unfamiliar — it's the same interface on every component.</p>
+<p>There is no collection filter: Trapper's deployment API has none, and it silently ignores any
+parameter it doesn't know (such as <code>colls</code>), returning every deployment instead. Use the shortcut
+below.</p>
 <h2 id="shortcut-by-collection">Shortcut: by collection</h2>
-<p><code>by_collection()</code>/<code>export_by_collection()</code> map a collection ID to the <code>colls</code> query param for you:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># All deployments in collection 5</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">by_collection</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+<p><code>by_collection()</code> returns the deployments with at least one resource in a collection. The
+deployment API can't filter by collection, but the resource API can filter by collection <strong>and</strong>
+deployment at once: every candidate deployment — whatever <code>where()</code> returns for the filters you
+pass — is checked with one single-item resource request, <code>max_workers</code> (8 by default) in parallel.
+Narrow the candidates, usually with <code>research_project</code>: with no filter, every deployment on the
+server is checked.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Deployments of research project 3 with images in collection 5</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">by_collection</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># Export to CSV</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export_by_collection</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;deps.csv&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># ...with how many images each one has there</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">for</span> <span class="n">dep</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">by_collection_with_counts</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="o">.</span><span class="n">deployment_id</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Export them to CSV</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export_by_collection</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;deps.csv&quot;</span><span class="p">)</span>
 </code></pre></div>
+<p><code>collection_id</code> is the storage collection's own pk — <code>collection_pk</code> in a classification project's
+collection list (<code>classification_projects.get_all_project_collections()</code>).</p>
 <h2 id="importing-deployments-write-access">Importing deployments (write access)</h2>
 <p><code>/geomap/api/deployments</code> is read-only, so <code>import_deployments()</code> works around that by simulating
 the classic web UI's <code>geomap/deployment/import/</code> form via cookie/session auth instead of the API's

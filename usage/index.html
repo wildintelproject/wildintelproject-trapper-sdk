@@ -3003,7 +3003,7 @@ which methods expect which pk, and how to resolve one from the other.</p>
 <hr />
 <h2 id="generic-endpoint">Generic endpoint</h2>
 <p>For any endpoint not covered by a component, use <code>client.where()</code> directly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;api/deployments/&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;colls&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">}):</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;api/deployments/&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;research_project&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">}):</span>
 <a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 </code></pre></div>
 
