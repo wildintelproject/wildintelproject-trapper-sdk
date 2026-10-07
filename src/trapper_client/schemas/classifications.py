@@ -273,8 +273,11 @@ class ClassificationResultRecordTrapper(TrapperSchema):
             parsed = json.loads(v)
             if not parsed:
                 return None
-            if isinstance(parsed[0], list):
-                return [BBox(x=b[0], y=b[1], width=b[2], height=b[3]) for b in parsed]
+            if isinstance(parsed[0], (list, type(None))):
+                # Trapper sometimes sends a null (or short) entry among the boxes.
+                boxes = [BBox(x=b[0], y=b[1], width=b[2], height=b[3])
+                         for b in parsed if isinstance(b, (list, tuple)) and len(b) >= 4]
+                return boxes or None
             return parsed
         return v
 
