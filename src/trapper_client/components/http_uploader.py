@@ -58,7 +58,12 @@ class HTTPUploader:
         )
         response.raise_for_status()
         data = response.json()
-        session_id = data["results"][0]["sessionid"]
+        # The login answers {"sessionid": …} — or, wrapped like the rest of Trapper's API, {"results": [{"sessionid": …}]}.
+        session_id = data.get("sessionid") if isinstance(data, dict) else None
+        if not session_id and isinstance(data, dict) and isinstance(data.get("results"), list) and data["results"]:
+            session_id = data["results"][0].get("sessionid")
+        if not session_id:
+            raise HTTPUploaderError(f"The uploader's login was accepted but its answer has no sessionid: {str(data)[:200]}")
         http.cookies.set("sessionid", session_id)
         if self.progress_callback:
             self.progress_callback("login", {"username": data.get("username")})
