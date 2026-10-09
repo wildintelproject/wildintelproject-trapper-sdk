@@ -271,6 +271,9 @@ class ClassificationResultRecordTrapper(TrapperSchema):
             return None
         if isinstance(v, str):
             parsed = json.loads(v)
+            # Trapper can write a null among the boxes: [[x, y, w, h], null].
+            if isinstance(parsed, list):
+                parsed = [b for b in parsed if b is not None]
             if not parsed:
                 return None
             if isinstance(parsed[0], list):
