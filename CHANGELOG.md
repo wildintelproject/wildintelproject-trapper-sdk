@@ -32,6 +32,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   filters (e.g. `research_project=...`) to narrow the candidates. `by_collection()` now returns a
   `list` instead of a lazy `APIQuery`. The docs also no longer list `collections` as a
   deployment filter.
+- `classification_package.get_project_package()` no longer surfaces a raw stringified
+  `{'data': {...}}` dict as the error message on a failed request (e.g. a package generation
+  failure returned as a 400) — it now extracts the server's actual `data.message`/`data.errors`,
+  matching the fix already applied to `import_classifications()`. Also no longer crashes with a
+  raw `JSONDecodeError` on a non-JSON (HTML) error page from a genuine unhandled server-side
+  exception.
 
 ## Released
 
