@@ -1,7 +1,7 @@
 """Schemas for User classification Trapper endpoints."""
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class ResourceUser(BaseModel):
@@ -26,14 +26,22 @@ class UserObservationAttr(BaseModel):
     count: Optional[str] = None
     classification_confidence: Optional[str] = None
 
+    @field_validator("observation_type", "species", "count", "classification_confidence", mode="before")
+    @classmethod
+    def _unwrap_value(cls, v: Any) -> Any:
+        """Trapper v2 wraps each attribute as ``{"value": ...}``; v1 sends the bare value."""
+        if isinstance(v, dict) and "value" in v:
+            return v["value"]
+        return v
+
 
 class UserClassificationRecord(BaseModel):
     """Schema for ``/media_classification/api/user-classifications`` items."""
 
     pk: int
     owner: str
-    owner_profile: str
-    classification: int
+    owner_profile: Optional[str] = None  # null in Trapper v2
+    classification: Optional[int] = None  # absent in Trapper v2
     resource: ResourceUser
 
     collection: Optional[int] = None
