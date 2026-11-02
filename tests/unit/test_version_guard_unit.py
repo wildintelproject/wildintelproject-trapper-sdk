@@ -82,23 +82,67 @@ class TestV1OnlyComponentsOnV1:
         client.get.assert_called_once()
 
 
-class TestImportsAreV1Only:
-    """Trapper v2 no longer exposes the HTML import forms (imports go through the Django admin)."""
+def response(status=302, location="/admin/geomap/location/"):
+    r = MagicMock()
+    r.status_code = status
+    r.headers = {"location": location} if location else {}
+    r.text = "<html><body><div class='errorlist'>bad column</div></body></html>"
+    return r
 
-    def test_import_locations_refused_on_v2(self, tmp_path):
-        from trapper_client.components.locations import LocationsComponent
+
+class TestImportsOnV2:
+    """v2 moved the import forms into the Django admin: same API, other URL, CSRF from the page."""
+
+    @pytest.mark.parametrize(
+        "cls_path, call, endpoint",
+        [
+            ("trapper_client.components.locations.LocationsComponent", "import_locations",
+             "admin/geomap/location/import-locations/"),
+            ("trapper_client.components.deployments.DeploymentsComponent", "import_deployments",
+             "admin/geomap/deployment/import-deployments/"),
+        ],
+    )
+    def test_v2_posts_to_the_admin_form_with_csrf_from_page(self, tmp_path, cls_path, call, endpoint):
+        import importlib
+        mod, name = cls_path.rsplit(".", 1)
+        comp_cls = getattr(importlib.import_module(mod), name)
         client = client_for("v2")
-        f = tmp_path / "l.csv"
+        client.session_post_multipart.return_value = response()
+        f = tmp_path / "x.csv"
         f.write_text("a\n")
-        with pytest.raises(err.UnsupportedVersionError, match="import_locations"):
+        kwargs = {"file": f, "research_project": 1, "timezone": "UTC"}
+        assert getattr(comp_cls(client), call)(**kwargs) is True
+        args, kw = client.session_post_multipart.call_args
+        assert args[0] == endpoint
+        assert kw["csrf_from_page"] is True
+        assert kw["data"]["research_project"] == 1
+
+    def test_v1_keeps_the_old_endpoint_and_call_shape(self, tmp_path):
+        client = client_for("v1")
+        client.session_post_multipart.return_value = response(location="/geomap/location/")
+        f = tmp_path / "x.csv"
+        f.write_text("a\n")
+        assert LocationsComponent(client).import_locations(file=f, research_project=1, timezone="UTC")
+        args, kw = client.session_post_multipart.call_args
+        assert args[0] == "geomap/location/import/"
+        assert "csrf_from_page" not in kw
+
+    def test_redirect_to_login_is_not_success(self, tmp_path):
+        client = client_for("v2")
+        client.session_post_multipart.return_value = response(location="/admin/login/?next=/admin/geomap/location/")
+        f = tmp_path / "x.csv"
+        f.write_text("a\n")
+        with pytest.raises(err.APIError, match="import refused.*staff"):
             LocationsComponent(client).import_locations(file=f, research_project=1, timezone="UTC")
-        client.session_login.assert_not_called()
+        assert LocationsComponent(client).import_locations(
+            file=f, research_project=1, timezone="UTC", raise_on_error=False
+        ) is False
 
-    def test_import_deployments_refused_on_v2(self, tmp_path):
-        from trapper_client.components.deployments import DeploymentsComponent
+    def test_form_errors_are_reported(self, tmp_path):
         client = client_for("v2")
-        f = tmp_path / "d.csv"
+        client.session_post_multipart.return_value = response(status=200, location=None)
+        client._extract_html_error_text.return_value = "bad column"
+        f = tmp_path / "x.csv"
         f.write_text("a\n")
-        with pytest.raises(err.UnsupportedVersionError, match="import_deployments"):
-            DeploymentsComponent(client).import_deployments(file=f, timezone="UTC", research_project=1)
-        client.session_login.assert_not_called()
+        with pytest.raises(err.APIError, match="bad column"):
+            LocationsComponent(client).import_locations(file=f, research_project=1, timezone="UTC")

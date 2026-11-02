@@ -25,9 +25,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `TusUploader` (`trapper_client.components.tus_uploader`): resumable uploads through tusd (tus 1.0),
   the v2 replacement for the v1 chunked uploader. `client.get_uploader()` returns the right uploader
   for the server's version.
-- Components that Trapper v2 removed — `maps`, `locations_geojson`, `collections.*_ondemand`,
-  `locations.import_locations`, `deployments.import_deployments` — raise
-  `UnsupportedVersionError` on a v2 server instead of failing with a bare 404.
+- Components that Trapper v2 removed — `maps`, `locations_geojson`, `collections.*_ondemand` —
+  raise `UnsupportedVersionError` on a v2 server instead of failing with a bare 404.
+- `locations.import_locations()` and `deployments.import_deployments()` work on v2 too, through the
+  import actions of its Django admin (`admin/geomap/<location|deployment>/import-*/`). Same signature;
+  they need a staff account with the add permission, and v2 processes the import asynchronously (a
+  `True` result means the table was validated and queued, not that every row is already in the
+  database). Failures report the server's message and the per-row validation errors. A redirect to
+  the login page is no longer taken as success.
 - `deployments.by_collection_with_counts()`: the deployments with at least one resource in a
   collection, each with how many resources it has there.
 

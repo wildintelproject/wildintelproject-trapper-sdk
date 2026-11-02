@@ -525,6 +525,15 @@ class APIClientBase:
         re.IGNORECASE | re.DOTALL,
     )
     _TAG_RE = re.compile(r"<[^>]+>")
+    # Trapper v2's admin (Unfold) renders import failures with these Tailwind-classed blocks.
+    _ADMIN_PANEL_RE = re.compile(r'<div class="[^"]*\bborder-red-600\b[^"]*">(.*?)</div>', re.DOTALL)
+    _ADMIN_COLUMNS_RE = re.compile(r'font-medium text-font-important-light[^"]*ml-2">(.*?)</span>', re.DOTALL)
+    _ADMIN_ROW_RE = re.compile(r'<tr class="hover:bg-base-50[^"]*">(.*?)</tr>', re.DOTALL)
+    _ADMIN_CELL_RE = re.compile(r"<td[^>]*>(.*?)</td>", re.DOTALL)
+    _ADMIN_BOILERPLATE_RE = re.compile(
+        r"Error:\s*Unfortunately, your table could not be imported;[^.]*\.\s*"
+        r"(?:Please note that the number of reported errors is limited to \d+\.)?\s*"
+    )
     _FRICTIONLESS_REPORT_RE = re.compile(r"const\s+report\s*=\s*(\{.*?\});", re.DOTALL)
 
     def _extract_frictionless_errors(
@@ -583,6 +592,36 @@ class APIClientBase:
             messages.append(f"(+{len(errors) - max_errors} more errors, truncated)")
         return messages
 
+    def _extract_admin_import_errors(self, html_text: str, max_errors: int = 20) -> str | None:
+        """Read the error panel of a failed import in Trapper v2's Django admin.
+
+        Returns the server's message, the provided/required columns when it complains
+        about them, and up to ``max_errors`` ``row N, field F: message`` lines from the
+        validation table; ``None`` when the page has no such panel.
+        """
+        def clean(fragment: str) -> str:
+            return " ".join(html.unescape(self._TAG_RE.sub(" ", fragment)).split())
+
+        panel = self._ADMIN_PANEL_RE.search(html_text)
+        if not panel:
+            return None
+        parts = []
+        message = self._ADMIN_BOILERPLATE_RE.sub("", clean(panel.group(1))).strip()
+        if message:
+            parts.append(message)
+        columns = [clean(c) for c in self._ADMIN_COLUMNS_RE.findall(html_text)]
+        if len(columns) >= 2:
+            parts.append(f"provided columns: {columns[0]}; required columns: {columns[1]}")
+        for row in self._ADMIN_ROW_RE.findall(html_text)[:max_errors]:
+            cells = [clean(c) for c in self._ADMIN_CELL_RE.findall(row)]
+            if len(cells) >= 6:
+                _, kind, row_no, field, cell, msg = cells[:6]
+                where = f"row {row_no}" if row_no != "—" else "table"
+                if field != "—":
+                    where += f", field {field}"
+                parts.append(f"{where}: {msg if msg != '—' else kind}" + (f" (cell {cell})" if cell != "—" else ""))
+        return "; ".join(parts) or None
+
     def _extract_html_error_text(self, html_text: str, max_len: int = 2000) -> str:
         """Best-effort extraction of a human-readable error from a Django page.
 
@@ -607,6 +646,10 @@ class APIClientBase:
         frictionless_errors = self._extract_frictionless_errors(html_text)
         if frictionless_errors:
             return "; ".join(frictionless_errors)[:max_len]
+
+        admin_errors = self._extract_admin_import_errors(html_text)
+        if admin_errors:
+            return admin_errors[:max_len]
 
         blocks = self._ERROR_BLOCK_RE.findall(html_text)
         if blocks:
@@ -732,6 +775,7 @@ class APIClientBase:
         endpoint: str,
         data: Dict[str, Any] | None = None,
         files: Dict[str, Any] | None = None,
+        csrf_from_page: bool = False,
     ) -> httpx.Response:
         """POST multipart/form-data to a classic (non-REST) Django view.
 
@@ -754,6 +798,11 @@ class APIClientBase:
             endpoint: Endpoint relative to ``base_url``.
             data: Form fields, excluding ``csrfmiddlewaretoken`` (added automatically).
             files: Mapping compatible with httpx's ``files`` parameter.
+            csrf_from_page: ``GET`` the endpoint first and use the ``csrfmiddlewaretoken``
+                embedded in the form, as a browser does. Needed by recent Django
+                versions (Trapper v2's admin), which reject the raw ``csrftoken`` cookie
+                value because form tokens are masked. Falls back to the cookie when the
+                page carries no token.
 
         Returns:
             Raw ``httpx.Response`` (redirects are not followed).
@@ -761,7 +810,15 @@ class APIClientBase:
         self.session_login()
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
         form_data = dict(data or {})
-        form_data["csrfmiddlewaretoken"] = self._csrf_cookie_value()
+        token = None
+        if csrf_from_page:
+            page = self._client.get(url)
+            if page.status_code != 200:
+                # Not allowed to see the form (redirect to login, 403, ...): hand that back
+                # instead of POSTing with a token the server would reject for the wrong reason.
+                return page
+            token = self._csrf_token_from_html(page.text)
+        form_data["csrfmiddlewaretoken"] = token or self._csrf_cookie_value()
         return self._client.post(url, data=form_data, files=files, headers={"Referer": url})
 
     def patch(

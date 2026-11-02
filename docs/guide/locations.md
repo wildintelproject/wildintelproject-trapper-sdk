@@ -55,6 +55,11 @@ See [Usage](../usage.md) if any of this looks unfamiliar — it's the same inter
 classic web UI's `geomap/location/import/` form via cookie/session auth instead of the API's token
 auth (see [`APIClientBase.session_login`](../api/api_client_base.md)).
 
+On **Trapper v2** the same method posts to the import action of the Django admin
+(`admin/geomap/location/import-locations/`). The account must be a staff user with the add
+permission, and the server imports asynchronously: `True` means the table passed validation and was
+queued. Rejected tables raise `APIError` with the server's message and the per-row errors.
+
 !!! warning "Not a stable API contract"
     This depends on an unversioned HTML form, not a documented endpoint — a Trapper change to that
     page can break it silently. It requires `user_name`/`user_password` (the account's *email*

@@ -73,6 +73,8 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
     export_schema = DeploymentExport
 
     import_endpoint = "geomap/deployment/import/"
+    #: Trapper v2 moved the import forms into the Django admin.
+    import_endpoint_v2 = "admin/geomap/deployment/import-deployments/"
 
     def import_deployments(
         self,
@@ -113,6 +115,11 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
         exists), when present. It still can't turn that into a structured
         report object the way :meth:`ClassificationsComponent.import_classifications`
         does for its proper REST endpoint — you get a joined string of messages.
+
+        On Trapper v2 the form is the import action of the Django admin
+        (``admin/geomap/deployment/import-deployments/``); the same arguments apply. The account must be a
+        staff user with the add permission, and the server imports
+        asynchronously, so ``True`` means the table was validated and queued.
 
         Warning:
             This is a workaround, not a stable integration: it depends on an
@@ -217,7 +224,6 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
                 delay=2,
             )
         """
-        self._require_version("v1", feature="deployments.import_deployments (geomap/deployment/import/)")
         data: Dict[str, Any] = {
             "timezone": timezone,
             "research_project": research_project,
@@ -267,20 +273,15 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
                 # object, whose read position may have advanced past a
                 # partial read from a prior attempt that timed out mid-upload.
                 fh.seek(0)
-                return self.client.session_post_multipart(
-                    self.import_endpoint, data=data, files=files,
-                )
+                return self._import_post(data, files)
 
             response = retrying(_do_request)
 
-        if response.status_code == 302:
+        if self._import_accepted(response):
             return True
 
         if raise_on_error:
-            message = self.client._extract_html_error_text(response.text)
-            raise err.APIError(
-                f"Deployment import failed (status {response.status_code}): {message}"
-            )
+            raise self._import_error("Deployment", response)
         return False
 
     def by_collection_with_counts(

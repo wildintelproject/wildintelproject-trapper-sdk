@@ -39,7 +39,7 @@ Skip the probe by passing `trapper_version="v1"` or `"v2"`.
 | `client.upload_auth()` | — | ✔ |
 | `client.maps`, `client.locations_geojson` | ✔ | `UnsupportedVersionError` |
 | `collections.*_ondemand` | ✔ | `UnsupportedVersionError` |
-| `locations.import_locations`, `deployments.import_deployments` | ✔ | `UnsupportedVersionError` (v2 imports through the Django admin) |
+| `locations.import_locations`, `deployments.import_deployments` | ✔ (web import form) | ✔ (Django admin import action; needs a staff account, runs asynchronously) |
 | Everything else | ✔ | ✔ |
 
 ## Uploading

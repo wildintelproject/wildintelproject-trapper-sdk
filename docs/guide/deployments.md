@@ -81,6 +81,12 @@ collection list (`classification_projects.get_all_project_collections()`).
 the classic web UI's `geomap/deployment/import/` form via cookie/session auth instead of the API's
 token auth (see [`APIClientBase.session_login`](../api/api_client_base.md)).
 
+On **Trapper v2** the same method posts to the import action of the Django admin
+(`admin/geomap/deployment/import-deployments/`). The account must be a staff user with the add
+permission, and the server imports asynchronously: `True` means the table passed validation and was
+queued, so poll `client.deployments` if you need the rows to be there. Rejected tables raise
+`APIError` with the server's message and the per-row errors.
+
 !!! warning "Not a stable API contract"
     Same caveat as [locations import](locations.md#importing-locations-write-access): this depends
     on an unversioned HTML form and requires `user_name`/`user_password` (account *email*). See the

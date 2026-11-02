@@ -68,6 +68,42 @@ class TrapperComponent(Generic[TModel]):
         if self.supported_versions != ("v1", "v2"):
             self._require_version(*self.supported_versions)
 
+    def _import_post(self, data: Dict[str, Any], files: Dict[str, Any]) -> Any:
+        """POST a CSV/GPX import form: v1's web view, or v2's Django-admin action.
+
+        The two versions use different URLs (``import_endpoint`` / ``import_endpoint_v2``) and v2's
+        admin needs the CSRF token read from the form page.
+        """
+        if self.client.server_version == "v2":
+            return self.client.session_post_multipart(
+                self.import_endpoint_v2, data=data, files=files, csrf_from_page=True
+            )
+        return self.client.session_post_multipart(self.import_endpoint, data=data, files=files)
+
+    @staticmethod
+    def _import_accepted(response: Any) -> bool:
+        """Whether a classic-form import POST was accepted.
+
+        The server answers ``302`` to the changelist on success. A ``302`` back to a login
+        page means the session has no permission for the form (e.g. a non-staff user on
+        Trapper v2's admin), which must not be mistaken for success.
+        """
+        if response.status_code != 302:
+            return False
+        return "login" not in (response.headers.get("location") or "").lower()
+
+    def _import_error(self, label: str, response: Any) -> err.APIError:
+        """Build the ``APIError`` for a rejected import POST, naming the real cause."""
+        location = (response.headers.get("location") or "").lower()
+        if response.status_code == 302 and "login" in location:
+            return err.APIError(
+                f"{label} import refused: the server redirected to its login page. The account "
+                "is not allowed to use the import form (on Trapper v2 it needs a staff account "
+                "with the add permission)."
+            )
+        message = self.client._extract_html_error_text(response.text)
+        return err.APIError(f"{label} import failed (status {response.status_code}): {message}")
+
     def _merge_query(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """Merge ``query`` and ``kwargs`` into one query-params dictionary.
 
