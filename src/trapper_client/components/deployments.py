@@ -7,6 +7,7 @@ from __future__ import annotations
 import time
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack
+from datetime import date
 from pathlib import Path
 from typing import Any, Dict
 
@@ -283,6 +284,69 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
         if raise_on_error:
             raise self._import_error("Deployment", response)
         return False
+
+    geojson_endpoint = "api/deployments/geojson/"
+
+    def geojson(
+        self,
+        classification_project: int | None = None,
+        observation_type: str | list[str] | None = None,
+        species: int | str | list[int | str] | None = None,
+        start_date_gte: str | date | None = None,
+        end_date_lte: str | date | None = None,
+        refresh: bool = False,
+        query: Dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
+        """Deployments as a GeoJSON ``FeatureCollection`` (**Trapper v2 only**).
+
+        Replaces ``client.maps`` and ``client.locations_geojson``, which v2 removed. Each feature is a
+        point whose ``properties`` follow the Camtrap DP shape (``deploymentID``, ``locationName``,
+        ``deploymentStart``, ...). Only deployments the current user can access are returned.
+
+        Args:
+            classification_project: Keep deployments linked to this classification project, and
+                scope ``observation_type`` / ``species`` to its classifications.
+            observation_type: One value or a list (``"animal"``, ``["animal", "human"]``): keep
+                deployments with at least one classification of that type.
+            species: One species primary key or a list: keep deployments where it was classified.
+            start_date_gte: Deployments that start on or after this date (``YYYY-MM-DD``).
+            end_date_lte: Deployments that end on or before this date.
+            refresh: Bypass the server's one-hour cache for this query and rebuild it.
+            query: Extra query parameters.
+
+        Returns:
+            The GeoJSON payload as a ``dict``.
+
+        Raises:
+            err.UnsupportedVersionError: On Trapper v1 (use ``client.locations_geojson`` there).
+
+        Example::
+
+            fc = client.deployments.geojson(classification_project=2, species=[3, 7])
+            for feature in fc["features"]:
+                lon, lat = feature["geometry"]["coordinates"]
+                print(feature["properties"]["deploymentID"], lon, lat)
+        """
+        self._require_version("v2", feature="deployments.geojson (api/deployments/geojson/)")
+
+        def csv(value: Any) -> Any:
+            return ",".join(str(v) for v in value) if isinstance(value, (list, tuple, set)) else value
+
+        q = dict(query or {})
+        q.update(kwargs)
+        for key, value in {
+            "classification_project": classification_project,
+            "observation_type": csv(observation_type),
+            "species": csv(species),
+            "start_date_gte": start_date_gte.isoformat() if isinstance(start_date_gte, date) else start_date_gte,
+            "end_date_lte": end_date_lte.isoformat() if isinstance(end_date_lte, date) else end_date_lte,
+        }.items():
+            if value is not None:
+                q[key] = value
+        if refresh:
+            q["refresh"] = 1
+        return self._unwrap_feature_collection(self.client.get(self.geojson_endpoint, query=q))
 
     def by_collection_with_counts(
         self,

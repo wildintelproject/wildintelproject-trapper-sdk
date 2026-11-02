@@ -104,6 +104,23 @@ class TrapperComponent(Generic[TModel]):
         message = self.client._extract_html_error_text(response.text)
         return err.APIError(f"{label} import failed (status {response.status_code}): {message}")
 
+    @staticmethod
+    def _unwrap_feature_collection(data: Any) -> Any:
+        """Return the GeoJSON ``FeatureCollection`` from ``client.get``'s envelope.
+
+        ``client.get`` wraps non-paginated bodies as ``{"pagination": ..., "results": [body]}``;
+        anything that is not exactly that is returned unchanged.
+        """
+        results = data.get("results") if isinstance(data, dict) else None
+        if (
+            isinstance(results, list)
+            and len(results) == 1
+            and isinstance(results[0], dict)
+            and results[0].get("type") == "FeatureCollection"
+        ):
+            return results[0]
+        return data
+
     def _merge_query(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """Merge ``query`` and ``kwargs`` into one query-params dictionary.
 

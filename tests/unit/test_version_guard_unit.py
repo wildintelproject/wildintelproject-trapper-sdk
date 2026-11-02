@@ -146,3 +146,56 @@ class TestImportsOnV2:
         f.write_text("a\n")
         with pytest.raises(err.APIError, match="bad column"):
             LocationsComponent(client).import_locations(file=f, research_project=1, timezone="UTC")
+
+
+class TestDeploymentsGeojson:
+    """``deployments.geojson()`` replaces maps / locations_geojson, which exist only in v1."""
+
+    FC = {"type": "FeatureCollection", "features": [{"type": "Feature"}]}
+
+    def _client(self, version="v2"):
+        client = client_for(version)
+        client.get.return_value = {"pagination": {"page": 1, "count": 1}, "results": [self.FC]}
+        return client
+
+    def test_refused_on_v1(self):
+        from trapper_client.components.deployments import DeploymentsComponent
+        client = self._client("v1")
+        with pytest.raises(err.UnsupportedVersionError, match="only available in Trapper v2"):
+            DeploymentsComponent(client).geojson()
+        client.get.assert_not_called()
+
+    def test_returns_the_feature_collection_not_the_envelope(self):
+        from trapper_client.components.deployments import DeploymentsComponent
+        assert DeploymentsComponent(self._client()).geojson() == self.FC
+
+    def test_filters_become_query_params(self):
+        import datetime
+        from trapper_client.components.deployments import DeploymentsComponent
+        client = self._client()
+        DeploymentsComponent(client).geojson(
+            classification_project=2, observation_type=["animal", "human"], species=[3, 7],
+            start_date_gte=datetime.date(2024, 3, 1), end_date_lte="2024-06-01", refresh=True,
+        )
+        endpoint = client.get.call_args.args[0]
+        q = client.get.call_args.kwargs["query"]
+        assert endpoint == "api/deployments/geojson/"
+        assert q == {
+            "classification_project": 2, "observation_type": "animal,human", "species": "3,7",
+            "start_date_gte": "2024-03-01", "end_date_lte": "2024-06-01", "refresh": 1,
+        }
+
+    def test_no_filters_sends_an_empty_query(self):
+        from trapper_client.components.deployments import DeploymentsComponent
+        client = self._client()
+        DeploymentsComponent(client).geojson()
+        assert client.get.call_args.kwargs["query"] == {}
+
+    def test_locations_geojson_also_unwraps_the_envelope(self):
+        client = self._client("v1")
+        assert LocationsGeoJsonComponent(client).get() == self.FC
+
+    def test_unwrap_leaves_other_payloads_alone(self):
+        from trapper_client.components.base import TrapperComponent
+        for data in ({"type": "FeatureCollection", "features": []}, {"results": [1, 2]}, [1], None):
+            assert TrapperComponent._unwrap_feature_collection(data) is data

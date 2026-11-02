@@ -110,7 +110,7 @@ class LocationsGeoJsonComponent(TrapperComponent[LocationGeoJsonFeatureCollectio
         q.update(kwargs)
         if collection_id is not None:
             q["colls"] = collection_id
-        return self.client.get(self.endpoint, query=q)
+        return self._unwrap_feature_collection(self.client.get(self.endpoint, query=q))
 
     def get_all(self, **kwargs: Any) -> None:  # type: ignore[override]
         raise NotImplementedError(_NOT_SUPPORTED)
