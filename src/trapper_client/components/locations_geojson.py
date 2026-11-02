@@ -87,6 +87,7 @@ class LocationsGeoJsonComponent(TrapperComponent[LocationGeoJsonFeatureCollectio
 
     endpoint = "geomap/api/locations/geojson/"
     schema = LocationGeoJsonFeatureCollection
+    supported_versions = ("v1",)  # removed in Trapper v2
 
     def get(
         self,
@@ -104,6 +105,7 @@ class LocationsGeoJsonComponent(TrapperComponent[LocationGeoJsonFeatureCollectio
         Returns:
             GeoJSON payload as a ``dict`` (FeatureCollection).
         """
+        self._ensure_supported()
         q = dict(query or {})
         q.update(kwargs)
         if collection_id is not None:

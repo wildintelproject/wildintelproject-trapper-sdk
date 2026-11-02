@@ -181,6 +181,25 @@ class TrapperClient(APIClientBase):
         self.sequences: SequencesComponent = SequencesComponent(self)
         self.users: UsersComponent = UsersComponent(self)
 
+    # ── Uploader ──────────────────────────────────────────────────────────────
+
+    def get_uploader(self, **kwargs: Any):
+        """Return the package uploader that matches the server's Trapper version.
+
+        * v1 → :class:`~trapper_client.components.http_uploader.HTTPUploader`
+          (custom chunked protocol; needs the ``upload`` extra: ``aiofiles`` and ``blake3``).
+        * v2 → :class:`~trapper_client.components.tus_uploader.TusUploader`
+          (tus 1.0 through tusd; resumable by design).
+
+        Both expose ``upload(file_path, remote_path)`` and ``upload_file`` (async).
+        Extra ``kwargs`` are passed to the uploader's constructor.
+        """
+        if self.server_version == "v2":
+            from trapper_client.components.tus_uploader import TusUploader
+            return TusUploader(client=self, **kwargs)
+        from trapper_client.components.http_uploader import HTTPUploader
+        return HTTPUploader(client=self, **kwargs)
+
     # ── Generic helper ────────────────────────────────────────────────────────
 
     def where(

@@ -18,6 +18,17 @@ import bz2
 
 logger = logging.getLogger(__name__)
 
+#: Accepted values for ``trapper_version``.
+TRAPPER_VERSIONS = ("auto", "v1", "v2")
+
+#: Public route that reports the server's release (``{"version": "v1.7.4"}``, ``{"version": "2.0.0a"}``).
+VERSION_ENDPOINT = "api/cs/version/"
+
+#: Route that exists only in Trapper v2 (``storage/api/upload-auth/``); fallback to tell versions apart.
+UPLOAD_AUTH_ENDPOINT = "storage/api/upload-auth/"
+
+_RELEASE_MAJOR = re.compile(r"^\s*v?(\d+)")
+
 
 @attr.s
 class APIClientBase:
@@ -35,6 +46,9 @@ class APIClientBase:
         verify_ssl: Whether to verify SSL certificates.
         base_url: Base URL of the Trapper API.
         timeout: Request timeout in seconds.
+        trapper_version: Trapper server major version: ``"v1"``, ``"v2"`` or ``"auto"``
+            (default). With ``"auto"`` the version is detected on first use by probing
+            ``storage/api/upload-auth/`` (see :meth:`detect_server_version`) and cached.
     """
 
     access_token: str = attr.ib(repr=False, default=None)
@@ -44,6 +58,10 @@ class APIClientBase:
     base_url: str = attr.ib(repr=False, default="https://trapper_api_client-trap.uhu.es")
     logger = attr.ib(repr=False, default=logger)
     timeout: int = attr.ib(default=30)
+    trapper_version: str = attr.ib(
+        default="auto",
+        validator=attr.validators.in_(TRAPPER_VERSIONS),
+    )
     _client: httpx.Client = attr.ib(init=False, repr=False)
     name = "trapper_api_client"
     user_id: str = "me"
@@ -61,6 +79,104 @@ class APIClientBase:
             raise ValueError("Token or user/password must be provided for authentication")
         self._client = httpx.Client(verify=self.verify_ssl, timeout=self.timeout)
         self._web_csrf_token: str | None = None
+        self._detected_version: str | None = None
+        self._server_release: str | None = None
+        self._release_probed = False
+
+    @property
+    def server_release(self) -> str | None:
+        """Exact release string reported by the server (e.g. ``"v1.7.4-2-g7540e9ed"``, ``"2.0.0a"``).
+
+        Read from ``api/cs/version/`` once and cached. ``None`` when the server does not
+        expose it (old v1 builds); :attr:`server_version` still works then.
+        """
+        if not self._release_probed:
+            self._read_release()
+        return self._server_release
+
+    @property
+    def server_version(self) -> Literal["v1", "v2"]:
+        """Trapper major version this client talks to (``"v1"`` or ``"v2"``).
+
+        Returns ``trapper_version`` when it was set explicitly; otherwise detects the
+        version once with :meth:`detect_server_version` and caches it.
+        """
+        if self.trapper_version != "auto":
+            return self.trapper_version
+        if self._detected_version is None:
+            self._detected_version = self.detect_server_version()
+        return self._detected_version
+
+    def _read_release(self) -> str | None:
+        """Fetch ``api/cs/version/``; return the release string, or ``None`` if unusable.
+
+        Only a ``200`` JSON object with a string ``version`` counts. A 404, an HTML page
+        (SPA fallback) or any other answer returns ``None`` so the caller can fall back.
+        Network errors still propagate: an unreachable server is not a version question.
+        """
+        r = self._send_request(VERSION_ENDPOINT, "GET", None, None)
+        release = None
+        if r.status_code == 200:
+            try:
+                data = r.json()
+            except ValueError:
+                data = None
+            if isinstance(data, dict) and isinstance(data.get("version"), str):
+                release = data["version"]
+        self._release_probed = True
+        self._server_release = release
+        return release
+
+    def detect_server_version(self) -> Literal["v1", "v2"]:
+        """Tell Trapper v1 from v2.
+
+        1. Reads the public ``GET api/cs/version/`` and takes the major number of the
+           release (``v1.7.4-2-g7540e9ed`` -> v1, ``2.0.0a`` -> v2).
+        2. If that endpoint is missing or unreadable, falls back to ``GET storage/api/upload-auth/``,
+           a route that exists only in v2: ``404`` -> **v1**; ``200`` / ``401`` / ``403`` -> **v2**.
+
+        Returns:
+            ``"v1"`` or ``"v2"``.
+
+        Raises:
+            err.APIError: If neither check is conclusive; set ``trapper_version`` explicitly.
+        """
+        release = self._read_release()
+        m = _RELEASE_MAJOR.match(release) if release else None
+        if m and int(m.group(1)) >= 1:
+            return "v1" if int(m.group(1)) == 1 else "v2"
+        return self._detect_by_upload_auth()
+
+    def _detect_by_upload_auth(self) -> Literal["v1", "v2"]:
+        r = self._send_request(UPLOAD_AUTH_ENDPOINT, "GET", None, None)
+        if r.status_code == 404:
+            return "v1"
+        if r.status_code in (200, 401, 403):
+            return "v2"
+        raise err.APIError(
+            f"Could not detect the Trapper version: GET {VERSION_ENDPOINT} gave no release and "
+            f"GET {UPLOAD_AUTH_ENDPOINT} returned HTTP {r.status_code}. "
+            "Pass trapper_version='v1' or 'v2' explicitly."
+        )
+
+    def upload_auth(self) -> Dict[str, Any]:
+        """Check that the token may upload packages, before any byte is sent (Trapper v2).
+
+        Calls ``GET storage/api/upload-auth/``. Returns ``{"username": ...}`` when the
+        credentials are valid **and** the account has been granted HTTP-uploader access.
+
+        Raises:
+            err.UnsupportedVersionError: On a Trapper v1 server (the route does not exist).
+            err.UnauthorizedError: Unknown or missing credentials (401).
+            err.ForbiddenError: Valid credentials but no uploader account (403).
+        """
+        if self.server_version != "v2":
+            raise err.UnsupportedVersionError(
+                "upload_auth() is only available in Trapper v2, "
+                f"but this server runs Trapper {self.server_version}."
+            )
+        r = self.make_request(UPLOAD_AUTH_ENDPOINT, "GET")
+        return r.json()
 
     def make_request(
         self,

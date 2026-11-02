@@ -210,6 +210,7 @@ class LocationsComponent(TrapperComponent[Location]):
                 delay=2,
             )
         """
+        self._require_version("v1", feature="locations.import_locations (geomap/location/import/)")
         if split and gpx_file is not None:
             raise ValueError("split=True is not supported together with gpx_file")
 

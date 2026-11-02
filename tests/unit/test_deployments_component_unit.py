@@ -54,7 +54,9 @@ class TestByCollection:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -106,7 +108,9 @@ class TestExportByCollection:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -143,7 +147,9 @@ class TestImportDeployments:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -295,7 +301,9 @@ class TestImportDeploymentsSplit:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -457,7 +465,9 @@ class TestImportDeploymentsRetry:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):

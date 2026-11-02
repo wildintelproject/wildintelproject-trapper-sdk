@@ -59,8 +59,10 @@ def paginated_response(
 
 
 def make_mock_client() -> MagicMock:
-    """Construye un mock de APIClientBase."""
-    return MagicMock()
+    """Construye un mock de APIClientBase (servidor Trapper v1 por defecto)."""
+    client = MagicMock()
+    client.server_version = "v1"
+    return client
 
 
 # ── clase base unit tests ─────────────────────────────────────────────────────

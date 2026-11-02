@@ -217,6 +217,7 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
                 delay=2,
             )
         """
+        self._require_version("v1", feature="deployments.import_deployments (geomap/deployment/import/)")
         data: Dict[str, Any] = {
             "timezone": timezone,
             "research_project": research_project,

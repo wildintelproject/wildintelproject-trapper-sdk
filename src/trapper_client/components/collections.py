@@ -22,7 +22,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
 
     - ``GET /storage/api/collections/``: Paginated list of accessible collections
     - ``GET /storage/api/collections/{id}``: Single collection detail
-    - ``GET /storage/api/e/collections_ondemand``: On-demand collections for current user
+    - ``GET /storage/api/collections_ondemand``: On-demand collections for current user (**Trapper v1 only**)
     - ``GET /storage/api/collections_map``: Collections list for map rendering
     - ``GET /storage/api//collections_append``: Collections the user can append resources to
     - ``POST api/storage/collection/process/``: Trigger processing of an FTP-uploaded collection
@@ -101,6 +101,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
             for col in client.collections.where_ondemand():
                 print(col)
         """
+        self._require_version("v1", feature="collections.where_ondemand (storage/api/collections_ondemand)")
         return self.where(
             query=query,
             filter_fn=filter_fn,
@@ -135,6 +136,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
             page = client.collections.get_ondemand(page_size=25)
             print(page.pagination.count, len(page.results))
         """
+        self._require_version("v1", feature="collections.get_ondemand (storage/api/collections_ondemand)")
         return self.get(
             query=query,
             page=page,
@@ -167,6 +169,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
             page = client.collections.get_all_ondemand()
             print(page.pagination.count, len(page.results))
         """
+        self._require_version("v1", feature="collections.get_all_ondemand (storage/api/collections_ondemand)")
         return self.get_all(
             query=query,
             page_size=page_size,
@@ -195,6 +198,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
             col = client.collections.find_ondemand(42)
             print(col)
         """
+        self._require_version("v1", feature="collections.find_ondemand (storage/api/collections_ondemand)")
         return self.find(
             pk=pk,
             validate=validate,

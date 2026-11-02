@@ -87,6 +87,7 @@ nav:
   - Uso: usage.md
   - Component Guides:
       - Locations: guide/locations.md
+      - Trapper versions (v1 / v2): guide/versions.md
       - Locations GeoJSON: guide/locations_geojson.md
       - Deployments: guide/deployments.md
       - Resources: guide/resources.md

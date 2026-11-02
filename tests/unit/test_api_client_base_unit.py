@@ -990,3 +990,108 @@ def test_session_post_multipart_returns_raw_response(basic_auth_client):
     result = basic_auth_client.session_post_multipart("/geomap/location/import/", data={}, files={})
 
     assert result is mock_resp
+
+# ── server version detection ──────────────────────────────────────────────────
+
+class TestServerVersion:
+    def _client(self, status=None, release=None, **kwargs):
+        """Client whose server answers ``api/cs/version/`` with ``release`` (404 when None)
+        and ``storage/api/upload-auth/`` with ``status``."""
+        client = APIClientBase(access_token="tok", **kwargs)
+
+        def send(endpoint, method, query, body):
+            if endpoint == "api/cs/version/":
+                if release is None:
+                    return make_response(status_code=404)
+                return make_response(status_code=200, json_data={"version": release})
+            return make_response(status_code=status or 200)
+
+        client._send_request = MagicMock(side_effect=send)
+        return client
+
+    def test_default_is_auto(self):
+        assert APIClientBase(access_token="tok").trapper_version == "auto"
+
+    def test_invalid_trapper_version_is_rejected(self):
+        with pytest.raises(ValueError):
+            APIClientBase(access_token="tok", trapper_version="v3")
+
+    @pytest.mark.parametrize("forced", ["v1", "v2"])
+    def test_explicit_version_skips_the_probe(self, forced):
+        client = self._client(trapper_version=forced)
+        assert client.server_version == forced
+        client._send_request.assert_not_called()
+
+    def test_404_means_v1(self):
+        assert self._client(404).server_version == "v1"
+
+    @pytest.mark.parametrize("status", [200, 401, 403])
+    def test_route_present_means_v2(self, status):
+        assert self._client(status).server_version == "v2"
+
+    @pytest.mark.parametrize("status", [302, 500, 502])
+    def test_inconclusive_answer_raises(self, status):
+        with pytest.raises(err.APIError, match="trapper_version"):
+            self._client(status).server_version
+
+    def test_probe_hits_upload_auth_and_is_cached(self):
+        client = self._client(200)
+        assert client.server_version == "v2"
+        assert client.server_version == "v2"
+        assert [c.args[0] for c in client._send_request.call_args_list] == [
+            "api/cs/version/",
+            "storage/api/upload-auth/",
+        ]
+
+    @pytest.mark.parametrize(
+        "release, expected",
+        [
+            ("v1.7.4-2-g7540e9ed", "v1"),
+            ("1.7.4", "v1"),
+            ("2.0.0a", "v2"),
+            ("v2.0.0a2", "v2"),
+            ("3.1.0", "v2"),
+        ],
+    )
+    def test_release_decides_without_the_upload_auth_probe(self, release, expected):
+        client = self._client(release=release)
+        assert client.server_version == expected
+        assert client.server_release == release
+        client._send_request.assert_called_once_with("api/cs/version/", "GET", None, None)
+
+    def test_release_wins_over_upload_auth(self):
+        # upload-auth would say v2, the release says v1: the release is authoritative.
+        client = self._client(status=200, release="v1.7.4")
+        assert client.server_version == "v1"
+
+    @pytest.mark.parametrize("bad", ["", "unknown", "dev-build"])
+    def test_unparseable_release_falls_back_to_upload_auth(self, bad):
+        assert self._client(404, release=bad).server_version == "v1"
+        assert self._client(401, release=bad).server_version == "v2"
+
+    def test_server_release_is_none_when_endpoint_is_missing(self):
+        client = self._client(404)
+        assert client.server_version == "v1"
+        assert client.server_release is None
+
+    def test_non_json_version_answer_falls_back(self):
+        client = APIClientBase(access_token="tok")
+        html = make_response(status_code=200)
+        html.json.side_effect = ValueError("not json")
+        client._send_request = MagicMock(side_effect=[html, make_response(status_code=404)])
+        assert client.server_version == "v1"
+        assert client.server_release is None
+
+    def test_server_release_is_cached(self):
+        client = self._client(release="2.0.0a", trapper_version="v2")
+        assert client.server_release == "2.0.0a"
+        assert client.server_release == "2.0.0a"
+        client._send_request.assert_called_once()
+
+    def test_inconclusive_probe_is_not_cached(self):
+        client = self._client(500)
+        with pytest.raises(err.APIError):
+            client.server_version
+        client._send_request.side_effect = None
+        client._send_request.return_value = make_response(status_code=200)
+        assert client.server_version == "v2"

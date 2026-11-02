@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, TypeVar, Union
 
 from pydantic import BaseModel
 
+from trapper_client import err
 from trapper_client.api_query import APIQuery, parse_row
 from trapper_client.schemas import PaginatedResult, Pagination
 
@@ -40,9 +41,32 @@ class TrapperComponent(Generic[TModel]):
     schema: type[TModel]
     export_schema: type[BaseModel] | None = None
     export_endpoint: str | None = None
+    #: Trapper major versions the resource exists in. Narrow it (e.g. ``("v1",)``) for
+    #: resources a version dropped; every read method then fails fast with
+    #: :class:`~trapper_client.err.UnsupportedVersionError` instead of a bare 404.
+    supported_versions: tuple[str, ...] = ("v1", "v2")
 
     def __init__(self, client: "APIClientBase"):
         self.client = client
+
+    def _require_version(self, *versions: str, feature: str | None = None) -> None:
+        """Raise ``UnsupportedVersionError`` unless the server runs one of ``versions``.
+
+        Reading ``client.server_version`` may probe the server once (``trapper_version="auto"``),
+        so only components or methods that really are version-specific call this.
+        """
+        current = self.client.server_version
+        if current not in versions:
+            name = feature or type(self).__name__
+            raise err.UnsupportedVersionError(
+                f"{name} is only available in Trapper {' / '.join(versions)}, "
+                f"but this server runs Trapper {current}."
+            )
+
+    def _ensure_supported(self) -> None:
+        """Version guard for the whole component; a no-op when it exists in every version."""
+        if self.supported_versions != ("v1", "v2"):
+            self._require_version(*self.supported_versions)
 
     def _merge_query(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """Merge ``query`` and ``kwargs`` into one query-params dictionary.
@@ -127,6 +151,7 @@ class TrapperComponent(Generic[TModel]):
         Returns:
             A ``PaginatedResult[TModel]`` containing only the requested page.
         """
+        self._ensure_supported()
         q = self._merge_query(query, kwargs)
         q = dict(q or {})
         q.setdefault("page", page)
@@ -152,6 +177,7 @@ class TrapperComponent(Generic[TModel]):
         The iterator fetches data page by page on demand. ``filter_fn`` is applied
         client-side to each yielded item.
         """
+        self._ensure_supported()
         q = dict(query or {})
         q.update(kwargs)
         endpoint = overwrite_endpoint or self.endpoint
@@ -216,6 +242,7 @@ class TrapperComponent(Generic[TModel]):
         Returns:
             A single ``PaginatedResult[TModel]`` containing merged results.
         """
+        self._ensure_supported()
         q = self._merge_query(query, kwargs)
         q.setdefault("page_size", page_size)
         endpoint = overwrite_endpoint or self.endpoint
@@ -253,6 +280,7 @@ class TrapperComponent(Generic[TModel]):
             ``Path`` to the generated CSV when ``file`` is provided,
             otherwise ``list[BaseModel]`` with parsed or constructed models.
         """
+        self._ensure_supported()
         q = self._merge_query(query, kwargs)
         endpoint = overwrite_endpoint or self.export_endpoint or self.endpoint
         target_schema = overwrite_schema or self.export_schema or self.schema
@@ -297,6 +325,7 @@ class TrapperComponent(Generic[TModel]):
             validated. If ``validate=False``, the model is built directly
             from the raw payload without running Pydantic validators.
         """
+        self._ensure_supported()
         q = self._merge_query(query, kwargs)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema

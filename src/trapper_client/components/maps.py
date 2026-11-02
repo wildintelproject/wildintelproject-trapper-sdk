@@ -28,3 +28,4 @@ class MapsComponent(TrapperComponent[MapRecord]):
 
     endpoint = "geomap/api/maps"
     schema = MapRecord
+    supported_versions = ("v1",)  # removed in Trapper v2

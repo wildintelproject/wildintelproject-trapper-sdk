@@ -1,5 +1,8 @@
 # Locations GeoJSON
 
+!!! warning "Trapper v1 only"
+    Removed in Trapper v2: on a v2 server this raises `UnsupportedVersionError`. See [Trapper versions](versions.md).
+
 `client.locations_geojson` — locations as a single GeoJSON `FeatureCollection`, for map rendering.
 
 **Endpoint:** `GET /geomap/api/locations/geojson/`.

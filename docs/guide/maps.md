@@ -1,5 +1,8 @@
 # Maps
 
+!!! warning "Trapper v1 only"
+    Removed in Trapper v2: on a v2 server this raises `UnsupportedVersionError`. See [Trapper versions](versions.md).
+
 `client.maps` — umap-based maps accessible to the current user.
 
 **Endpoint:** `GET /geomap/api/maps` (list + detail).

@@ -14,7 +14,9 @@ from trapper_client.components.locations_geojson import LocationsGeoJsonComponen
 
 @pytest.fixture
 def client():
-    return MagicMock()
+    client = MagicMock()
+    client.server_version = "v1"
+    return client
 
 
 @pytest.fixture

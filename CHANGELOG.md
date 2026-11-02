@@ -16,6 +16,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Upcoming release
 
 ### Added
+- **Trapper v2 support** (issue #1). `TrapperClient(trapper_version="auto" | "v1" | "v2")`: with
+  `"auto"` (default) the version is detected once, on first use, from
+  the public `GET api/cs/version/` (major number of the release), falling back to probing
+  `GET storage/api/upload-auth/` (404 → v1; 200/401/403 → v2). Read it with `client.server_version`
+  and the exact release with `client.server_release`.
+- `client.upload_auth()` (v2): checks that the token may upload packages before sending data.
+- `TusUploader` (`trapper_client.components.tus_uploader`): resumable uploads through tusd (tus 1.0),
+  the v2 replacement for the v1 chunked uploader. `client.get_uploader()` returns the right uploader
+  for the server's version.
+- Components that Trapper v2 removed — `maps`, `locations_geojson`, `collections.*_ondemand`,
+  `locations.import_locations`, `deployments.import_deployments` — raise
+  `UnsupportedVersionError` on a v2 server instead of failing with a bare 404.
 - `deployments.by_collection_with_counts()`: the deployments with at least one resource in a
   collection, each with how many resources it has there.
 
