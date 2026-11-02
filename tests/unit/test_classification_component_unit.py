@@ -332,6 +332,34 @@ class TestImportClassifications:
         endpoint = client.post_multipart.call_args.kwargs["endpoint"]
         assert endpoint == f"{component.endpoint.rstrip('/')}/import/"
 
+    def test_bare_500_explains_the_likely_validation_failure(self, component, client, csv_file):
+        response = MagicMock()
+        response.status_code = 500
+        response.json.side_effect = ValueError("not json")
+        response.text = "<h1>Server Error (500)</h1>"
+        client.post_multipart.return_value = response
+        with pytest.raises(err.APIError, match="fails validation.*scientificName"):
+            component.import_classifications(project_id=PROJECT_PK, file=csv_file, retry_attempts=1)
+
+    def test_overwrite_attrs_is_sent_on_v1(self, component, client, csv_file):
+        client.server_version = "v1"
+        self._mock_response(client, {"data": {}})
+        component.import_classifications(project_id=PROJECT_PK, file=csv_file, overwrite_attrs=True)
+        assert client.post_multipart.call_args.kwargs["data"]["overwrite_attrs"] is True
+
+    def test_overwrite_attrs_is_refused_on_v2(self, component, client, csv_file):
+        """Trapper v2's import view dropped the option; it must not vanish silently."""
+        client.server_version = "v2"
+        with pytest.raises(err.UnsupportedVersionError, match="overwrite_attrs"):
+            component.import_classifications(project_id=PROJECT_PK, file=csv_file, overwrite_attrs=True)
+        client.post_multipart.assert_not_called()
+
+    def test_default_import_does_not_probe_the_version(self, component, client, csv_file):
+        """Without overwrite_attrs the call is the same on both versions: no probe needed."""
+        type(client).server_version = property(lambda self: (_ for _ in ()).throw(AssertionError("probed")))
+        self._mock_response(client, {"data": {}})
+        component.import_classifications(project_id=PROJECT_PK, file=csv_file)
+
     def test_sends_project_id_and_flags(self, component, client, csv_file):
         """import_classifications() envía project_id y los flags booleanos."""
         self._mock_response(client, {"data": {}})

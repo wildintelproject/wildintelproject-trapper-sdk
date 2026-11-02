@@ -204,7 +204,8 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
             import_ai_classifications: Import rows with classificationMethod = machine.
                 Requires ``ai_provider_id``.
             overwrite_attrs: Overwrite existing classification attributes when
-                approving imported AI classifications.
+                approving imported AI classifications. **Trapper v1 only**: v2 removed
+                the option, so ``True`` raises ``UnsupportedVersionError`` there.
             ai_provider_id: AI provider primary key. Required when
                 ``import_ai_classifications=True``.
             validate: Whether to validate the response with Pydantic.
@@ -271,14 +272,18 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
         """
         if import_ai_classifications and ai_provider_id is None:
             raise ValueError("ai_provider_id is required when import_ai_classifications=True")
+        if overwrite_attrs:
+            # Trapper v2's import view no longer reads it, so it would be dropped silently.
+            self._require_version("v1", feature="classification_results.import_classifications(overwrite_attrs=True)")
 
         data: Dict[str, Any] = {
             "project_id": project_id,
             "approve": approve,
             "import_bboxes": import_bboxes,
             "import_expert_classifications": import_expert_classifications,
-            "overwrite_attrs": overwrite_attrs,
         }
+        if overwrite_attrs:
+            data["overwrite_attrs"] = True
         if import_ai_classifications:
             # Sent only when True: the server reads this flag from the raw
             # request body *before* running it through form validation, as a
@@ -380,7 +385,15 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
         try:
             payload = response.json()
         except ValueError:
-            return f"non-JSON response (likely an unhandled server error): {response.text[:1000]}"
+            hint = ""
+            if response.status_code == 500:
+                hint = (
+                    " Trapper (v1 and v2) answers a table that fails validation with a bare 500, because "
+                    "it cannot serialize its validation report. Check the CSV against the project: "
+                    "every scientificName must belong to the project's classificator, each _id must "
+                    "be a classification of the project, and classificationMethod should be present."
+                )
+            return f"non-JSON response (likely an unhandled server error):{hint} {response.text[:1000]}"
 
         block = payload.get("data", {}) if isinstance(payload, dict) else {}
         message = block.get("message") or "Classification import failed"
