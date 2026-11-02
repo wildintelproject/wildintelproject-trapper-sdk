@@ -33,10 +33,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `True` result means the table was validated and queued, not that every row is already in the
   database). Failures report the server's message and the per-row validation errors. A redirect to
   the login page is no longer taken as success.
+- `deployments.geojson()` (Trapper v2): deployments as a GeoJSON `FeatureCollection`, filtered by
+  `classification_project`, `observation_type`, `species` and date range. It is the v2 replacement for
+  `maps` / `locations_geojson`.
+- Schemas of classification projects, classification results, the classifications map, classificators
+  and user classifications now parse Trapper v2 payloads (`null` UI links and profiles, no
+  `status`/`status_ai`/`classification`, attributes wrapped as `{"value": ...}`); v1 payloads still
+  parse. They raised `ValidationError` on v2 before.
+- `classification_results.import_classifications(overwrite_attrs=True)` raises `UnsupportedVersionError`
+  on v2, whose import endpoint no longer reads the option (it used to be dropped silently). The rest
+  of the import is the same REST endpoint in both versions.
+- A classification import whose table fails validation makes Trapper answer a bare HTTP 500 (it cannot serialize
+  its validation report; v1 and v2 alike). The `APIError` now says so and lists what to check.
 - `deployments.by_collection_with_counts()`: the deployments with at least one resource in a
   collection, each with how many resources it has there.
 
 ### Fixed
+- `locations_geojson.get()` returned the `{pagination, results}` envelope instead of the documented
+  `FeatureCollection`.
 - `classification_results.where_project_results()` (and any other `where()` whose schema is a
   `Union`, such as `ClassificationRecordExport`) failed on the first page with
   `AttributeError: model_validate`: `APIQuery` called `model_validate`/`model_construct` on the

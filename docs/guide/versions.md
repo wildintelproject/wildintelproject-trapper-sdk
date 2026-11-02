@@ -37,9 +37,11 @@ Skip the probe by passing `trapper_version="v1"` or `"v2"`.
 |---|---|---|
 | Package upload | `HTTPUploader` (custom chunked protocol) | `TusUploader` (tus 1.0 / tusd) |
 | `client.upload_auth()` | — | ✔ |
-| `client.maps`, `client.locations_geojson` | ✔ | `UnsupportedVersionError` |
+| `client.maps`, `client.locations_geojson` | ✔ | `UnsupportedVersionError` (use `deployments.geojson()`) |
+| `deployments.geojson()` | `UnsupportedVersionError` | ✔ (`api/deployments/geojson/`) |
 | `collections.*_ondemand` | ✔ | `UnsupportedVersionError` |
 | `locations.import_locations`, `deployments.import_deployments` | ✔ (web import form) | ✔ (Django admin import action; needs a staff account, runs asynchronously) |
+| `classification_results.import_classifications(overwrite_attrs=True)` | ✔ | `UnsupportedVersionError` (v2 removed the option) |
 | Everything else | ✔ | ✔ |
 
 ## Uploading
