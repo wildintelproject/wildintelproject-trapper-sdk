@@ -57,3 +57,10 @@ def test_v1_only_fields_are_optional():
     row.pop("approved", None)
     record = ClassificationRecord.model_validate(row)
     assert record.status is None and record.status_ai is None
+
+
+def test_resource_without_name_validates():
+    """The ``/storage/api/resources/location/<pk>`` sub-endpoint omits ``name``."""
+    from trapper_client.schemas import Resource
+
+    assert Resource.model_validate({"pk": 29, "resource_type": "I"}).name is None

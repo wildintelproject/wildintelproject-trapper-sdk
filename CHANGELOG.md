@@ -52,6 +52,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   collection, each with how many resources it has there.
 
 ### Fixed
+- `resources.get_by_location()` / `find_by_location()` raised `ValidationError`: the
+  `/storage/api/resources/location/<pk>` endpoint omits `name`, which `Resource` required. It is now optional.
 - `locations_geojson.get()` returned the `{pagination, results}` envelope instead of the documented
   `FeatureCollection`.
 - `classification_results.where_project_results()` (and any other `where()` whose schema is a
