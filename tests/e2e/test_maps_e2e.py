@@ -9,11 +9,14 @@ Optional:
 """
 from __future__ import annotations
 
+import pytest
+
 from tests.base_component_tests import ComponentE2ETestBase
 from trapper_client.components.maps import MapsComponent
 from trapper_client.schemas import MapRecord
 
 
+@pytest.mark.usefixtures("v1_only")
 class TestMapsComponentE2E(ComponentE2ETestBase):
     component_class = MapsComponent
     schema = MapRecord

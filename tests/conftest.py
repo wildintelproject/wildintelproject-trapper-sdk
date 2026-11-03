@@ -90,3 +90,10 @@ def real_api_base() -> APIClientBase:
     )
 
 
+
+
+@pytest.fixture
+def v1_only(real_api_base):
+    """Skip a test on Trapper v2, which removed the endpoint it exercises."""
+    if real_api_base.server_version == "v2":
+        pytest.skip("this endpoint was removed in Trapper v2")

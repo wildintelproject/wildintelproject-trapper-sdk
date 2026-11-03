@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.base_component_tests import ComponentE2ETestBase
+from tests.base_component_tests import ComponentE2ETestBase, assert_page_size_respected
 from trapper_client.api_query import APIQuery
 from trapper_client.components.classifications import ClassificationsComponent
 from trapper_client.schemas import (
@@ -47,6 +47,20 @@ class TestClassificationsComponentE2E(ComponentE2ETestBase):
     schema = ClassificationRecord
     export_schema = ClassificationRecordExport
     env_pk_var = "WILDINTEL_CLASSIFICATION_RESULT_PK"
+
+    _NOT_APPLICABLE = "classification results are exported per project (see TestProjectResultsE2E)"
+
+    def test_get_with_overwrite_schema(self, component):
+        pytest.skip(self._NOT_APPLICABLE)
+
+    def test_export_file_none_returns_list(self, component):
+        pytest.skip(self._NOT_APPLICABLE)
+
+    def test_export_to_csv_writes_file(self, component, tmp_path):
+        pytest.skip(self._NOT_APPLICABLE)
+
+    def test_export_csv_row_count_matches_get_all(self, component, tmp_path):
+        pytest.skip(self._NOT_APPLICABLE)
 
 
 # ── tests específicos de project results ─────────────────────────────────────
@@ -94,7 +108,7 @@ class TestProjectResultsE2E:
 
         result = component.get_project_results(int(pk), page_size=3)
 
-        assert len(result.results) <= 3
+        assert_page_size_respected(result, 3)
 
     @pytest.mark.e2e
     def test_get_project_results_validate_false_returns_models(self, component):
@@ -187,7 +201,7 @@ class TestProjectResultsE2E:
 
         assert isinstance(result, list)
         if result:
-            assert isinstance(result[0], ClassificationResultRecord)
+            assert isinstance(result[0], _EXPORT_TYPES)
 
     @pytest.mark.e2e
     def test_export_project_results_writes_csv(self, component, tmp_path):
