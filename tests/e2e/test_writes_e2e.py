@@ -17,7 +17,6 @@ Trapper v2 imports asynchronously, so the tests wait for the rows to show up.
 from __future__ import annotations
 
 import os
-import time
 import uuid
 from pathlib import Path
 
@@ -63,16 +62,6 @@ def session_writer(writer) -> TrapperClient:
     if not (_env("WILDINTEL_USER_NAME") and _env("WILDINTEL_USER_PASSWORD")):
         pytest.skip("Set WILDINTEL_USER_NAME / WILDINTEL_USER_PASSWORD (imports use the session login)")
     return writer
-
-
-def _wait_for(fetch, timeout: float = 90.0, interval: float = 2.0):
-    """Poll ``fetch()`` until it returns something truthy (v2 imports are asynchronous)."""
-    deadline = time.monotonic() + timeout
-    while True:
-        found = fetch()
-        if found or time.monotonic() > deadline:
-            return found
-        time.sleep(interval)
 
 
 def _retry_once_on_500(call):
@@ -143,11 +132,7 @@ class TestLocationAndDeploymentImportE2E:
         assert _retry_once_on_500(lambda: session_writer.locations.import_locations(
             file=locations_csv, research_project=research_project, timezone=TIMEZONE,
         )) is True
-        location = _wait_for(
-            lambda: next(iter(session_writer.locations.where(search=loc_id, page_size=5)), None)
-        )
-        assert location is not None, f"location {loc_id} never appeared"
-        assert location.location_id == loc_id
+        session_writer.locations.wait_for_import([loc_id], timeout=90)
 
         deployments_csv = tmp_path / "deployments.csv"
         deployments_csv.write_text(
@@ -158,11 +143,7 @@ class TestLocationAndDeploymentImportE2E:
         assert _retry_once_on_500(lambda: session_writer.deployments.import_deployments(
             file=deployments_csv, research_project=research_project, timezone=TIMEZONE,
         )) is True
-        deployment = _wait_for(
-            lambda: next(iter(session_writer.deployments.where(search=dep_id, page_size=5)), None)
-        )
-        assert deployment is not None, f"deployment {dep_id} never appeared"
-        assert deployment.deployment_id == dep_id
+        session_writer.deployments.wait_for_import([dep_id], timeout=90)
 
     @pytest.mark.e2e
     def test_import_with_a_bad_table_reports_why(self, session_writer, research_project, tmp_path):

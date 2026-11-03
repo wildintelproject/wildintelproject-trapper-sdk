@@ -89,6 +89,20 @@ client.locations.import_locations(
       success. This method requires `timezone` up front specifically to prevent creating that
       kind of latent, hard-to-diagnose corruption.
 
+### Waiting for the import to land
+
+On Trapper v2 the import runs in the background: `import_locations()` returning `True` means the
+table was validated and queued, not that the rows exist yet. Neither version exposes the import
+task through the API, so `wait_for_import()` checks the outcome instead — it polls until every
+`locationID` is listed:
+
+```python
+client.locations.import_locations(file="locations.csv", research_project=1, timezone="Europe/Madrid")
+client.locations.wait_for_import(["don-01", "don-02"], timeout=60)   # raises TimeoutError if missing
+```
+
+Pass `raise_on_timeout=False` to get `False` back instead. It works the same on v1.
+
 There's also a ready-to-run script: [`examples/import_locations.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_locations.py).
 
 ### What you get in the exception when the CSV itself is rejected

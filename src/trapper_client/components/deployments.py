@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack
 from datetime import date
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 from tenacity import Retrying
 
@@ -449,3 +449,35 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
         output_path = self.client._select_file(file)
         self.client._write_csv([row.model_dump(mode="json") for row in rows], output_path)
         return output_path
+
+    def wait_for_import(
+        self,
+        deployment_ids: Iterable[str],
+        timeout: float = 60.0,
+        interval: float = 2.0,
+        raise_on_timeout: bool = True,
+    ) -> bool:
+        """Wait until the imported deployments are visible through the API.
+
+        Trapper v2 imports asynchronously: ``import_deployments()`` returning ``True`` only means the table was
+        validated and queued. Neither version offers an API to query the import task, so this
+        checks the outcome instead: it polls the list endpoint until every ID is there.
+
+        Args:
+            deployment_ids: The deployment IDs the import should create (the ``deploymentID`` column).
+            timeout: Seconds to wait in total.
+            interval: Seconds between polls.
+            raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.
+
+        Returns:
+            ``True`` once all of them exist; ``False`` on timeout when ``raise_on_timeout=False``.
+
+        Raises:
+            TimeoutError: Some IDs were still missing after ``timeout`` seconds.
+
+        Example::
+
+            client.deployments.import_deployments(file="deployments.csv", research_project=1, timezone="Europe/Madrid")
+            client.deployments.wait_for_import(["DON01-2024A"])
+        """
+        return self._wait_for_ids(deployment_ids, "deployment_id", timeout, interval, raise_on_timeout, "deployment ID")

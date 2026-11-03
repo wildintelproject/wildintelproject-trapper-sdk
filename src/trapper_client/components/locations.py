@@ -7,7 +7,7 @@ from __future__ import annotations
 import time
 from contextlib import ExitStack
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 from tenacity import Retrying
 
@@ -288,3 +288,35 @@ class LocationsComponent(TrapperComponent[Location]):
         if raise_on_error:
             raise self._import_error("Location", response)
         return False
+
+    def wait_for_import(
+        self,
+        location_ids: Iterable[str],
+        timeout: float = 60.0,
+        interval: float = 2.0,
+        raise_on_timeout: bool = True,
+    ) -> bool:
+        """Wait until the imported locations are visible through the API.
+
+        Trapper v2 imports asynchronously: ``import_locations()`` returning ``True`` only means the table was
+        validated and queued. Neither version offers an API to query the import task, so this
+        checks the outcome instead: it polls the list endpoint until every ID is there.
+
+        Args:
+            location_ids: The location IDs the import should create (the ``locationID`` column).
+            timeout: Seconds to wait in total.
+            interval: Seconds between polls.
+            raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.
+
+        Returns:
+            ``True`` once all of them exist; ``False`` on timeout when ``raise_on_timeout=False``.
+
+        Raises:
+            TimeoutError: Some IDs were still missing after ``timeout`` seconds.
+
+        Example::
+
+            client.locations.import_locations(file="locations.csv", research_project=1, timezone="Europe/Madrid")
+            client.locations.wait_for_import(["don-01"])
+        """
+        return self._wait_for_ids(location_ids, "location_id", timeout, interval, raise_on_timeout, "location ID")

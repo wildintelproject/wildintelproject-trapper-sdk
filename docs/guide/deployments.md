@@ -109,6 +109,20 @@ client.deployments.import_deployments(
 
 There's also a ready-to-run script: [`examples/import_deployments.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_deployments.py).
 
+### Waiting for the import to land
+
+On Trapper v2 the import runs in the background: `import_deployments()` returning `True` means the
+table was validated and queued, not that the rows exist yet. Neither version exposes the import
+task through the API, so `wait_for_import()` checks the outcome instead — it polls until every
+`deploymentID` is listed:
+
+```python
+client.deployments.import_deployments(file="deployments.csv", research_project=1, timezone="Europe/Madrid")
+client.deployments.wait_for_import(["DON01-2024A", "DON01-2024B"], timeout=60)   # raises TimeoutError if missing
+```
+
+Pass `raise_on_timeout=False` to get `False` back instead. It works the same on v1.
+
 ### What you get in the exception when the CSV itself is rejected
 
 Same as [locations](locations.md#what-you-get-in-the-exception-when-the-csv-itself-is-rejected):

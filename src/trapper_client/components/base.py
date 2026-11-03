@@ -5,8 +5,9 @@ Base class for all Trapper API components.
 from __future__ import annotations
 
 import logging
+import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, Iterable, TypeVar, Union
 
 from pydantic import BaseModel
 
@@ -120,6 +121,33 @@ class TrapperComponent(Generic[TModel]):
         ):
             return results[0]
         return data
+
+    def _wait_for_ids(
+        self,
+        ids: Iterable[str],
+        id_attr: str,
+        timeout: float,
+        interval: float,
+        raise_on_timeout: bool,
+        label: str,
+    ) -> bool:
+        """Poll the list API until every id in ``ids`` shows up (``search`` + exact match)."""
+        pending = list(dict.fromkeys(str(i) for i in ids))
+        deadline = time.monotonic() + timeout
+        while True:
+            pending = [
+                i for i in pending
+                if not any(getattr(row, id_attr, None) == i for row in self.where(search=i, page_size=20))
+            ]
+            if not pending:
+                return True
+            if time.monotonic() >= deadline:
+                if raise_on_timeout:
+                    raise TimeoutError(
+                        f"{len(pending)} {label}(s) still missing after {timeout:g}s: {', '.join(pending[:10])}"
+                    )
+                return False
+            time.sleep(interval)
 
     def _merge_query(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """Merge ``query`` and ``kwargs`` into one query-params dictionary.
