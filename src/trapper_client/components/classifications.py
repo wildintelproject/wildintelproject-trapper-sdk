@@ -4,6 +4,7 @@ Component for classification observations exports.
 
 from __future__ import annotations
 
+import csv
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Union
@@ -176,6 +177,7 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
             overwrite_attrs: bool = False,
             ai_provider_id: int | str | None = None,
             validate: bool = True,
+            check_table: bool = True,
             split: bool = False,
             delay: float = 1.0,
             chunk_size: int = DEFAULT_MAX_CHUNK_BYTES,
@@ -208,6 +210,8 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
                 the option, so ``True`` raises ``UnsupportedVersionError`` there.
             ai_provider_id: AI provider primary key. Required when
                 ``import_ai_classifications=True``.
+            check_table: Check the table locally first (required columns, ``sex`` values) and
+                raise ``ValueError`` instead of sending a table Trapper would reject with a bare 500.
             validate: Whether to validate the response with Pydantic.
             split: Instead of uploading ``file`` in one request, split it into
                 several smaller, self-contained CSV chunks (each repeating the
@@ -272,6 +276,8 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
         """
         if import_ai_classifications and ai_provider_id is None:
             raise ValueError("ai_provider_id is required when import_ai_classifications=True")
+        if check_table:
+            self._check_table(Path(file))
         if overwrite_attrs:
             # Trapper v2's import view no longer reads it, so it would be dropped silently.
             self._require_version("v1", feature="classification_results.import_classifications(overwrite_attrs=True)")
@@ -310,6 +316,36 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
         finally:
             for chunk_path in chunk_paths:
                 chunk_path.unlink(missing_ok=True)
+
+    #: Values Trapper accepts for ``sex`` (anything else fails validation).
+    VALID_SEX = ("female", "male")
+    #: Columns Trapper's importer cannot do without.
+    REQUIRED_COLUMNS = ("_id", "classificationMethod")
+
+    @classmethod
+    def _check_table(cls, file_path: Path) -> None:
+        """Catch locally what Trapper would answer with a bare HTTP 500.
+
+        Checks the required columns and the ``sex`` enum. Raises ``ValueError``
+        listing every problem found (first 10 rows for the enum).
+        """
+        with file_path.open(newline="", encoding="utf-8-sig") as fh:
+            reader = csv.DictReader(fh)
+            header = reader.fieldnames or []
+            problems = [f"missing column '{c}'" for c in cls.REQUIRED_COLUMNS if c not in header]
+            if "sex" in header:
+                bad = [
+                    f"row {n}: sex={row['sex']!r}"
+                    for n, row in enumerate(reader, start=2)
+                    if (row.get("sex") or "").strip() and row["sex"].strip() not in cls.VALID_SEX
+                ]
+                if bad:
+                    problems.append(f"sex must be one of {cls.VALID_SEX} ({'; '.join(bad[:10])})")
+        if problems:
+            raise ValueError(
+                f"{file_path.name} would be rejected by Trapper: " + "; ".join(problems)
+                + ". Pass check_table=False to skip this check."
+            )
 
     def _import_classifications_once(
             self,
