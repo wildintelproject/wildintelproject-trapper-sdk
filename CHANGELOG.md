@@ -52,6 +52,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   collection, each with how many resources it has there.
 
 ### Fixed
+- A client that had imported locations or deployments (session login) could no longer call any
+  token-authenticated POST, such as `import_classifications()`: the web session's cookies were sent
+  with every REST call and Trapper answered `403 CSRF Failed`. Session and token requests now use
+  separate HTTP clients.
 - `resources.get_by_location()` / `find_by_location()` raised `ValidationError`: the
   `/storage/api/resources/location/<pk>` endpoint omits `name`, which `Resource` required. It is now optional.
 - `locations_geojson.get()` returned the `{pagination, results}` envelope instead of the documented

@@ -63,6 +63,7 @@ class APIClientBase:
         validator=attr.validators.in_(TRAPPER_VERSIONS),
     )
     _client: httpx.Client = attr.ib(init=False, repr=False)
+    _web_client: httpx.Client = attr.ib(init=False, repr=False)
     name = "trapper_api_client"
     user_id: str = "me"
 
@@ -77,7 +78,11 @@ class APIClientBase:
         """
         if not self.access_token and not (self.user_name and self.user_password):
             raise ValueError("Token or user/password must be provided for authentication")
+        # Token-authenticated REST calls. It must never hold the web session's cookies: with a
+        # ``sessionid`` cookie present DRF authenticates by session and demands a CSRF token.
         self._client = httpx.Client(verify=self.verify_ssl, timeout=self.timeout)
+        # Cookie-authenticated calls to the classic web views (imports of locations/deployments).
+        self._web_client = httpx.Client(verify=self.verify_ssl, timeout=self.timeout)
         self._web_csrf_token: str | None = None
         self._detected_version: str | None = None
         self._server_release: str | None = None
@@ -674,7 +679,7 @@ class APIClientBase:
             err.APIError: If no token is available from either source yet —
                 call :meth:`session_login` first.
         """
-        token = self._client.cookies.get("csrftoken") or self._web_csrf_token
+        token = self._web_client.cookies.get("csrftoken") or self._web_csrf_token
         if not token:
             raise err.APIError(
                 "No CSRF token available (no csrftoken cookie, and none scraped "
@@ -724,7 +729,7 @@ class APIClientBase:
             err.APIError: If the login attempt does not result in an
                 authenticated session (wrong credentials, changed login form, ...).
         """
-        if not force and self._client.cookies.get("sessionid"):
+        if not force and self._web_client.cookies.get("sessionid"):
             return
 
         if not (self.user_name and self.user_password):
@@ -740,8 +745,8 @@ class APIClientBase:
         # response sets the CSRF cookie / embeds the csrfmiddlewaretoken
         # input. The login POST below deliberately does NOT follow redirects,
         # since a 302 there is how we detect a successful login.
-        login_page = self._client.get(login_url, follow_redirects=True)
-        csrf_token = self._client.cookies.get("csrftoken") or self._csrf_token_from_html(login_page.text)
+        login_page = self._web_client.get(login_url, follow_redirects=True)
+        csrf_token = self._web_client.cookies.get("csrftoken") or self._csrf_token_from_html(login_page.text)
 
         if not csrf_token:
             raise err.APIError(
@@ -752,7 +757,7 @@ class APIClientBase:
             )
         self._web_csrf_token = csrf_token
 
-        response = self._client.post(
+        response = self._web_client.post(
             str(login_page.url),
             data={
                 "login": self.user_name,
@@ -762,7 +767,7 @@ class APIClientBase:
             headers={"Referer": str(login_page.url)},
         )
 
-        if response.status_code != 302 or not self._client.cookies.get("sessionid"):
+        if response.status_code != 302 or not self._web_client.cookies.get("sessionid"):
             raise err.APIError(
                 f"Web session login failed (status {response.status_code} from "
                 f"{response.url}) — check user_name/user_password (user_name must "
@@ -812,14 +817,14 @@ class APIClientBase:
         form_data = dict(data or {})
         token = None
         if csrf_from_page:
-            page = self._client.get(url)
+            page = self._web_client.get(url)
             if page.status_code != 200:
                 # Not allowed to see the form (redirect to login, 403, ...): hand that back
                 # instead of POSTing with a token the server would reject for the wrong reason.
                 return page
             token = self._csrf_token_from_html(page.text)
         form_data["csrfmiddlewaretoken"] = token or self._csrf_cookie_value()
-        return self._client.post(url, data=form_data, files=files, headers={"Referer": url})
+        return self._web_client.post(url, data=form_data, files=files, headers={"Referer": url})
 
     def patch(
         self,

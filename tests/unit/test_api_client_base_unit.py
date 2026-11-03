@@ -623,7 +623,7 @@ def test_post_multipart_returns_response_when_raise_on_error_false(token_client)
 def _fake_login_get(client):
     """Simula que el GET al login setea la cookie csrftoken."""
     def _get(url, *a, **kw):
-        client._client.cookies.set("csrftoken", "csrf-abc")
+        client._web_client.cookies.set("csrftoken", "csrf-abc")
         return MagicMock()
     return _get
 
@@ -632,7 +632,7 @@ def _fake_login_post(client, status_code=302, set_sessionid=True):
     """Simula que el POST de login setea la cookie sessionid en éxito."""
     def _post(url, *a, **kw):
         if set_sessionid:
-            client._client.cookies.set("sessionid", "session-abc")
+            client._web_client.cookies.set("sessionid", "session-abc")
         resp = MagicMock()
         resp.status_code = status_code
         return resp
@@ -647,7 +647,7 @@ def test_csrf_cookie_value_raises_if_missing(token_client):
 
 def test_csrf_cookie_value_returns_cookie(token_client):
     """_csrf_cookie_value() devuelve el valor de la cookie csrftoken."""
-    token_client._client.cookies.set("csrftoken", "abc123")
+    token_client._web_client.cookies.set("csrftoken", "abc123")
 
     assert token_client._csrf_cookie_value() == "abc123"
 
@@ -848,30 +848,30 @@ def test_session_login_raises_without_credentials(token_client):
 
 def test_session_login_skips_if_session_cookie_present(basic_auth_client):
     """session_login() no repite el login si ya hay cookie sessionid."""
-    basic_auth_client._client.cookies.set("sessionid", "already-there")
-    basic_auth_client._client.get = MagicMock()
-    basic_auth_client._client.post = MagicMock()
+    basic_auth_client._web_client.cookies.set("sessionid", "already-there")
+    basic_auth_client._web_client.get = MagicMock()
+    basic_auth_client._web_client.post = MagicMock()
 
     basic_auth_client.session_login()
 
-    basic_auth_client._client.get.assert_not_called()
-    basic_auth_client._client.post.assert_not_called()
+    basic_auth_client._web_client.get.assert_not_called()
+    basic_auth_client._web_client.post.assert_not_called()
 
 
 def test_session_login_performs_get_then_post(basic_auth_client):
     """session_login() hace GET (csrf) y luego POST con las credenciales."""
-    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
-    basic_auth_client._client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
+    basic_auth_client._web_client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._web_client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
 
     basic_auth_client.session_login()
 
-    basic_auth_client._client.get.assert_called_once()
-    basic_auth_client._client.post.assert_called_once()
-    post_kwargs = basic_auth_client._client.post.call_args.kwargs
+    basic_auth_client._web_client.get.assert_called_once()
+    basic_auth_client._web_client.post.assert_called_once()
+    post_kwargs = basic_auth_client._web_client.post.call_args.kwargs
     assert post_kwargs["data"]["login"] == "user"
     assert post_kwargs["data"]["password"] == "pass"
     assert post_kwargs["data"]["csrfmiddlewaretoken"] == "csrf-abc"
-    assert basic_auth_client._client.cookies.get("sessionid") == "session-abc"
+    assert basic_auth_client._web_client.cookies.get("sessionid") == "session-abc"
 
 
 def test_session_login_get_follows_redirects(basic_auth_client):
@@ -882,12 +882,12 @@ def test_session_login_get_follows_redirects(basic_auth_client):
     https, o un proxy delante del servidor) nunca se llegaba a renderizar el
     formulario real, y por tanto nunca se fijaba la cookie csrftoken.
     """
-    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
-    basic_auth_client._client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
+    basic_auth_client._web_client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._web_client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
 
     basic_auth_client.session_login()
 
-    get_kwargs = basic_auth_client._client.get.call_args.kwargs
+    get_kwargs = basic_auth_client._web_client.get.call_args.kwargs
     assert get_kwargs.get("follow_redirects") is True
 
 
@@ -898,19 +898,19 @@ def test_session_login_falls_back_to_html_scraped_csrf_token(basic_auth_client):
         '<form><input type="hidden" name="csrfmiddlewaretoken" value="html-token"></form>'
     )
     login_page.status_code = 200
-    basic_auth_client._client.get = MagicMock(return_value=login_page)
+    basic_auth_client._web_client.get = MagicMock(return_value=login_page)
 
     def fake_post(url, *a, **kw):
-        basic_auth_client._client.cookies.set("sessionid", "session-abc")
+        basic_auth_client._web_client.cookies.set("sessionid", "session-abc")
         resp = MagicMock()
         resp.status_code = 302
         return resp
 
-    basic_auth_client._client.post = MagicMock(side_effect=fake_post)
+    basic_auth_client._web_client.post = MagicMock(side_effect=fake_post)
 
     basic_auth_client.session_login()
 
-    post_kwargs = basic_auth_client._client.post.call_args.kwargs
+    post_kwargs = basic_auth_client._web_client.post.call_args.kwargs
     assert post_kwargs["data"]["csrfmiddlewaretoken"] == "html-token"
     assert basic_auth_client._web_csrf_token == "html-token"
 
@@ -921,19 +921,19 @@ def test_session_login_raises_clear_error_when_no_csrf_found(basic_auth_client):
     login_page.text = "<html><body>unexpected page</body></html>"
     login_page.status_code = 200
     login_page.url = "https://example.com/account/login/"
-    basic_auth_client._client.get = MagicMock(return_value=login_page)
-    basic_auth_client._client.post = MagicMock()
+    basic_auth_client._web_client.get = MagicMock(return_value=login_page)
+    basic_auth_client._web_client.post = MagicMock()
 
     with pytest.raises(err.APIError, match="CSRF token"):
         basic_auth_client.session_login()
 
-    basic_auth_client._client.post.assert_not_called()
+    basic_auth_client._web_client.post.assert_not_called()
 
 
 def test_session_login_raises_if_post_not_redirect(basic_auth_client):
     """session_login() lanza APIError si el POST no devuelve un redirect."""
-    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
-    basic_auth_client._client.post = MagicMock(
+    basic_auth_client._web_client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._web_client.post = MagicMock(
         side_effect=_fake_login_post(basic_auth_client, status_code=200, set_sessionid=False)
     )
 
@@ -943,38 +943,38 @@ def test_session_login_raises_if_post_not_redirect(basic_auth_client):
 
 def test_session_login_force_repeats_login(basic_auth_client):
     """session_login(force=True) repite el login aunque ya haya sessionid."""
-    basic_auth_client._client.cookies.set("sessionid", "old-session")
-    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
-    basic_auth_client._client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
+    basic_auth_client._web_client.cookies.set("sessionid", "old-session")
+    basic_auth_client._web_client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._web_client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
 
     basic_auth_client.session_login(force=True)
 
-    basic_auth_client._client.get.assert_called_once()
-    basic_auth_client._client.post.assert_called_once()
+    basic_auth_client._web_client.get.assert_called_once()
+    basic_auth_client._web_client.post.assert_called_once()
 
 
 def test_session_post_multipart_logs_in_first(basic_auth_client):
     """session_post_multipart() hace login de sesión si aún no hay sessionid."""
-    basic_auth_client._client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
-    basic_auth_client._client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
+    basic_auth_client._web_client.get = MagicMock(side_effect=_fake_login_get(basic_auth_client))
+    basic_auth_client._web_client.post = MagicMock(side_effect=_fake_login_post(basic_auth_client))
 
     basic_auth_client.session_post_multipart("/geomap/location/import/", data={}, files={})
 
-    basic_auth_client._client.get.assert_called_once()
+    basic_auth_client._web_client.get.assert_called_once()
 
 
 def test_session_post_multipart_sends_csrf_and_files(basic_auth_client):
     """session_post_multipart() incluye csrfmiddlewaretoken y los files/data."""
-    basic_auth_client._client.cookies.set("sessionid", "existing-session")
-    basic_auth_client._client.cookies.set("csrftoken", "csrf-xyz")
-    basic_auth_client._client.post = MagicMock(return_value=MagicMock(status_code=302))
+    basic_auth_client._web_client.cookies.set("sessionid", "existing-session")
+    basic_auth_client._web_client.cookies.set("csrftoken", "csrf-xyz")
+    basic_auth_client._web_client.post = MagicMock(return_value=MagicMock(status_code=302))
 
     files = {"csv_file": ("locations.csv", b"a,b\n1,2", "text/csv")}
     basic_auth_client.session_post_multipart(
         "/geomap/location/import/", data={"ignore_DST": False}, files=files,
     )
 
-    call_kwargs = basic_auth_client._client.post.call_args.kwargs
+    call_kwargs = basic_auth_client._web_client.post.call_args.kwargs
     assert call_kwargs["data"]["csrfmiddlewaretoken"] == "csrf-xyz"
     assert call_kwargs["data"]["ignore_DST"] is False
     assert call_kwargs["files"] is files
@@ -982,10 +982,10 @@ def test_session_post_multipart_sends_csrf_and_files(basic_auth_client):
 
 def test_session_post_multipart_returns_raw_response(basic_auth_client):
     """session_post_multipart() devuelve la respuesta cruda (sin seguir redirects)."""
-    basic_auth_client._client.cookies.set("sessionid", "existing-session")
-    basic_auth_client._client.cookies.set("csrftoken", "csrf-xyz")
+    basic_auth_client._web_client.cookies.set("sessionid", "existing-session")
+    basic_auth_client._web_client.cookies.set("csrftoken", "csrf-xyz")
     mock_resp = MagicMock(status_code=302)
-    basic_auth_client._client.post = MagicMock(return_value=mock_resp)
+    basic_auth_client._web_client.post = MagicMock(return_value=mock_resp)
 
     result = basic_auth_client.session_post_multipart("/geomap/location/import/", data={}, files={})
 
@@ -1095,3 +1095,17 @@ class TestServerVersion:
         client._send_request.side_effect = None
         client._send_request.return_value = make_response(status_code=200)
         assert client.server_version == "v2"
+
+
+def test_session_cookies_never_reach_token_requests():
+    """A web session's cookies must not ride along on token-authenticated REST calls.
+
+    With a ``sessionid`` cookie DRF authenticates by session and answers ``403 CSRF Failed``
+    to every POST, so a client that imported locations could no longer import classifications.
+    """
+    client = APIClientBase(base_url="http://x", access_token="tok", user_name="u", user_password="p")
+    client._web_client.cookies.set("sessionid", "abc")
+    client._web_client.cookies.set("csrftoken", "def")
+
+    assert "sessionid" not in client._client.cookies
+    assert client._client is not client._web_client
