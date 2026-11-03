@@ -55,3 +55,22 @@ On v2 the uploader authenticates with `Authorization: Token ...`, so the client 
 `access_token`. Call `client.upload_auth()` first to find out, before any byte moves, whether the
 token may upload (`403` = no uploader account). An interrupted upload resumes from the last byte
 the server holds; its URL is kept in a `<file>.tusmeta.json` sidecar.
+
+### Uploader account (v2)
+
+A valid token is not enough to upload on v2: the user also needs an **HTTP uploader account**
+(`UserHttpUploaderAccount`), which a Trapper administrator grants in the Django admin
+(*Accounts → User HTTP uploader accounts → Add*, pick the user). Without it the server refuses the
+upload with `403 "HTTP uploader access not granted"`.
+
+```python
+try:
+    client.upload_auth()                    # {"username": "..."} when the token may upload
+except err.ForbiddenError:
+    ...                                     # valid token, but no uploader account yet
+except err.UnauthorizedError:
+    ...                                     # unknown or missing token
+```
+
+Check it once before a long upload instead of finding out at the first byte. v1 has no such
+requirement (and no `upload_auth()`: it raises `UnsupportedVersionError`).
