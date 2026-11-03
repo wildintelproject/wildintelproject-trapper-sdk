@@ -23,6 +23,7 @@ from trapper_client.components.classifications_map import ClassificationsMapComp
 from trapper_client.components.classificators import ClassificatorsComponent
 from trapper_client.components.species import SpeciesComponent
 from trapper_client.components.maps import MapsComponent
+from trapper_client.components.project_deployments import ProjectDeploymentsComponent
 from trapper_client.components.sequences import SequencesComponent
 from trapper_client.components.users import UsersComponent
 from trapper_client.schemas import (
@@ -63,6 +64,7 @@ __all__ = [
     "ClassificatorsComponent",
     "SpeciesComponent",
     "MapsComponent",
+    "ProjectDeploymentsComponent",
     "SequencesComponent",
     "UsersComponent",
     "Pagination",

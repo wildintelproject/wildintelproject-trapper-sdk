@@ -72,6 +72,7 @@ from trapper_client.components import (
     ClassificatorsComponent,
     SpeciesComponent,
     MapsComponent,
+    ProjectDeploymentsComponent,
     SequencesComponent,
     UsersComponent,
     CollectionsComponent,
@@ -108,6 +109,7 @@ class TrapperClient(APIClientBase):
     * :attr:`classifications_map` — :class:`~trapper_api_client.components.ClassificationsMapComponent`
     * :attr:`classificators` — :class:`~trapper_api_client.components.ClassificatorsComponent`
     * :attr:`species` — :class:`~trapper_api_client.components.SpeciesComponent`
+    * :attr:`project_deployments` — :class:`~trapper_api_client.components.ProjectDeploymentsComponent` (v2)
     * :attr:`maps` — :class:`~trapper_api_client.components.MapsComponent`
     * :attr:`sequences` — :class:`~trapper_api_client.components.SequencesComponent`
     * :attr:`users` — :class:`~trapper_api_client.components.UsersComponent`
@@ -178,6 +180,7 @@ class TrapperClient(APIClientBase):
         self.classificators: ClassificatorsComponent = ClassificatorsComponent(self)
         self.species: SpeciesComponent = SpeciesComponent(self)
         self.maps: MapsComponent = MapsComponent(self)
+        self.project_deployments: ProjectDeploymentsComponent = ProjectDeploymentsComponent(self)
         self.sequences: SequencesComponent = SequencesComponent(self)
         self.users: UsersComponent = UsersComponent(self)
 

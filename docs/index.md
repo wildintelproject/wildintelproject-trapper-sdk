@@ -102,6 +102,7 @@ client.classification_results.export_project_results(
 | `client.locations` | Locations |
 | `client.locations_geojson` | Locations as GeoJSON |
 | `client.deployments` | Deployments |
+| `client.project_deployments` | Deployments of a classification project and their actions (v2) |
 | `client.resources` | Media resources |
 | `client.collections` | Storage collections |
 | `client.research_projects` | Research projects |

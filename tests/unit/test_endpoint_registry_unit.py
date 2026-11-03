@@ -50,6 +50,7 @@ from trapper_client.components.deployments import DeploymentsComponent
 from trapper_client.components.locations import LocationsComponent
 from trapper_client.components.locations_geojson import LocationsGeoJsonComponent
 from trapper_client.components.maps import MapsComponent
+from trapper_client.components.project_deployments import ProjectDeploymentsComponent
 from trapper_client.components.sequences import SequencesComponent
 from trapper_client.components.users import UsersComponent
 from trapper_client.components.research_project_collections import (
@@ -141,6 +142,10 @@ ENDPOINT_REGISTRY: list[tuple[type, str, str, str]] = [
     # ── geomap: maps (mounted at geomap/) ──────────────────────────────────────
     (MapsComponent, "endpoint", "geomap/api/maps",
      "geomap/urls.py: router.register(r'maps', MapViewSet)"),
+
+    # ── Trapper v2 only: deployments of a classification project (mounted at api/) ──
+    (ProjectDeploymentsComponent, "endpoint", "api/deployments",
+     "geomap/urls_rest.py: api/deployments/<slug:cs_project_slug>/... (CSDeploymentsView & co.)"),
 
     # ── media_classification: sequences ───────────────────────────────────────
     (SequencesComponent, "endpoint", "media_classification/api/sequences",

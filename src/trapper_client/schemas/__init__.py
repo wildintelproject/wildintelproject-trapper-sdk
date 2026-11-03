@@ -14,6 +14,12 @@ from .locations import (
     LocationGeoJsonFeatureCollection,
 )
 from .deployments import Deployment, DeploymentExport
+from .project_deployments import (
+    ProjectDeployment,
+    ProjectDeploymentDetail,
+    ProjectDeploymentProgress,
+    ProjectLocation,
+)
 from .resources import Resource
 from .collections import Collection
 from .research_projects import ResearchProject, ResearchProjectCollection, ResearchProjectRole
@@ -76,6 +82,10 @@ __all__ = [
     "LocationGeoJsonFeatureCollection",
     # deployments
     "Deployment",
+    "ProjectDeployment",
+    "ProjectDeploymentDetail",
+    "ProjectDeploymentProgress",
+    "ProjectLocation",
     "DeploymentExport",
     # resources
     "Resource",

@@ -48,6 +48,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `import_classifications(check_table=True)` checks the table locally before sending it (`_id` and
   `classificationMethod` columns present, `sex` only `female`/`male`) and raises a `ValueError` naming
   the problem, instead of letting Trapper answer with a bare 500. `check_table=False` skips it.
+- `client.project_deployments` (Trapper v2): the deployments of a classification project
+  (`api/deployments/<slug>/`) — list, `locations`, `find`, `update` (PATCH), `delete`,
+  `update_timestamps`, AI `progress`, and the depth-calibration / distance-estimation requests.
 - `locations.wait_for_import(ids)` / `deployments.wait_for_import(ids)`: wait until an imported
   table is visible through the API. Trapper v2 imports asynchronously and neither version has an API to
   query the import task, so it polls for the rows themselves.

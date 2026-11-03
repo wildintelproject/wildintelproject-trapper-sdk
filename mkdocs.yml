@@ -90,6 +90,7 @@ nav:
       - Trapper versions (v1 / v2): guide/versions.md
       - Locations GeoJSON: guide/locations_geojson.md
       - Deployments: guide/deployments.md
+      - Project deployments (v2): guide/project_deployments.md
       - Resources: guide/resources.md
       - Collections: guide/collections.md
       - Research Projects: guide/research_projects.md
@@ -119,6 +120,7 @@ nav:
           - Locations: api/components/locations.md
           - Locations GeoJSON: api/components/locations_geojson.md
           - Deployments: api/components/deployments.md
+          - ProjectDeployments: api/components/project_deployments.md
           - Resources: api/components/resources.md
           - Collections: api/components/collections.md
           - Research Projects: api/components/research_projects.md
@@ -140,6 +142,7 @@ nav:
           - Common: api/schemas/common.md
           - Locations: api/schemas/locations.md
           - Deployments: api/schemas/deployments.md
+          - ProjectDeployments: api/schemas/project_deployments.md
           - Resources: api/schemas/resources.md
           - Collections: api/schemas/collections.md
           - Research Projects: api/schemas/research_projects.md
