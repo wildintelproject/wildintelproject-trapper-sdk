@@ -108,6 +108,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `DeploymentExport` left `session`, `array`, `tags` and `bait_type` always empty (issue #43): Trapper has no
+  column for them, it puts them in `deploymentGroups` and `deploymentTags` (with `baitType:<value>` among the
+  tags). They are read from there now, and `camera_depth` is a field.
 - A client that had imported locations or deployments (session login) could no longer call any
   token-authenticated POST, such as `import_classifications()`: the web session's cookies were sent
   with every REST call and Trapper answered `403 CSRF Failed`. Session and token requests now use

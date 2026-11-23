@@ -101,6 +101,24 @@ for feature in fc["features"]:
 
 Solo se devuelven los despliegues a los que puede acceder el usuario actual.
 
+## Campos: la lista y la exportación
+
+Igual que las locations, un despliegue viene en dos formas y ninguna tiene todos los campos. `where()`,
+`get()` y `find()` devuelven un `Deployment` (el JSON de Trapper): `pk`, `deployment_code`, `deployment_id`,
+`location` (el **pk** de la location), `location_id`, `start_date`, `end_date`, `owner`, `research_project`
+(su **acrónimo**), `tags`, `correct_setup` y `correct_tstamp`. `export(file=None)` devuelve un
+`DeploymentExport` por cada fila del CSV, que tiene en cambio los campos de la cámara y la instalación
+(`setup_by`, `camera_*`, `detection_distance`, `bait_use`, `feature_type`, `habitat`, `session`, `array`,
+`comments`, `longitude`, `latitude`, `location_name`) pero **no** el propietario, el proyecto de investigación
+ni `correct_setup` y `correct_tstamp`. Las dos tienen `pk`, `deployment_id`, `location_id`, `start_date`,
+`end_date` y `tags`. Comprobado en Trapper v1 y v2.
+
+El CSV de Trapper no tiene columna para `session`, `array`, `tags` ni `bait_type`: pone las dos primeras en
+`deploymentGroups` (`session:S | array:A`) y las etiquetas en `deploymentTags`, con `baitType:<valor>` añadido
+cuando el despliegue tiene un tipo de cebo. `DeploymentExport` las lee de ahí, así que `tags` solo tiene las
+etiquetas y `bait_type` el cebo. Para obtener el CSV tal como lo envía Trapper, usa
+`export(file=..., raw=True)`.
+
 ## Importar despliegues (acceso de escritura)
 
 `/geomap/api/deployments` es de solo lectura, así que `import_deployments()` lo resuelve simulando el
