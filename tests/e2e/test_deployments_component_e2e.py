@@ -51,3 +51,19 @@ class TestLocationsComponentE2E(ComponentE2ETestBase):
         with pytest.warns(err.UnknownFilterWarning):
             ignored = component.get(page_size=1, colls=1, ordering="-pk")
         assert ignored.pagination.count == total      # and it really is ignored
+
+    @pytest.mark.e2e
+    def test_dates_are_datetimes_in_the_list_and_in_the_export(self, component):
+        """The list and the export spell the same instant differently; both are read as aware datetimes."""
+        from datetime import datetime
+
+        listed = {d.pk: d for d in component.where(page_size=100)}
+        exported = {r.pk: r for r in component.export(file=None)}
+        common = [pk for pk in listed if pk in exported and listed[pk].start_date is not None]
+        if not common:
+            pytest.skip("No deployment with a start date on this server")
+        for pk in common:
+            for value in (listed[pk].start_date, exported[pk].start_date):
+                assert isinstance(value, datetime) and value.tzinfo is not None
+            assert listed[pk].start_date == exported[pk].start_date
+            assert listed[pk].end_date == exported[pk].end_date

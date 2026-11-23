@@ -3,9 +3,29 @@ from datetime import datetime
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError, field_validator, model_validator
 
 from .base import TrapperSchema
+
+
+_DATETIME = TypeAdapter(datetime)
+
+
+def _read_datetime(value: Any) -> Any:
+    """Read a date from Trapper as a timezone-aware ``datetime``.
+
+    The JSON list gives ``2024-01-01T00:00:00+01:00`` and the CSV export ``2024-01-01T00:00:00+0100``. An
+    empty value is ``None``; one that cannot be read is kept as it came, so that a strange value does not
+    break a listing.
+    """
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    if isinstance(value, datetime):
+        return value
+    try:
+        return _DATETIME.validate_python(value.strip() if isinstance(value, str) else value)
+    except ValidationError:
+        return value
 
 
 class Deployment(TrapperSchema):
@@ -20,6 +40,11 @@ class Deployment(TrapperSchema):
 
     start_date: datetime | str | None = None
     end_date: datetime | str | None = None
+
+    @field_validator("start_date", "end_date", mode="before")
+    @classmethod
+    def _dates_as_datetimes(cls, v):
+        return _read_datetime(v)
 
     owner: str | None = None
     owner_profile: str | None = None
@@ -53,8 +78,13 @@ class DeploymentExport(BaseModel):
     longitude: float | None = Field(None, alias="longitude")
     coordinate_uncertainty: float | None = Field(None, alias="coordinateUncertainty")
 
-    start_date: str | None = Field(None, alias="deploymentStart")
-    end_date: str | None = Field(None, alias="deploymentEnd")
+    start_date: datetime | str | None = Field(None, alias="deploymentStart")
+    end_date: datetime | str | None = Field(None, alias="deploymentEnd")
+
+    @field_validator("start_date", "end_date", mode="before")
+    @classmethod
+    def _dates_as_datetimes(cls, v):
+        return _read_datetime(v)
 
     setup_by: str | None = Field(None, alias="setupBy")
     camera_id: str | None = Field(None, alias="cameraID")

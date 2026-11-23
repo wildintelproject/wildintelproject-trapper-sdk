@@ -103,6 +103,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- **The dates of a deployment are `datetime`** (issue #49): `Deployment.start_date`/`end_date` and
+  `DeploymentExport.start_date`/`end_date` were text, and the JSON and the CSV spell them differently
+  (`+01:00` and `+0100`). Both are timezone-aware `datetime` now; one that cannot be read stays as text and an
+  empty one is `None`. Code that used them as strings has to format them, and `export(file=...)` writes them
+  as ISO text with the colon.
 - **The schemas the API returns are named after the resource.** The `Record` suffix is gone:
   `SpeciesRecord` is now `Species`, `ClassificatorRecord` is `Classificator`, `ClassificationRecord`
   is `Classification`, and likewise `User`, `Sequence`, `Map`, `UserClassification`,

@@ -121,6 +121,12 @@ which has the camera and setup fields instead (`setup_by`, `camera_*`, `detectio
 the owner, the research project or `correct_setup` and `correct_tstamp`. Both have `pk`, `deployment_id`,
 `location_id`, `start_date`, `end_date` and `tags`. Checked on Trapper v1 and v2.
 
+`start_date` and `end_date` are timezone-aware `datetime` objects in both shapes, although Trapper spells them
+differently (`2024-01-01T00:00:00+01:00` in the JSON, `2024-01-01T00:00:00+0100` in the CSV), so they can be
+compared and sorted whichever you read. A date that cannot be read is kept as the text it came as, and an empty
+one is `None`. `export(file="x.csv")` writes them back as ISO text with the colon (`+01:00`); `raw=True` keeps
+Trapper's own spelling.
+
 Trapper's CSV has no column for `session`, `array`, `tags` or `bait_type`: it puts the first two in
 `deploymentGroups` (`session:S | array:A`) and the tags in `deploymentTags`, with `baitType:<value>` added
 when the deployment has a bait type. `DeploymentExport` reads them from there, so `tags` holds only the tags and
