@@ -1128,6 +1128,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#creating-a-classificator-trapper-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating a classificator (Trapper v1)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2770,6 +2781,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#creating-a-classificator-trapper-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating a classificator (Trapper v1)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2793,7 +2815,7 @@
 <h1 id="classificators">Classificators</h1>
 <div class="admonition info">
 <p class="admonition-title">Trapper compatibility</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — same code on both. See <a href="../versions/">Trapper versions</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — except <code>create()</code>, which is <strong>v1 only</strong>. See <a href="../versions/">Trapper versions</a>.</p>
 </div>
 <p><code>client.classificators</code> — classificator configurations (the taxonomy/attribute schema a
 classification project classifies against).</p>
@@ -2830,6 +2852,84 @@ classification project classifies against).</p>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">classificator</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classificators</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">client</span><span class="o">.</span><span class="n">classificators</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;classificators.csv&quot;</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="creating-a-classificator-trapper-v1">Creating a classificator (Trapper v1)</h2>
+<p>The REST API is read-only for classificators, so <code>create()</code> works around that by simulating the
+classic web form <code>media_classification/classificator/create/</code> via cookie/session auth, like
+<a href="../locations/#importing-locations-write-access"><code>import_locations()</code></a>. The account that logs in
+becomes the owner. On Trapper v2 it raises <code>UnsupportedVersionError</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Not a stable API contract</p>
+<p>It depends on an unversioned HTML form and needs <code>user_name</code>/<code>user_password</code> (the account's <em>email</em>
+on servers that log in by email): a token alone cannot authenticate it.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">trapper_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassificatorCreate</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">lynx</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="s2">&quot;lynx&quot;</span><span class="p">)))</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">classificator</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classificators</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">ClassificatorCreate</span><span class="p">(</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Iberian mammals&quot;</span><span class="p">,</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>        <span class="n">species</span><span class="o">=</span><span class="p">[</span><span class="n">lynx</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>     <span class="c1"># what a classifier can choose from: objects or primary keys</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>        <span class="n">tracked_species</span><span class="o">=</span><span class="p">[</span><span class="n">lynx</span><span class="p">],</span>         <span class="c1"># the ones Trapper watches</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>        <span class="n">sex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>        <span class="n">age</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="p">)</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="p">)</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="nb">print</span><span class="p">(</span><span class="n">classificator</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">classificator</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</code></pre></div>
+<p><code>create()</code> takes a <code>ClassificatorCreate</code>, a Pydantic model, and returns the created classificator.
+Building the model validates the data before anything is sent. To build it from a dict, use
+<code>ClassificatorCreate.model_validate(data)</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>up to 255 characters, unique</td>
+<td>required</td>
+</tr>
+<tr>
+<td><code>template</code></td>
+<td><code>ClassificatorTemplate.INLINE</code> (<code>"inline"</code>) or <code>TAB</code> (<code>"tab"</code>, tabbed): how the classification form is laid out</td>
+<td><code>INLINE</code></td>
+</tr>
+<tr>
+<td><code>species</code></td>
+<td>the species a classifier can choose from, as objects from <a href="../species/"><code>client.species</code></a> or primary keys. Empty means <strong>every species</strong></td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>tracked_species</code></td>
+<td>the species Trapper <strong>watches</strong> (objects or primary keys): classifying one notifies the administrators of the project (an e-mail and a message). They must be among <code>species</code> when that is not empty</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>sex</code>, <code>age</code>, <code>count_new</code>, <code>behaviour</code>, <code>individual_id</code>, <code>classification_confidence</code></td>
+<td>add that optional attribute to the classification form</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<p>Observation type, count and "is setup" are always part of the form, so they are not parameters.</p>
+<div class="admonition note">
+<p class="admonition-title"><code>species</code> and <code>tracked_species</code> are different lists</p>
+<p><code>species</code> is what a classifier <em>can pick</em>. <code>tracked_species</code> is a subset of those that Trapper
+<em>keeps an eye on</em>: the same species can be in both, but only the second one raises a notification.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Unknown species are dropped silently</p>
+<p>Trapper ignores a species primary key that does not exist: if every key in <code>species</code> is unknown, the
+classificator is created accepting every species. Check the keys with
+<a href="../species/"><code>client.species</code></a> first when it matters.</p>
+</div>
+<p>Custom and predefined attributes (the extra fields a classificator can add to the form) are <strong>not</strong>
+covered. A rejected form raises <code>APIError</code> naming the field, for example
+<code>name: Classificator with this Name already exists.</code>; <code>raise_on_error=False</code> returns <code>None</code> instead.</p>
 
 
 
