@@ -3488,7 +3488,19 @@
 <span class="normal"><a href="#__codelineno-0-523">523</a></span>
 <span class="normal"><a href="#__codelineno-0-524">524</a></span>
 <span class="normal"><a href="#__codelineno-0-525">525</a></span>
-<span class="normal"><a href="#__codelineno-0-526">526</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="k">class</span><span class="w"> </span><span class="nc">TrapperComponent</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">TModel</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-526">526</a></span>
+<span class="normal"><a href="#__codelineno-0-527">527</a></span>
+<span class="normal"><a href="#__codelineno-0-528">528</a></span>
+<span class="normal"><a href="#__codelineno-0-529">529</a></span>
+<span class="normal"><a href="#__codelineno-0-530">530</a></span>
+<span class="normal"><a href="#__codelineno-0-531">531</a></span>
+<span class="normal"><a href="#__codelineno-0-532">532</a></span>
+<span class="normal"><a href="#__codelineno-0-533">533</a></span>
+<span class="normal"><a href="#__codelineno-0-534">534</a></span>
+<span class="normal"><a href="#__codelineno-0-535">535</a></span>
+<span class="normal"><a href="#__codelineno-0-536">536</a></span>
+<span class="normal"><a href="#__codelineno-0-537">537</a></span>
+<span class="normal"><a href="#__codelineno-0-538">538</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="k">class</span><span class="w"> </span><span class="nc">TrapperComponent</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">TModel</span><span class="p">]):</span>
 <a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    Base component for a Trapper API resource.</span>
 <a id="__codelineno-0-41" name="__codelineno-0-41"></a>
@@ -3886,97 +3898,109 @@
 <a id="__codelineno-0-433" name="__codelineno-0-433"></a>            <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="n">overwrite_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-435" name="__codelineno-0-435"></a>            <span class="n">overwrite_schema</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">TModel</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]:</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">        Export resource data as CSV or as a list of parsed models.</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">        If ``export_endpoint`` is defined on the component, it is used instead of</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">        ``endpoint``. If ``export_schema`` is defined, it is used for parsing;</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">        otherwise ``schema`` is used as fallback.</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">            overwrite_schema: Schema to use for parsing. Defaults to ``self.export_schema``.</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">            query: Base query parameters.</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">            file: Output CSV path. If ``None``, returns a list of models.</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">            validate: Whether to run full Pydantic validation on each item.</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">                      If ``False``, models are built without validation using</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">                      ``model_construct``.</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="sd">            overwrite_endpoint: Override the export endpoint for this call.</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">            **kwargs: Extra query params merged into ``query``.</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">            ``Path`` to the generated CSV when ``file`` is provided,</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">            otherwise ``list[BaseModel]`` with parsed or constructed models.</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a>        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">overwrite_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a>        <span class="n">target_schema</span> <span class="o">=</span> <span class="n">overwrite_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>        <span class="n">raw_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_all</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a>        <span class="n">rows_raw</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="p">[])</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_model</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">target_schema</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows_raw</span><span class="p">]</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a>        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a>            <span class="k">return</span> <span class="n">items</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>            <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]:</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">        Export resource data as CSV or as a list of parsed models.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">        If ``export_endpoint`` is defined on the component, it is used instead of</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">        ``endpoint``. If ``export_schema`` is defined, it is used for parsing;</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">        otherwise ``schema`` is used as fallback.</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">            overwrite_schema: Schema to use for parsing. Defaults to ``self.export_schema``.</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">            query: Base query parameters.</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">            file: Output CSV path. If ``None``, returns a list of models.</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">            validate: Whether to run full Pydantic validation on each item.</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">                      If ``False``, models are built without validation using</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="sd">                      ``model_construct``.</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">            overwrite_endpoint: Override the export endpoint for this call.</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">            raw: Save the CSV exactly as Trapper sends it (its own header, column order and values)</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">                instead of parsing the rows and writing them with the SDK&#39;s column names, sorted</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">                alphabetically. Needs ``file``; ``validate`` and ``overwrite_schema`` do not apply.</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">            **kwargs: Extra query params merged into ``query``.</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">            ``Path`` to the generated CSV when ``file`` is provided,</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">            otherwise ``list[BaseModel]`` with parsed or constructed models.</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">        Raises:</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">            ValueError: If ``raw`` is ``True`` and ``file`` is ``None``.</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a>        <span class="k">if</span> <span class="n">raw</span> <span class="ow">and</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;raw=True saves Trapper&#39;s CSV as it comes: give a file&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">overwrite_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span>
 <a id="__codelineno-0-471" name="__codelineno-0-471"></a>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_select_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a>        <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_write_csv</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a>        <span class="k">return</span> <span class="n">output_path</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="k">if</span> <span class="n">raw</span><span class="p">:</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">export_all</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>        <span class="n">target_schema</span> <span class="o">=</span> <span class="n">overwrite_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>
 <a id="__codelineno-0-476" name="__codelineno-0-476"></a>
-<a id="__codelineno-0-477" name="__codelineno-0-477"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a>            <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a>            <span class="n">pk</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>            <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a>            <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a>            <span class="n">overwrite_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a>            <span class="n">overwrite_schema</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">TModel</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TModel</span><span class="p">:</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a><span class="sd">        Retrieve one item by primary key.</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a><span class="sd">            overwrite_schema: Schema to use for parsing. Defaults to ``self.schema``.</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="sd">            overwrite_endpoint:</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="sd">            pk: Resource primary key.</span>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="sd">            query: Base query parameters.</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">            validate: Whether to run full Pydantic validation.</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">                      If False, the model is constructed without validation.</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">            **kwargs: Extra query params merged into ``query``.</span>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">            A typed model instance. If ``validate=True``, fields are fully</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">            validated. If ``validate=False``, the model is built directly</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">            from the raw payload without running Pydantic validators.</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a>        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">overwrite_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a>        <span class="n">schema</span> <span class="o">=</span>  <span class="n">overwrite_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a>        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_one</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">endpoint</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>        <span class="n">raw_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_all</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>        <span class="n">rows_raw</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a>        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_model</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">target_schema</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows_raw</span><span class="p">]</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a>        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>            <span class="k">return</span> <span class="n">items</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a>        <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_select_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a>        <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_write_csv</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>        <span class="k">return</span> <span class="n">output_path</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>
+<a id="__codelineno-0-489" name="__codelineno-0-489"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>            <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a>            <span class="n">pk</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>            <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a>            <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>            <span class="n">overwrite_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a>            <span class="n">overwrite_schema</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">TModel</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TModel</span><span class="p">:</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        Retrieve one item by primary key.</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">            overwrite_schema: Schema to use for parsing. Defaults to ``self.schema``.</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">            overwrite_endpoint:</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">            pk: Resource primary key.</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">            query: Base query parameters.</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">            validate: Whether to run full Pydantic validation.</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">                      If False, the model is constructed without validation.</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">            **kwargs: Extra query params merged into ``query``.</span>
 <a id="__codelineno-0-510" name="__codelineno-0-510"></a>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;results&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a>            <span class="n">results</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="p">[])</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a>                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No results found for pk=</span><span class="si">{</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a>            <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_model</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return debug-friendly representation of the component.</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">            A typed model instance. If ``validate=True``, fields are fully</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">            validated. If ``validate=False``, the model is built directly</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">            from the raw payload without running Pydantic validators.</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">overwrite_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>        <span class="n">schema</span> <span class="o">=</span>  <span class="n">overwrite_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a>        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_one</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">endpoint</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
 <a id="__codelineno-0-522" name="__codelineno-0-522"></a>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">            String with class name and configured endpoint.</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> endpoint=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span><span class="si">!r}</span><span class="s2">&gt;&quot;</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;results&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>            <span class="n">results</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a>                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No results found for pk=</span><span class="si">{</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a>            <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_model</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return debug-friendly representation of the component.</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a><span class="sd">            String with class name and configured endpoint.</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;&lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> endpoint=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span><span class="si">!r}</span><span class="s2">&gt;&quot;</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -4621,7 +4645,7 @@ as the idiomatic way to iterate all items; this method makes those examples work
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">export</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_schema</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">TModel</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">export</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">overwrite_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">overwrite_schema</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">TModel</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4727,6 +4751,24 @@ otherwise <code>schema</code> is used as fallback.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
+                <code>raw</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Save the CSV exactly as Trapper sends it (its own header, column order and values)
+instead of parsing the rows and writing them with the SDK's column names, sorted
+alphabetically. Needs <code>file</code>; <code>validate</code> and <code>overwrite_schema</code> do not apply.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
                 <code>**kwargs</code>
             </td>
             <td>
@@ -4771,6 +4813,29 @@ otherwise <code>schema</code> is used as fallback.</p>
             <td>
               <div class="doc-md-description">
                 <p>otherwise <code>list[BaseModel]</code> with parsed or constructed models.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>raw</code> is <code>True</code> and <code>file</code> is <code>None</code>.</p>
               </div>
             </td>
           </tr>
@@ -4826,53 +4891,77 @@ otherwise <code>schema</code> is used as fallback.</p>
 <span class="normal"><a href="#__codelineno-0-472">472</a></span>
 <span class="normal"><a href="#__codelineno-0-473">473</a></span>
 <span class="normal"><a href="#__codelineno-0-474">474</a></span>
-<span class="normal"><a href="#__codelineno-0-475">475</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-475">475</a></span>
+<span class="normal"><a href="#__codelineno-0-476">476</a></span>
+<span class="normal"><a href="#__codelineno-0-477">477</a></span>
+<span class="normal"><a href="#__codelineno-0-478">478</a></span>
+<span class="normal"><a href="#__codelineno-0-479">479</a></span>
+<span class="normal"><a href="#__codelineno-0-480">480</a></span>
+<span class="normal"><a href="#__codelineno-0-481">481</a></span>
+<span class="normal"><a href="#__codelineno-0-482">482</a></span>
+<span class="normal"><a href="#__codelineno-0-483">483</a></span>
+<span class="normal"><a href="#__codelineno-0-484">484</a></span>
+<span class="normal"><a href="#__codelineno-0-485">485</a></span>
+<span class="normal"><a href="#__codelineno-0-486">486</a></span>
+<span class="normal"><a href="#__codelineno-0-487">487</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-429" name="__codelineno-0-429"></a><span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span>
 <a id="__codelineno-0-430" name="__codelineno-0-430"></a>        <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-431" name="__codelineno-0-431"></a>        <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="n">file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-433" name="__codelineno-0-433"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-434" name="__codelineno-0-434"></a>        <span class="n">overwrite_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-435" name="__codelineno-0-435"></a>        <span class="n">overwrite_schema</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">TModel</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]:</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">    Export resource data as CSV or as a list of parsed models.</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">    If ``export_endpoint`` is defined on the component, it is used instead of</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">    ``endpoint``. If ``export_schema`` is defined, it is used for parsing;</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">    otherwise ``schema`` is used as fallback.</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">        overwrite_schema: Schema to use for parsing. Defaults to ``self.export_schema``.</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">        query: Base query parameters.</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">        file: Output CSV path. If ``None``, returns a list of models.</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">        validate: Whether to run full Pydantic validation on each item.</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">                  If ``False``, models are built without validation using</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">                  ``model_construct``.</span>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="sd">        overwrite_endpoint: Override the export endpoint for this call.</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">        **kwargs: Extra query params merged into ``query``.</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">        ``Path`` to the generated CSV when ``file`` is provided,</span>
-<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">        otherwise ``list[BaseModel]`` with parsed or constructed models.</span>
-<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-459" name="__codelineno-0-459"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
-<a id="__codelineno-0-460" name="__codelineno-0-460"></a>    <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-461" name="__codelineno-0-461"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">overwrite_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span>
-<a id="__codelineno-0-462" name="__codelineno-0-462"></a>    <span class="n">target_schema</span> <span class="o">=</span> <span class="n">overwrite_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>
-<a id="__codelineno-0-464" name="__codelineno-0-464"></a>
-<a id="__codelineno-0-465" name="__codelineno-0-465"></a>    <span class="n">raw_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_all</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
-<a id="__codelineno-0-466" name="__codelineno-0-466"></a>    <span class="n">rows_raw</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="p">[])</span>
-<a id="__codelineno-0-467" name="__codelineno-0-467"></a>    <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_model</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">target_schema</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows_raw</span><span class="p">]</span>
-<a id="__codelineno-0-468" name="__codelineno-0-468"></a>
-<a id="__codelineno-0-469" name="__codelineno-0-469"></a>    <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-470" name="__codelineno-0-470"></a>        <span class="k">return</span> <span class="n">items</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">BaseModel</span><span class="p">]:</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">    Export resource data as CSV or as a list of parsed models.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">    If ``export_endpoint`` is defined on the component, it is used instead of</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">    ``endpoint``. If ``export_schema`` is defined, it is used for parsing;</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">    otherwise ``schema`` is used as fallback.</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">        overwrite_schema: Schema to use for parsing. Defaults to ``self.export_schema``.</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">        query: Base query parameters.</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a><span class="sd">        file: Output CSV path. If ``None``, returns a list of models.</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a><span class="sd">        validate: Whether to run full Pydantic validation on each item.</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="sd">                  If ``False``, models are built without validation using</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="sd">                  ``model_construct``.</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">        overwrite_endpoint: Override the export endpoint for this call.</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">        raw: Save the CSV exactly as Trapper sends it (its own header, column order and values)</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">            instead of parsing the rows and writing them with the SDK&#39;s column names, sorted</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">            alphabetically. Needs ``file``; ``validate`` and ``overwrite_schema`` do not apply.</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">        **kwargs: Extra query params merged into ``query``.</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a><span class="sd">        ``Path`` to the generated CSV when ``file`` is provided,</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a><span class="sd">        otherwise ``list[BaseModel]`` with parsed or constructed models.</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a><span class="sd">        ValueError: If ``raw`` is ``True`` and ``file`` is ``None``.</span>
+<a id="__codelineno-0-465" name="__codelineno-0-465"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-466" name="__codelineno-0-466"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
+<a id="__codelineno-0-467" name="__codelineno-0-467"></a>    <span class="k">if</span> <span class="n">raw</span> <span class="ow">and</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-468" name="__codelineno-0-468"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;raw=True saves Trapper&#39;s CSV as it comes: give a file&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-469" name="__codelineno-0-469"></a>    <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-470" name="__codelineno-0-470"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">overwrite_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span>
 <a id="__codelineno-0-471" name="__codelineno-0-471"></a>
-<a id="__codelineno-0-472" name="__codelineno-0-472"></a>    <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_select_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-<a id="__codelineno-0-473" name="__codelineno-0-473"></a>    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_write_csv</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a>    <span class="k">return</span> <span class="n">output_path</span>
+<a id="__codelineno-0-472" name="__codelineno-0-472"></a>    <span class="k">if</span> <span class="n">raw</span><span class="p">:</span>
+<a id="__codelineno-0-473" name="__codelineno-0-473"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">export_all</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">file</span><span class="p">)</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="n">target_schema</span> <span class="o">=</span> <span class="n">overwrite_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">export_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>
+<a id="__codelineno-0-476" name="__codelineno-0-476"></a>
+<a id="__codelineno-0-477" name="__codelineno-0-477"></a>    <span class="n">raw_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_all</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+<a id="__codelineno-0-478" name="__codelineno-0-478"></a>    <span class="n">rows_raw</span> <span class="o">=</span> <span class="n">raw_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<a id="__codelineno-0-479" name="__codelineno-0-479"></a>    <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_model</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">target_schema</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows_raw</span><span class="p">]</span>
+<a id="__codelineno-0-480" name="__codelineno-0-480"></a>
+<a id="__codelineno-0-481" name="__codelineno-0-481"></a>    <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-482" name="__codelineno-0-482"></a>        <span class="k">return</span> <span class="n">items</span>
+<a id="__codelineno-0-483" name="__codelineno-0-483"></a>
+<a id="__codelineno-0-484" name="__codelineno-0-484"></a>    <span class="n">output_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_select_file</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a>    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_write_csv</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">output_path</span><span class="p">)</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>    <span class="k">return</span> <span class="n">output_path</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5052,19 +5141,7 @@ otherwise <code>schema</code> is used as fallback.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/trapper_client/components/base.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-477">477</a></span>
-<span class="normal"><a href="#__codelineno-0-478">478</a></span>
-<span class="normal"><a href="#__codelineno-0-479">479</a></span>
-<span class="normal"><a href="#__codelineno-0-480">480</a></span>
-<span class="normal"><a href="#__codelineno-0-481">481</a></span>
-<span class="normal"><a href="#__codelineno-0-482">482</a></span>
-<span class="normal"><a href="#__codelineno-0-483">483</a></span>
-<span class="normal"><a href="#__codelineno-0-484">484</a></span>
-<span class="normal"><a href="#__codelineno-0-485">485</a></span>
-<span class="normal"><a href="#__codelineno-0-486">486</a></span>
-<span class="normal"><a href="#__codelineno-0-487">487</a></span>
-<span class="normal"><a href="#__codelineno-0-488">488</a></span>
-<span class="normal"><a href="#__codelineno-0-489">489</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-489">489</a></span>
 <span class="normal"><a href="#__codelineno-0-490">490</a></span>
 <span class="normal"><a href="#__codelineno-0-491">491</a></span>
 <span class="normal"><a href="#__codelineno-0-492">492</a></span>
@@ -5092,47 +5169,59 @@ otherwise <code>schema</code> is used as fallback.</p>
 <span class="normal"><a href="#__codelineno-0-514">514</a></span>
 <span class="normal"><a href="#__codelineno-0-515">515</a></span>
 <span class="normal"><a href="#__codelineno-0-516">516</a></span>
-<span class="normal"><a href="#__codelineno-0-517">517</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span>
-<a id="__codelineno-0-478" name="__codelineno-0-478"></a>        <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-479" name="__codelineno-0-479"></a>        <span class="n">pk</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
-<a id="__codelineno-0-480" name="__codelineno-0-480"></a>        <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-481" name="__codelineno-0-481"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-482" name="__codelineno-0-482"></a>        <span class="n">overwrite_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-483" name="__codelineno-0-483"></a>        <span class="n">overwrite_schema</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">TModel</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-484" name="__codelineno-0-484"></a>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TModel</span><span class="p">:</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a><span class="sd">    Retrieve one item by primary key.</span>
-<a id="__codelineno-0-489" name="__codelineno-0-489"></a>
-<a id="__codelineno-0-490" name="__codelineno-0-490"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-491" name="__codelineno-0-491"></a><span class="sd">        overwrite_schema: Schema to use for parsing. Defaults to ``self.schema``.</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a><span class="sd">        overwrite_endpoint:</span>
-<a id="__codelineno-0-493" name="__codelineno-0-493"></a><span class="sd">        pk: Resource primary key.</span>
-<a id="__codelineno-0-494" name="__codelineno-0-494"></a><span class="sd">        query: Base query parameters.</span>
-<a id="__codelineno-0-495" name="__codelineno-0-495"></a><span class="sd">        validate: Whether to run full Pydantic validation.</span>
-<a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">                  If False, the model is constructed without validation.</span>
-<a id="__codelineno-0-497" name="__codelineno-0-497"></a><span class="sd">        **kwargs: Extra query params merged into ``query``.</span>
-<a id="__codelineno-0-498" name="__codelineno-0-498"></a>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        A typed model instance. If ``validate=True``, fields are fully</span>
-<a id="__codelineno-0-501" name="__codelineno-0-501"></a><span class="sd">        validated. If ``validate=False``, the model is built directly</span>
-<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">        from the raw payload without running Pydantic validators.</span>
-<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a>    <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-506" name="__codelineno-0-506"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">overwrite_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span>
-<a id="__codelineno-0-507" name="__codelineno-0-507"></a>    <span class="n">schema</span> <span class="o">=</span>  <span class="n">overwrite_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
-<a id="__codelineno-0-508" name="__codelineno-0-508"></a>
-<a id="__codelineno-0-509" name="__codelineno-0-509"></a>    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_one</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">endpoint</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-517">517</a></span>
+<span class="normal"><a href="#__codelineno-0-518">518</a></span>
+<span class="normal"><a href="#__codelineno-0-519">519</a></span>
+<span class="normal"><a href="#__codelineno-0-520">520</a></span>
+<span class="normal"><a href="#__codelineno-0-521">521</a></span>
+<span class="normal"><a href="#__codelineno-0-522">522</a></span>
+<span class="normal"><a href="#__codelineno-0-523">523</a></span>
+<span class="normal"><a href="#__codelineno-0-524">524</a></span>
+<span class="normal"><a href="#__codelineno-0-525">525</a></span>
+<span class="normal"><a href="#__codelineno-0-526">526</a></span>
+<span class="normal"><a href="#__codelineno-0-527">527</a></span>
+<span class="normal"><a href="#__codelineno-0-528">528</a></span>
+<span class="normal"><a href="#__codelineno-0-529">529</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span>
+<a id="__codelineno-0-490" name="__codelineno-0-490"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-491" name="__codelineno-0-491"></a>        <span class="n">pk</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-494" name="__codelineno-0-494"></a>        <span class="n">overwrite_endpoint</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-495" name="__codelineno-0-495"></a>        <span class="n">overwrite_schema</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">TModel</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-496" name="__codelineno-0-496"></a>
+<a id="__codelineno-0-497" name="__codelineno-0-497"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TModel</span><span class="p">:</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">    Retrieve one item by primary key.</span>
+<a id="__codelineno-0-501" name="__codelineno-0-501"></a>
+<a id="__codelineno-0-502" name="__codelineno-0-502"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-503" name="__codelineno-0-503"></a><span class="sd">        overwrite_schema: Schema to use for parsing. Defaults to ``self.schema``.</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="sd">        overwrite_endpoint:</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="sd">        pk: Resource primary key.</span>
+<a id="__codelineno-0-506" name="__codelineno-0-506"></a><span class="sd">        query: Base query parameters.</span>
+<a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">        validate: Whether to run full Pydantic validation.</span>
+<a id="__codelineno-0-508" name="__codelineno-0-508"></a><span class="sd">                  If False, the model is constructed without validation.</span>
+<a id="__codelineno-0-509" name="__codelineno-0-509"></a><span class="sd">        **kwargs: Extra query params merged into ``query``.</span>
 <a id="__codelineno-0-510" name="__codelineno-0-510"></a>
-<a id="__codelineno-0-511" name="__codelineno-0-511"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;results&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-<a id="__codelineno-0-512" name="__codelineno-0-512"></a>        <span class="n">results</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="p">[])</span>
-<a id="__codelineno-0-513" name="__codelineno-0-513"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
-<a id="__codelineno-0-514" name="__codelineno-0-514"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No results found for pk=</span><span class="si">{</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a>        <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_model</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
+<a id="__codelineno-0-511" name="__codelineno-0-511"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-512" name="__codelineno-0-512"></a><span class="sd">        A typed model instance. If ``validate=True``, fields are fully</span>
+<a id="__codelineno-0-513" name="__codelineno-0-513"></a><span class="sd">        validated. If ``validate=False``, the model is built directly</span>
+<a id="__codelineno-0-514" name="__codelineno-0-514"></a><span class="sd">        from the raw payload without running Pydantic validators.</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a>    <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">overwrite_endpoint</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="n">schema</span> <span class="o">=</span>  <span class="n">overwrite_schema</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a>    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_one</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">endpoint</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;results&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>        <span class="n">results</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="p">[])</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">results</span><span class="p">:</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a>            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No results found for pk=</span><span class="si">{</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a>        <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_model</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

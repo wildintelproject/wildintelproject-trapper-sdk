@@ -3193,6 +3193,9 @@ devuelven una <code>Location</code>, construida con el JSON de Trapper; <code>ex
 </tr>
 </tbody>
 </table>
+<p>Para guardar la exportación tal como la envía Trapper, con su cabecera (<code>locationID</code>, <code>ignoreDST</code>, <code>_id</code>,
+<code>researchProject</code>, ...) en lugar de los nombres de columna del SDK, usa
+<code>client.locations.export(file="locations.csv", raw=True)</code>.</p>
 <p>Así que para leer el <code>ignore_dst</code> de una location, o la clave primaria de su research project, usa la
 exportación; para leer su nombre o su propietario, usa la lista. <code>coordinate_uncertainty</code> y <code>managers</code>
 existen en Trapper pero no están en ninguna de las dos, y no se pueden leer. Cuando necesites las dos
