@@ -10,13 +10,14 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack
 from datetime import date
 from pathlib import Path
-from typing import Any, Dict, Iterable, Mapping
+from typing import Any, Dict, Iterable, Iterator, Mapping
 
 from tenacity import Retrying
 
 from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
+from trapper_client.components.locations import LocationsComponent
 from trapper_client.components.resources import ResourcesComponent
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
 from trapper_client.retry_utils import retrying_for_chunk_upload
@@ -87,6 +88,52 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
     export_endpoint = "geomap/api/deployments/export/"
     schema = Deployment
     export_schema = DeploymentExport
+
+    #: How many location pks go in one request of :meth:`in_area` (the list of pks is in the URL).
+    in_area_batch_size = 50
+
+    def in_area(
+        self,
+        bbox: tuple[float, float, float, float] | None = None,
+        center: tuple[float, float] | None = None,
+        radius: float | None = None,
+        **filters: Any,
+    ) -> Iterator[Deployment]:
+        """Iterate over the deployments whose location is inside an area.
+
+        A deployment has no coordinates of its own: they are its location's, and the deployment list gives
+        only the location's pk. So this finds the locations in the area with
+        :meth:`LocationsComponent.in_area <trapper_client.components.locations.LocationsComponent.in_area>`
+        (reading every location the account can see, filtered on the client) and then asks for the
+        deployments of those locations, ``in_area_batch_size`` pks per request. A deployment whose location
+        has no readable coordinates is left out.
+
+        Args:
+            bbox: ``(min_lon, min_lat, max_lon, max_lat)``, edges included. ``min_lon > max_lon`` crosses
+                the antimeridian.
+            center: ``(longitude, latitude)`` of the circle, longitude first, like Trapper.
+            radius: Radius of the circle in **metres**; needs ``center``.
+            **filters: Any filter of :meth:`where` (``research_project``, ``sdate_from``, ``tags``, ...),
+                applied to the deployments, not to the locations.
+
+        Raises:
+            ValueError: if the area is wrong (see :meth:`LocationsComponent.in_area`), before any request
+                for deployments. A ``location`` filter cannot be combined with the area.
+
+        Example:
+            ``client.deployments.in_area(center=(-6.44, 37.05), radius=5000, research_project=3)``
+        """
+        if "location" in filters:
+            raise ValueError("in_area() chooses the locations itself: do not pass `location`")
+        locations = LocationsComponent(self.client).in_area(bbox=bbox, center=center, radius=radius)
+        pks = sorted(location.pk for location in locations)
+        size = max(1, int(self.in_area_batch_size))
+
+        def deployments() -> Iterator[Deployment]:
+            for start in range(0, len(pks), size):
+                yield from self.where(location=pks[start:start + size], **filters)
+
+        return deployments()
 
     import_endpoint = "geomap/deployment/import/"
     #: Trapper v2 moved the import forms into the Django admin.

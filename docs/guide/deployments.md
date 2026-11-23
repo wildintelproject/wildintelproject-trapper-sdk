@@ -34,6 +34,27 @@ below for the one write operation this component supports.
     `end_date`, `is_incomplete`, `view_quality`, `capture_method` and `status`, and v2 also applies `in_bbox`. To
     silence it: `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
 
+## Filtering by area
+
+A deployment has no coordinates of its own: they are its location's, and the deployment list gives only the
+location's pk, so `where()` has no spatial filter. `in_area()` takes the same area as
+[`client.locations.in_area()`](locations.md#filtering-by-area) and returns the deployments whose location is inside:
+
+```python
+# a bounding box: (min_lon, min_lat, max_lon, max_lat)
+for dep in client.deployments.in_area(bbox=(-7.0, 36.5, -5.5, 37.5)):
+    print(dep.deployment_id, dep.location_id)
+
+# a circle: the centre as (longitude, latitude), the radius in metres, plus the usual filters
+near = list(client.deployments.in_area(center=(-6.44, 37.05), radius=5_000, research_project=3, sdate_from="2024-01-01"))
+```
+
+It finds the locations in the area first (every location the account can see is read and filtered on the
+client) and then asks for the deployments of those locations, 50 location pks per request. The other keywords are
+filters of the **deployments**, not of the locations, and `location` cannot be combined with the area. A deployment
+whose location has no readable coordinates is left out, and a wrong area raises `ValueError` before any request for
+deployments.
+
 ## The six access patterns
 
 ```python

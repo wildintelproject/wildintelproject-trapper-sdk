@@ -89,6 +89,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`import_deployments(update=True)`) has been applied. The import returns `True` when the table is queued and
   `wait_for_import()` cannot tell an update, because the IDs exist already. The guide now describes the round trip
   export (`raw=True`), edit, import with `update=True`, checked on v1 and v2.
+- `client.deployments.in_area(bbox=..., center=..., radius=..., **filters)` (issue #51): the deployments whose
+  location is inside a bounding box or a circle. A deployment has no coordinates of its own, so it finds the
+  locations in the area (`locations.in_area()`) and asks for their deployments in batches of location pks.
 - `client.locations.in_area(bbox=..., center=..., radius=..., **filters)` (issue #34): the locations inside a
   bounding box or a circle (radius in metres). Trapper v1's list ignores `in_bbox` and `radius` silently and
   v2's ignores `radius`, so the SDK filters on the client; on v2 a box is also sent as `in_bbox` (issue #40) so
