@@ -124,9 +124,10 @@ print(project.pk, project.name)
 ```
 
 `create()` recibe un `ResearchProjectCreate`, un modelo de Pydantic con todos los campos del
-formulario de creación (también vale un diccionario con esos campos, que se valida igual). Valida antes
-de enviar nada: recorta los textos, rechaza los campos desconocidos (una errata falla en lugar de
-ignorarse) y lanza `pydantic.ValidationError`, que es un `ValueError`, indicando el campo incorrecto.
+formulario de creación. Construirlo valida los datos antes de enviar nada: recorta los textos, rechaza
+los campos desconocidos (una errata falla en lugar de ignorarse) y lanza `pydantic.ValidationError`,
+que es un `ValueError`, indicando el campo incorrecto. Para construirlo desde un diccionario (un JSON o
+un YAML, por ejemplo) usa `ResearchProjectCreate.model_validate(datos)`.
 
 | Campo | Valores | Por defecto |
 |---|---|---|

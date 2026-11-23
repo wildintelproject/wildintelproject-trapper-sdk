@@ -2,7 +2,6 @@
 Component for the /research/api/projects resource.
 """
 
-import re
 from typing import Any, Dict
 
 from trapper_client import err
@@ -19,17 +18,6 @@ from trapper_client.components.research_project_collections  import (
 )
 
 _ROLES_PREFIX = "project_roles"
-
-
-def _selected_option(html: str, select_name: str) -> str | None:
-    """The value of the ``selected`` option of ``<select name=select_name>`` in a rendered form."""
-    block = re.search(
-        rf'<select[^>]*name="{re.escape(select_name)}"[^>]*>(.*?)</select>', html, re.DOTALL
-    )
-    if not block:
-        return None
-    option = re.search(r'<option[^>]*value="([^"]+)"[^>]*selected', block.group(1))
-    return option.group(1) if option else None
 
 
 class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
@@ -92,7 +80,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
 
     def create(
         self,
-        request: ResearchProjectCreate | Dict[str, Any],
+        request: ResearchProjectCreate,
         *,
         raise_on_error: bool = True,
     ) -> ResearchProject | None:
@@ -110,8 +98,8 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
 
         Args:
             request: The project to create, as a
-                :class:`~trapper_client.schemas.research_projects.ResearchProjectCreate` (a dict
-                with its fields is validated into one). ``name`` and ``acronym`` (3 to 10
+                :class:`~trapper_client.schemas.research_projects.ResearchProjectCreate`, which
+                validates it before anything is sent. ``name`` and ``acronym`` (3 to 10
                 characters) must be unique; the sampling design, sensor method, animal types and
                 bait use are the enumerations of :mod:`trapper_client.enums`.
             raise_on_error: Raise ``APIError`` when the server rejects the form (the default);
@@ -124,7 +112,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
             server rejects the form and ``raise_on_error=False``.)
 
         Raises:
-            pydantic.ValidationError: ``request`` is not valid (a ``ValueError``): nothing is sent.
+            TypeError: ``request`` is not a ``ResearchProjectCreate``.
             err.UnsupportedVersionError: On Trapper v2.
             err.APIError: The server rejected the form (a name or acronym already in use, ...) or
                 redirected to its login page.
@@ -143,58 +131,18 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         """
         self._require_version("v1", feature="research_projects.create()")
         if not isinstance(request, ResearchProjectCreate):
-            request = ResearchProjectCreate.model_validate(request)
+            raise TypeError(
+                f"create() takes a ResearchProjectCreate, not {type(request).__name__}; "
+                "build one with ResearchProjectCreate(...) or ResearchProjectCreate.model_validate(data)"
+            )
         acronym = request.acronym
 
         data = request.to_form()
-        data.update(self._owner_role_fields())
+        data.update(self._owner_role_fields(self.create_endpoint, _ROLES_PREFIX, "research project"))
 
-        response = self.client.session_post_multipart(self.create_endpoint, data=data)
-        location = (response.headers.get("location") or "").lower()
-        if response.status_code == 302 and "login" not in location:
+        if self._submit_create_form(self.create_endpoint, data, "Research project", raise_on_error):
             return next(iter(self.where(acronym=acronym, page_size=5)), None)
-
-        if raise_on_error:
-            if response.status_code == 302:
-                raise err.APIError(
-                    "Research project creation refused: the server redirected to its login page."
-                )
-            message = self.client._extract_html_error_text(response.text)
-            raise err.APIError(
-                f"Research project creation failed (status {response.status_code}): {message}"
-            )
         return None
-
-    def _owner_role_fields(self) -> Dict[str, Any]:
-        """The role formset the create form always posts: the logged-in user as administrator.
-
-        The form page already says who that is (the owner is pre-selected in its first row), so
-        read it from there instead of looking the user up through the API.
-        """
-        self.client.session_login()
-        url = f"{self.client.base_url.rstrip('/')}/{self.create_endpoint}"
-        page = self.client._web_client.get(url)
-        if page.status_code != 200:
-            raise err.APIError(
-                f"Cannot open the research project form (status {page.status_code}): the account "
-                "may not be allowed to create projects."
-            )
-        user = _selected_option(page.text, f"{_ROLES_PREFIX}-0-user")
-        role = _selected_option(page.text, f"{_ROLES_PREFIX}-0-name")
-        if user is None or role is None:
-            raise err.APIError(
-                "The research project form has no pre-selected owner role: Trapper changed the "
-                "form and this workaround needs updating."
-            )
-        return {
-            f"{_ROLES_PREFIX}-TOTAL_FORMS": 1,
-            f"{_ROLES_PREFIX}-INITIAL_FORMS": 0,
-            f"{_ROLES_PREFIX}-MIN_NUM_FORMS": 0,
-            f"{_ROLES_PREFIX}-MAX_NUM_FORMS": 1000,
-            f"{_ROLES_PREFIX}-0-id": "",
-            f"{_ROLES_PREFIX}-0-user": user,
-            f"{_ROLES_PREFIX}-0-name": role,
-        }
 
     def get_project_collections(
         self,

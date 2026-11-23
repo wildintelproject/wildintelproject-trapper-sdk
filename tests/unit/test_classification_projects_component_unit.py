@@ -6,17 +6,22 @@ specific methods.
 """
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 
 from tests.base_component_tests import ComponentUnitTestBase, paginated_response
+from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.classification_projects import ClassificationProjectsComponent
 from trapper_client.schemas import (
     ClassificationProject,
     ClassificationProjectCollection,
+    ClassificationProjectCreate,
     ClassificationResourceRecord,
+    ClassificatorRecord,
+    ResearchProject,
     PaginatedResult,
 )
 
@@ -443,3 +448,188 @@ class TestClassificationProjectCollectionResources:
 
         params = client.get.call_args[1]["query"]
         assert params["species"] == 42
+
+
+# ── write access: create / add_collections / remove_collection ───────────────
+
+FORM_PAGE = """
+<select name="classification_project_roles-0-user"><option value="">---</option>
+<option value="4" selected>rp_staff</option></select>
+<select name="classification_project_roles-0-name"><option value="1" selected>Admin</option></select>
+"""
+
+
+def _project(pk, name="Doñana", research_project="Host"):
+    return ClassificationProject(**{**VALID_PROJECT, "pk": pk, "name": name, "research_project": research_project})
+
+
+def _link(pk, collection_pk):
+    return ClassificationProjectCollection(
+        pk=pk, collection_pk=collection_pk, name=f"c{collection_pk}", status="OnDemand", is_active=True,
+    )
+
+
+class TestCreate:
+
+    @pytest.fixture
+    def client(self):
+        c = MagicMock()
+        c.server_version = "v1"
+        c.base_url = "https://trapper.example"
+        c._web_client.get.return_value = MagicMock(status_code=200, text=FORM_PAGE)
+        c.session_post_multipart.return_value = MagicMock(
+            status_code=302, headers={"location": "/media_classification/project/list/"}
+        )
+        return c
+
+    @pytest.fixture
+    def component(self, client):
+        comp = ClassificationProjectsComponent(client)
+        # before the POST: nothing called "Doñana"; after: the new project 7 (an older one, 3, stays)
+        comp.where = MagicMock(side_effect=[iter([_project(3)]), iter([_project(3), _project(7)])])
+        return comp
+
+    def test_returns_the_new_project_not_a_namesake(self, component):
+        project = component.create(ClassificationProjectCreate(name="Doñana", research_project=1, classificator=2))
+        assert project.pk == 7
+
+    def test_posts_the_form_with_the_owner_as_admin(self, component, client):
+        component.create(ClassificationProjectCreate(name=" Doñana ", research_project=1, classificator=2))
+        endpoint = client.session_post_multipart.call_args.args[0]
+        data = client.session_post_multipart.call_args.kwargs["data"]
+        assert endpoint == "media_classification/project/create/"
+        assert (data["name"], data["research_project"], data["classificator"], data["status"]) == ("Doñana", 1, 2, 1)
+        assert data["classification_project_roles-TOTAL_FORMS"] == 1
+        assert data["classification_project_roles-0-user"] == "4"
+        assert data["classification_project_roles-0-name"] == "1"
+
+    def test_rejected_form_names_the_field(self, component, client):
+        client.session_post_multipart.return_value = MagicMock(status_code=200, text="<html/>")
+        client._extract_html_error_text.return_value = "classificator: Select a valid choice."
+        with pytest.raises(err.APIError, match="classificator: Select a valid choice"):
+            component.create(ClassificationProjectCreate(name="N", research_project=1, classificator=2))
+
+    def test_rejected_form_returns_none_without_raise_on_error(self, component, client):
+        client.session_post_multipart.return_value = MagicMock(status_code=200, text="<html/>")
+        assert component.create(ClassificationProjectCreate(name="N", research_project=1, classificator=2), raise_on_error=False) is None
+
+    def test_not_available_on_v2(self, component, client):
+        client.server_version = "v2"
+        with pytest.raises(err.UnsupportedVersionError):
+            component.create(ClassificationProjectCreate(name="N", research_project=1, classificator=2))
+        client.session_post_multipart.assert_not_called()
+
+    def test_only_takes_the_model(self, component, client):
+        with pytest.raises(TypeError, match="takes a ClassificationProjectCreate, not dict"):
+            component.create({"name": "N", "research_project": 1, "classificator": 2})
+        client.session_post_multipart.assert_not_called()
+
+    @pytest.mark.parametrize("data", [
+        {"name": " ", "research_project": 1, "classificator": 2},
+        {"name": "N", "research_project": 0, "classificator": 2},
+        {"name": "N", "research_project": 1, "classificator": -1},
+        {"name": "N", "research_project": 1, "classificator": 2, "typo": 1},
+        {"name": "N", "research_project": 1},
+    ])
+    def test_the_model_rejects_invalid_data_before_create_is_reached(self, data):
+        with pytest.raises(ValueError):
+            ClassificationProjectCreate.model_validate(data)
+
+
+class TestAddAndRemoveCollections:
+
+    @pytest.fixture
+    def client(self):
+        c = MagicMock()
+        c.server_version = "v1"
+        c.base_url = "https://trapper.example"
+        c.session_post_multipart.return_value = MagicMock(
+            status_code=200, json=MagicMock(return_value={"success": True, "msg": "ok"})
+        )
+        # research project "Host" is pk 10 and holds storage collections 1, 2 (links 4, 5)
+        c.research_projects.where.return_value = [SimpleNamespace(pk=10, name="Host")]
+        c.research_projects.where_project_collections.return_value = [
+            MagicMock(pk=4, collection_pk=1), MagicMock(pk=5, collection_pk=2),
+        ]
+        return c
+
+    @pytest.fixture
+    def component(self, client):
+        comp = ClassificationProjectsComponent(client)
+        comp.find = MagicMock(return_value=_project(7))
+        return comp
+
+    def test_adds_only_the_missing_collections_by_their_research_links(self, component, client):
+        component.where_project_collections = MagicMock(
+            side_effect=[[_link(50, 1)], [_link(50, 1), _link(51, 2)]]
+        )
+        links = component.add_collections(7, [1, 2])
+        data = client.session_post_multipart.call_args.kwargs["data"]
+        assert client.session_post_multipart.call_args.args[0] == "media_classification/project/collection/add/"
+        assert data == {"project": 7, "rproject": 10, "collections_pks": "5"}   # link 5, not storage 2
+        assert [l.collection_pk for l in links] == [1, 2]
+
+    def test_nothing_is_posted_when_all_are_already_there(self, component, client):
+        component.where_project_collections = MagicMock(return_value=[_link(50, 1)])
+        assert [l.pk for l in component.add_collections(7, [1])] == [50]
+        client.session_post_multipart.assert_not_called()
+
+    def test_a_collection_outside_the_research_project_is_refused(self, component, client):
+        component.where_project_collections = MagicMock(return_value=[])
+        with pytest.raises(ValueError, match=r"\[3\] are not in the research project 'Host'"):
+            component.add_collections(7, [1, 3])
+        client.session_post_multipart.assert_not_called()
+
+    def test_the_servers_refusal_is_raised(self, component, client):
+        component.where_project_collections = MagicMock(return_value=[])
+        client.session_post_multipart.return_value = MagicMock(
+            status_code=200, json=MagicMock(return_value={"success": False, "msg": "Nothing to process"})
+        )
+        with pytest.raises(err.APIError, match="Nothing to process"):
+            component.add_collections(7, [1])
+
+    def test_accepted_but_not_linked_is_an_error(self, component):
+        component.where_project_collections = MagicMock(return_value=[])
+        with pytest.raises(err.APIError, match="still not linked"):
+            component.add_collections(7, [1])
+
+    def test_empty_list_is_a_value_error(self, component):
+        with pytest.raises(ValueError, match="empty"):
+            component.add_collections(7, [])
+
+    def test_remove_unlinks_through_the_delete_url(self, component, client):
+        component.find_collection_in_project = MagicMock(side_effect=[50, None])
+        assert component.remove_collection(7, 1) is True
+        url = client._web_client.get.call_args.args[0]
+        assert url == "https://trapper.example/media_classification/project/collection/delete/50/"
+
+    def test_remove_a_collection_that_is_not_linked(self, component, client):
+        component.find_collection_in_project = MagicMock(return_value=None)
+        assert component.remove_collection(7, 1) is False
+        client._web_client.get.assert_not_called()
+
+    def test_remove_that_trapper_did_not_perform_raises(self, component):
+        component.find_collection_in_project = MagicMock(return_value=50)   # still there afterwards
+        with pytest.raises(err.APIError, match="may not be allowed"):
+            component.remove_collection(7, 1)
+
+    def test_not_available_on_v2(self, component, client):
+        client.server_version = "v2"
+        for call in (lambda: component.add_collections(7, [1]), lambda: component.remove_collection(7, 1)):
+            with pytest.raises(err.UnsupportedVersionError):
+                call()
+
+
+class TestClassificationProjectCreateModel:
+
+    def test_takes_the_objects_the_sdk_returns_or_their_primary_keys(self):
+        rp = ResearchProject(pk=3, name="Host")
+        clf = ClassificatorRecord(pk=2, name="C", owner="o", updated_date="2026-01-01")
+        by_object = ClassificationProjectCreate(name="N", research_project=rp, classificator=clf)
+        by_key = ClassificationProjectCreate(name="N", research_project=3, classificator=2)
+        assert by_object.research_project == 3 and by_object.classificator == 2
+        assert by_object.to_form() == by_key.to_form()
+
+    def test_an_object_with_a_non_positive_pk_is_rejected(self):
+        with pytest.raises(ValueError, match="positive"):
+            ClassificationProjectCreate(name="N", research_project=ResearchProject(pk=0), classificator=2)

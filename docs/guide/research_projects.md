@@ -122,10 +122,11 @@ project = client.research_projects.create(
 print(project.pk, project.name)
 ```
 
-`create()` takes a `ResearchProjectCreate`, a Pydantic model with every field of the creation form
-(a dict with those fields works too, and is validated the same way). It validates before anything is
-sent: it trims the text, rejects unknown fields (a typo fails instead of being ignored) and raises
-`pydantic.ValidationError`, a `ValueError`, naming the field that is wrong.
+`create()` takes a `ResearchProjectCreate`, a Pydantic model with every field of the creation form.
+Building it validates the data before anything is sent: it trims the text, rejects unknown fields (a
+typo fails instead of being ignored) and raises `pydantic.ValidationError`, a `ValueError`, naming the
+field that is wrong. To build it from a dict (a JSON or YAML file, say), use
+`ResearchProjectCreate.model_validate(data)`.
 
 | Field | Values | Default |
 |---|---|---|

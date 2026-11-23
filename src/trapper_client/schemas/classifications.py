@@ -6,6 +6,8 @@ from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 from .base import TrapperSchema
+from .classificators import ClassificatorRecord
+from .research_projects import ResearchProject
 from .resources import Resource
 
 
@@ -342,6 +344,47 @@ class ClassificationProject(TrapperSchema):
     update_data: str | None = None
     detail_data: str | None = None
     delete_data: str | None = None
+
+
+class ClassificationProjectCreate(BaseModel):
+    """What it takes to create a classification project
+    (``client.classification_projects.create()``).
+
+    ``ClassificationProject`` is what the API answers (it names the research project, not its pk);
+    this is what the creation form asks. Unknown fields are rejected, so a typo fails here and not
+    silently on the server.
+
+    The research project and the classificator can be given as the objects the SDK returns
+    (``ResearchProject``, ``ClassificatorRecord``) or as their primary keys; the model keeps the
+    primary keys.
+
+    The project starts *ongoing*, and the account that creates it becomes its owner and
+    administrator. Collections are added afterwards with ``add_collections()``.
+    """
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    name: str = Field(min_length=1, max_length=255)
+    research_project: int | ResearchProject = Field(description="The research project, or its primary key.")
+    classificator: int | ClassificatorRecord = Field(description="The classificator, or its primary key.")
+
+    @field_validator("research_project", "classificator")
+    @classmethod
+    def _primary_key(cls, value: int | ResearchProject | ClassificatorRecord) -> int:
+        """Keep the primary key (an object is replaced by its ``pk``)."""
+        pk = value if isinstance(value, int) else value.pk
+        if pk <= 0:
+            raise ValueError("the primary key must be positive")
+        return pk
+
+    def to_form(self) -> Dict[str, Any]:
+        """The fields of Trapper's ``media_classification/project/create/`` form."""
+        return {
+            "name": self.name,
+            "research_project": self.research_project,
+            "classificator": self.classificator,
+            "status": 1,  # ongoing: the form hides the field and posts this value on creation
+        }
 
 
 class ClassificationProjectCollection(TrapperSchema):

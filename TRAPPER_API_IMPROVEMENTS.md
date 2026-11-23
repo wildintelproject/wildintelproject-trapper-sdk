@@ -22,6 +22,8 @@ the SDK does in the meantime.
 | 10 | Answer an invalid classification import with a `400` and the report | media_classification |
 | 11 | Reject a blank `timezone` and `research_project` on import | geomap |
 | 12 | Accept token authentication for every write operation | cross-cutting |
+| 13 | Do not delete on a `GET` request | media_classification |
+| 14 | Return primary keys, not names, for the related objects of a classification project | media_classification |
 
 ---
 
@@ -132,7 +134,13 @@ linking a collection to it (`project/collection/add/`) and creating a classifica
 attribute schema, so its JSON representation (species, tracked species, the dynamic attributes and
 the form template) needs agreeing first.
 
-**Workaround in the SDK.** Planned as web-form workarounds, in the same way as research projects.
+**Notes.** Adding collections to a classification project (`project/collection/add/`) takes the primary
+keys of the *research project's* collection links (`ResearchProjectCollection`), not of the storage
+collections, and the collections must already be linked to the research project. An API should take
+the storage collection primary keys and say clearly when one is not part of the research project.
+
+**Workaround in the SDK.** `classification_projects.create()`, `.add_collections()` and
+`.remove_collection()` simulate the forms (classification projects are done; classificators are not).
 
 ## 8. Import locations and deployments through the API
 
@@ -204,6 +212,35 @@ only a token.
 enough.
 
 **Workaround in the SDK.** `session_login()` and `session_post_multipart()`.
+
+## 13. Do not delete on a `GET` request
+
+**Labels:** bug, security
+
+**Problem.** `BaseDeleteView` deletes the object on `GET` (`project/collection/delete/<pk>/`,
+`project/delete/<pk>/`, and every view built on it). A `GET` that changes data can be triggered by a
+link, an image tag or a prefetch, and is not protected by the CSRF token the `POST` variant carries.
+Deleting a project collection also deletes the classifications made on it (`on_delete=CASCADE`).
+
+**Proposal.** Delete only on `DELETE` (or `POST`) and answer `204`, with the reason in the body when it
+is refused (no permission, protected objects) instead of a redirect with a flash message.
+
+**Workaround in the SDK.** `remove_collection()` issues the `GET` and then checks through the API
+that the link is gone.
+
+## 14. Return primary keys, not names, for the related objects of a classification project
+
+**Labels:** enhancement, api
+
+**Problem.** `GET media_classification/api/projects/` returns `classificator` as a primary key but
+`research_project` as the research project's *name*. A client cannot tell which research project it is
+without a second lookup by name, and the add-collections form needs the primary key.
+
+**Proposal.** Return both as primary keys (plus the name next to it if it is wanted, e.g.
+`research_project` and `research_project_name`).
+
+**Workaround in the SDK.** The research project's primary key is looked up by its name, which is
+unique.
 
 ---
 

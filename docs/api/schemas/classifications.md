@@ -10,6 +10,8 @@
 
 ::: trapper_client.schemas.classifications.ClassificationProject
 
+::: trapper_client.schemas.classifications.ClassificationProjectCreate
+
 ::: trapper_client.schemas.classifications.ClassificationProjectCollection
 
 ::: trapper_client.schemas.classifications.MediaRecord

@@ -67,6 +67,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`name: ... already exists`) instead of the generic banner, for every form-based write.
 - `trapper_client.SamplingDesign`, `SensorMethod`, `AnimalTypes` and `BaitUse`: enumerations of the
   fixed choices of the research project form; the request model accepts a member, its number or its label.
+- `classification_projects.create()`, `.add_collections()` and `.remove_collection()` (Trapper v1):
+  create a classification project, link storage collections to it and unlink them, through the
+  classic web forms (the REST API is read-only for them). `create()` takes a
+  `ClassificationProjectCreate` model. A project can only use the collections of its research
+  project; unlinking deletes the classifications made on that collection in the project.
 
 ### Fixed
 - A client that had imported locations or deployments (session login) could no longer call any
