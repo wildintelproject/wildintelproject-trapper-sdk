@@ -372,6 +372,37 @@ class ComponentUnitTestBase:
 
         assert isinstance(result[0], self.schema)
 
+    def test_export_raw_saves_the_csv_as_the_server_sends_it(self, component, client, tmp_path):
+        """export(raw=True) delegates to the client's raw export, with the endpoint and the query."""
+        target = tmp_path / "raw.csv"
+        client.export_all.return_value = target
+
+        result = component.export(query={"a": 1}, file=target, raw=True, b=2)
+
+        assert result == target
+        client.export_all.assert_called_once()
+        args, kwargs = client.export_all.call_args
+        assert args[0] == (component.export_endpoint or component.endpoint)
+        assert kwargs["file"] == target
+        assert kwargs["query"]["a"] == 1 and kwargs["query"]["b"] == 2
+        client.get_all.assert_not_called()
+
+    def test_export_raw_needs_a_file(self, component, client):
+        """export(raw=True) without a file raises before any request."""
+        with pytest.raises(ValueError):
+            component.export(file=None, raw=True)
+        client.export_all.assert_not_called()
+        client.get_all.assert_not_called()
+
+    def test_export_is_not_raw_by_default(self, component, client, tmp_path):
+        """Without raw the rows are parsed: nothing changes for existing callers."""
+        client.get_all.return_value = paginated_response([self.valid_export_item])
+
+        component.export(file=tmp_path / "x.csv")
+
+        client.export_all.assert_not_called()
+        client.get_all.assert_called_once()
+
     def test_export_writes_csv_when_file_provided(self, component, client, tmp_path):
         """export() escribe CSV y devuelve Path cuando se indica file."""
         client.get_all.return_value = paginated_response([self.valid_export_item])

@@ -143,6 +143,10 @@ class TestAIClassificationsComponent(ComponentUnitTestBase):
     test_export_uses_overwrite_schema = None
     test_export_writes_csv_when_file_provided = None
     test_export_validate_false_constructs_without_validation = None
+    # export(raw=True) is not on this component: its own export() saves the raw CSV with validate=False
+    test_export_raw_saves_the_csv_as_the_server_sends_it = None
+    test_export_raw_needs_a_file = None
+    test_export_is_not_raw_by_default = None
 
 
 # ── fixtures ──────────────────────────────────────────────────────────────────

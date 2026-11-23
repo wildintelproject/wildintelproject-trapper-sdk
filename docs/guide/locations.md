@@ -114,6 +114,10 @@ its CSV. Checked on Trapper v1 and v2:
 | `habitat` | no | **yes** |
 | `coordinate_uncertainty`, `managers` | no | no |
 
+To save the export as Trapper sends it, with its own header (`locationID`, `ignoreDST`, `_id`,
+`researchProject`, ...) instead of the SDK's column names, use `client.locations.export(file="locations.csv",
+raw=True)`.
+
 So to read the `ignore_dst` of a location, or the primary key of its research project, use the export; to
 read its name or its owner, use the list. `coordinate_uncertainty` and `managers` exist in Trapper but are
 in neither, and cannot be read. When you need both, join them by `pk`; give the export the same filters as
