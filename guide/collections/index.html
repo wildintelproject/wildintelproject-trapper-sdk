@@ -845,6 +845,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Filters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filtering-by-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering by status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2789,6 +2806,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Filters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filtering-by-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering by status
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2870,13 +2904,13 @@
 <tbody>
 <tr>
 <td><code>pk</code></td>
-<td>comma-separated PKs</td>
+<td>list of PKs</td>
 <td>Filter by specific collection PKs</td>
 </tr>
 <tr>
 <td><code>status</code></td>
 <td>choice</td>
-<td>Filter by collection status</td>
+<td><code>Private</code>, <code>OnDemand</code>, <code>Public</code> or <code>Archived</code> (<a href="#filtering-by-status"><code>CollectionStatus</code></a>), in any case</td>
 </tr>
 <tr>
 <td><code>owner</code></td>
@@ -2895,8 +2929,8 @@
 </tr>
 <tr>
 <td><code>locations_map</code></td>
-<td>comma-separated PKs</td>
-<td>Filter via <code>resources__deployment__location</code></td>
+<td>list of PKs</td>
+<td>Filter via <code>resources__deployment__location</code> (<strong>v1 only</strong>: Trapper v2 ignores it)</td>
 </tr>
 <tr>
 <td><code>search</code></td>
@@ -2905,21 +2939,44 @@
 </tr>
 </tbody>
 </table>
+<p>Lists (<code>pk</code>, <code>owners</code>, <code>research_projects</code>, <code>locations_map</code>) can be given as a list or as a comma-separated string:
+<code>pk=[2, 1]</code> and <code>pk="2,1"</code> are the same. Trapper reads <code>pk</code> and <code>locations_map</code> as one string with commas and
+<code>owners</code> and <code>research_projects</code> as repeated parameters, and <code>pk=[2, 1]</code> sent the other way keeps <strong>one</strong> pk; the SDK
+sends each one the way Trapper reads it.</p>
+<h3 id="filtering-by-status">Filtering by status</h3>
+<p>Trapper compares <code>status</code> as it is stored, in upper and lower case, and a value that does not exist is an <strong>empty
+result, not an error</strong>: <code>status="private"</code> and <code>status="Bogus"</code> both give no collections. The SDK resolves it with
+<code>CollectionStatus</code> (<code>Private</code>, <code>OnDemand</code>, <code>Public</code>, <code>Archived</code>), accepting any case, the label (<code>"On demand"</code>) or the
+member, and raises a <code>ValueError</code> listing the valid ones before any request when it is none of them:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">trapper_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">CollectionStatus</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">&quot;public&quot;</span><span class="p">)</span>                    <span class="c1"># the same as &quot;Public&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="n">CollectionStatus</span><span class="o">.</span><span class="n">ON_DEMAND</span><span class="p">)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">&quot;Bogus&quot;</span><span class="p">)</span>                     <span class="c1"># ValueError: use one of Private, OnDemand, Public, Archived</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">A filter that Trapper does not apply</p>
+<p>Trapper ignores a parameter that is not one of its filters <strong>without an error</strong>, and the list comes back
+unfiltered; the SDK emits an <code>UnknownFilterWarning</code> that names it (the request is still sent). Besides those in
+the table, the list applies <code>name</code>, <code>period_begin</code>, <code>period_end</code>, <code>is_complete_cs_collection</code>, <code>cs_deployment</code>,
+<code>managers</code> and <code>members</code>. <code>locations_map</code> is ignored by v2, and <code>description</code>, <code>date_created</code> and <code>ordering</code> by
+both. To silence it: <code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code>.</p>
+</div>
 <h2 id="the-six-access-patterns">The six access patterns</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Lazy iteration (all() is the same thing)</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">():</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">owner</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">research_projects</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># One page</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nb">print</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">pagination</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># Single item</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">col</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Lazy iteration (all() is the same thing)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">():</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">owner</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">research_projects</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># One page</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nb">print</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">pagination</span><span class="o">.</span><span class="n">count</span><span class="p">)</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="c1"># Single item</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="n">col</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
 </code></pre></div>
 <p>See <a href="../../usage/">Usage</a> if any of this looks unfamiliar — it's the same interface on every component.</p>
 <div class="admonition note">
@@ -2930,29 +2987,29 @@
 <h2 id="on-demand-map-append-sub-endpoints">On-demand / map / append sub-endpoints</h2>
 <p>Three related endpoints get the exact same <code>where_*</code>/<code>get_*</code>/<code>get_all_*</code>/<code>find_*</code> set as the main
 one, just scoped to a different collection subset:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># On-demand collections for the current user</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where_ondemand</span><span class="p">():</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get_ondemand</span><span class="p">(</span><span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get_all_ondemand</span><span class="p">()</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">col</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">find_ondemand</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># Collections for map rendering</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where_map</span><span class="p">():</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1"># Collections the user can append resources to</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where_append</span><span class="p">():</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># On-demand collections for the current user</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where_ondemand</span><span class="p">():</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get_ondemand</span><span class="p">(</span><span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">get_all_ondemand</span><span class="p">()</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">col</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">find_ondemand</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># Collections for map rendering</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where_map</span><span class="p">():</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1"># Collections the user can append resources to</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where_append</span><span class="p">():</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="triggering-ftp-uploaded-collection-processing">Triggering FTP-uploaded collection processing</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">trigger_collection</span><span class="p">(</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">payload</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        <span class="s2">&quot;yaml_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.yaml&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        <span class="s2">&quot;zip_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.zip&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        <span class="s2">&quot;remove_zip&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="p">},</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">trigger_collection</span><span class="p">(</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">payload</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="s2">&quot;yaml_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.yaml&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="s2">&quot;zip_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.zip&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="s2">&quot;remove_zip&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="p">},</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">)</span>
 </code></pre></div>
 
 
