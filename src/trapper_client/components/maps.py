@@ -5,10 +5,10 @@ Component for the umap-based Maps data endpoint.
 from __future__ import annotations
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import MapRecord
+from trapper_client.schemas import Map
 
 
-class MapsComponent(TrapperComponent[MapRecord]):
+class MapsComponent(TrapperComponent[Map]):
     """
     Component for ``/geomap/api/maps``.
 
@@ -27,5 +27,5 @@ class MapsComponent(TrapperComponent[MapRecord]):
     """
 
     endpoint = "geomap/api/maps"
-    schema = MapRecord
+    schema = Map
     supported_versions = ("v1",)  # removed in Trapper v2

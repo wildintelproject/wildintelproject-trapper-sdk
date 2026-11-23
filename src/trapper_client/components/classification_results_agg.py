@@ -8,10 +8,10 @@ from pathlib import Path
 from typing import Any, Dict
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import ClassificationAggRecord, PaginatedResult
+from trapper_client.schemas import ClassificationAgg, PaginatedResult
 
 
-class ClassificationResultsAggComponent(TrapperComponent[ClassificationAggRecord]):
+class ClassificationResultsAggComponent(TrapperComponent[ClassificationAgg]):
     """
     Component for ``/media_classification/api/classifications/results/agg/{project_pk}/``.
 
@@ -22,7 +22,7 @@ class ClassificationResultsAggComponent(TrapperComponent[ClassificationAggRecord
     """
 
     endpoint = "media_classification/api/classifications/results/agg/{project_pk}/"
-    schema = ClassificationAggRecord
+    schema = ClassificationAgg
 
     def get_project_results_agg(
         self,
@@ -32,7 +32,7 @@ class ClassificationResultsAggComponent(TrapperComponent[ClassificationAggRecord
         page_size: int = 50,
         validate: bool = True,
         **kwargs: Any,
-    ) -> PaginatedResult[ClassificationAggRecord]:
+    ) -> PaginatedResult[ClassificationAgg]:
         """Fetch one page of aggregated results for a project.
 
         Args:
@@ -44,7 +44,7 @@ class ClassificationResultsAggComponent(TrapperComponent[ClassificationAggRecord
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Paginated result containing ``ClassificationAggRecord`` items.
+            Paginated result containing ``ClassificationAgg`` items.
         """
         q = self._merge_query(query, kwargs)
         q = dict(q or {})

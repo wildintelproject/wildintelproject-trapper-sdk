@@ -5,10 +5,10 @@ Component for User classifications data endpoint.
 from __future__ import annotations
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import UserClassificationRecord
+from trapper_client.schemas import UserClassification
 
 
-class UserClassificationsComponent(TrapperComponent[UserClassificationRecord]):
+class UserClassificationsComponent(TrapperComponent[UserClassification]):
     """
     Component for ``/media_classification/api/user-classifications/``.
 
@@ -45,4 +45,4 @@ class UserClassificationsComponent(TrapperComponent[UserClassificationRecord]):
     """
 
     endpoint = "/media_classification/api/user-classifications"
-    schema = UserClassificationRecord
+    schema = UserClassification

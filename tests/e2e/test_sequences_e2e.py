@@ -11,11 +11,11 @@ from __future__ import annotations
 
 from tests.base_component_tests import ComponentE2ETestBase
 from trapper_client.components.sequences import SequencesComponent
-from trapper_client.schemas import SequenceRecord
+from trapper_client.schemas import Sequence
 
 
 class TestSequencesComponentE2E(ComponentE2ETestBase):
     component_class = SequencesComponent
-    schema = SequenceRecord
-    export_schema = SequenceRecord
+    schema = Sequence
+    export_schema = Sequence
     env_pk_var = "WILDINTEL_SEQUENCE_PK"

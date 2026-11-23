@@ -16,7 +16,7 @@ import pytest
 from tests.base_component_tests import ComponentUnitTestBase, paginated_response
 from trapper_client.api_query import APIQuery
 from trapper_client.components.classification_media import ClassificationMediaComponent
-from trapper_client.schemas import MediaRecord, PaginatedResult
+from trapper_client.schemas import Media, PaginatedResult
 
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
@@ -45,8 +45,8 @@ FILE_URL = "http://example.com/storage/media/1/pfile/"
 
 class TestClassificationMediaComponent(ComponentUnitTestBase):
     component_class = ClassificationMediaComponent
-    schema = MediaRecord
-    export_schema = MediaRecord
+    schema = Media
+    export_schema = Media
     find_pk = 1
     valid_item = VALID_MEDIA
     valid_export_item = VALID_MEDIA
@@ -235,13 +235,13 @@ class TestProjectMedia:
     # ── get_project_media ─────────────────────────────────────────────────────
 
     def test_get_project_media_returns_paginated_result(self, component, client):
-        """get_project_media() devuelve PaginatedResult con items de tipo MediaRecord."""
+        """get_project_media() devuelve PaginatedResult con items de tipo Media."""
         client.get.return_value = paginated_response([VALID_MEDIA])
 
         result = component.get_project_media(PROJECT_PK)
 
         assert isinstance(result, PaginatedResult)
-        assert isinstance(result.results[0], MediaRecord)
+        assert isinstance(result.results[0], Media)
 
     def test_get_project_media_uses_correct_endpoint(self, component, client):
         """get_project_media() usa el endpoint del proyecto."""
@@ -276,7 +276,7 @@ class TestProjectMedia:
 
         result = component.get_project_media(PROJECT_PK, validate=False)
 
-        assert isinstance(result.results[0], MediaRecord)
+        assert isinstance(result.results[0], Media)
 
     # ── where_project_media ───────────────────────────────────────────────────
 
@@ -290,9 +290,9 @@ class TestProjectMedia:
         assert query.endpoint == self._expected_endpoint(component)
 
     def test_where_project_media_uses_media_schema(self, component):
-        """where_project_media() usa MediaRecord como schema."""
+        """where_project_media() usa Media como schema."""
         query = component.where_project_media(PROJECT_PK)
-        assert query.schema is MediaRecord
+        assert query.schema is Media
 
     def test_where_project_media_passes_page_size(self, component):
         """where_project_media() pasa page_size al APIQuery."""
@@ -318,7 +318,7 @@ class TestProjectMedia:
         result = component.export_project_media(PROJECT_PK, file=None)
 
         assert isinstance(result, list)
-        assert isinstance(result[0], MediaRecord)
+        assert isinstance(result[0], Media)
 
     def test_export_project_media_writes_csv_when_file_provided(self, component, client, tmp_path):
         """export_project_media() escribe CSV y devuelve Path cuando se indica file."""
@@ -343,12 +343,12 @@ class TestProjectMedia:
     # ── get_project_media_by_id ───────────────────────────────────────────────
 
     def test_get_project_media_by_id_returns_matching_record(self, component, client):
-        """get_project_media_by_id() devuelve el MediaRecord con el id correcto."""
+        """get_project_media_by_id() devuelve el Media con el id correcto."""
         client.get.return_value = paginated_response([VALID_MEDIA])
 
         result = component.get_project_media_by_id(PROJECT_PK, MEDIA_ID)
 
-        assert isinstance(result, MediaRecord)
+        assert isinstance(result, Media)
 
     def test_get_project_media_by_id_returns_none_when_not_found(self, component, client):
         """get_project_media_by_id() devuelve None si no encuentra el media_id."""
@@ -394,7 +394,7 @@ class TestCollectionMedia:
         result = component.get_collection_media(PROJECT_PK, COLLECTION_PK)
 
         assert isinstance(result, PaginatedResult)
-        assert isinstance(result.results[0], MediaRecord)
+        assert isinstance(result.results[0], Media)
 
     def test_get_collection_media_uses_correct_endpoint(self, component, client):
         """get_collection_media() usa el endpoint del proyecto."""
@@ -451,7 +451,7 @@ class TestCollectionMedia:
         result = component.export_collection_media(PROJECT_PK, COLLECTION_PK, file=None)
 
         assert isinstance(result, list)
-        assert isinstance(result[0], MediaRecord)
+        assert isinstance(result[0], Media)
 
     def test_export_collection_media_sends_collection_filter(self, component, client):
         """export_collection_media() incluye el link_pk como parámetro collection."""

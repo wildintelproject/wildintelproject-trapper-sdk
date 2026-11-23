@@ -1,5 +1,5 @@
 """
-Unit tests for SpeciesComponent and SpeciesRecord schema.
+Unit tests for SpeciesComponent and Species schema.
 
 All API calls are mocked — no real server needed.
 """
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from tests.base_component_tests import ComponentUnitTestBase
 from trapper_client.components.species import SpeciesComponent
-from trapper_client.schemas import SpeciesRecord
+from trapper_client.schemas import Species
 
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
@@ -38,19 +38,19 @@ def test_endpoint_matches_server_route():
 
 class TestSpeciesComponent(ComponentUnitTestBase):
     component_class = SpeciesComponent
-    schema = SpeciesRecord
-    export_schema = SpeciesRecord
+    schema = Species
+    export_schema = Species
     find_pk = 5
     valid_item = VALID_RECORD
     valid_export_item = VALID_RECORD
 
 
-# ── SpeciesRecord ─────────────────────────────────────────────────────────────
+# ── Species ─────────────────────────────────────────────────────────────
 
 class TestSpeciesRecord:
 
     def test_parses_full_record(self):
-        result = SpeciesRecord.model_validate(VALID_RECORD)
+        result = Species.model_validate(VALID_RECORD)
 
         assert result.pk == 5
         assert result.english_name == "Wolf"
@@ -61,13 +61,13 @@ class TestSpeciesRecord:
     def test_str_field_is_exposed_as_display_name(self):
         """El servidor serializa __str__() del modelo bajo la clave literal
         '__str__' (DRF); el schema la expone como display_name via alias."""
-        result = SpeciesRecord.model_validate(VALID_RECORD)
+        result = Species.model_validate(VALID_RECORD)
 
         assert result.display_name == "Wolf (Canis lupus)"
 
     def test_parses_minimal_record(self):
         """El schema acepta registros sin family/genus/__str__."""
-        result = SpeciesRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = Species.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.pk == 1
         assert result.genus is None
@@ -77,6 +77,6 @@ class TestSpeciesRecord:
     def test_display_name_populatable_by_field_name(self):
         """populate_by_name permite construir el modelo con display_name= además
         del alias __str__, útil para tests/código que no reciben el payload crudo."""
-        result = SpeciesRecord(pk=1, display_name="Test (Testus)")
+        result = Species(pk=1, display_name="Test (Testus)")
 
         assert result.display_name == "Test (Testus)"

@@ -6,10 +6,11 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from trapper_client.enums import ClassificatorTemplate
 
 from .base import choice
-from .species import SpeciesRecord
+from .species import Species
+from trapper_client._deprecated import deprecated_getattr
 
 
-class ClassificatorRecord(BaseModel):
+class Classificator(BaseModel):
     """Schema for ``/api/classificators/`` items."""
 
     pk: int
@@ -33,12 +34,12 @@ class ClassificatorRecord(BaseModel):
 class ClassificatorCreate(BaseModel):
     """What it takes to create a classificator (``client.classificators.create()``).
 
-    ``ClassificatorRecord`` is what the API answers (it leaves out the species and the standard
+    ``Classificator`` is what the API answers (it leaves out the species and the standard
     attributes); this is what the creation form asks. Unknown fields are rejected, so a typo fails
     here and not silently on the server.
 
     ``species`` limits the species a classifier can choose from (empty: every species). Both lists
-    take the species themselves (``SpeciesRecord``, as ``client.species`` returns them) or their
+    take the species themselves (``Species``, as ``client.species`` returns them) or their
     primary keys; the model keeps the primary keys.
     ``tracked_species`` are the ones Trapper watches: classifying one of them notifies the
     administrators of the project. Observation type, count and "is setup" are always on.
@@ -50,10 +51,10 @@ class ClassificatorCreate(BaseModel):
 
     name: str = Field(min_length=1, max_length=255, description="Unique.")
     template: Annotated[ClassificatorTemplate, choice(ClassificatorTemplate)] = ClassificatorTemplate.INLINE
-    species: list[int | SpeciesRecord] = Field(
+    species: list[int | Species] = Field(
         default_factory=list, description="Species (or their pks); empty = every species."
     )
-    tracked_species: list[int | SpeciesRecord] = Field(
+    tracked_species: list[int | Species] = Field(
         default_factory=list, description="Species (or their pks) to watch."
     )
     sex: bool = False
@@ -65,9 +66,9 @@ class ClassificatorCreate(BaseModel):
 
     @field_validator("species", "tracked_species")
     @classmethod
-    def _primary_keys(cls, value: list[int | SpeciesRecord]) -> list[int]:
-        """Keep the primary keys (a ``SpeciesRecord`` is replaced by its ``pk``), without repeats."""
-        pks = [item.pk if isinstance(item, SpeciesRecord) else item for item in value]
+    def _primary_keys(cls, value: list[int | Species]) -> list[int]:
+        """Keep the primary keys (a ``Species`` is replaced by its ``pk``), without repeats."""
+        pks = [item.pk if isinstance(item, Species) else item for item in value]
         if any(pk <= 0 for pk in pks):
             raise ValueError("species primary keys must be positive")
         return list(dict.fromkeys(pks))
@@ -94,3 +95,6 @@ class ClassificatorCreate(BaseModel):
             if getattr(self, flag):
                 data[f"classificator-{flag}"] = "on"      # a checkbox is posted only when ticked
         return data
+
+
+__getattr__ = deprecated_getattr(__name__)

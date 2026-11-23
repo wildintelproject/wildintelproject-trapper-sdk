@@ -13,12 +13,12 @@ import pytest
 
 from tests.base_component_tests import ComponentE2ETestBase
 from trapper_client.components.maps import MapsComponent
-from trapper_client.schemas import MapRecord
+from trapper_client.schemas import Map
 
 
 @pytest.mark.usefixtures("v1_only")
 class TestMapsComponentE2E(ComponentE2ETestBase):
     component_class = MapsComponent
-    schema = MapRecord
-    export_schema = MapRecord
+    schema = Map
+    export_schema = Map
     env_pk_var = "WILDINTEL_MAP_PK"

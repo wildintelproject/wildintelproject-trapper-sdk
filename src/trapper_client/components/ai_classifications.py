@@ -10,11 +10,11 @@ from typing import Any, Dict
 from pydantic import BaseModel
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import AIClassificationRecord,  AIClassificationRecordExport, \
+from trapper_client.schemas import AIClassification,  AIClassificationRecordExport, \
     AIClassificationRecordExportTrapper, AIClassificationRecordExportCamTrap
 
 
-class AIClassificationsComponent(TrapperComponent[AIClassificationRecord]):
+class AIClassificationsComponent(TrapperComponent[AIClassification]):
     """
     Component for ``/media_classification/api/ai-classifications/``.
 
@@ -60,7 +60,7 @@ class AIClassificationsComponent(TrapperComponent[AIClassificationRecord]):
 
     endpoint = "/media_classification/api/ai-classifications"
     export_endpoint = "/media_classification/api/ai-classifications/results/{project_pk}/"
-    schema = AIClassificationRecord
+    schema = AIClassification
     export_schema = AIClassificationRecordExport
 
     def export(

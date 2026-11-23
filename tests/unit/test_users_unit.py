@@ -1,5 +1,5 @@
 """
-Unit tests for UsersComponent and UserRecord schema.
+Unit tests for UsersComponent and User schema.
 
 All API calls are mocked — no real server needed.
 """
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from tests.base_component_tests import ComponentUnitTestBase
 from trapper_client.components.users import UsersComponent
-from trapper_client.schemas import UserRecord
+from trapper_client.schemas import User
 
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
@@ -34,19 +34,19 @@ def test_endpoint_matches_server_route():
 
 class TestUsersComponent(ComponentUnitTestBase):
     component_class = UsersComponent
-    schema = UserRecord
-    export_schema = UserRecord
+    schema = User
+    export_schema = User
     find_pk = 7
     valid_item = VALID_RECORD
     valid_export_item = VALID_RECORD
 
 
-# ── UserRecord ────────────────────────────────────────────────────────────────
+# ── User ────────────────────────────────────────────────────────────────
 
 class TestUserRecord:
 
     def test_parses_full_record(self):
-        result = UserRecord.model_validate(VALID_RECORD)
+        result = User.model_validate(VALID_RECORD)
 
         assert result.pk == 7
         assert result.username == "wildintel"
@@ -54,7 +54,7 @@ class TestUserRecord:
 
     def test_parses_minimal_record(self):
         """El schema acepta registros sin first_name/last_name/email/name."""
-        result = UserRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = User.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.pk == 1
         assert result.username == "anon"

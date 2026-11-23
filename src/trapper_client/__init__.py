@@ -22,6 +22,7 @@ from trapper_client.components import *  # noqa: F401,F403
 from trapper_client.components import __all__ as _components_all
 from trapper_client.schemas import *  # noqa: F401,F403
 from trapper_client.schemas import __all__ as _schemas_all
+from trapper_client._deprecated import deprecated_getattr
 
 __all__ = [
     "APIClientBase",
@@ -35,3 +36,6 @@ __all__ = [
     "SensorMethod",
     *sorted(set(_components_all) | set(_schemas_all)),
 ]
+
+
+__getattr__ = deprecated_getattr(__name__)

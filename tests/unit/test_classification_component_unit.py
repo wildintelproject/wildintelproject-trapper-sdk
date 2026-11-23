@@ -17,7 +17,7 @@ from trapper_client.api_query import APIQuery
 from trapper_client.components.classifications import ClassificationsComponent
 from trapper_client.schemas import (
     ClassificationImportResponse,
-    ClassificationRecord,
+    Classification,
     ClassificationRecordExport,
     ClassificationResultRecordCamtrapDP,
     ClassificationResultRecordTrapper,
@@ -64,7 +64,7 @@ PROJECT_PK = 7
 
 class TestClassificationsComponent(ComponentUnitTestBase):
     component_class = ClassificationsComponent
-    schema = ClassificationRecord
+    schema = Classification
     export_schema = ClassificationResultRecordCamtrapDP
     find_pk = 1
     valid_item = VALID_RECORD

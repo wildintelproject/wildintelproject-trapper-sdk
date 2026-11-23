@@ -19,7 +19,7 @@ from tests.base_component_tests import ComponentE2ETestBase, assert_page_size_re
 from trapper_client.api_query import APIQuery
 from trapper_client.components.classifications import ClassificationsComponent
 from trapper_client.schemas import (
-    ClassificationRecord,
+    Classification,
     ClassificationRecordExport,
     ClassificationResultRecordCamtrapDP,
     ClassificationResultRecordTrapper,
@@ -44,7 +44,7 @@ _EXPORT_TYPES = (ClassificationResultRecordCamtrapDP, ClassificationResultRecord
 
 class TestClassificationsComponentE2E(ComponentE2ETestBase):
     component_class = ClassificationsComponent
-    schema = ClassificationRecord
+    schema = Classification
     export_schema = ClassificationRecordExport
     env_pk_var = "WILDINTEL_CLASSIFICATION_RESULT_PK"
 

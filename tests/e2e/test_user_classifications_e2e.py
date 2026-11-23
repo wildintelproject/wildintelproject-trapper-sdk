@@ -16,15 +16,15 @@ import pytest
 from tests.base_component_tests import ComponentE2ETestBase
 from trapper_client.api_query import APIQuery
 from trapper_client.components.user_classifications import UserClassificationsComponent
-from trapper_client.schemas import UserClassificationRecord
+from trapper_client.schemas import UserClassification
 
 
 # ── tests heredados (get / get_all / where / find / export) ──────────────────
 
 class TestUserClassificationsComponentE2E(ComponentE2ETestBase):
     component_class = UserClassificationsComponent
-    schema = UserClassificationRecord
-    export_schema = UserClassificationRecord
+    schema = UserClassification
+    export_schema = UserClassification
     env_pk_var = "WILDINTEL_USER_CLASSIFICATION_PK"
 
     # export() sin endpoint de results devuelve lo mismo que get_all;
