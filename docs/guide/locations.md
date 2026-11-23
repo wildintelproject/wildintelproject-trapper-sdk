@@ -70,6 +70,32 @@ They are `None` when the coordinates are missing, cannot be read or are out of r
 time, not fields of the model, so `model_dump()` does not change. The rows of `export(file=None)` carry
 `longitude` and `latitude` already.
 
+## Filtering by area
+
+Trapper's location list has **no spatial filter**: `in_bbox` and `radius` are ignored without an error, and every
+location comes back (the GeoJSON endpoint applies them, but only on Trapper v1). `in_area()` filters on the
+client instead, using the [coordinates](#coordinates) as numbers:
+
+```python
+# a bounding box: (min_lon, min_lat, max_lon, max_lat)
+for loc in client.locations.in_area(bbox=(-7.0, 36.5, -5.5, 37.5)):
+    print(loc.name, loc.longitude, loc.latitude)
+
+# a circle: the centre as (longitude, latitude), the radius in metres, plus the usual filters
+near = list(client.locations.in_area(center=(-6.44, 37.05), radius=5_000, research_project=3))
+```
+
+Give a box, a circle or both (a location must then be inside both). The edges of the box are inside, a box
+with `min_lon` greater than `max_lon` crosses the antimeridian (±180°), and the distances are great-circle
+(haversine) ones. Any other keyword is an ordinary filter of the list, sent to the server, so it narrows down
+what has to be read. A wrong area (nothing given, `center` without `radius`, out of range) raises
+`ValueError` before any request.
+
+!!! warning "It reads every page"
+    The server cannot do the filtering, so `in_area()` reads all the locations that match the other filters and
+    keeps the ones in the area. On a server with many locations, pass `research_project` or `owner`. A location
+    whose coordinates cannot be read is left out.
+
 ## Fields: the list and the export
 
 Trapper gives a location in two shapes, and **neither holds every field**. `where()`, `get()` and `find()`

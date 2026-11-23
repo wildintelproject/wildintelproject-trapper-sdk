@@ -70,6 +70,32 @@ Valen `None` cuando las coordenadas faltan, no se pueden leer o están fuera de 
 no son campos del modelo, así que `model_dump()` no cambia. Las filas de `export(file=None)` ya llevan
 `longitude` y `latitude`.
 
+## Filtrar por área
+
+La lista de locations de Trapper **no tiene filtro espacial**: `in_bbox` y `radius` se ignoran sin error y
+vuelven todas las locations (el endpoint GeoJSON sí los aplica, pero solo en Trapper v1). `in_area()` filtra
+en el cliente, con las [coordenadas](#coordenadas) como números:
+
+```python
+# un rectángulo: (min_lon, min_lat, max_lon, max_lat)
+for loc in client.locations.in_area(bbox=(-7.0, 36.5, -5.5, 37.5)):
+    print(loc.name, loc.longitude, loc.latitude)
+
+# un círculo: el centro como (longitud, latitud), el radio en metros, y los filtros de siempre
+cerca = list(client.locations.in_area(center=(-6.44, 37.05), radius=5_000, research_project=3))
+```
+
+Se da un rectángulo, un círculo o los dos (la location debe estar entonces en ambos). Los bordes del rectángulo
+cuentan como dentro, un rectángulo con `min_lon` mayor que `max_lon` cruza el antimeridiano (±180°) y las
+distancias son de círculo máximo (haversine). Cualquier otro argumento es un filtro normal de la lista, que se
+envía al servidor y reduce lo que hay que leer. Un área incorrecta (sin nada, `center` sin `radius`, fuera de
+rango) lanza `ValueError` antes de hacer ninguna petición.
+
+!!! warning "Lee todas las páginas"
+    El servidor no puede filtrar, así que `in_area()` lee todas las locations que cumplen los otros filtros y se
+    queda con las del área. En un servidor con muchas locations, pasa `research_project` u `owner`. Una location
+    cuyas coordenadas no se pueden leer queda fuera.
+
 ## Campos: la lista y la exportación
 
 Trapper da una location en dos formas, y **ninguna tiene todos los campos**. `where()`, `get()` y `find()`

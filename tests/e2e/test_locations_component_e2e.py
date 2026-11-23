@@ -30,3 +30,24 @@ class TestLocationsComponentE2E(ComponentE2ETestBase):
         for loc in located:
             assert isinstance(loc.longitude, float) and -180 <= loc.longitude <= 180, loc.coordinates
             assert isinstance(loc.latitude, float) and -90 <= loc.latitude <= 90, loc.coordinates
+
+    @pytest.mark.e2e
+    def test_in_area_filters_on_the_client(self, component):
+        """``in_area`` keeps what the list would not filter, on Trapper v1 and v2."""
+        everything = [loc for loc in component.where(page_size=100) if loc.longitude is not None]
+        if not everything:
+            pytest.skip("No location with coordinates on this server")
+        target = everything[0]
+        lon, lat = target.longitude, target.latitude
+
+        box = (lon - 0.001, lat - 0.001, lon + 0.001, lat + 0.001)
+        in_box = list(component.in_area(bbox=box, page_size=100))
+        assert target.pk in {loc.pk for loc in in_box}
+        assert all(box[0] <= loc.longitude <= box[2] and box[1] <= loc.latitude <= box[3] for loc in in_box)
+
+        around = list(component.in_area(center=(lon, lat), radius=1, page_size=100))
+        assert target.pk in {loc.pk for loc in around}
+
+        # a box on the other side of the Earth is empty, whereas the server's own list ignores `in_bbox`
+        far = (lon + 90 if lon <= 0 else lon - 90, -1.0, lon + 91 if lon <= 0 else lon - 89, 1.0)
+        assert [loc for loc in component.in_area(bbox=far, page_size=100) if loc.pk == target.pk] == []
