@@ -75,6 +75,19 @@ class LocationsComponent(TrapperComponent[Location]):
     """
 
     endpoint = "/geomap/api/locations"
+
+    # Checked against live Trapper v1 and v2: a parameter that is not here is ignored by the server.
+    _V2_FILTERS = frozenset({
+        "pk", "name", "description", "owner", "owners", "research_project", "deployments", "search",
+        "location_id", "is_public", "ignore_DST", "coordinate_uncertainty", "date_created", "managers",
+        "research_projects_member",
+        "in_bbox",  # v2 only: v1's list ignores it
+    })
+    known_filters = {
+        "v2": _V2_FILTERS,
+        # v1 adds the map and the address fields (v2 has neither), and has no in_bbox on the list
+        "v1": (_V2_FILTERS - {"in_bbox"}) | {"locations_map", "country", "state", "county", "city"},
+    }
     export_endpoint = "/geomap/api/locations/export/"
     schema = Location
     export_schema = LocationExport

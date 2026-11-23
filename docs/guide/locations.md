@@ -23,6 +23,15 @@ below for the one write operation this component supports.
 | `deployments` | list of PKs | Filter locations that have those deployments |
 | `search` | string | Global text search across `location_id`, `name`, `description`, `county`, `city`, owner username |
 
+!!! warning "Trapper ignores a filter it does not know"
+    A parameter that is not in this table, or that a typo turned into another name, is **ignored without an
+    error**, and the list comes back unfiltered. The SDK knows the filters of each Trapper version and, when
+    you pass another one, emits an `UnknownFilterWarning` that names it (the request is still sent). Besides
+    those in the table, the list applies `pk`, `location_id`, `is_public`, `ignore_DST`, `coordinate_uncertainty`,
+    `date_created`, `managers` and `research_projects_member` on both versions, and `country`, `state`, `county`
+    and `city` on v1 only (`locations_map` also on v1 only). `in_bbox` is applied by v2 only; `radius` and
+    `ordering` by neither. To silence it: `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
+
 ## The six access patterns
 
 ```python
