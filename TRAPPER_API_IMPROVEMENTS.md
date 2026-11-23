@@ -39,6 +39,13 @@ the SDK does in the meantime.
 | 24 | Return the coordinates of a location as numbers | geomap |
 | 25 | Filter the list of locations by area | geomap |
 | 26 | Reject the filters and the ordering the list does not apply | cross-cutting |
+| 27 | Create, update and delete deployments through the API | geomap |
+| 28 | Return every field of a deployment, and its related objects as keys | geomap |
+| 29 | Give `session`, `array` and the bait type their own columns in the deployment export | geomap |
+| 30 | Write the dates of a deployment in one format | geomap |
+| 31 | Answer an empty export with an empty CSV, not a `400` | cross-cutting |
+| 32 | Filter the list of deployments by collection | geomap |
+| 33 | Filter the list of deployments by area in every version | geomap |
 
 ---
 
@@ -494,8 +501,134 @@ nothing. (A filter with an invalid value is answered with a `400` and the field,
 **Proposal.** Answer `400` with the names of the unknown parameters, or at least list the accepted filters in the
 `OPTIONS` response, and either implement `ordering` or reject it.
 
-**Workaround in the SDK.** For locations, `UnknownFilterWarning` names the filters the server would ignore; the
-filters each version applies are listed in the locations guide. Other endpoints are not checked yet.
+**Workaround in the SDK.** For locations and deployments, `UnknownFilterWarning` names the filters the server would
+ignore; the filters each version applies are listed in their guides (checked live on v1 and v2: `colls`,
+`collections`, `ordering`, `radius`, `bait_use` and a typo are ignored on the deployment list too). Other
+endpoints are not checked yet.
+
+## 27. Create, update and delete deployments through the API
+
+**Labels:** enhancement, api
+
+**Problem.** `DeploymentViewSet` is a read-only viewset: `OPTIONS geomap/api/deployments` and
+`geomap/api/deployments/<pk>` answer `Allow: GET, HEAD, OPTIONS` on v1 and v2. A deployment can be created in
+bulk by the CSV import form (#8), and created, edited or deleted one by one only in the web views
+(`geomap/deployment/create|update|delete/<pk>/`). The import is the one way to **update** by script: with its
+`update` option and an `_id` column it changes the deployments that exist (checked on v1 and v2: export, edit,
+import, and the value changes). Two things make that fragile:
+
+- It answers `True` before the change is applied, and nothing says when it has been (#9): a read just after still
+  gives the old value.
+- A number that is `0` is stored as `NULL`: importing `cameraHeight=0` as an update leaves the height empty
+  (checked on v1 and v2), because the importer skips every falsy value (`if val:`).
+
+**Proposal.** `POST geomap/api/deployments`, and `PATCH`/`PUT`/`DELETE geomap/api/deployments/<pk>`, with token
+authentication and the permissions the web views already check, and a way to know when an import has finished
+(#9). Apply an explicit `0` and an empty text as such.
+
+**Workaround in the SDK.** `deployments.import_deployments(update=True)` with the CSV that
+`deployments.export(raw=True)` gives (it keeps `_id`), and `deployments.wait_for_update()` to know when the new
+values are there. There is no way to create or delete a single deployment, and a `0` cannot be written.
+
+## 28. Return every field of a deployment, and its related objects as keys
+
+**Labels:** enhancement, api
+
+**Problem.** Checked on v1 and v2, a deployment has two shapes and neither is complete. `GET
+geomap/api/deployments` gives `pk`, `deployment_code`, `deployment_id`, `location`, `location_id`, `start_date`,
+`end_date`, `owner`, `owner_profile`, `research_project`, `tags`, `correct_setup`, `correct_tstamp` and three
+action URLs. `geomap/api/deployments/export/` gives 25 columns, among them the camera fields, `habitat`,
+`deploymentComments`, `latitude` and `longitude`, but **not** the owner, the research project, `correct_setup`
+or `correct_tstamp`. From the model, `view_quality`, `date_created`, `managers`, `capture_method`,
+`is_incomplete` and `status` are in neither *(unverified on a server)*. As with locations (#23), each shape is
+built by its own serializer. Besides:
+
+- The related objects come in different forms in the same row: `location` is a primary key, `location_id` the
+  text key of that location, `research_project` an **acronym** and `owner` a **user name**, and the export has
+  none of the three.
+- The same flag has opposite meanings: `correct_tstamp` is `true` when the timestamps are right, and the export
+  column `timestampIssues` is `true` when there are problems. The export negates it and the import negates it
+  back (checked: importing `timestampIssues=true` sets `correct_tstamp` to `false`).
+- The list has fields made for the web page: `detail_data`, `update_data`, `delete_data` and `owner_profile` are
+  URLs of the web views on v1 and `null` on v2.
+
+**Proposal.** One serializer for the whole deployment, with the related objects as primary keys (and a name next
+to them if it helps), and the others (CSV, GeoJSON) built from it. Name the timestamp flag the same way in
+both. Leave the web-page fields out of the API.
+
+**Workaround in the SDK.** The guide lists the fields of each shape and gives the join by `pk` that gets all of
+them; the fields that are in neither cannot be read.
+
+## 29. Give `session`, `array` and the bait type their own columns in the deployment export
+
+**Labels:** enhancement, api
+
+**Problem.** The export has no `session`, `array` or `baitType` column. `DeploymentsSerializer` packs the first two
+into `deploymentGroups` (`session:S | array:A`) and the tags into `deploymentTags`, joined by ` | `, and
+**appends** the bait type to those tags as `baitType:<value>`, so a bait looks like a tag. Checked on v2 with a
+deployment imported with `session:s1 | array:a1` and `spring | x`: the export gives those two columns as they went
+in. The importer reads `deploymentGroups` and `deploymentTags` back, but has no `baitType` column, so a bait
+cannot be set by import and the packed form was read from the source only *(unverified on a server)*. `baitUse` is
+derived from the bait type.
+
+**Proposal.** Real `session`, `array` and `baitType` columns, accepted by the import too, and the tags alone in
+`deploymentTags`.
+
+**Workaround in the SDK.** `DeploymentExport` splits them: `session`, `array`, `tags` and `bait_type`.
+
+## 30. Write the dates of a deployment in one format
+
+**Labels:** enhancement, api
+
+**Problem.** The same instant is written in two ways. Checked on v1 and v2: the JSON list gives
+`2024-01-01T00:00:00+01:00` and the export `2024-01-01T00:00:00+0100`, without the colon in the offset. Both
+carry the deployment's own timezone offset, not a fixed one, and the timezone name is in neither.
+
+**Proposal.** ISO 8601 with the colon in the offset in both, and the timezone name as a field.
+
+**Workaround in the SDK.** The dates of `Deployment` and `DeploymentExport` are read as timezone-aware `datetime`.
+
+## 31. Answer an empty export with an empty CSV, not a `400`
+
+**Labels:** bug, api, cross-cutting
+
+**Problem.** `GET geomap/api/deployments/export/` and `geomap/api/locations/export/` answer `400
+["Empty queryset or you have no permission to access the requested objects."]` when no row matches (checked on v1
+and v2), while the list with the same filter answers `200` with `count: 0`. A filter that matches nothing and a
+missing permission look the same, and a caller must treat a `400` as a normal result.
+
+**Proposal.** Answer `200` with the header row only, and `403` for a missing permission.
+
+**Workaround in the SDK.** The guide warns about the `BadRequestError`, and `deployments.wait_for_update()`
+counts it as "not there yet".
+
+## 32. Filter the list of deployments by collection
+
+**Labels:** enhancement, api
+
+**Problem.** The list of deployments has no collection filter in the servers checked (v1.7.4 and a v2 build):
+`?collections=2`, `?collection=2` and `?colls=2` are ignored and every deployment comes back, although a
+deployment's media belong to collections. The development source (`v1.7.3-63`) declares a `collections` filter
+(`CollectionDeploymentFilter`) in `DeploymentFilter` that the servers tested do not have, and it was **not** tried
+*(unverified)*.
+
+**Proposal.** Ship that filter and apply it to the list and to the export.
+
+**Workaround in the SDK.** `deployments.by_collection()`, `by_collection_with_counts()` and
+`export_by_collection()` ask the resources API, one request per candidate deployment.
+
+## 33. Filter the list of deployments by area in every version
+
+**Labels:** enhancement, api
+
+**Problem.** A deployment has no coordinates in the JSON, only its location's pk. The list applies `in_bbox` on
+v2 (`-7,36,-5,38` returns 13 of 15) and **ignores it on v1** (the same request returns every deployment); `radius`
+is ignored by both. The export has `latitude` and `longitude` but no spatial filter on v1.
+
+**Proposal.** Accept `in_bbox` and `radius` on the list and the export in every version (see #25 for locations).
+
+**Workaround in the SDK.** `deployments.in_area()` finds the locations in the area and asks for their
+deployments; the SDK warns when a filter the list does not apply is passed (see entry 26).
 
 ---
 
