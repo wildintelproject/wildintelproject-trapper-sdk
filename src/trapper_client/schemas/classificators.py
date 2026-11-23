@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from trapper_client.enums import ClassificatorTemplate
 
 from .base import choice
+from .species import SpeciesRecord
 
 
 class ClassificatorRecord(BaseModel):
@@ -36,7 +37,9 @@ class ClassificatorCreate(BaseModel):
     attributes); this is what the creation form asks. Unknown fields are rejected, so a typo fails
     here and not silently on the server.
 
-    ``species`` limits the species a classifier can choose from (empty: every species).
+    ``species`` limits the species a classifier can choose from (empty: every species). Both lists
+    take the species themselves (``SpeciesRecord``, as ``client.species`` returns them) or their
+    primary keys; the model keeps the primary keys.
     ``tracked_species`` are the ones Trapper watches: classifying one of them notifies the
     administrators of the project. Observation type, count and "is setup" are always on.
 
@@ -47,8 +50,12 @@ class ClassificatorCreate(BaseModel):
 
     name: str = Field(min_length=1, max_length=255, description="Unique.")
     template: Annotated[ClassificatorTemplate, choice(ClassificatorTemplate)] = ClassificatorTemplate.INLINE
-    species: list[int] = Field(default_factory=list, description="Species pks; empty = every species.")
-    tracked_species: list[int] = Field(default_factory=list, description="Species pks to watch.")
+    species: list[int | SpeciesRecord] = Field(
+        default_factory=list, description="Species (or their pks); empty = every species."
+    )
+    tracked_species: list[int | SpeciesRecord] = Field(
+        default_factory=list, description="Species (or their pks) to watch."
+    )
     sex: bool = False
     age: bool = False
     count_new: bool = False
@@ -58,10 +65,12 @@ class ClassificatorCreate(BaseModel):
 
     @field_validator("species", "tracked_species")
     @classmethod
-    def _primary_keys(cls, value: list[int]) -> list[int]:
-        if any(pk <= 0 for pk in value):
+    def _primary_keys(cls, value: list[int | SpeciesRecord]) -> list[int]:
+        """Keep the primary keys (a ``SpeciesRecord`` is replaced by its ``pk``), without repeats."""
+        pks = [item.pk if isinstance(item, SpeciesRecord) else item for item in value]
+        if any(pk <= 0 for pk in pks):
             raise ValueError("species primary keys must be positive")
-        return list(dict.fromkeys(value))
+        return list(dict.fromkeys(pks))
 
     @model_validator(mode="after")
     def _tracked_within_species(self) -> "ClassificatorCreate":

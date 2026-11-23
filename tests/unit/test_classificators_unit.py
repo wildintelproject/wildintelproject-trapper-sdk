@@ -12,7 +12,7 @@ import pytest
 from tests.base_component_tests import ComponentUnitTestBase
 from trapper_client import ClassificatorTemplate, err
 from trapper_client.components.classificators import ClassificatorsComponent
-from trapper_client.schemas import ClassificatorCreate, ClassificatorRecord
+from trapper_client.schemas import ClassificatorCreate, ClassificatorRecord, SpeciesRecord
 
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
@@ -208,6 +208,16 @@ class TestClassificatorCreate:
 
     def test_species_are_deduplicated_keeping_the_order(self):
         assert ClassificatorCreate(name="N", species=[3, 1, 3, 2]).species == [3, 1, 2]
+
+    def test_species_can_be_given_as_objects_or_primary_keys(self):
+        lynx, fox = SpeciesRecord(pk=1, english_name="Iberian lynx"), SpeciesRecord(pk=4)
+        c = ClassificatorCreate(name="N", species=[lynx, 5, fox], tracked_species=[lynx, 5])
+        assert c.species == [1, 5, 4] and c.tracked_species == [1, 5]
+        assert c.to_form()["classificator-species"] == "1,5,4"
+
+    def test_a_tracked_species_object_must_be_among_the_species(self):
+        with pytest.raises(ValueError, match=r"tracked_species \[2\]"):
+            ClassificatorCreate(name="N", species=[1], tracked_species=[SpeciesRecord(pk=2)])
 
     def test_tracked_species_can_be_anything_when_every_species_is_allowed(self):
         assert ClassificatorCreate(name="N", tracked_species=[9]).tracked_species == [9]

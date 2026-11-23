@@ -43,11 +43,12 @@ inicia sesión pasa a ser la propietaria. En Trapper v2 lanza `UnsupportedVersio
 ```python
 from trapper_client import ClassificatorCreate
 
+lynx = next(iter(client.species.where(search="lynx")))
 classificator = client.classificators.create(
     ClassificatorCreate(
         name="Iberian mammals",
-        species=[1, 5, 6, 7, 8],        # entre las que puede elegir quien clasifica
-        tracked_species=[1],            # las que Trapper vigila
+        species=[lynx, 5, 6, 7, 8],     # entre las que elige quien clasifica: objetos o claves primarias
+        tracked_species=[lynx],         # las que Trapper vigila
         sex=True,
         age=True,
     )
@@ -62,8 +63,8 @@ campos) que se valida antes de enviar nada, y devuelve el clasificador creado.
 |---|---|---|
 | `name` | hasta 255 caracteres, único | obligatorio |
 | `template` | `ClassificatorTemplate.INLINE` (`"inline"`) o `TAB` (`"tab"`, en pestañas): cómo se dispone el formulario de clasificación | `INLINE` |
-| `species` | claves primarias de las especies entre las que se puede elegir. Vacío significa **todas las especies** | vacío |
-| `tracked_species` | claves primarias de las especies que Trapper **vigila**: al clasificar una, se avisa a los administradores del proyecto (un correo y un mensaje). Deben estar entre las `species` cuando esa lista no está vacía | vacío |
+| `species` | las especies entre las que se puede elegir, como objetos de [`client.species`](species.md) o claves primarias. Vacío significa **todas las especies** | vacío |
+| `tracked_species` | las especies que Trapper **vigila** (objetos o claves primarias): al clasificar una, se avisa a los administradores del proyecto (un correo y un mensaje). Deben estar entre las `species` cuando esa lista no está vacía | vacío |
 | `sex`, `age`, `count_new`, `behaviour`, `individual_id`, `classification_confidence` | añade ese atributo opcional al formulario de clasificación | `False` |
 
 El tipo de observación, el recuento y «es de montaje» (`is_setup`) forman siempre parte del formulario,

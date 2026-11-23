@@ -43,11 +43,12 @@ becomes the owner. On Trapper v2 it raises `UnsupportedVersionError`.
 ```python
 from trapper_client import ClassificatorCreate
 
+lynx = next(iter(client.species.where(search="lynx")))
 classificator = client.classificators.create(
     ClassificatorCreate(
         name="Iberian mammals",
-        species=[1, 5, 6, 7, 8],        # what a classifier can choose from
-        tracked_species=[1],            # the ones Trapper watches
+        species=[lynx, 5, 6, 7, 8],     # what a classifier can choose from: objects or primary keys
+        tracked_species=[lynx],         # the ones Trapper watches
         sex=True,
         age=True,
     )
@@ -62,8 +63,8 @@ validated before anything is sent, and returns the created classificator.
 |---|---|---|
 | `name` | up to 255 characters, unique | required |
 | `template` | `ClassificatorTemplate.INLINE` (`"inline"`) or `TAB` (`"tab"`, tabbed): how the classification form is laid out | `INLINE` |
-| `species` | primary keys of the species a classifier can choose from. Empty means **every species** | empty |
-| `tracked_species` | primary keys of the species Trapper **watches**: classifying one notifies the administrators of the project (an e-mail and a message). They must be among `species` when that is not empty | empty |
+| `species` | the species a classifier can choose from, as objects from [`client.species`](species.md) or primary keys. Empty means **every species** | empty |
+| `tracked_species` | the species Trapper **watches** (objects or primary keys): classifying one notifies the administrators of the project (an e-mail and a message). They must be among `species` when that is not empty | empty |
 | `sex`, `age`, `count_new`, `behaviour`, `individual_id`, `classification_confidence` | add that optional attribute to the classification form | `False` |
 
 Observation type, count and "is setup" are always part of the form, so they are not parameters.
