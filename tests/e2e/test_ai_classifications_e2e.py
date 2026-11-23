@@ -10,12 +10,14 @@ Optional:
 """
 from __future__ import annotations
 
+import functools
 import os
 from pathlib import Path
 
 import pytest
 
 from tests.base_component_tests import ComponentE2ETestBase
+from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.ai_classifications import AIClassificationsComponent
 from trapper_client.schemas import (
@@ -36,6 +38,23 @@ def _project_pk() -> str:
     return os.getenv("WILDINTEL_CLASSIFICATION_PROJECT_PK", "").strip()
 
 
+def _skip_without_ai_data(test):
+    """Skip when the server answers its "Empty queryset" 400: the project has no AI results.
+
+    Trapper refuses to export a project whose AI classification queryset is empty (a 400, not an
+    empty file), so on a server where no AI job ever ran there is nothing to export.
+    """
+    @functools.wraps(test)
+    def wrapper(*args, **kwargs):
+        try:
+            return test(*args, **kwargs)
+        except err.APIError as e:
+            if "Empty queryset" in str(e):
+                pytest.skip("the project has no AI classification results to export")
+            raise
+    return wrapper
+
+
 # ── tests heredados ───────────────────────────────────────────────────────────
 
 class TestAIClassificationsComponentE2E(ComponentE2ETestBase):
@@ -43,6 +62,15 @@ class TestAIClassificationsComponentE2E(ComponentE2ETestBase):
     schema = AIClassificationRecord
     export_schema = AIClassificationRecordExport
     env_pk_var = "WILDINTEL_AI_CLASSIFICATION_PK"
+
+    # export() needs a classification project; TestAIClassificationsExportE2E covers it.
+    @pytest.mark.e2e
+    def test_export_file_none_returns_list(self, component):
+        pytest.skip("export() takes a classification project: see TestAIClassificationsExportE2E")
+
+    @pytest.mark.e2e
+    def test_export_to_csv_writes_file(self, component, tmp_path):
+        pytest.skip("export() takes a classification project: see TestAIClassificationsExportE2E")
 
 
 # ── tests específicos de export ───────────────────────────────────────────────
@@ -163,3 +191,8 @@ class TestAIClassificationsExportE2E:
         filtered_results = component.export(int(pk), file=None, approved=True)
 
         assert len(filtered_results) <= len(all_results)
+
+
+for _name, _fn in list(vars(TestAIClassificationsExportE2E).items()):
+    if _name.startswith("test_") and callable(_fn):
+        setattr(TestAIClassificationsExportE2E, _name, _skip_without_ai_data(_fn))
