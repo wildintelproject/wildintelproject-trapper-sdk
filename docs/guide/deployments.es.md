@@ -155,6 +155,25 @@ cuando el despliegue tiene un tipo de cebo. `DeploymentExport` las lee de ahí, 
 etiquetas y `bait_type` el cebo. Para obtener el CSV tal como lo envía Trapper, usa
 `export(file=..., raw=True)`.
 
+Para leer la cámara de un despliegue, o su hábitat, usa la exportación; para leer su propietario, su proyecto de
+investigación o `correct_setup`, usa la lista. Cuando necesites las dos, únelas por `pk`, dándole a la exportación
+los mismos filtros que a la lista para que devuelvan los mismos despliegues:
+
+```python
+filters = {"research_project": 3}
+by_pk = {row.pk: row for row in client.deployments.export(query=filters, file=None)}
+
+for dep in client.deployments.where(**filters):
+    row = by_pk.get(dep.pk)
+    print(dep.deployment_id, dep.owner, row.camera_height, row.habitat, row.session)
+```
+
+Probado en Trapper v1 y v2, todos los despliegues de la lista estaban en la exportación. Si ningún despliegue
+cumple los filtros, la exportación lanza `BadRequestError` («Empty queryset»), porque Trapper contesta una
+exportación vacía con un `400`; la lista da un resultado vacío. Algunos campos de un despliegue están en
+**ninguna** de las dos formas, así que no se pueden leer por la API: `view_quality`, `date_created`, `managers`,
+`capture_method`, `is_incomplete` y `status` (según el modelo de Trapper, sin comprobar en un servidor).
+
 ## Importar despliegues (acceso de escritura)
 
 `/geomap/api/deployments` es de solo lectura, así que `import_deployments()` lo resuelve simulando el

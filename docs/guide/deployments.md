@@ -153,6 +153,25 @@ Trapper's CSV has no column for `session`, `array`, `tags` or `bait_type`: it pu
 when the deployment has a bait type. `DeploymentExport` reads them from there, so `tags` holds only the tags and
 `bait_type` the bait. To get the CSV exactly as Trapper sends it, use `export(file=..., raw=True)`.
 
+To read the camera of a deployment, or its habitat, use the export; to read its owner, its research project or
+`correct_setup`, use the list. When you need both, join them by `pk`, giving the export the same filters as the
+list so that both return the same deployments:
+
+```python
+filters = {"research_project": 3}
+by_pk = {row.pk: row for row in client.deployments.export(query=filters, file=None)}
+
+for dep in client.deployments.where(**filters):
+    row = by_pk.get(dep.pk)
+    print(dep.deployment_id, dep.owner, row.camera_height, row.habitat, row.session)
+```
+
+Run against Trapper v1 and v2, every deployment of the list was in the export. If no deployment matches the filters,
+the export raises `BadRequestError` ("Empty queryset"), because Trapper answers an empty export with a `400`; the
+list gives an empty result. A few fields of a deployment are in **neither** shape, so they cannot be read through
+the API: `view_quality`, `date_created`, `managers`, `capture_method`, `is_incomplete` and `status` (taken from
+Trapper's model, not checked on a server).
+
 ## Importing deployments (write access)
 
 `/geomap/api/deployments` is read-only, so `import_deployments()` works around that by simulating
