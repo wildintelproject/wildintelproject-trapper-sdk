@@ -2926,7 +2926,7 @@
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="ClassificationRecord (trapper_client.schemas.ClassificationRecord)" href="../../schemas/classifications/#trapper_client.schemas.classifications.ClassificationRecord">ClassificationRecord</a>]</code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="Classification (trapper_client.schemas.Classification)" href="../../schemas/classifications/#trapper_client.schemas.classifications.Classification">Classification</a>]</code></p>
 
 
 
@@ -3477,7 +3477,7 @@
 <span class="normal"><a href="#__codelineno-0-434">434</a></span>
 <span class="normal"><a href="#__codelineno-0-435">435</a></span>
 <span class="normal"><a href="#__codelineno-0-436">436</a></span>
-<span class="normal"><a href="#__codelineno-0-437">437</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassificationsComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">ClassificationRecord</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-437">437</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassificationsComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Classification</span><span class="p">]):</span>
 <a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    Component for ``/media_classification/api/classifications``.</span>
 <a id="__codelineno-0-30" name="__codelineno-0-30"></a>
@@ -3523,7 +3523,7 @@
 <a id="__codelineno-0-70" name="__codelineno-0-70"></a>
 <a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/media_classification/api/classifications&quot;</span>
 <a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="n">export_endpoint</span> <span class="o">=</span> <span class="s2">&quot;/media_classification/api/classifications/results/</span><span class="si">{project_pk}</span><span class="s2">/&quot;</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">ClassificationRecord</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Classification</span>
 <a id="__codelineno-0-74" name="__codelineno-0-74"></a>    <span class="n">export_schema</span> <span class="o">=</span> <span class="n">ClassificationRecordExport</span>
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a>
 <a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_export_endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

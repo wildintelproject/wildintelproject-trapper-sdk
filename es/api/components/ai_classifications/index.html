@@ -2862,7 +2862,7 @@
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="AIClassificationRecord (trapper_client.schemas.AIClassificationRecord)" href="../../schemas/ai_classifications/#trapper_client.schemas.ai_classifications.AIClassificationRecord">AIClassificationRecord</a>]</code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="AIClassification (trapper_client.schemas.AIClassification)" href="../../schemas/ai_classifications/#trapper_client.schemas.ai_classifications.AIClassification">AIClassification</a>]</code></p>
 
 
 
@@ -3114,7 +3114,7 @@ through query parameters.</p>
 <span class="normal"><a href="#__codelineno-0-125">125</a></span>
 <span class="normal"><a href="#__codelineno-0-126">126</a></span>
 <span class="normal"><a href="#__codelineno-0-127">127</a></span>
-<span class="normal"><a href="#__codelineno-0-128">128</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="k">class</span><span class="w"> </span><span class="nc">AIClassificationsComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">AIClassificationRecord</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-128">128</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="k">class</span><span class="w"> </span><span class="nc">AIClassificationsComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">AIClassification</span><span class="p">]):</span>
 <a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">    Component for ``/media_classification/api/ai-classifications/``.</span>
 <a id="__codelineno-0-20" name="__codelineno-0-20"></a>
@@ -3160,7 +3160,7 @@ through query parameters.</p>
 <a id="__codelineno-0-60" name="__codelineno-0-60"></a>
 <a id="__codelineno-0-61" name="__codelineno-0-61"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/media_classification/api/ai-classifications&quot;</span>
 <a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="n">export_endpoint</span> <span class="o">=</span> <span class="s2">&quot;/media_classification/api/ai-classifications/results/</span><span class="si">{project_pk}</span><span class="s2">/&quot;</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">AIClassificationRecord</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">AIClassification</span>
 <a id="__codelineno-0-64" name="__codelineno-0-64"></a>    <span class="n">export_schema</span> <span class="o">=</span> <span class="n">AIClassificationRecordExport</span>
 <a id="__codelineno-0-65" name="__codelineno-0-65"></a>
 <a id="__codelineno-0-66" name="__codelineno-0-66"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span>

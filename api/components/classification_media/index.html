@@ -3058,7 +3058,7 @@
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="MediaRecord (trapper_client.schemas.MediaRecord)" href="../../schemas/classifications/#trapper_client.schemas.classifications.MediaRecord">MediaRecord</a>]</code></p>
+              Bases: <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="Media (trapper_client.schemas.Media)" href="../../schemas/classifications/#trapper_client.schemas.classifications.Media">Media</a>]</code></p>
 
 
 
@@ -3899,7 +3899,7 @@ files = client.classification_media.download_collection_media_files(
 <span class="normal"><a href="#__codelineno-0-676">676</a></span>
 <span class="normal"><a href="#__codelineno-0-677">677</a></span>
 <span class="normal"><a href="#__codelineno-0-678">678</a></span>
-<span class="normal"><a href="#__codelineno-0-679">679</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassificationMediaComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-679">679</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassificationMediaComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Media</span><span class="p">]):</span>
 <a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    Component for ``/media_classification/api/media`` resource.</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25"></a>
@@ -3976,7 +3976,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-96" name="__codelineno-0-96"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-97" name="__codelineno-0-97"></a>
 <a id="__codelineno-0-98" name="__codelineno-0-98"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;media_classification/api/media/</span><span class="si">{project_pk}</span><span class="s2">/&quot;</span>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">MediaRecord</span>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Media</span>
 <a id="__codelineno-0-100" name="__codelineno-0-100"></a>
 <a id="__codelineno-0-101" name="__codelineno-0-101"></a>    <span class="c1"># ── internal helpers ──────────────────────────────────────────────────────</span>
 <a id="__codelineno-0-102" name="__codelineno-0-102"></a>
@@ -4187,7 +4187,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-307" name="__codelineno-0-307"></a>        <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-308" name="__codelineno-0-308"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-309" name="__codelineno-0-309"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">Media</span><span class="p">]:</span>
 <a id="__codelineno-0-311" name="__codelineno-0-311"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch one page of media rows for a classification project.</span>
 <a id="__codelineno-0-312" name="__codelineno-0-312"></a>
 <a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="sd">        Args:</span>
@@ -4199,7 +4199,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-320" name="__codelineno-0-320"></a>
 <a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">            ``PaginatedResult[MediaRecord]`` for the requested page.</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">            ``PaginatedResult[Media]`` for the requested page.</span>
 <a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-324" name="__codelineno-0-324"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
 <a id="__codelineno-0-325" name="__codelineno-0-325"></a>            <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
@@ -4217,7 +4217,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-337" name="__codelineno-0-337"></a>        <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-338" name="__codelineno-0-338"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-339" name="__codelineno-0-339"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-340" name="__codelineno-0-340"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">Media</span><span class="p">]:</span>
 <a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a lazy iterator over media rows for a classification project.</span>
 <a id="__codelineno-0-342" name="__codelineno-0-342"></a>
 <a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">        Args:</span>
@@ -4228,7 +4228,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-348" name="__codelineno-0-348"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-349" name="__codelineno-0-349"></a>
 <a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">            Lazy ``APIQuery[MediaRecord]`` iterator yielding media rows.</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">            Lazy ``APIQuery[Media]`` iterator yielding media rows.</span>
 <a id="__codelineno-0-352" name="__codelineno-0-352"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
 <a id="__codelineno-0-354" name="__codelineno-0-354"></a>            <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
@@ -4257,7 +4257,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-377" name="__codelineno-0-377"></a>
 <a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">        Returns:</span>
 <a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="sd">            ``Path`` to the generated CSV when ``file`` is provided,</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="sd">            otherwise ``list[MediaRecord]``.</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="sd">            otherwise ``list[Media]``.</span>
 <a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-382" name="__codelineno-0-382"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">export</span><span class="p">(</span>
 <a id="__codelineno-0-383" name="__codelineno-0-383"></a>            <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
@@ -4274,7 +4274,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-394" name="__codelineno-0-394"></a>        <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-395" name="__codelineno-0-395"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-396" name="__codelineno-0-396"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MediaRecord</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Media</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Find one media record within a project by its media/resource ID.</span>
 <a id="__codelineno-0-399" name="__codelineno-0-399"></a>
 <a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="sd">        Iterates project media lazily and returns the first matching record.</span>
@@ -4287,7 +4287,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-407" name="__codelineno-0-407"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-408" name="__codelineno-0-408"></a>
 <a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">            Matching ``MediaRecord`` if found, otherwise ``None``.</span>
+<a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">            Matching ``Media`` if found, otherwise ``None``.</span>
 <a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-412" name="__codelineno-0-412"></a>        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">where_project_media</span><span class="p">(</span>
 <a id="__codelineno-0-413" name="__codelineno-0-413"></a>            <span class="n">project_pk</span><span class="o">=</span><span class="n">project_pk</span><span class="p">,</span>
@@ -4363,7 +4363,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-483" name="__codelineno-0-483"></a>        <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-484" name="__codelineno-0-484"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-485" name="__codelineno-0-485"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">Media</span><span class="p">]:</span>
 <a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch one page of media rows for a collection within a project.</span>
 <a id="__codelineno-0-488" name="__codelineno-0-488"></a>
 <a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="sd">        Args:</span>
@@ -4376,7 +4376,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-497" name="__codelineno-0-497"></a>
 <a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">            ``PaginatedResult[MediaRecord]`` for the requested page.</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">            ``PaginatedResult[Media]`` for the requested page.</span>
 <a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-501" name="__codelineno-0-501"></a>        <span class="n">link_pk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_collection_pk</span><span class="p">(</span><span class="n">project_pk</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">)</span>
 <a id="__codelineno-0-502" name="__codelineno-0-502"></a>        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
@@ -4397,7 +4397,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-518" name="__codelineno-0-518"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-519" name="__codelineno-0-519"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">Media</span><span class="p">]:</span>
 <a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a lazy iterator over media rows for a collection within a project.</span>
 <a id="__codelineno-0-522" name="__codelineno-0-522"></a>
 <a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">        Args:</span>
@@ -4409,7 +4409,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-530" name="__codelineno-0-530"></a>
 <a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">            Lazy ``APIQuery[MediaRecord]`` iterator yielding collection media rows.</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">            Lazy ``APIQuery[Media]`` iterator yielding collection media rows.</span>
 <a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-534" name="__codelineno-0-534"></a>        <span class="n">link_pk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_collection_pk</span><span class="p">(</span><span class="n">project_pk</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">)</span>
 <a id="__codelineno-0-535" name="__codelineno-0-535"></a>        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
@@ -4442,7 +4442,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-562" name="__codelineno-0-562"></a>
 <a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">        Returns:</span>
 <a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">            ``Path`` to the generated CSV when ``file`` is provided,</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">            otherwise ``list[MediaRecord]``.</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">            otherwise ``list[Media]``.</span>
 <a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-567" name="__codelineno-0-567"></a>        <span class="n">link_pk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_collection_pk</span><span class="p">(</span><span class="n">project_pk</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">)</span>
 <a id="__codelineno-0-568" name="__codelineno-0-568"></a>        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
@@ -4581,7 +4581,7 @@ files = client.classification_media.download_collection_media_files(
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">Media</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4711,11 +4711,11 @@ files = client.classification_media.download_collection_media_files(
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<a class="autorefs autorefs-internal" title="MediaRecord (trapper_client.schemas.MediaRecord)" href="../../schemas/classifications/#trapper_client.schemas.classifications.MediaRecord">MediaRecord</a>]</code>
+                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<a class="autorefs autorefs-internal" title="Media (trapper_client.schemas.Media)" href="../../schemas/classifications/#trapper_client.schemas.classifications.Media">Media</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><code>PaginatedResult[MediaRecord]</code> for the requested page.</p>
+                <p><code>PaginatedResult[Media]</code> for the requested page.</p>
               </div>
             </td>
           </tr>
@@ -4762,7 +4762,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-307" name="__codelineno-0-307"></a>    <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-308" name="__codelineno-0-308"></a>    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-309" name="__codelineno-0-309"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">Media</span><span class="p">]:</span>
 <a id="__codelineno-0-311" name="__codelineno-0-311"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch one page of media rows for a classification project.</span>
 <a id="__codelineno-0-312" name="__codelineno-0-312"></a>
 <a id="__codelineno-0-313" name="__codelineno-0-313"></a><span class="sd">    Args:</span>
@@ -4774,7 +4774,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-319" name="__codelineno-0-319"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-320" name="__codelineno-0-320"></a>
 <a id="__codelineno-0-321" name="__codelineno-0-321"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">        ``PaginatedResult[MediaRecord]`` for the requested page.</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a><span class="sd">        ``PaginatedResult[Media]`` for the requested page.</span>
 <a id="__codelineno-0-323" name="__codelineno-0-323"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-324" name="__codelineno-0-324"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
 <a id="__codelineno-0-325" name="__codelineno-0-325"></a>        <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
@@ -4798,7 +4798,7 @@ files = client.classification_media.download_collection_media_files(
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">where_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">where_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">Media</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4912,11 +4912,11 @@ files = client.classification_media.download_collection_media_files(
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="APIQuery (trapper_client.api_query.APIQuery)" href="../../api_query/#trapper_client.api_query.APIQuery">APIQuery</a>[<a class="autorefs autorefs-internal" title="MediaRecord (trapper_client.schemas.MediaRecord)" href="../../schemas/classifications/#trapper_client.schemas.classifications.MediaRecord">MediaRecord</a>]</code>
+                  <code><a class="autorefs autorefs-internal" title="APIQuery (trapper_client.api_query.APIQuery)" href="../../api_query/#trapper_client.api_query.APIQuery">APIQuery</a>[<a class="autorefs autorefs-internal" title="Media (trapper_client.schemas.Media)" href="../../schemas/classifications/#trapper_client.schemas.classifications.Media">Media</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Lazy <code>APIQuery[MediaRecord]</code> iterator yielding media rows.</p>
+                <p>Lazy <code>APIQuery[Media]</code> iterator yielding media rows.</p>
               </div>
             </td>
           </tr>
@@ -4959,7 +4959,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-337" name="__codelineno-0-337"></a>    <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-338" name="__codelineno-0-338"></a>    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-339" name="__codelineno-0-339"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-340" name="__codelineno-0-340"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">Media</span><span class="p">]:</span>
 <a id="__codelineno-0-341" name="__codelineno-0-341"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a lazy iterator over media rows for a classification project.</span>
 <a id="__codelineno-0-342" name="__codelineno-0-342"></a>
 <a id="__codelineno-0-343" name="__codelineno-0-343"></a><span class="sd">    Args:</span>
@@ -4970,7 +4970,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-348" name="__codelineno-0-348"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-349" name="__codelineno-0-349"></a>
 <a id="__codelineno-0-350" name="__codelineno-0-350"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">        Lazy ``APIQuery[MediaRecord]`` iterator yielding media rows.</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a><span class="sd">        Lazy ``APIQuery[Media]`` iterator yielding media rows.</span>
 <a id="__codelineno-0-352" name="__codelineno-0-352"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-353" name="__codelineno-0-353"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
 <a id="__codelineno-0-354" name="__codelineno-0-354"></a>        <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
@@ -5121,7 +5121,7 @@ files = client.classification_media.download_collection_media_files(
             </td>
             <td>
               <div class="doc-md-description">
-                <p>otherwise <code>list[MediaRecord]</code>.</p>
+                <p>otherwise <code>list[Media]</code>.</p>
               </div>
             </td>
           </tr>
@@ -5177,7 +5177,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-377" name="__codelineno-0-377"></a>
 <a id="__codelineno-0-378" name="__codelineno-0-378"></a><span class="sd">    Returns:</span>
 <a id="__codelineno-0-379" name="__codelineno-0-379"></a><span class="sd">        ``Path`` to the generated CSV when ``file`` is provided,</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="sd">        otherwise ``list[MediaRecord]``.</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a><span class="sd">        otherwise ``list[Media]``.</span>
 <a id="__codelineno-0-381" name="__codelineno-0-381"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-382" name="__codelineno-0-382"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">export</span><span class="p">(</span>
 <a id="__codelineno-0-383" name="__codelineno-0-383"></a>        <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
@@ -5200,7 +5200,7 @@ files = client.classification_media.download_collection_media_files(
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_project_media_by_id</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MediaRecord</span> <span class="o">|</span> <span class="kc">None</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_project_media_by_id</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">media_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Media</span> <span class="o">|</span> <span class="kc">None</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5315,11 +5315,11 @@ files = client.classification_media.download_collection_media_files(
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="MediaRecord (trapper_client.schemas.MediaRecord)" href="../../schemas/classifications/#trapper_client.schemas.classifications.MediaRecord">MediaRecord</a> | None</code>
+                  <code><a class="autorefs autorefs-internal" title="Media (trapper_client.schemas.Media)" href="../../schemas/classifications/#trapper_client.schemas.classifications.Media">Media</a> | None</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Matching <code>MediaRecord</code> if found, otherwise <code>None</code>.</p>
+                <p>Matching <code>Media</code> if found, otherwise <code>None</code>.</p>
               </div>
             </td>
           </tr>
@@ -5367,7 +5367,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-394" name="__codelineno-0-394"></a>    <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-395" name="__codelineno-0-395"></a>    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-396" name="__codelineno-0-396"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MediaRecord</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-397" name="__codelineno-0-397"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Media</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-398" name="__codelineno-0-398"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Find one media record within a project by its media/resource ID.</span>
 <a id="__codelineno-0-399" name="__codelineno-0-399"></a>
 <a id="__codelineno-0-400" name="__codelineno-0-400"></a><span class="sd">    Iterates project media lazily and returns the first matching record.</span>
@@ -5380,7 +5380,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-407" name="__codelineno-0-407"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-408" name="__codelineno-0-408"></a>
 <a id="__codelineno-0-409" name="__codelineno-0-409"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">        Matching ``MediaRecord`` if found, otherwise ``None``.</span>
+<a id="__codelineno-0-410" name="__codelineno-0-410"></a><span class="sd">        Matching ``Media`` if found, otherwise ``None``.</span>
 <a id="__codelineno-0-411" name="__codelineno-0-411"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-412" name="__codelineno-0-412"></a>    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">where_project_media</span><span class="p">(</span>
 <a id="__codelineno-0-413" name="__codelineno-0-413"></a>        <span class="n">project_pk</span><span class="o">=</span><span class="n">project_pk</span><span class="p">,</span>
@@ -5745,7 +5745,7 @@ files = client.classification_media.download_collection_media_files(
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_collection_media</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_collection_media</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">Media</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -5891,11 +5891,11 @@ files = client.classification_media.download_collection_media_files(
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<a class="autorefs autorefs-internal" title="MediaRecord (trapper_client.schemas.MediaRecord)" href="../../schemas/classifications/#trapper_client.schemas.classifications.MediaRecord">MediaRecord</a>]</code>
+                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<a class="autorefs autorefs-internal" title="Media (trapper_client.schemas.Media)" href="../../schemas/classifications/#trapper_client.schemas.classifications.Media">Media</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><code>PaginatedResult[MediaRecord]</code> for the requested page.</p>
+                <p><code>PaginatedResult[Media]</code> for the requested page.</p>
               </div>
             </td>
           </tr>
@@ -5947,7 +5947,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-483" name="__codelineno-0-483"></a>    <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-484" name="__codelineno-0-484"></a>    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-485" name="__codelineno-0-485"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">Media</span><span class="p">]:</span>
 <a id="__codelineno-0-487" name="__codelineno-0-487"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch one page of media rows for a collection within a project.</span>
 <a id="__codelineno-0-488" name="__codelineno-0-488"></a>
 <a id="__codelineno-0-489" name="__codelineno-0-489"></a><span class="sd">    Args:</span>
@@ -5960,7 +5960,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-496" name="__codelineno-0-496"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-497" name="__codelineno-0-497"></a>
 <a id="__codelineno-0-498" name="__codelineno-0-498"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        ``PaginatedResult[MediaRecord]`` for the requested page.</span>
+<a id="__codelineno-0-499" name="__codelineno-0-499"></a><span class="sd">        ``PaginatedResult[Media]`` for the requested page.</span>
 <a id="__codelineno-0-500" name="__codelineno-0-500"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-501" name="__codelineno-0-501"></a>    <span class="n">link_pk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_collection_pk</span><span class="p">(</span><span class="n">project_pk</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">)</span>
 <a id="__codelineno-0-502" name="__codelineno-0-502"></a>    <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
@@ -5986,7 +5986,7 @@ files = client.classification_media.download_collection_media_files(
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">where_collection_media</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">where_collection_media</span><span class="p">(</span><span class="n">project_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">Media</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6116,11 +6116,11 @@ files = client.classification_media.download_collection_media_files(
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="APIQuery (trapper_client.api_query.APIQuery)" href="../../api_query/#trapper_client.api_query.APIQuery">APIQuery</a>[<a class="autorefs autorefs-internal" title="MediaRecord (trapper_client.schemas.MediaRecord)" href="../../schemas/classifications/#trapper_client.schemas.classifications.MediaRecord">MediaRecord</a>]</code>
+                  <code><a class="autorefs autorefs-internal" title="APIQuery (trapper_client.api_query.APIQuery)" href="../../api_query/#trapper_client.api_query.APIQuery">APIQuery</a>[<a class="autorefs autorefs-internal" title="Media (trapper_client.schemas.Media)" href="../../schemas/classifications/#trapper_client.schemas.classifications.Media">Media</a>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Lazy <code>APIQuery[MediaRecord]</code> iterator yielding collection media rows.</p>
+                <p>Lazy <code>APIQuery[Media]</code> iterator yielding collection media rows.</p>
               </div>
             </td>
           </tr>
@@ -6168,7 +6168,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-517" name="__codelineno-0-517"></a>    <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-518" name="__codelineno-0-518"></a>    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">MediaRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">Media</span><span class="p">]:</span>
 <a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a lazy iterator over media rows for a collection within a project.</span>
 <a id="__codelineno-0-522" name="__codelineno-0-522"></a>
 <a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">    Args:</span>
@@ -6180,7 +6180,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-530" name="__codelineno-0-530"></a>
 <a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">        Lazy ``APIQuery[MediaRecord]`` iterator yielding collection media rows.</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">        Lazy ``APIQuery[Media]`` iterator yielding collection media rows.</span>
 <a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-534" name="__codelineno-0-534"></a>    <span class="n">link_pk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_collection_pk</span><span class="p">(</span><span class="n">project_pk</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">)</span>
 <a id="__codelineno-0-535" name="__codelineno-0-535"></a>    <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
@@ -6349,7 +6349,7 @@ files = client.classification_media.download_collection_media_files(
             </td>
             <td>
               <div class="doc-md-description">
-                <p>otherwise <code>list[MediaRecord]</code>.</p>
+                <p>otherwise <code>list[Media]</code>.</p>
               </div>
             </td>
           </tr>
@@ -6411,7 +6411,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-562" name="__codelineno-0-562"></a>
 <a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">    Returns:</span>
 <a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">        ``Path`` to the generated CSV when ``file`` is provided,</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">        otherwise ``list[MediaRecord]``.</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">        otherwise ``list[Media]``.</span>
 <a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-567" name="__codelineno-0-567"></a>    <span class="n">link_pk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_collection_pk</span><span class="p">(</span><span class="n">project_pk</span><span class="p">,</span> <span class="n">collection_pk</span><span class="p">)</span>
 <a id="__codelineno-0-568" name="__codelineno-0-568"></a>    <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>

@@ -1403,6 +1403,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#renamed-schemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renamed schemas
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2820,6 +2831,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#renamed-schemas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renamed schemas
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2995,39 +3017,39 @@
 </tr>
 <tr>
 <td><a href="schemas/classifications/">Classifications</a></td>
-<td><code>ClassificationRecord</code>, <code>ClassificationProject</code>, etc.</td>
+<td><code>Classification</code>, <code>ClassificationProject</code>, etc.</td>
 </tr>
 <tr>
 <td><a href="schemas/ai_classifications/">AI Classifications</a></td>
-<td><code>AIClassificationRecord</code>, <code>AIClassificationRecordExport*</code></td>
+<td><code>AIClassification</code>, <code>AIClassificationRecordExport*</code></td>
 </tr>
 <tr>
 <td><a href="schemas/user_classifications/">User Classifications</a></td>
-<td><code>UserClassificationRecord</code>, <code>ResourceUser</code>, <code>UserObservationAttr</code></td>
+<td><code>UserClassification</code>, <code>ResourceUser</code>, <code>UserObservationAttr</code></td>
 </tr>
 <tr>
 <td><a href="schemas/classifications_map/">Classifications Map</a></td>
-<td><code>ClassificationMapRecord</code>, <code>ResourceClassificationMap</code></td>
+<td><code>ClassificationMap</code>, <code>ResourceClassificationMap</code></td>
 </tr>
 <tr>
 <td><a href="schemas/classificators/">Classificators</a></td>
-<td><code>ClassificatorRecord</code></td>
+<td><code>Classificator</code></td>
 </tr>
 <tr>
 <td><a href="schemas/species/">Species</a></td>
-<td><code>SpeciesRecord</code></td>
+<td><code>Species</code></td>
 </tr>
 <tr>
 <td><a href="schemas/maps/">Maps</a></td>
-<td><code>MapRecord</code></td>
+<td><code>Map</code></td>
 </tr>
 <tr>
 <td><a href="schemas/sequences/">Sequences</a></td>
-<td><code>SequenceRecord</code></td>
+<td><code>Sequence</code></td>
 </tr>
 <tr>
 <td><a href="schemas/users/">Users</a></td>
-<td><code>UserRecord</code></td>
+<td><code>User</code></td>
 </tr>
 </tbody>
 </table>
@@ -3046,6 +3068,72 @@
 </tr>
 </tbody>
 </table>
+<h2 id="renamed-schemas">Renamed schemas</h2>
+<p>The schemas that Trapper's API returns are named after the resource, without the <code>Record</code> suffix some
+of them used to carry. The old names still import, give the same class and warn with a
+<code>DeprecationWarning</code>; they will be removed in a future release.</p>
+<table>
+<thead>
+<tr>
+<th>Old name</th>
+<th>New name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>UserRecord</code></td>
+<td><code>User</code></td>
+</tr>
+<tr>
+<td><code>SpeciesRecord</code></td>
+<td><code>Species</code></td>
+</tr>
+<tr>
+<td><code>SequenceRecord</code></td>
+<td><code>Sequence</code></td>
+</tr>
+<tr>
+<td><code>MapRecord</code></td>
+<td><code>Map</code></td>
+</tr>
+<tr>
+<td><code>ClassificatorRecord</code></td>
+<td><code>Classificator</code></td>
+</tr>
+<tr>
+<td><code>ClassificationRecord</code></td>
+<td><code>Classification</code></td>
+</tr>
+<tr>
+<td><code>UserClassificationRecord</code></td>
+<td><code>UserClassification</code></td>
+</tr>
+<tr>
+<td><code>AIClassificationRecord</code></td>
+<td><code>AIClassification</code></td>
+</tr>
+<tr>
+<td><code>ClassificationMapRecord</code></td>
+<td><code>ClassificationMap</code></td>
+</tr>
+<tr>
+<td><code>ClassificationAggRecord</code></td>
+<td><code>ClassificationAgg</code></td>
+</tr>
+<tr>
+<td><code>ClassificationResourceRecord</code></td>
+<td><code>ClassifiedResource</code> (<code>ClassificationResource</code> is already the resource embedded in a classification)</td>
+</tr>
+<tr>
+<td><code>MediaRecord</code></td>
+<td><code>Media</code></td>
+</tr>
+</tbody>
+</table>
+<p>The export row schemas (<code>ClassificationRecordExport</code>, <code>ClassificationResultRecordCamtrapDP</code>, ...) keep
+their names: they describe a row of an exported file.</p>
+<p><code>Sequence</code> has the same name as <code>typing.Sequence</code>; if a module uses both, import one under another
+name (<code>from trapper_client import Sequence as TrapperSequence</code>).</p>
 
 
 

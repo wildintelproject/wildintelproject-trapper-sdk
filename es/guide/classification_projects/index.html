@@ -3077,7 +3077,7 @@ autenticarlos.</p>
 </code></pre></div>
 <p><code>create()</code> recibe un <code>ClassificationProjectCreate</code>, un modelo de Pydantic. Construirlo valida los datos
 antes de enviar nada: un nombre, y el research project y el clasificador, cada uno como el objeto que
-devuelve el SDK (<code>ResearchProject</code>, <code>ClassificatorRecord</code>) o como su clave primaria, de modo que las
+devuelve el SDK (<code>ResearchProject</code>, <code>Classificator</code>) o como su clave primaria, de modo que las
 creaciones se encadenan:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">rp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">research_projects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ResearchProjectCreate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Doñana mammals&quot;</span><span class="p">,</span> <span class="n">acronym</span><span class="o">=</span><span class="s2">&quot;DONMAM&quot;</span><span class="p">))</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">clf</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classificators</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ClassificatorCreate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Iberian mammals&quot;</span><span class="p">))</span>

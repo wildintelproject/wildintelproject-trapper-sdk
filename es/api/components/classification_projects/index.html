@@ -4061,7 +4061,7 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-410" name="__codelineno-0-410"></a>        <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-411" name="__codelineno-0-411"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-412" name="__codelineno-0-412"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]:</span>
 <a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch one page of classified resources within a project-collection link.</span>
 <a id="__codelineno-0-415" name="__codelineno-0-415"></a>
 <a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">        Args:</span>
@@ -4074,7 +4074,7 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-424" name="__codelineno-0-424"></a>
 <a id="__codelineno-0-425" name="__codelineno-0-425"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="sd">            ``PaginatedResult[ClassificationResourceRecord]`` for the requested page.</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="sd">            ``PaginatedResult[ClassifiedResource]`` for the requested page.</span>
 <a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-428" name="__codelineno-0-428"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
 <a id="__codelineno-0-429" name="__codelineno-0-429"></a>            <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
@@ -4082,7 +4082,7 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="n">page_size</span><span class="o">=</span><span class="n">page_size</span><span class="p">,</span>
 <a id="__codelineno-0-432" name="__codelineno-0-432"></a>            <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
 <a id="__codelineno-0-433" name="__codelineno-0-433"></a>            <span class="n">overwrite_endpoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources_entrypoint</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">),</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassificationResourceRecord</span><span class="p">,</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a>            <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassifiedResource</span><span class="p">,</span>
 <a id="__codelineno-0-435" name="__codelineno-0-435"></a>            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <a id="__codelineno-0-436" name="__codelineno-0-436"></a>        <span class="p">)</span>
 <a id="__codelineno-0-437" name="__codelineno-0-437"></a>
@@ -4093,7 +4093,7 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-442" name="__codelineno-0-442"></a>        <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-443" name="__codelineno-0-443"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-444" name="__codelineno-0-444"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]:</span>
 <a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a lazy iterator over classified resources within a project-collection link.</span>
 <a id="__codelineno-0-447" name="__codelineno-0-447"></a>
 <a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">        Args:</span>
@@ -4104,14 +4104,14 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-454" name="__codelineno-0-454"></a>
 <a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">            Lazy ``APIQuery[ClassificationResourceRecord]`` iterator.</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">            Lazy ``APIQuery[ClassifiedResource]`` iterator.</span>
 <a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-458" name="__codelineno-0-458"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
 <a id="__codelineno-0-459" name="__codelineno-0-459"></a>            <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
 <a id="__codelineno-0-460" name="__codelineno-0-460"></a>            <span class="n">page_size</span><span class="o">=</span><span class="n">page_size</span><span class="p">,</span>
 <a id="__codelineno-0-461" name="__codelineno-0-461"></a>            <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
 <a id="__codelineno-0-462" name="__codelineno-0-462"></a>            <span class="n">overwrite_endpoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources_entrypoint</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">),</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>            <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassificationResourceRecord</span><span class="p">,</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a>            <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassifiedResource</span><span class="p">,</span>
 <a id="__codelineno-0-464" name="__codelineno-0-464"></a>            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <a id="__codelineno-0-465" name="__codelineno-0-465"></a>        <span class="p">)</span>
 <a id="__codelineno-0-466" name="__codelineno-0-466"></a>
@@ -4122,7 +4122,7 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-471" name="__codelineno-0-471"></a>        <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-472" name="__codelineno-0-472"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-473" name="__codelineno-0-473"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]:</span>
 <a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch all pages of classified resources within a project-collection link.</span>
 <a id="__codelineno-0-476" name="__codelineno-0-476"></a>
 <a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">        Args:</span>
@@ -4133,14 +4133,14 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-483" name="__codelineno-0-483"></a>
 <a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">            ``PaginatedResult[ClassificationResourceRecord]`` with all items merged.</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">            ``PaginatedResult[ClassifiedResource]`` with all items merged.</span>
 <a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-487" name="__codelineno-0-487"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all</span><span class="p">(</span>
 <a id="__codelineno-0-488" name="__codelineno-0-488"></a>            <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
 <a id="__codelineno-0-489" name="__codelineno-0-489"></a>            <span class="n">page_size</span><span class="o">=</span><span class="n">page_size</span><span class="p">,</span>
 <a id="__codelineno-0-490" name="__codelineno-0-490"></a>            <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
 <a id="__codelineno-0-491" name="__codelineno-0-491"></a>            <span class="n">overwrite_endpoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources_entrypoint</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">),</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a>            <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassificationResourceRecord</span><span class="p">,</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>            <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassifiedResource</span><span class="p">,</span>
 <a id="__codelineno-0-493" name="__codelineno-0-493"></a>            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <a id="__codelineno-0-494" name="__codelineno-0-494"></a>        <span class="p">)</span>
 <a id="__codelineno-0-495" name="__codelineno-0-495"></a>
@@ -4152,7 +4152,7 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-501" name="__codelineno-0-501"></a>        <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-502" name="__codelineno-0-502"></a>        <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-503" name="__codelineno-0-503"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]:</span>
 <a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch resources surrounding one resource within a project-collection link.</span>
 <a id="__codelineno-0-506" name="__codelineno-0-506"></a>
 <a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">        Uses the server&#39;s windowed pagination (``current``/``size`` query</span>
@@ -4172,7 +4172,7 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-522" name="__codelineno-0-522"></a>
 <a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">            ``PaginatedResult[ClassificationResourceRecord]`` with</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">            ``PaginatedResult[ClassifiedResource]`` with</span>
 <a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">            ``pagination.total`` and ``pagination.filtered`` populated.</span>
 <a id="__codelineno-0-526" name="__codelineno-0-526"></a>
 <a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="sd">        Example::</span>
@@ -4186,7 +4186,7 @@ client.classification_projects.export(file=&quot;/tmp/cs_projects.csv&quot;)
 <a id="__codelineno-0-535" name="__codelineno-0-535"></a>        <span class="n">q</span><span class="p">[</span><span class="s2">&quot;current&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resource_pk</span>
 <a id="__codelineno-0-536" name="__codelineno-0-536"></a>        <span class="n">q</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">size</span>
 <a id="__codelineno-0-537" name="__codelineno-0-537"></a>        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources_entrypoint</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">),</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_paginated</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">ClassificationResourceRecord</span><span class="p">)</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_paginated</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">ClassifiedResource</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -5873,7 +5873,7 @@ are not touched.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_collection_resources</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_collection_resources</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6004,11 +6004,11 @@ are not touched.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<span title="trapper_client.schemas.ClassificationResourceRecord">ClassificationResourceRecord</span>]</code>
+                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<span title="trapper_client.schemas.ClassifiedResource">ClassifiedResource</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><code>PaginatedResult[ClassificationResourceRecord]</code> for the requested page.</p>
+                <p><code>PaginatedResult[ClassifiedResource]</code> for the requested page.</p>
               </div>
             </td>
           </tr>
@@ -6057,7 +6057,7 @@ are not touched.</p>
 <a id="__codelineno-0-410" name="__codelineno-0-410"></a>    <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-411" name="__codelineno-0-411"></a>    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-412" name="__codelineno-0-412"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]:</span>
 <a id="__codelineno-0-414" name="__codelineno-0-414"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch one page of classified resources within a project-collection link.</span>
 <a id="__codelineno-0-415" name="__codelineno-0-415"></a>
 <a id="__codelineno-0-416" name="__codelineno-0-416"></a><span class="sd">    Args:</span>
@@ -6070,7 +6070,7 @@ are not touched.</p>
 <a id="__codelineno-0-423" name="__codelineno-0-423"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-424" name="__codelineno-0-424"></a>
 <a id="__codelineno-0-425" name="__codelineno-0-425"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="sd">        ``PaginatedResult[ClassificationResourceRecord]`` for the requested page.</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a><span class="sd">        ``PaginatedResult[ClassifiedResource]`` for the requested page.</span>
 <a id="__codelineno-0-427" name="__codelineno-0-427"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-428" name="__codelineno-0-428"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
 <a id="__codelineno-0-429" name="__codelineno-0-429"></a>        <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
@@ -6078,7 +6078,7 @@ are not touched.</p>
 <a id="__codelineno-0-431" name="__codelineno-0-431"></a>        <span class="n">page_size</span><span class="o">=</span><span class="n">page_size</span><span class="p">,</span>
 <a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
 <a id="__codelineno-0-433" name="__codelineno-0-433"></a>        <span class="n">overwrite_endpoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources_entrypoint</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">),</span>
-<a id="__codelineno-0-434" name="__codelineno-0-434"></a>        <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassificationResourceRecord</span><span class="p">,</span>
+<a id="__codelineno-0-434" name="__codelineno-0-434"></a>        <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassifiedResource</span><span class="p">,</span>
 <a id="__codelineno-0-435" name="__codelineno-0-435"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <a id="__codelineno-0-436" name="__codelineno-0-436"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6095,7 +6095,7 @@ are not touched.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">where_collection_resources</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">where_collection_resources</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6209,11 +6209,11 @@ are not touched.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="APIQuery (trapper_client.APIQuery)" href="../../api_query/#trapper_client.api_query.APIQuery">APIQuery</a>[<span title="trapper_client.schemas.ClassificationResourceRecord">ClassificationResourceRecord</span>]</code>
+                  <code><a class="autorefs autorefs-internal" title="APIQuery (trapper_client.APIQuery)" href="../../api_query/#trapper_client.api_query.APIQuery">APIQuery</a>[<span title="trapper_client.schemas.ClassifiedResource">ClassifiedResource</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Lazy <code>APIQuery[ClassificationResourceRecord]</code> iterator.</p>
+                <p>Lazy <code>APIQuery[ClassifiedResource]</code> iterator.</p>
               </div>
             </td>
           </tr>
@@ -6257,7 +6257,7 @@ are not touched.</p>
 <a id="__codelineno-0-442" name="__codelineno-0-442"></a>    <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-443" name="__codelineno-0-443"></a>    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-444" name="__codelineno-0-444"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">APIQuery</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]:</span>
 <a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a lazy iterator over classified resources within a project-collection link.</span>
 <a id="__codelineno-0-447" name="__codelineno-0-447"></a>
 <a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">    Args:</span>
@@ -6268,14 +6268,14 @@ are not touched.</p>
 <a id="__codelineno-0-453" name="__codelineno-0-453"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-454" name="__codelineno-0-454"></a>
 <a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">        Lazy ``APIQuery[ClassificationResourceRecord]`` iterator.</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a><span class="sd">        Lazy ``APIQuery[ClassifiedResource]`` iterator.</span>
 <a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-458" name="__codelineno-0-458"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
 <a id="__codelineno-0-459" name="__codelineno-0-459"></a>        <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
 <a id="__codelineno-0-460" name="__codelineno-0-460"></a>        <span class="n">page_size</span><span class="o">=</span><span class="n">page_size</span><span class="p">,</span>
 <a id="__codelineno-0-461" name="__codelineno-0-461"></a>        <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
 <a id="__codelineno-0-462" name="__codelineno-0-462"></a>        <span class="n">overwrite_endpoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources_entrypoint</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">),</span>
-<a id="__codelineno-0-463" name="__codelineno-0-463"></a>        <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassificationResourceRecord</span><span class="p">,</span>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a>        <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassifiedResource</span><span class="p">,</span>
 <a id="__codelineno-0-464" name="__codelineno-0-464"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <a id="__codelineno-0-465" name="__codelineno-0-465"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6292,7 +6292,7 @@ are not touched.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_all_collection_resources</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_all_collection_resources</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6406,11 +6406,11 @@ are not touched.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<span title="trapper_client.schemas.ClassificationResourceRecord">ClassificationResourceRecord</span>]</code>
+                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<span title="trapper_client.schemas.ClassifiedResource">ClassifiedResource</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><code>PaginatedResult[ClassificationResourceRecord]</code> with all items merged.</p>
+                <p><code>PaginatedResult[ClassifiedResource]</code> with all items merged.</p>
               </div>
             </td>
           </tr>
@@ -6454,7 +6454,7 @@ are not touched.</p>
 <a id="__codelineno-0-471" name="__codelineno-0-471"></a>    <span class="n">page_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
 <a id="__codelineno-0-472" name="__codelineno-0-472"></a>    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-473" name="__codelineno-0-473"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]:</span>
 <a id="__codelineno-0-475" name="__codelineno-0-475"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch all pages of classified resources within a project-collection link.</span>
 <a id="__codelineno-0-476" name="__codelineno-0-476"></a>
 <a id="__codelineno-0-477" name="__codelineno-0-477"></a><span class="sd">    Args:</span>
@@ -6465,14 +6465,14 @@ are not touched.</p>
 <a id="__codelineno-0-482" name="__codelineno-0-482"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-483" name="__codelineno-0-483"></a>
 <a id="__codelineno-0-484" name="__codelineno-0-484"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">        ``PaginatedResult[ClassificationResourceRecord]`` with all items merged.</span>
+<a id="__codelineno-0-485" name="__codelineno-0-485"></a><span class="sd">        ``PaginatedResult[ClassifiedResource]`` with all items merged.</span>
 <a id="__codelineno-0-486" name="__codelineno-0-486"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-487" name="__codelineno-0-487"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all</span><span class="p">(</span>
 <a id="__codelineno-0-488" name="__codelineno-0-488"></a>        <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span>
 <a id="__codelineno-0-489" name="__codelineno-0-489"></a>        <span class="n">page_size</span><span class="o">=</span><span class="n">page_size</span><span class="p">,</span>
 <a id="__codelineno-0-490" name="__codelineno-0-490"></a>        <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
 <a id="__codelineno-0-491" name="__codelineno-0-491"></a>        <span class="n">overwrite_endpoint</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources_entrypoint</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">),</span>
-<a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassificationResourceRecord</span><span class="p">,</span>
+<a id="__codelineno-0-492" name="__codelineno-0-492"></a>        <span class="n">overwrite_schema</span><span class="o">=</span><span class="n">ClassifiedResource</span><span class="p">,</span>
 <a id="__codelineno-0-493" name="__codelineno-0-493"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <a id="__codelineno-0-494" name="__codelineno-0-494"></a>    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6489,7 +6489,7 @@ are not touched.</p>
 
 
 </h4>
-<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_collection_resources_around</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">resource_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]</span>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">get_collection_resources_around</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">resource_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -6626,17 +6626,17 @@ carries <code>total</code>/<code>filtered</code> counts instead of the usual
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<span title="trapper_client.schemas.ClassificationResourceRecord">ClassificationResourceRecord</span>]</code>
+                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<span title="trapper_client.schemas.ClassifiedResource">ClassifiedResource</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p><code>PaginatedResult[ClassificationResourceRecord]</code> with</p>
+                <p><code>PaginatedResult[ClassifiedResource]</code> with</p>
               </div>
             </td>
           </tr>
           <tr class="doc-section-item">
             <td>
-                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<span title="trapper_client.schemas.ClassificationResourceRecord">ClassificationResourceRecord</span>]</code>
+                  <code><a class="autorefs autorefs-internal" title="PaginatedResult (trapper_client.schemas.PaginatedResult)" href="../../schemas/common/#trapper_client.schemas.base.PaginatedResult">PaginatedResult</a>[<span title="trapper_client.schemas.ClassifiedResource">ClassifiedResource</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6706,7 +6706,7 @@ print(page.pagination.total, page.pagination.filtered)
 <a id="__codelineno-0-501" name="__codelineno-0-501"></a>    <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <a id="__codelineno-0-502" name="__codelineno-0-502"></a>    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-0-503" name="__codelineno-0-503"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassificationResourceRecord</span><span class="p">]:</span>
+<a id="__codelineno-0-504" name="__codelineno-0-504"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PaginatedResult</span><span class="p">[</span><span class="n">ClassifiedResource</span><span class="p">]:</span>
 <a id="__codelineno-0-505" name="__codelineno-0-505"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch resources surrounding one resource within a project-collection link.</span>
 <a id="__codelineno-0-506" name="__codelineno-0-506"></a>
 <a id="__codelineno-0-507" name="__codelineno-0-507"></a><span class="sd">    Uses the server&#39;s windowed pagination (``current``/``size`` query</span>
@@ -6726,7 +6726,7 @@ print(page.pagination.total, page.pagination.filtered)
 <a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
 <a id="__codelineno-0-522" name="__codelineno-0-522"></a>
 <a id="__codelineno-0-523" name="__codelineno-0-523"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">        ``PaginatedResult[ClassificationResourceRecord]`` with</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">        ``PaginatedResult[ClassifiedResource]`` with</span>
 <a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">        ``pagination.total`` and ``pagination.filtered`` populated.</span>
 <a id="__codelineno-0-526" name="__codelineno-0-526"></a>
 <a id="__codelineno-0-527" name="__codelineno-0-527"></a><span class="sd">    Example::</span>
@@ -6740,7 +6740,7 @@ print(page.pagination.total, page.pagination.filtered)
 <a id="__codelineno-0-535" name="__codelineno-0-535"></a>    <span class="n">q</span><span class="p">[</span><span class="s2">&quot;current&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resource_pk</span>
 <a id="__codelineno-0-536" name="__codelineno-0-536"></a>    <span class="n">q</span><span class="p">[</span><span class="s2">&quot;size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">size</span>
 <a id="__codelineno-0-537" name="__codelineno-0-537"></a>    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources_entrypoint</span><span class="p">(</span><span class="n">collection_pk</span><span class="p">),</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">)</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_paginated</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">ClassificationResourceRecord</span><span class="p">)</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_paginated</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">ClassifiedResource</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
