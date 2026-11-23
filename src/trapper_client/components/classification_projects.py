@@ -267,7 +267,11 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
 
         known = {p.pk for p in self.where(search=project.name, page_size=50) if p.name == project.name}
         data = project.to_form()
-        data.update(self._owner_role_fields(self.create_endpoint, self._ROLES_PREFIX, "classification project"))
+        data.update(
+            self._owner_role_fields(
+                self.create_endpoint, self._ROLES_PREFIX, "classification project", project.role_rows()
+            )
+        )
         if self._submit_create_form(self.create_endpoint, data, "Classification project", raise_on_error) is None:
             return None
         created = [

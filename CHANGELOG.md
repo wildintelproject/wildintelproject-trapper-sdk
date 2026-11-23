@@ -79,6 +79,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   join a research project when it is created, with the role they have in it
   (`ResearchProjectRoleType`: admin, expert or collaborator). `user` is a `User` or its primary key.
   Enumeration labels are now matched in any case.
+- `ClassificationProjectCreate(members=[ClassificationProjectMember(user, role)])` (Trapper v1): the
+  users that join a classification project when it is created, with their role
+  (`ClassificationProjectRoleType`: admin, expert, collaborator, error proof or citizen).
 
 ### Changed
 - **The schemas the API returns are named after the resource.** The `Record` suffix is gone:

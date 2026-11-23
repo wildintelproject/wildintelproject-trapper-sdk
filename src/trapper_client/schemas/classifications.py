@@ -1,14 +1,17 @@
 """Schemas for classification-related Trapper endpoints."""
 import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Annotated, Any, Dict, List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
-from .base import TrapperSchema
+from trapper_client.enums import ClassificationProjectRoleType
+
+from .base import TrapperSchema, choice
 from .classificators import Classificator
 from .research_projects import ResearchProject
 from .resources import Resource
+from .users import User
 from trapper_client._deprecated import deprecated_getattr
 
 
@@ -347,6 +350,23 @@ class ClassificationProject(TrapperSchema):
     delete_data: str | None = None
 
 
+class ClassificationProjectMember(BaseModel):
+    """A user that joins a classification project when it is created, and their role in it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    user: int | User = Field(description="The user the SDK returns, or their primary key.")
+    role: Annotated[ClassificationProjectRoleType, choice(ClassificationProjectRoleType)]
+
+    @field_validator("user")
+    @classmethod
+    def _primary_key(cls, value: int | User) -> int:
+        pk = value if isinstance(value, int) else value.pk
+        if pk <= 0:
+            raise ValueError("the user primary key must be positive")
+        return pk
+
+
 class ClassificationProjectCreate(BaseModel):
     """What it takes to create a classification project
     (``client.classification_projects.create()``).
@@ -368,6 +388,10 @@ class ClassificationProjectCreate(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     research_project: int | ResearchProject = Field(description="The research project, or its primary key.")
     classificator: int | Classificator = Field(description="The classificator, or its primary key.")
+    members: List[ClassificationProjectMember] = Field(
+        default_factory=list,
+        description="The users that join the project besides its creator, who is its administrator.",
+    )
 
     @field_validator("research_project", "classificator")
     @classmethod
@@ -377,6 +401,20 @@ class ClassificationProjectCreate(BaseModel):
         if pk <= 0:
             raise ValueError("the primary key must be positive")
         return pk
+
+    @field_validator("members")
+    @classmethod
+    def _one_role_per_user(cls, value: List[ClassificationProjectMember]) -> List[ClassificationProjectMember]:
+        """Trapper refuses a user that appears twice in a project."""
+        seen: set = set()
+        repeated = sorted({m.user for m in value if m.user in seen or seen.add(m.user)})
+        if repeated:
+            raise ValueError(f"users {repeated} appear more than once in members")
+        return value
+
+    def role_rows(self) -> List[tuple]:
+        """The members as the ``(user pk, role)`` pairs of the form's role rows."""
+        return [(m.user, int(m.role)) for m in self.members]
 
     def to_form(self) -> Dict[str, Any]:
         """The fields of Trapper's ``media_classification/project/create/`` form."""

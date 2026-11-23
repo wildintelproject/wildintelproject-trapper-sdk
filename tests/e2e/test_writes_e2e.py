@@ -26,6 +26,7 @@ import pytest
 
 from trapper_client import (
     ClassificationProjectCreate,
+    ClassificationProjectMember,
     ClassificatorCreate,
     ResearchProjectCreate,
     ResearchProjectMember,
@@ -301,6 +302,21 @@ class TestClassificationProjectCreateE2E:
         assert projects.remove_collection(project.pk, pk) is True
         assert projects.find_collection_in_project(project.pk, pk) is None
         assert projects.remove_collection(project.pk, pk) is False
+
+    @pytest.mark.e2e
+    def test_create_with_a_member_and_read_the_roles_back(self, session_writer, research_project):
+        classificator, member = _env("WILDINTEL_CLASSIFICATOR_PK"), _env("WILDINTEL_MEMBER_USER_PK")
+        if not (classificator and member):
+            pytest.skip("Set WILDINTEL_CLASSIFICATOR_PK and WILDINTEL_MEMBER_USER_PK")
+        if session_writer.server_version == "v2":
+            pytest.skip("Trapper v1 only")
+        project = session_writer.classification_projects.create(ClassificationProjectCreate(
+            name=f"e2e team {uuid.uuid4().hex[:6]}", research_project=research_project,
+            classificator=int(classificator),
+            members=[ClassificationProjectMember(user=int(member), role="collaborator")],
+        ))
+        roles = [role.roles for role in project.project_roles]
+        assert ["Collaborator"] in roles and ["Admin"] in roles
 
     @pytest.mark.e2e
     def test_unknown_research_project_is_rejected_with_the_field(self, session_writer):

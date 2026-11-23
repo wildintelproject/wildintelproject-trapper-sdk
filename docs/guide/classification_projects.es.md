@@ -147,6 +147,35 @@ Classification project creation failed (status 200): research_project: Select a 
 Devuelve el proyecto creado, o `None` si no se puede leer de vuelta (o si se rechazó el formulario con
 `raise_on_error=False`).
 
+### Miembros
+
+Igual que en los [research projects](research_projects.md#miembros), quien crea el proyecto pasa a ser
+su administrador y `members` añade a los demás usuarios, cada uno con un rol:
+
+```python
+from trapper_client import ClassificationProjectCreate, ClassificationProjectMember
+
+project = client.classification_projects.create(
+    ClassificationProjectCreate(
+        name="Doñana 2026",
+        research_project=rp,
+        classificator=clf,
+        members=[
+            ClassificationProjectMember(user=ana, role="expert"),
+            ClassificationProjectMember(user=7, role="collaborator"),
+        ],
+    )
+)
+print([(r.user, r.roles) for r in project.project_roles])
+# [('Ana Romero', ['Expert']), ('rp_staff', ['Admin']), ('user7', ['Collaborator'])]
+```
+
+`role` es un `ClassificationProjectRoleType`, su número o su etiqueta (en cualquier caso): `ADMIN`,
+`EXPERT`, `COLLABORATOR`, y `ERROR_PROOF` y `CITIZEN`, que pertenecen a las funciones de ciencia
+ciudadana de Trapper. `user` es un `User` de `client.users` o su clave primaria. Un usuario no puede
+aparecer dos veces y el creador no puede figurar; las dos cosas fallan antes de enviar nada. Los
+miembros solo se pueden dar al crear el proyecto.
+
 ### Añadir colecciones
 
 Un proyecto nuevo está vacío. `add_collections()` le vincula *colecciones de almacenamiento*:
