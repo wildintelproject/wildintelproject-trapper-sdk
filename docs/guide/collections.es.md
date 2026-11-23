@@ -177,6 +177,12 @@ Lo que necesita (comprobado en Trapper v1 y v2, salvo lo que dice *en el código
   `resources.download(pk, ..., kind="thumbnail")` puede dar `NotFoundError` durante un momento. Una vez generadas se
   descargan (comprobado en v1).
 
+## Descargar los ficheros de una colección
+
+`client.collections.download_resources(pk, "downloads/")` guarda los ficheros de una colección en
+`downloads/<nombre de la colección>/`, con los filtros de la lista de resources para elegir cuáles, omitiendo lo que ya
+está. Véase [Descargar todos los ficheros de un deployment o de una colección](resources.md#descargar-todos-los-ficheros-de-un-deployment-o-de-una-coleccion).
+
 ## Lanzar el procesado de una colección subida por FTP
 
 `trigger_collection()` inicia el procesado de un paquete de datos (una definición YAML y un ZIP) que **ya está en la

@@ -95,6 +95,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `client.resources.download(pk, file, kind="original" | "preview" | "thumbnail")` (issue #56): saves the file of a
   resource. The API token cannot fetch it (the web view answers `404`), so it logs in with `user_name` and
   `user_password`, streams to a `.part` file, and retries network failures and `502`/`503`/`504` with tenacity.
+- `deployments.download_resources(deployment_pk, directory, ...)` and `collections.download_resources(collection_pk,
+  directory, ...)` (issue #69): download the files of a deployment or a collection into a folder, one `download()` per
+  resource, with the filters of the resource list and a `filter_fn` to choose which ones, `skip_existing` so a run can
+  be repeated, a failure that does not stop the rest, a progress callback and a `DownloadReport`. Both use
+  `resources.download_many()`, which takes any list of resources.
 - Creating a collection from a package is described and tested (issue #67): upload a YAML and a ZIP with the uploader,
   `collections.trigger_collection()`, and wait for the collection to appear. The guide has the YAML format, what the
   package needs and the gotchas (v1 needs Trapper's nginx for the uploader, and on v2 the first trigger can answer

@@ -131,6 +131,12 @@ for feature in fc["features"]:
 
 Solo se devuelven los despliegues a los que puede acceder el usuario actual.
 
+## Descargar los ficheros
+
+`client.deployments.download_resources(pk, "downloads/")` guarda las imágenes o vídeos de un deployment en
+`downloads/<deployment_id>/`, con los filtros de la lista de resources para elegir cuáles, omitiendo lo que ya está.
+Véase [Descargar todos los ficheros de un deployment o de una colección](resources.md#descargar-todos-los-ficheros-de-un-deployment-o-de-una-coleccion).
+
 ## Campos: la lista y la exportación
 
 Igual que las locations, un despliegue viene en dos formas y ninguna tiene todos los campos. `where()`,

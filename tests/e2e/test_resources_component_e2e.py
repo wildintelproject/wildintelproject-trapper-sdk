@@ -515,3 +515,69 @@ class TestResourceFiltersE2E:
 
         with pytest.warns(err.UnknownFilterWarning, match="500"), pytest.raises(err.APIError):
             component.get(page_size=1, deployment__isnull=True)
+
+
+class TestDownloadResourcesE2E:
+    """``deployments.download_resources()`` and ``collections.download_resources()`` need the web session."""
+
+    @pytest.fixture(scope="class")
+    def session_client(self):
+        from trapper_client import TrapperClient
+
+        if os.getenv("WILDINTEL_SMOKE_ENABLED", "").strip() != "1":
+            pytest.skip("Set WILDINTEL_SMOKE_ENABLED=1")
+        user, password = os.getenv("WILDINTEL_USER_NAME", "").strip(), os.getenv("WILDINTEL_USER_PASSWORD", "").strip()
+        if not (user and password):
+            pytest.skip("Set WILDINTEL_USER_NAME and WILDINTEL_USER_PASSWORD (the web session is needed to download)")
+        return TrapperClient(
+            base_url=os.environ["WILDINTEL_BASE_URL"], access_token=os.environ["WILDINTEL_ACCESS_TOKEN"],
+            user_name=user, user_password=password,
+        )
+
+    @staticmethod
+    def _skip_without_proxy(report):
+        if any("proxy" in message for message in report.failed.values()):
+            pytest.skip("this Trapper is not behind the proxy that serves its files (X-Accel-Redirect)")
+
+    @pytest.mark.e2e
+    def test_a_deployment_is_downloaded_with_a_filter_and_repeated(self, session_client, tmp_path):
+        client = session_client
+        found = None
+        for deployment in client.deployments.where(page_size=50):
+            resources = list(client.resources.where(deployments=deployment.pk, page_size=50))
+            if len(resources) >= 2:
+                found = deployment, resources
+                break
+        if not found:
+            pytest.skip("No deployment with two resources on this server")
+        deployment, resources = found
+
+        everything = client.deployments.download_resources(deployment.pk, tmp_path)
+        self._skip_without_proxy(everything)
+        assert everything.ok and len(everything.downloaded) == len(resources)
+        assert everything.directory == tmp_path / deployment.deployment_id
+        assert all(p.stat().st_size > 0 for p in everything.downloaded)
+
+        again = client.deployments.download_resources(deployment.pk, tmp_path)
+        assert again.downloaded == [] and len(again.skipped) == len(resources)
+
+        # a filter of the resource list chooses which ones (a list of pks), a filter_fn does it on the client
+        chosen = [r.pk for r in resources[:2]]
+        some = client.deployments.download_resources(deployment.pk, tmp_path / "some", pk=chosen)
+        assert len(some.downloaded) == 2
+        one = client.deployments.download_resources(deployment.pk, tmp_path / "one", filter_fn=lambda r: r.pk == chosen[0])
+        assert len(one.downloaded) == 1
+
+    @pytest.mark.e2e
+    def test_a_collection_is_downloaded(self, session_client, tmp_path):
+        client = session_client
+        collection = next((c for c in client.collections.where(page_size=50)
+                           if client.resources.get_by_collection(c.pk, page_size=1).pagination.count), None)
+        if collection is None:
+            pytest.skip("No collection with resources on this server")
+        count = client.resources.get_by_collection(collection.pk, page_size=1).pagination.count
+        events: list[str] = []
+        report = client.collections.download_resources(
+            collection.pk, tmp_path, progress_callback=lambda event, data: events.append(event))
+        self._skip_without_proxy(report)
+        assert report.ok and len(report.downloaded) == count and events == ["downloaded"] * count

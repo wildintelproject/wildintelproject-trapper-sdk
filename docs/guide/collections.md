@@ -174,6 +174,12 @@ What it needs (checked on Trapper v1 and v2, except what says *in Trapper's code
   `resources.download(pk, ..., kind="thumbnail")` may answer `NotFoundError` for a moment. Once built, they download
   (checked on v1).
 
+## Downloading the files of a collection
+
+`client.collections.download_resources(pk, "downloads/")` saves the files of a collection into
+`downloads/<collection name>/`, with the filters of the resource list to choose which ones, skipping what is already
+there. See [Downloading all the files of a deployment or a collection](resources.md#downloading-all-the-files-of-a-deployment-or-a-collection).
+
 ## Triggering FTP-uploaded collection processing
 
 `trigger_collection()` starts the processing of a data package (a YAML definition and a ZIP) that is **already in
