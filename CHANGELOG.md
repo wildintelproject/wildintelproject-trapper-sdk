@@ -82,6 +82,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `ClassificationProjectCreate(members=[ClassificationProjectMember(user, role)])` (Trapper v1): the
   users that join a classification project when it is created, with their role
   (`ClassificationProjectRoleType`: admin, expert, collaborator, error proof or citizen).
+- `Location.longitude` and `Location.latitude`: the coordinates of a location as numbers. Trapper returns them as
+  one string (`"-6.44, 37.05"`, longitude first, in v1 and v2); `coordinates` keeps it as it comes. They are
+  `None` when the string is missing, cannot be read or is out of range.
+- `client.locations.in_area(bbox=..., center=..., radius=..., **filters)` (issue #34): the locations inside a
+  bounding box or a circle (radius in metres). Trapper v1's list ignores `in_bbox` and `radius` silently and
+  v2's ignores `radius`, so the SDK filters on the client; on v2 a box is also sent as `in_bbox` (issue #40) so
+  that fewer pages are read, and on v1 it reads every page that matches the other filters.
+- `UnknownFilterWarning` (issue #37): the locations list ignores a filter it does not know without an error, so
+  passing one (a typo, `radius`, `ordering`, or `country` on v2) now warns and names it. The filters are those
+  each Trapper version applies, checked live; the request is still sent.
+- `export(file=..., raw=True)` (issue #36): saves the CSV exactly as Trapper sends it, with its own header,
+  column order and values, instead of the SDK's column names sorted alphabetically. `False` by default, so
+  nothing changes; it needs `file`.
 
 ### Changed
 - **The schemas the API returns are named after the resource.** The `Record` suffix is gone:

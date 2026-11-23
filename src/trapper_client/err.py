@@ -13,6 +13,13 @@ class UnsupportedVersionError(APIError):
     pass
 
 
+class UnknownFilterWarning(UserWarning):
+    """A filter was sent that the server does not apply: Trapper ignores it silently and returns everything.
+
+    The request is still made. Silence it with ``warnings.simplefilter("ignore", err.UnknownFilterWarning)``.
+    """
+
+
 class NotFoundError(APIError):
     """HTTP 404 Not Found."""
     pass

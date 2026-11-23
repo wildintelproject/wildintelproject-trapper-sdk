@@ -60,18 +60,20 @@ Contexto del proyecto y financiación de WildINTEL.
 <div class="termy">
 
 ```console
-$ pip install wildintel-trapper-sdk
+$ pip install git+https://github.com/wildintelproject/wildintelproject-trapper-sdk
 ---> 100%
-Successfully installed wildintel-trapper-sdk
+Successfully installed wildintel-trapper-sdk-0.1.0
 
 // O, con uv:
-$ uv add wildintel-trapper-sdk
+$ uv add git+https://github.com/wildintelproject/wildintelproject-trapper-sdk
 Resolved 1 package in 340ms
 Installed 1 package in 12ms
- + wildintel-trapper-sdk==0.1.0
+ + wildintel-trapper-sdk==0.1.0 (from git+https://github.com/wildintelproject/wildintelproject-trapper-sdk)
 ```
 
 </div>
+
+El paquete se instala desde GitHub (no está en PyPI): consulta [Instalación](installation.md).
 
 ---
 

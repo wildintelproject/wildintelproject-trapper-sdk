@@ -131,6 +131,15 @@ path = client.locations.export(file="locations.csv")
 print(f"Saved to {path}")
 ```
 
+El CSV se escribe con los nombres de columna del SDK (`pk`, `location_id`, ...), ordenadas
+alfabéticamente. Para guardar el fichero **tal como lo envía Trapper**, con su cabecera, el orden de sus
+columnas y sus valores (`locationID`, `_id`, `ignoreDST`, ...), pasa `raw=True` (necesita `file`, y
+`validate` no se aplica):
+
+```python
+client.locations.export(file="locations.csv", raw=True)
+```
+
 Pasa `file=None` para recibir una lista de instancias de modelo, sin CSV de por medio: simplemente
 todos los elementos descargados y parseados:
 

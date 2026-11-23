@@ -23,6 +23,15 @@ más abajo para la única operación de escritura que admite este componente.
 | `deployments` | lista de PK | Filtra las localizaciones que tienen esos despliegues |
 | `search` | cadena | Búsqueda de texto global en `location_id`, `name`, `description`, `county`, `city` y el nombre de usuario del propietario |
 
+!!! warning "Trapper ignora un filtro que no conoce"
+    Un parámetro que no está en esta tabla, o que una errata convirtió en otro nombre, se **ignora sin
+    error** y la lista vuelve sin filtrar. El SDK conoce los filtros de cada versión de Trapper y, si pasas
+    otro, emite un `UnknownFilterWarning` que lo nombra (la petición se envía igualmente). Además de los de la
+    tabla, la lista aplica `pk`, `location_id`, `is_public`, `ignore_DST`, `coordinate_uncertainty`,
+    `date_created`, `managers` y `research_projects_member` en las dos versiones, y `country`, `state`,
+    `county` y `city` solo en v1 (`locations_map` también solo en v1). `in_bbox` solo lo aplica v2; `radius` y
+    `ordering` ninguna. Para silenciarlo: `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
+
 ## Los seis patrones de acceso
 
 ```python
@@ -51,6 +60,93 @@ client.locations.export(query={"research_project": 5}, file="project5_locations.
 ```
 
 Consulta [Uso](../usage.md) si algo de esto te resulta desconocido: es la misma interfaz en todos los componentes.
+
+## Coordenadas
+
+Trapper devuelve las coordenadas de una location como una sola cadena, con la **longitud primero**
+(`"-6.44, 37.05"`), en v1 y en v2. `Location.coordinates` la conserva tal como llega, y `longitude` y
+`latitude` la dan como números:
+
+```python
+loc = client.locations.find(16)
+loc.coordinates         # "-6.44, 37.05"
+loc.longitude           # -6.44
+loc.latitude            # 37.05
+```
+
+Valen `None` cuando las coordenadas faltan, no se pueden leer o están fuera de rango (longitud más allá de
+±180, latitud más allá de ±90): una location rara no rompe un listado. Se leen de `coordinates` cada vez y
+no son campos del modelo, así que `model_dump()` no cambia. Las filas de `export(file=None)` ya llevan
+`longitude` y `latitude`.
+
+## Filtrar por área
+
+La lista de locations de Trapper no tiene un filtro espacial utilizable. **Trapper v1** ignora `in_bbox` y
+`radius` sin error y devuelve todas las locations (el endpoint GeoJSON sí los aplica, pero solo en v1); **v2**
+aplica `in_bbox` pero ignora `radius`. `in_area()` filtra en el cliente, con las
+[coordenadas](#coordenadas) como números, así que funciona igual en las dos:
+
+```python
+# un rectángulo: (min_lon, min_lat, max_lon, max_lat)
+for loc in client.locations.in_area(bbox=(-7.0, 36.5, -5.5, 37.5)):
+    print(loc.name, loc.longitude, loc.latitude)
+
+# un círculo: el centro como (longitud, latitud), el radio en metros, y los filtros de siempre
+cerca = list(client.locations.in_area(center=(-6.44, 37.05), radius=5_000, research_project=3))
+```
+
+Se da un rectángulo, un círculo o los dos (la location debe estar entonces en ambos). Los bordes del rectángulo
+cuentan como dentro, un rectángulo con `min_lon` mayor que `max_lon` cruza el antimeridiano (±180°) y las
+distancias son de círculo máximo (haversine). Cualquier otro argumento es un filtro normal de la lista, que se
+envía al servidor y reduce lo que hay que leer. Un área incorrecta (sin nada, `center` sin `radius`, fuera de
+rango) lanza `ValueError` antes de hacer ninguna petición.
+
+!!! warning "Lee todas las páginas"
+    El servidor no puede hacer todo el filtrado, así que `in_area()` lee las locations que cumplen los otros
+    filtros y se queda con las del área. En v2 el rectángulo se envía además al servidor (`in_bbox`) y solo se
+    leen las locations que caen dentro, salvo que cruce el antimeridiano; en v1, y con un círculo solo, se leen
+    todas las páginas. En un servidor con muchas locations, pasa `research_project` u `owner`. Una location
+    cuyas coordenadas no se pueden leer queda fuera.
+
+## Campos: la lista y la exportación
+
+Trapper da una location en dos formas, y **ninguna tiene todos los campos**. `where()`, `get()` y `find()`
+devuelven una `Location`, construida con el JSON de Trapper; `export(file=None)` devuelve un
+`LocationExport` por cada fila de su CSV. Comprobado en Trapper v1 y v2:
+
+| Campo | `Location` (`find()`, `get()`, `where()`) | `LocationExport` (`export(file=None)`) |
+|---|---|---|
+| `pk`, `location_id`, `description`, `timezone` | sí | sí |
+| `name`, `owner`, `owner_profile`, `is_public`, `date_created` | **sí** | no |
+| `city`, `county`, `state` | **sí** (no en v2) | no |
+| `country` | sí (no en v2) | **sí** |
+| Coordenadas | `coordinates`, una cadena, y `longitude` y `latitude` leídas de ella | `longitude` y `latitude` |
+| Research project | `research_project`, su **acrónimo** | `research_project_id`, su **clave primaria** |
+| `ignore_dst` | no | **sí** |
+| `habitat` | no | **sí** |
+| `coordinate_uncertainty`, `managers` | no | no |
+
+Para guardar la exportación tal como la envía Trapper, con su cabecera (`locationID`, `ignoreDST`, `_id`,
+`researchProject`, ...) en lugar de los nombres de columna del SDK, usa
+`client.locations.export(file="locations.csv", raw=True)`.
+
+Así que para leer el `ignore_dst` de una location, o la clave primaria de su research project, usa la
+exportación; para leer su nombre o su propietario, usa la lista. `coordinate_uncertainty` y `managers`
+existen en Trapper pero no están en ninguna de las dos, y no se pueden leer. Cuando necesites las dos
+cosas, únelas por `pk`; dale a la exportación los mismos filtros que a la lista para que devuelvan las
+mismas locations:
+
+```python
+filters = {"research_project": 3}
+by_pk = {row.pk: row for row in client.locations.export(query=filters, file=None)}
+
+for loc in client.locations.where(**filters):
+    row = by_pk.get(loc.pk)
+    print(loc.name, loc.longitude, row.ignore_dst, row.research_project_id)
+```
+
+Trapper construye cada forma con su propio serializador y su propia lista de campos, y por eso difieren
+(entrada 23 de `TRAPPER_API_IMPROVEMENTS.md`).
 
 ## Importar localizaciones (acceso de escritura)
 

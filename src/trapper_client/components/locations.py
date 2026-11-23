@@ -7,12 +7,13 @@ from __future__ import annotations
 import time
 from contextlib import ExitStack
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, Iterator
 
 from tenacity import Retrying
 
 from trapper_client import err
 from trapper_client.components.base import TrapperComponent
+from trapper_client.geo import distance_m, in_bbox
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
 from trapper_client.retry_utils import retrying_for_chunk_upload
 from trapper_client.schemas import Location, LocationExport
@@ -62,6 +63,10 @@ class LocationsComponent(TrapperComponent[Location]):
         for loc in client.locations.where(owner=True, search="camera"):
             print(loc)
 
+        # Locations inside a bounding box or a circle (filtered on the client)
+        for loc in client.locations.in_area(center=(-6.44, 37.05), radius=5000):
+            print(loc)
+
         # Export all locations to CSV
         client.locations.export(file="/tmp/locations.csv")
 
@@ -70,9 +75,93 @@ class LocationsComponent(TrapperComponent[Location]):
     """
 
     endpoint = "/geomap/api/locations"
+
+    # Checked against live Trapper v1 and v2: a parameter that is not here is ignored by the server.
+    _V2_FILTERS = frozenset({
+        "pk", "name", "description", "owner", "owners", "research_project", "deployments", "search",
+        "location_id", "is_public", "ignore_DST", "coordinate_uncertainty", "date_created", "managers",
+        "research_projects_member",
+        "in_bbox",  # v2 only: v1's list ignores it
+    })
+    known_filters = {
+        "v2": _V2_FILTERS,
+        # v1 adds the map and the address fields (v2 has neither), and has no in_bbox on the list
+        "v1": (_V2_FILTERS - {"in_bbox"}) | {"locations_map", "country", "state", "county", "city"},
+    }
     export_endpoint = "/geomap/api/locations/export/"
     schema = Location
     export_schema = LocationExport
+
+    def in_area(
+        self,
+        bbox: tuple[float, float, float, float] | None = None,
+        center: tuple[float, float] | None = None,
+        radius: float | None = None,
+        **filters: Any,
+    ) -> Iterator[Location]:
+        """Iterate over the locations inside an area, filtering on the client.
+
+        Trapper's location list has no usable spatial filter: Trapper v1 **ignores** ``in_bbox`` and
+        ``radius`` silently and returns every location, and v2 applies ``in_bbox`` but ignores ``radius``.
+        So this fetches the locations that match ``filters`` and keeps those whose coordinates fall in the
+        area (see :attr:`Location.longitude`). On v2 a box that does not cross the antimeridian is also
+        sent to the server as ``in_bbox``, so that fewer pages are read; on v1 it reads every page: on a big
+        server, narrow it down with ``filters`` such as ``research_project``. A location whose coordinates
+        cannot be read is left out.
+
+        Give a bounding box, a circle, or both (a location must then be inside both).
+
+        Args:
+            bbox: ``(min_lon, min_lat, max_lon, max_lat)``, edges included. ``min_lon > max_lon`` crosses
+                the antimeridian.
+            center: ``(longitude, latitude)`` of the circle, longitude first, like Trapper.
+            radius: Radius of the circle in **metres**; needs ``center``.
+            **filters: Any filter of :meth:`where` (``research_project``, ``owner``, ``search``, ...).
+
+        Raises:
+            ValueError: if no area is given, if ``center`` and ``radius`` are not given together, or if
+                a coordinate is out of range or ``radius`` is negative.
+
+        Example:
+            ``client.locations.in_area(center=(-6.44, 37.05), radius=5000, research_project=3)``
+        """
+        if bbox is None and center is None and radius is None:
+            raise ValueError("give an area: bbox, or center and radius")
+        if (center is None) != (radius is None):
+            raise ValueError("center and radius go together")
+        if bbox is not None:
+            if len(bbox) != 4:
+                raise ValueError("bbox is (min_lon, min_lat, max_lon, max_lat)")
+            min_lon, min_lat, max_lon, max_lat = bbox
+            if not (-180 <= min_lon <= 180 and -180 <= max_lon <= 180
+                    and -90 <= min_lat <= 90 and -90 <= max_lat <= 90):
+                raise ValueError("bbox out of range: longitude within ±180 and latitude within ±90")
+            if min_lat > max_lat:
+                raise ValueError("bbox: min_lat is greater than max_lat")
+        if center is not None:
+            if len(center) != 2 or not (-180 <= center[0] <= 180 and -90 <= center[1] <= 90):
+                raise ValueError("center is (longitude, latitude), within ±180 and ±90")
+            if radius < 0:
+                raise ValueError("radius cannot be negative")
+
+        def inside(loc: Location) -> bool:
+            lon, lat = loc.longitude, loc.latitude
+            if lon is None or lat is None:
+                return False
+            if bbox is not None and not in_bbox(lon, lat, bbox):
+                return False
+            if center is not None and distance_m(center[0], center[1], lon, lat) > radius:
+                return False
+            return True
+
+        if (
+            bbox is not None
+            and bbox[0] <= bbox[2]
+            and "in_bbox" not in filters
+            and self.client.server_version == "v2"
+        ):
+            filters["in_bbox"] = ",".join(repr(float(v)) for v in bbox)
+        return iter(self.where(filter_fn=inside, **filters))
 
     import_endpoint = "geomap/location/import/"
     #: Trapper v2 moved the import forms into the Django admin.

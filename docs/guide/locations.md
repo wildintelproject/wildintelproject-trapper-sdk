@@ -23,6 +23,15 @@ below for the one write operation this component supports.
 | `deployments` | list of PKs | Filter locations that have those deployments |
 | `search` | string | Global text search across `location_id`, `name`, `description`, `county`, `city`, owner username |
 
+!!! warning "Trapper ignores a filter it does not know"
+    A parameter that is not in this table, or that a typo turned into another name, is **ignored without an
+    error**, and the list comes back unfiltered. The SDK knows the filters of each Trapper version and, when
+    you pass another one, emits an `UnknownFilterWarning` that names it (the request is still sent). Besides
+    those in the table, the list applies `pk`, `location_id`, `is_public`, `ignore_DST`, `coordinate_uncertainty`,
+    `date_created`, `managers` and `research_projects_member` on both versions, and `country`, `state`, `county`
+    and `city` on v1 only (`locations_map` also on v1 only). `in_bbox` is applied by v2 only; `radius` and
+    `ordering` by neither. To silence it: `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
+
 ## The six access patterns
 
 ```python
@@ -51,6 +60,91 @@ client.locations.export(query={"research_project": 5}, file="project5_locations.
 ```
 
 See [Usage](../usage.md) if any of this looks unfamiliar — it's the same interface on every component.
+
+## Coordinates
+
+Trapper returns the coordinates of a location as one string, with the **longitude first**
+(`"-6.44, 37.05"`), in v1 and v2. `Location.coordinates` keeps it as it comes, and `longitude` and
+`latitude` give it as numbers:
+
+```python
+loc = client.locations.find(16)
+loc.coordinates         # "-6.44, 37.05"
+loc.longitude           # -6.44
+loc.latitude            # 37.05
+```
+
+They are `None` when the coordinates are missing, cannot be read or are out of range (longitude beyond
+±180, latitude beyond ±90): one odd location does not break a listing. They are read from `coordinates` each
+time, not fields of the model, so `model_dump()` does not change. The rows of `export(file=None)` carry
+`longitude` and `latitude` already.
+
+## Filtering by area
+
+Trapper's location list has no usable spatial filter. **Trapper v1** ignores `in_bbox` and `radius` without an
+error and returns every location (the GeoJSON endpoint applies them, but only on v1); **v2** applies `in_bbox`
+but ignores `radius`. `in_area()` filters on the client instead, with the [coordinates](#coordinates) as
+numbers, so it works the same on both:
+
+```python
+# a bounding box: (min_lon, min_lat, max_lon, max_lat)
+for loc in client.locations.in_area(bbox=(-7.0, 36.5, -5.5, 37.5)):
+    print(loc.name, loc.longitude, loc.latitude)
+
+# a circle: the centre as (longitude, latitude), the radius in metres, plus the usual filters
+near = list(client.locations.in_area(center=(-6.44, 37.05), radius=5_000, research_project=3))
+```
+
+Give a box, a circle or both (a location must then be inside both). The edges of the box are inside, a box
+with `min_lon` greater than `max_lon` crosses the antimeridian (±180°), and the distances are great-circle
+(haversine) ones. Any other keyword is an ordinary filter of the list, sent to the server, so it narrows down
+what has to be read. A wrong area (nothing given, `center` without `radius`, out of range) raises
+`ValueError` before any request.
+
+!!! warning "It reads every page"
+    The server cannot do all the filtering, so `in_area()` reads the locations that match the other filters and
+    keeps the ones in the area. On v2 a box is also sent to the server (`in_bbox`), and only the locations in it
+    are read, unless it crosses the antimeridian; on v1, and for a circle alone, every page is read. On a server with many locations, pass `research_project` or `owner`. A location
+    whose coordinates cannot be read is left out.
+
+## Fields: the list and the export
+
+Trapper gives a location in two shapes, and **neither holds every field**. `where()`, `get()` and `find()`
+return a `Location`, built from Trapper's JSON; `export(file=None)` returns a `LocationExport` for each row of
+its CSV. Checked on Trapper v1 and v2:
+
+| Field | `Location` (`find()`, `get()`, `where()`) | `LocationExport` (`export(file=None)`) |
+|---|---|---|
+| `pk`, `location_id`, `description`, `timezone` | yes | yes |
+| `name`, `owner`, `owner_profile`, `is_public`, `date_created` | **yes** | no |
+| `city`, `county`, `state` | **yes** (not on v2) | no |
+| `country` | yes (not on v2) | **yes** |
+| Coordinates | `coordinates`, a string, and `longitude` and `latitude` read from it | `longitude` and `latitude` |
+| Research project | `research_project`, its **acronym** | `research_project_id`, its **primary key** |
+| `ignore_dst` | no | **yes** |
+| `habitat` | no | **yes** |
+| `coordinate_uncertainty`, `managers` | no | no |
+
+To save the export as Trapper sends it, with its own header (`locationID`, `ignoreDST`, `_id`,
+`researchProject`, ...) instead of the SDK's column names, use `client.locations.export(file="locations.csv",
+raw=True)`.
+
+So to read the `ignore_dst` of a location, or the primary key of its research project, use the export; to
+read its name or its owner, use the list. `coordinate_uncertainty` and `managers` exist in Trapper but are
+in neither, and cannot be read. When you need both, join them by `pk`; give the export the same filters as
+the list so that both return the same locations:
+
+```python
+filters = {"research_project": 3}
+by_pk = {row.pk: row for row in client.locations.export(query=filters, file=None)}
+
+for loc in client.locations.where(**filters):
+    row = by_pk.get(loc.pk)
+    print(loc.name, loc.longitude, row.ignore_dst, row.research_project_id)
+```
+
+Trapper builds each shape from its own serializer, with its own list of fields, which is why they differ
+(entry 23 of `TRAPPER_API_IMPROVEMENTS.md`).
 
 ## Importing locations (write access)
 
