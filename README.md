@@ -25,11 +25,13 @@ packages — resumable on Trapper v2. It is the layer that the other tools of th
 ## 🚀 Quick start
 
 ```bash
-pip install wildintel-trapper-sdk
-# or: uv add wildintel-trapper-sdk
+pip install git+https://github.com/wildintelproject/wildintelproject-trapper-sdk
+# or: uv add git+https://github.com/wildintelproject/wildintelproject-trapper-sdk
 ```
 
-Uploading packages to a Trapper v1 server needs the `upload` extra: `pip install "wildintel-trapper-sdk[upload]"`.
+The package is installed from this repository: it is **not on PyPI**. Add `@vX.Y.Z` (pip) or `--tag vX.Y.Z` (uv) to
+install a [release](https://github.com/wildintelproject/wildintelproject-trapper-sdk/releases). Uploading packages to a
+Trapper v1 server needs the `upload` extra: `pip install "wildintel-trapper-sdk[upload] @ git+https://github.com/wildintelproject/wildintelproject-trapper-sdk"`.
 
 ```python
 from trapper_client import TrapperClient
