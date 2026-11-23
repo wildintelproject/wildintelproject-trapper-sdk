@@ -66,6 +66,12 @@ client.resources.export(file="resources.csv", status="Public")
 
 See [Usage](../usage.md) if any of this looks unfamiliar — it's the same interface on every component.
 
+## Dates
+
+`date_recorded` is a timezone-aware `datetime` (`2024-03-10T20:49:43+01:00` in Trapper's JSON), so resources can be
+compared and sorted by when they were taken. One that cannot be read stays as the text it came as, and an empty one
+is `None`. `export(file="x.csv")` writes it back as ISO text.
+
 ## Downloading the file
 
 The REST API lists resources but does not serve their files: `url` and `url_original` are paths of a classic web

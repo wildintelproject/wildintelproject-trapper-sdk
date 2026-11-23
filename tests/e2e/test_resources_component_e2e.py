@@ -370,6 +370,25 @@ class TestResourcesByLocationE2E:
         with pytest.raises(Exception):
             component.find_by_location(int(pk), 999999999)
 
+class TestResourceDatesE2E:
+
+    @pytest.fixture(scope="class")
+    def component(self, real_api_base):
+        return ResourcesComponent(real_api_base)
+
+    @pytest.mark.e2e
+    def test_date_recorded_is_an_aware_datetime(self, component):
+        from datetime import datetime
+
+        page = component.get(page_size=20)
+        if not page.results:
+            pytest.skip("No resources on this server")
+        for res in page.results:
+            assert isinstance(res.date_recorded, datetime) and res.date_recorded.tzinfo is not None, res.date_recorded
+        ordered = sorted(page.results, key=lambda r: r.date_recorded)
+        assert ordered[0].date_recorded <= ordered[-1].date_recorded
+
+
 # ── download ──────────────────────────────────────────────────────────────────
 
 class TestResourceDownloadE2E:

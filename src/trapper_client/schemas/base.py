@@ -1,7 +1,8 @@
 """Base schemas shared across all Trapper components."""
-from typing import Generic, TypeVar
+from datetime import datetime
+from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict
+from pydantic import BaseModel, BeforeValidator, ConfigDict, TypeAdapter, ValidationError
 
 TTrapperSchema = TypeVar("TTrapperSchema", bound="TrapperSchema")
 
@@ -10,6 +11,26 @@ def choice(enum: type) -> BeforeValidator:
     """Validator for a field typed with one of :mod:`trapper_client.enums`: it accepts the enum's
     member, number or label, whatever ``enum.parse()`` accepts."""
     return BeforeValidator(lambda value: enum.parse(value, enum.__name__))
+
+
+_DATETIME = TypeAdapter(datetime)
+
+
+def read_datetime(value: Any) -> Any:
+    """Read a date from Trapper as a timezone-aware ``datetime``.
+
+    Trapper writes the same instant as ``2024-01-01T00:00:00+01:00`` in a JSON list and as
+    ``2024-01-01T00:00:00+0100`` in a CSV export. An empty value is ``None``; one that cannot be read is kept
+    as it came, so that a strange value does not break a listing.
+    """
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    if isinstance(value, datetime):
+        return value
+    try:
+        return _DATETIME.validate_python(value.strip() if isinstance(value, str) else value)
+    except ValidationError:
+        return value
 
 
 class Pagination(BaseModel):

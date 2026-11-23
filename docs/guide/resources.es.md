@@ -65,6 +65,12 @@ client.resources.export(file="resources.csv", status="Public")
 
 Consulta [Uso](../usage.md) si algo de esto te resulta desconocido: es la misma interfaz en todos los componentes.
 
+## Fechas
+
+`date_recorded` es un `datetime` con zona horaria (`2024-03-10T20:49:43+01:00` en el JSON de Trapper), así que los
+recursos se pueden comparar y ordenar por cuándo se tomaron. Una que no se puede leer se queda como el texto con el
+que llegó, y una vacía es `None`. `export(file="x.csv")` la escribe de vuelta como texto ISO.
+
 ## Descargar el fichero
 
 La API REST lista los resources pero no sirve sus ficheros: `url` y `url_original` son rutas de una vista web
