@@ -114,3 +114,36 @@ class TestInArea:
         with pytest.raises(ValueError):
             component.in_area(**kwargs)
         assert component.calls == []
+
+
+class TestServerSideBox:
+    """Trapper v2 applies ``in_bbox`` in its list: the box is sent so fewer pages are read."""
+
+    def with_version(self, component, version):
+        component.client.server_version = version
+        return component
+
+    def test_v2_sends_the_box(self, component):
+        found = self.with_version(component, "v2").in_area(bbox=(-7, 36, -5, 38))
+        assert component.calls == [{"in_bbox": "-7.0,36.0,-5.0,38.0"}]
+        assert names(found) == ["donana", "sevilla"]           # still filtered on the client
+
+    def test_v1_does_not_send_it(self, component):
+        list(self.with_version(component, "v1").in_area(bbox=(-7, 36, -5, 38)))
+        assert component.calls == [{}]
+
+    def test_a_box_across_the_antimeridian_is_not_sent(self, component):
+        list(self.with_version(component, "v2").in_area(bbox=(170, -20, -170, -10)))
+        assert component.calls == [{}]
+
+    def test_a_circle_alone_is_not_sent(self, component):
+        list(self.with_version(component, "v2").in_area(center=(-6.44, 37.05), radius=1000))
+        assert component.calls == [{}]
+
+    def test_other_filters_are_kept_and_a_given_in_bbox_wins(self, component):
+        list(self.with_version(component, "v2").in_area(bbox=(-7, 36, -5, 38), research_project=3))
+        list(self.with_version(component, "v2").in_area(bbox=(-7, 36, -5, 38), in_bbox="0,0,1,1"))
+        assert component.calls == [
+            {"research_project": 3, "in_bbox": "-7.0,36.0,-5.0,38.0"},
+            {"in_bbox": "0,0,1,1"},
+        ]

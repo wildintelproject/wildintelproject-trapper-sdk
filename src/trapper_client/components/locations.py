@@ -101,10 +101,13 @@ class LocationsComponent(TrapperComponent[Location]):
     ) -> Iterator[Location]:
         """Iterate over the locations inside an area, filtering on the client.
 
-        Trapper's location list **ignores** ``in_bbox`` and ``radius`` silently and returns every location,
-        so this fetches the locations that match ``filters`` and keeps those whose coordinates fall in the
-        area (see :attr:`Location.longitude`). It reads every page: on a big server, narrow it down with
-        ``filters`` such as ``research_project``. A location whose coordinates cannot be read is left out.
+        Trapper's location list has no usable spatial filter: Trapper v1 **ignores** ``in_bbox`` and
+        ``radius`` silently and returns every location, and v2 applies ``in_bbox`` but ignores ``radius``.
+        So this fetches the locations that match ``filters`` and keeps those whose coordinates fall in the
+        area (see :attr:`Location.longitude`). On v2 a box that does not cross the antimeridian is also
+        sent to the server as ``in_bbox``, so that fewer pages are read; on v1 it reads every page: on a big
+        server, narrow it down with ``filters`` such as ``research_project``. A location whose coordinates
+        cannot be read is left out.
 
         Give a bounding box, a circle, or both (a location must then be inside both).
 
@@ -151,6 +154,13 @@ class LocationsComponent(TrapperComponent[Location]):
                 return False
             return True
 
+        if (
+            bbox is not None
+            and bbox[0] <= bbox[2]
+            and "in_bbox" not in filters
+            and self.client.server_version == "v2"
+        ):
+            filters["in_bbox"] = ",".join(repr(float(v)) for v in bbox)
         return iter(self.where(filter_fn=inside, **filters))
 
     import_endpoint = "geomap/location/import/"
