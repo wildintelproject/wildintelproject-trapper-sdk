@@ -7,6 +7,9 @@
 classify camera-trap data: locations, deployments, media resources, storage collections, research
 projects, and both manual and AI-assisted classification results.
 
+It works with **both Trapper v1 and Trapper v2**: the server version is detected automatically, and
+the few differences are documented in [Trapper versions](guide/versions.md).
+
 Every Trapper resource is exposed as a typed Python component sharing the same interface for
 pagination, filtering, and export — plus write access for the two resources (locations,
 deployments) the REST API doesn't expose natively.
@@ -102,6 +105,7 @@ client.classification_results.export_project_results(
 | `client.locations` | Locations |
 | `client.locations_geojson` | Locations as GeoJSON |
 | `client.deployments` | Deployments |
+| `client.project_deployments` | Deployments of a classification project and their actions (v2) |
 | `client.resources` | Media resources |
 | `client.collections` | Storage collections |
 | `client.research_projects` | Research projects |

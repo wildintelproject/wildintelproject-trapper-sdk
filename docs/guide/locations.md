@@ -1,5 +1,8 @@
 # Locations
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — `import_locations()` works on both but behaves differently (see below). See [Trapper versions](versions.md).
+
 `client.locations` — read/write access to camera-trap locations.
 
 **Endpoint:** `GET /geomap/api/locations` (list + detail), `GET /geomap/api/locations/export/` (CSV export).
@@ -55,6 +58,11 @@ See [Usage](../usage.md) if any of this looks unfamiliar — it's the same inter
 classic web UI's `geomap/location/import/` form via cookie/session auth instead of the API's token
 auth (see [`APIClientBase.session_login`](../api/api_client_base.md)).
 
+On **Trapper v2** the same method posts to the import action of the Django admin
+(`admin/geomap/location/import-locations/`). The account must be a staff user with the add
+permission, and the server imports asynchronously: `True` means the table passed validation and was
+queued. Rejected tables raise `APIError` with the server's message and the per-row errors.
+
 !!! warning "Not a stable API contract"
     This depends on an unversioned HTML form, not a documented endpoint — a Trapper change to that
     page can break it silently. It requires `user_name`/`user_password` (the account's *email*
@@ -83,6 +91,20 @@ client.locations.import_locations(
       typically a `500` on an otherwise-unrelated request, long after the import reported
       success. This method requires `timezone` up front specifically to prevent creating that
       kind of latent, hard-to-diagnose corruption.
+
+### Waiting for the import to land
+
+On Trapper v2 the import runs in the background: `import_locations()` returning `True` means the
+table was validated and queued, not that the rows exist yet. Neither version exposes the import
+task through the API, so `wait_for_import()` checks the outcome instead — it polls until every
+`locationID` is listed:
+
+```python
+client.locations.import_locations(file="locations.csv", research_project=1, timezone="Europe/Madrid")
+client.locations.wait_for_import(["don-01", "don-02"], timeout=60)   # raises TimeoutError if missing
+```
+
+Pass `raise_on_timeout=False` to get `False` back instead. It works the same on v1.
 
 There's also a ready-to-run script: [`examples/import_locations.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_locations.py).
 

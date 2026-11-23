@@ -1,5 +1,8 @@
 # Deployments
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — `import_deployments()` works on both but behaves differently (see below), and `geojson()` is **v2 only**. See [Trapper versions](versions.md).
+
 `client.deployments` — camera deployments at a location, over a time range.
 
 **Endpoints:** `GET /geomap/api/deployments` (list + detail), `GET /geomap/api/deployments/export/` (CSV export).
@@ -75,11 +78,40 @@ client.deployments.export_by_collection(5, research_project=3, file="deps.csv")
 `collection_id` is the storage collection's own pk — `collection_pk` in a classification project's
 collection list (`classification_projects.get_all_project_collections()`).
 
+## GeoJSON (Trapper v2 only)
+
+`geojson()` returns the deployments as a GeoJSON `FeatureCollection`. It replaces
+[`client.maps`](maps.md) and [`client.locations_geojson`](locations_geojson.md), which Trapper v2
+removed; on a v1 server it raises `UnsupportedVersionError`.
+
+```python
+fc = client.deployments.geojson(classification_project=2, species=[3, 7])
+for feature in fc["features"]:
+    lon, lat = feature["geometry"]["coordinates"]
+    print(feature["properties"]["deploymentID"], lon, lat)
+```
+
+| Parameter | Description |
+|---|---|
+| `classification_project` | Keep deployments linked to this classification project; scopes `observation_type` and `species` to its classifications |
+| `observation_type` | One value or a list (`"animal"`, `["animal", "human"]`) |
+| `species` | One species pk or a list |
+| `start_date_gte`, `end_date_lte` | Deployments starting on/after, or ending on/before, a date (`YYYY-MM-DD`) |
+| `refresh` | Bypass the server's one-hour cache for this query |
+
+Only deployments the current user can access are returned.
+
 ## Importing deployments (write access)
 
 `/geomap/api/deployments` is read-only, so `import_deployments()` works around that by simulating
 the classic web UI's `geomap/deployment/import/` form via cookie/session auth instead of the API's
 token auth (see [`APIClientBase.session_login`](../api/api_client_base.md)).
+
+On **Trapper v2** the same method posts to the import action of the Django admin
+(`admin/geomap/deployment/import-deployments/`). The account must be a staff user with the add
+permission, and the server imports asynchronously: `True` means the table passed validation and was
+queued, so poll `client.deployments` if you need the rows to be there. Rejected tables raise
+`APIError` with the server's message and the per-row errors.
 
 !!! warning "Not a stable API contract"
     Same caveat as [locations import](locations.md#importing-locations-write-access): this depends
@@ -102,6 +134,20 @@ client.deployments.import_deployments(
 ```
 
 There's also a ready-to-run script: [`examples/import_deployments.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_deployments.py).
+
+### Waiting for the import to land
+
+On Trapper v2 the import runs in the background: `import_deployments()` returning `True` means the
+table was validated and queued, not that the rows exist yet. Neither version exposes the import
+task through the API, so `wait_for_import()` checks the outcome instead — it polls until every
+`deploymentID` is listed:
+
+```python
+client.deployments.import_deployments(file="deployments.csv", research_project=1, timezone="Europe/Madrid")
+client.deployments.wait_for_import(["DON01-2024A", "DON01-2024B"], timeout=60)   # raises TimeoutError if missing
+```
+
+Pass `raise_on_timeout=False` to get `False` back instead. It works the same on v1.
 
 ### What you get in the exception when the CSV itself is rejected
 

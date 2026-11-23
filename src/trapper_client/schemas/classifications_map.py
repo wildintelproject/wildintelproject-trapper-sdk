@@ -22,5 +22,5 @@ class ClassificationMapRecord(BaseModel):
     resource: ResourceClassificationMap
     static_attrs: Dict[str, Any] = Field(default_factory=dict)
     dynamic_attrs: List[Dict[str, Any]] = Field(default_factory=list)
-    classify_data: str
+    classify_data: Optional[str] = None  # null in Trapper v2
     project: int

@@ -1,5 +1,8 @@
 # AI Classifications
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ (not yet validated against a live Trapper v2 server). See [Trapper versions](versions.md).
+
 `client.ai_classifications` — classification observations produced by an AI provider.
 
 **Endpoints:**

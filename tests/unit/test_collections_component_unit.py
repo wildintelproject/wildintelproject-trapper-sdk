@@ -66,7 +66,9 @@ class TestCollectionsComponent(ComponentUnitTestBase):
 
 @pytest.fixture
 def client():
-    return MagicMock()
+    client = MagicMock()
+    client.server_version = "v1"
+    return client
 
 
 @pytest.fixture
@@ -80,7 +82,9 @@ class TestCollectionResources:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -92,7 +96,9 @@ class TestCollectionOndemand:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -201,7 +207,9 @@ class TestCollectionMap:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -287,7 +295,9 @@ class TestCollectionAppend:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -373,7 +383,9 @@ class TestTriggerCollection:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):

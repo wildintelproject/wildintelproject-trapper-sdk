@@ -114,17 +114,20 @@ class ClassificationRecord(TrapperSchema):
 
     dynamic_attrs: List[DynamicAttr]
 
-    status: bool
-    status_ai: bool
+    # ``status``/``status_ai`` exist in Trapper v1 only (v2 reports ``approved``); the
+    # ``*_data`` UI links are ``null`` in v2.
+    status: bool | None = None
+    status_ai: bool | None = None
+    approved: bool | None = None
     classified: bool
     classified_ai: bool
 
     classification_project: str
 
-    detail_data: str
-    delete_data: str
-    classify_data: str
-    update_data: str
+    detail_data: str | None = None
+    delete_data: str | None = None
+    classify_data: str | None = None
+    update_data: str | None = None
 
     bboxes: bool
 
@@ -319,7 +322,7 @@ class TrapperClassificationProjectRole(BaseModel):
     """Role entry inside a classification project."""
 
     user: str
-    profile: str
+    profile: str | None = None  # null in Trapper v2
     roles: List[str]
 
 
@@ -329,16 +332,16 @@ class ClassificationProject(TrapperSchema):
     pk: int
     name: str
     owner: str
-    owner_profile: str
+    owner_profile: str | None = None  # null in Trapper v2
     classificator: int
     research_project: str
     status: str
     is_active: bool
     project_roles: List[TrapperClassificationProjectRole]
     classificator_removed: bool
-    update_data: str
-    detail_data: str
-    delete_data: str
+    update_data: str | None = None
+    detail_data: str | None = None
+    delete_data: str | None = None
 
 
 class ClassificationProjectCollection(TrapperSchema):

@@ -1,5 +1,8 @@
 # Classification Media
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.classification_media` — media rows (with download URLs) for a classification project.
 
 **Endpoint:** `GET /media_classification/api/media/{project_pk}/`.

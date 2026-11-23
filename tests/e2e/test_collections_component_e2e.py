@@ -52,6 +52,7 @@ class TestCollectionResourcesE2E:
 
 # ── ondemand sub-endpoint ─────────────────────────────────────────────────────
 
+@pytest.mark.usefixtures("v1_only")
 class TestCollectionOndemandE2E:
 
     @pytest.fixture(scope="class")
@@ -108,6 +109,8 @@ class TestCollectionOndemandE2E:
         if not pk:
             pytest.skip("Set WILDINTEL_COLLECTION_PK to run this test")
 
+        if not component.get_ondemand(page_size=1).results:
+            pytest.skip("no on-demand collections on this server")
         result = component.find_ondemand(int(pk))
 
         assert isinstance(result, Collection)

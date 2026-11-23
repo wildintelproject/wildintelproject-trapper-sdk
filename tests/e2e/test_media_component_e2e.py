@@ -16,6 +16,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.base_component_tests import assert_page_size_respected
+
 from trapper_client.api_query import APIQuery
 from trapper_client.components.classification_media import ClassificationMediaComponent
 from trapper_client.schemas import MediaRecord, PaginatedResult
@@ -84,7 +86,7 @@ class TestProjectMediaE2E:
             pytest.skip("Set WILDINTEL_CLASSIFICATION_PROJECT_PK to run this test")
 
         result = component.get_project_media(int(pk), page_size=3)
-        assert len(result.results) <= 3
+        assert_page_size_respected(result, 3)
 
     @pytest.mark.e2e
     def test_get_project_media_validate_false_returns_models(self, component):

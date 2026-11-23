@@ -224,6 +224,8 @@ class TestResearchProjectCollectionsE2E:
         if not project_pk or not collection_pk:
             pytest.skip("Set WILDINTEL_RPROJECT_PK and WILDINTEL_COLLECTION_PK to run this test")
 
+        if not projects.get_project_collections(int(project_pk), page_size=1).results:
+            pytest.skip("the project has no collections linked")
         result = projects.find_collection_in_project(
             project_pk=int(project_pk),
             collection_pk=int(collection_pk),

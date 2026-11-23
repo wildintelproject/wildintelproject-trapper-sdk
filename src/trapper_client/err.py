@@ -8,6 +8,11 @@ class APIError(Exception):
     pass
 
 
+class UnsupportedVersionError(APIError):
+    """The feature is not available in the Trapper version the server runs."""
+    pass
+
+
 class NotFoundError(APIError):
     """HTTP 404 Not Found."""
     pass

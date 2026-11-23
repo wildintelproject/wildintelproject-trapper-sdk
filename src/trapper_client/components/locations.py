@@ -7,7 +7,7 @@ from __future__ import annotations
 import time
 from contextlib import ExitStack
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 from tenacity import Retrying
 
@@ -75,6 +75,8 @@ class LocationsComponent(TrapperComponent[Location]):
     export_schema = LocationExport
 
     import_endpoint = "geomap/location/import/"
+    #: Trapper v2 moved the import forms into the Django admin.
+    import_endpoint_v2 = "admin/geomap/location/import-locations/"
 
     def import_locations(
         self,
@@ -113,6 +115,11 @@ class LocationsComponent(TrapperComponent[Location]):
         It still can't turn that into a structured report object the way
         :meth:`ClassificationsComponent.import_classifications` does for its
         proper REST endpoint — you get a joined string of messages.
+
+        On Trapper v2 the form is the import action of the Django admin
+        (``admin/geomap/location/import-locations/``); the same arguments apply. The account must be a
+        staff user with the add permission, and the server imports
+        asynchronously, so ``True`` means the table was validated and queued.
 
         Warning:
             This is a workaround, not a stable integration: it depends on an
@@ -271,18 +278,45 @@ class LocationsComponent(TrapperComponent[Location]):
                 # partial read from a prior attempt that timed out mid-upload.
                 for handle in handles:
                     handle.seek(0)
-                return self.client.session_post_multipart(
-                    self.import_endpoint, data=data, files=files,
-                )
+                return self._import_post(data, files)
 
             response = retrying(_do_request)
 
-        if response.status_code == 302:
+        if self._import_accepted(response):
             return True
 
         if raise_on_error:
-            message = self.client._extract_html_error_text(response.text)
-            raise err.APIError(
-                f"Location import failed (status {response.status_code}): {message}"
-            )
+            raise self._import_error("Location", response)
         return False
+
+    def wait_for_import(
+        self,
+        location_ids: Iterable[str],
+        timeout: float = 60.0,
+        interval: float = 2.0,
+        raise_on_timeout: bool = True,
+    ) -> bool:
+        """Wait until the imported locations are visible through the API.
+
+        Trapper v2 imports asynchronously: ``import_locations()`` returning ``True`` only means the table was
+        validated and queued. Neither version offers an API to query the import task, so this
+        checks the outcome instead: it polls the list endpoint until every ID is there.
+
+        Args:
+            location_ids: The location IDs the import should create (the ``locationID`` column).
+            timeout: Seconds to wait in total.
+            interval: Seconds between polls.
+            raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.
+
+        Returns:
+            ``True`` once all of them exist; ``False`` on timeout when ``raise_on_timeout=False``.
+
+        Raises:
+            TimeoutError: Some IDs were still missing after ``timeout`` seconds.
+
+        Example::
+
+            client.locations.import_locations(file="locations.csv", research_project=1, timezone="Europe/Madrid")
+            client.locations.wait_for_import(["don-01"])
+        """
+        return self._wait_for_ids(location_ids, "location_id", timeout, interval, raise_on_timeout, "location ID")

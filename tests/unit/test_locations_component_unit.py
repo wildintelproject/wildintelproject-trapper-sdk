@@ -32,7 +32,9 @@ class TestImportLocations:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -164,7 +166,9 @@ class TestImportLocationsSplit:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):
@@ -338,7 +342,9 @@ class TestImportLocationsRetry:
 
     @pytest.fixture
     def client(self):
-        return MagicMock()
+        client = MagicMock()
+        client.server_version = "v1"
+        return client
 
     @pytest.fixture
     def component(self, client):

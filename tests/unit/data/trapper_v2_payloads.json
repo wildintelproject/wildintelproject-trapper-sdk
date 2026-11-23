@@ -1,0 +1,286 @@
+{
+ "classification_projects": [
+  {
+   "pk": 2,
+   "name": "Mamíferos de Doñana y Sierra Morena",
+   "owner": "sdktest",
+   "owner_profile": null,
+   "classificator": 2,
+   "research_project": "SDK test project",
+   "status": "Ongoing",
+   "is_active": true,
+   "project_roles": [
+    {
+     "user": "sdktest",
+     "username": "sdktest",
+     "profile": null,
+     "is_superuser": true,
+     "roles": [
+      "Admin"
+     ]
+    }
+   ],
+   "classificator_removed": false,
+   "update_data": null,
+   "detail_data": null,
+   "delete_data": null
+  },
+  {
+   "pk": 1,
+   "name": "SDK cls",
+   "owner": "sdktest",
+   "owner_profile": null,
+   "classificator": 1,
+   "research_project": "SDK test project",
+   "status": "Ongoing",
+   "is_active": true,
+   "project_roles": [
+    {
+     "user": "sdktest",
+     "username": "sdktest",
+     "profile": null,
+     "is_superuser": true,
+     "roles": [
+      "Admin"
+     ]
+    }
+   ],
+   "classificator_removed": false,
+   "update_data": null,
+   "detail_data": null,
+   "delete_data": null
+  }
+ ],
+ "classification_results": [
+  {
+   "pk": 28,
+   "resource": {
+    "pk": 29,
+    "name": "sm02-2024a_0003",
+    "resource_type": "I",
+    "thumbnail_url": "/static/trapper_storage/img/no_thumb_image_100x100.jpg",
+    "url": "/storage/resource/media/29/pfile/",
+    "mime": "image/jpeg",
+    "date_recorded": "2024-03-10T20:49:43.076845+01:00",
+    "deployment": 9,
+    "deployment_id": "sm02-2024a"
+   },
+   "collection": 3,
+   "updated_at": "2026-11-02T19:52:51.272906Z",
+   "is_setup": false,
+   "static_attrs": {},
+   "dynamic_attrs": [
+    {
+     "observation_type": {
+      "value": "blank"
+     },
+     "species": {
+      "value": "None"
+     },
+     "count": {
+      "value": "1"
+     }
+    }
+   ],
+   "approved": true,
+   "classified": true,
+   "classified_ai": false,
+   "classification_project": "Mamíferos de Doñana y Sierra Morena",
+   "detail_data": null,
+   "delete_data": null,
+   "classify_data": null,
+   "update_data": null,
+   "bboxes": false
+  },
+  {
+   "pk": 15,
+   "resource": {
+    "pk": 14,
+    "name": "don03-2024a_0001",
+    "resource_type": "I",
+    "thumbnail_url": "/static/trapper_storage/img/no_thumb_image_100x100.jpg",
+    "url": "/storage/resource/media/14/pfile/",
+    "mime": "image/jpeg",
+    "date_recorded": "2024-03-12T19:19:34.637950+01:00",
+    "deployment": 6,
+    "deployment_id": "don03-2024a"
+   },
+   "collection": 2,
+   "updated_at": "2026-11-02T19:52:51.272906Z",
+   "is_setup": false,
+   "static_attrs": {},
+   "dynamic_attrs": [
+    {
+     "observation_type": {
+      "value": "animal",
+      "confidence": 76.0
+     },
+     "species": {
+      "value": "Red Deer (Cervus elaphus)",
+      "confidence": 76.0
+     },
+     "count": {
+      "value": "1"
+     }
+    }
+   ],
+   "approved": true,
+   "classified": true,
+   "classified_ai": false,
+   "classification_project": "Mamíferos de Doñana y Sierra Morena",
+   "detail_data": null,
+   "delete_data": null,
+   "classify_data": null,
+   "update_data": null,
+   "bboxes": false
+  }
+ ],
+ "classifications_map": [
+  {
+   "pk": 28,
+   "resource": {
+    "pk": 29,
+    "name": "sm02-2024a_0003",
+    "resource_type": "I",
+    "thumbnail_url": "/static/trapper_storage/img/no_thumb_image_100x100.jpg",
+    "date_recorded": "2024-03-10T20:49:43.076845+01:00",
+    "deployment": "sm02-2024a"
+   },
+   "static_attrs": {},
+   "dynamic_attrs": [],
+   "classify_data": null,
+   "project": 2
+  },
+  {
+   "pk": 15,
+   "resource": {
+    "pk": 14,
+    "name": "don03-2024a_0001",
+    "resource_type": "I",
+    "thumbnail_url": "/static/trapper_storage/img/no_thumb_image_100x100.jpg",
+    "date_recorded": "2024-03-12T19:19:34.637950+01:00",
+    "deployment": "don03-2024a"
+   },
+   "static_attrs": {},
+   "dynamic_attrs": [],
+   "classify_data": null,
+   "project": 2
+  }
+ ],
+ "classificators": [
+  {
+   "pk": 2,
+   "name": "Mamíferos ibéricos",
+   "owner": "sdktest",
+   "owner_profile": null,
+   "updated_date": "2026-11-02T19:51:26.516916Z",
+   "static_attrs_order": "is_setup",
+   "dynamic_attrs_order": "observation_type,species,count",
+   "description": "",
+   "group_level_annotations": false,
+   "update_data": "/admin/media_classification/classificator/2/change/",
+   "detail_data": "/admin/media_classification/classificator/2/change/",
+   "delete_data": "/admin/media_classification/classificator/2/delete/"
+  },
+  {
+   "pk": 1,
+   "name": "sdk-clf",
+   "owner": "sdktest",
+   "owner_profile": null,
+   "updated_date": "2026-11-02T19:10:05.399429Z",
+   "static_attrs_order": "is_setup",
+   "dynamic_attrs_order": "observation_type,species,count",
+   "description": "",
+   "group_level_annotations": false,
+   "update_data": "/admin/media_classification/classificator/1/change/",
+   "detail_data": "/admin/media_classification/classificator/1/change/",
+   "delete_data": "/admin/media_classification/classificator/1/delete/"
+  }
+ ],
+ "user_classifications": [
+  {
+   "pk": 31,
+   "owner": "sdktest",
+   "owner_profile": null,
+   "resource": {
+    "pk": 29,
+    "name": "sm02-2024a_0003",
+    "resource_type": "I",
+    "thumbnail_url": "/static/trapper_storage/img/no_thumb_image_100x100.jpg",
+    "url": "/storage/resource/media/29/pfile/",
+    "mime": "image/jpeg",
+    "date_recorded": "2024-03-10T20:49:43.076845+01:00",
+    "deployment": 9,
+    "deployment_id": "sm02-2024a"
+   },
+   "collection": 3,
+   "updated_at": "2026-11-02T19:52:51.272906Z",
+   "is_setup": false,
+   "static_attrs": {},
+   "dynamic_attrs": [
+    {
+     "observation_type": {
+      "value": "blank"
+     },
+     "species": {
+      "value": "None"
+     },
+     "count": {
+      "value": "1"
+     }
+    }
+   ],
+   "approved": true,
+   "is_feedback": false,
+   "classification_project": "Mamíferos de Doñana y Sierra Morena",
+   "detail_data": null,
+   "delete_data": null,
+   "classify_data": null,
+   "update_data": null,
+   "bboxes": false
+  },
+  {
+   "pk": 32,
+   "owner": "sdktest",
+   "owner_profile": null,
+   "resource": {
+    "pk": 14,
+    "name": "don03-2024a_0001",
+    "resource_type": "I",
+    "thumbnail_url": "/static/trapper_storage/img/no_thumb_image_100x100.jpg",
+    "url": "/storage/resource/media/14/pfile/",
+    "mime": "image/jpeg",
+    "date_recorded": "2024-03-12T19:19:34.637950+01:00",
+    "deployment": 6,
+    "deployment_id": "don03-2024a"
+   },
+   "collection": 2,
+   "updated_at": "2026-11-02T19:52:51.272906Z",
+   "is_setup": false,
+   "static_attrs": {},
+   "dynamic_attrs": [
+    {
+     "observation_type": {
+      "value": "animal",
+      "confidence": 76.0
+     },
+     "species": {
+      "value": "Red Deer (Cervus elaphus)",
+      "confidence": 76.0
+     },
+     "count": {
+      "value": "1"
+     }
+    }
+   ],
+   "approved": true,
+   "is_feedback": false,
+   "classification_project": "Mamíferos de Doñana y Sierra Morena",
+   "detail_data": null,
+   "delete_data": null,
+   "classify_data": null,
+   "update_data": null,
+   "bboxes": false
+  }
+ ]
+}

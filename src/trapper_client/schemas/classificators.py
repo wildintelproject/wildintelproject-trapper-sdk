@@ -10,7 +10,7 @@ class ClassificatorRecord(BaseModel):
     pk: int
     name: str
     owner: str
-    owner_profile: str
+    owner_profile: Optional[str] = None  # null in Trapper v2
     updated_date: str
 
     predefined_attrs: Dict[str, Any] = Field(default_factory=dict)
@@ -20,6 +20,6 @@ class ClassificatorRecord(BaseModel):
     dynamic_attrs_order: Optional[str] = None
     description: Optional[str] = None
 
-    update_data: str
-    detail_data: str
-    delete_data: str
+    update_data: Optional[str] = None
+    detail_data: Optional[str] = None
+    delete_data: Optional[str] = None

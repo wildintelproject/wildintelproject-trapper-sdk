@@ -37,7 +37,7 @@ class AIClassificationRecord(BaseModel):
 
     pk: int
     owner: str
-    owner_profile: str
+    owner_profile: Optional[str] = None  # null in Trapper v2
     classification: int
 
     resource: ResourceAI
@@ -50,8 +50,8 @@ class AIClassificationRecord(BaseModel):
     static_attrs: Dict[str, Any] = Field(default_factory=dict)
     dynamic_attrs: List[AIObservationAttr] = Field(default_factory=list)
 
-    detail_data: str
-    delete_data: str
+    detail_data: Optional[str] = None
+    delete_data: Optional[str] = None
     ai_provider: str
 
 

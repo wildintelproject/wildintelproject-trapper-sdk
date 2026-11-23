@@ -1,5 +1,8 @@
 # Classification Projects
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.classification_projects` — classification projects: the workspace where resources from one
 or more collections get classified against a classificator.
 

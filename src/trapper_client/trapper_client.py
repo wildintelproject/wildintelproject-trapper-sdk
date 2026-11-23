@@ -72,6 +72,7 @@ from trapper_client.components import (
     ClassificatorsComponent,
     SpeciesComponent,
     MapsComponent,
+    ProjectDeploymentsComponent,
     SequencesComponent,
     UsersComponent,
     CollectionsComponent,
@@ -108,6 +109,7 @@ class TrapperClient(APIClientBase):
     * :attr:`classifications_map` — :class:`~trapper_api_client.components.ClassificationsMapComponent`
     * :attr:`classificators` — :class:`~trapper_api_client.components.ClassificatorsComponent`
     * :attr:`species` — :class:`~trapper_api_client.components.SpeciesComponent`
+    * :attr:`project_deployments` — :class:`~trapper_api_client.components.ProjectDeploymentsComponent` (v2)
     * :attr:`maps` — :class:`~trapper_api_client.components.MapsComponent`
     * :attr:`sequences` — :class:`~trapper_api_client.components.SequencesComponent`
     * :attr:`users` — :class:`~trapper_api_client.components.UsersComponent`
@@ -178,8 +180,28 @@ class TrapperClient(APIClientBase):
         self.classificators: ClassificatorsComponent = ClassificatorsComponent(self)
         self.species: SpeciesComponent = SpeciesComponent(self)
         self.maps: MapsComponent = MapsComponent(self)
+        self.project_deployments: ProjectDeploymentsComponent = ProjectDeploymentsComponent(self)
         self.sequences: SequencesComponent = SequencesComponent(self)
         self.users: UsersComponent = UsersComponent(self)
+
+    # ── Uploader ──────────────────────────────────────────────────────────────
+
+    def get_uploader(self, **kwargs: Any):
+        """Return the package uploader that matches the server's Trapper version.
+
+        * v1 → :class:`~trapper_client.components.http_uploader.HTTPUploader`
+          (custom chunked protocol; needs the ``upload`` extra: ``aiofiles`` and ``blake3``).
+        * v2 → :class:`~trapper_client.components.tus_uploader.TusUploader`
+          (tus 1.0 through tusd; resumable by design).
+
+        Both expose ``upload(file_path, remote_path)`` and ``upload_file`` (async).
+        Extra ``kwargs`` are passed to the uploader's constructor.
+        """
+        if self.server_version == "v2":
+            from trapper_client.components.tus_uploader import TusUploader
+            return TusUploader(client=self, **kwargs)
+        from trapper_client.components.http_uploader import HTTPUploader
+        return HTTPUploader(client=self, **kwargs)
 
     # ── Generic helper ────────────────────────────────────────────────────────
 

@@ -1,5 +1,8 @@
 # Species
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ (not yet validated against a live Trapper v2 server). See [Trapper versions](versions.md).
+
 `client.species` — the species taxonomy table. PKs returned here are the same ones referenced by
 the `species` filter on classification-related components (e.g.
 [`classifications`](classifications.md), [`ai_classifications`](ai_classifications.md)).

@@ -87,6 +87,7 @@ class LocationsGeoJsonComponent(TrapperComponent[LocationGeoJsonFeatureCollectio
 
     endpoint = "geomap/api/locations/geojson/"
     schema = LocationGeoJsonFeatureCollection
+    supported_versions = ("v1",)  # removed in Trapper v2
 
     def get(
         self,
@@ -104,11 +105,12 @@ class LocationsGeoJsonComponent(TrapperComponent[LocationGeoJsonFeatureCollectio
         Returns:
             GeoJSON payload as a ``dict`` (FeatureCollection).
         """
+        self._ensure_supported()
         q = dict(query or {})
         q.update(kwargs)
         if collection_id is not None:
             q["colls"] = collection_id
-        return self.client.get(self.endpoint, query=q)
+        return self._unwrap_feature_collection(self.client.get(self.endpoint, query=q))
 
     def get_all(self, **kwargs: Any) -> None:  # type: ignore[override]
         raise NotImplementedError(_NOT_SUPPORTED)

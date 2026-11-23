@@ -5,11 +5,13 @@ Base class for all Trapper API components.
 from __future__ import annotations
 
 import logging
+import time
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, Iterable, TypeVar, Union
 
 from pydantic import BaseModel
 
+from trapper_client import err
 from trapper_client.api_query import APIQuery, parse_row
 from trapper_client.schemas import PaginatedResult, Pagination
 
@@ -40,9 +42,112 @@ class TrapperComponent(Generic[TModel]):
     schema: type[TModel]
     export_schema: type[BaseModel] | None = None
     export_endpoint: str | None = None
+    #: Trapper major versions the resource exists in. Narrow it (e.g. ``("v1",)``) for
+    #: resources a version dropped; every read method then fails fast with
+    #: :class:`~trapper_client.err.UnsupportedVersionError` instead of a bare 404.
+    supported_versions: tuple[str, ...] = ("v1", "v2")
 
     def __init__(self, client: "APIClientBase"):
         self.client = client
+
+    def _require_version(self, *versions: str, feature: str | None = None) -> None:
+        """Raise ``UnsupportedVersionError`` unless the server runs one of ``versions``.
+
+        Reading ``client.server_version`` may probe the server once (``trapper_version="auto"``),
+        so only components or methods that really are version-specific call this.
+        """
+        current = self.client.server_version
+        if current not in versions:
+            name = feature or type(self).__name__
+            raise err.UnsupportedVersionError(
+                f"{name} is only available in Trapper {' / '.join(versions)}, "
+                f"but this server runs Trapper {current}."
+            )
+
+    def _ensure_supported(self) -> None:
+        """Version guard for the whole component; a no-op when it exists in every version."""
+        if self.supported_versions != ("v1", "v2"):
+            self._require_version(*self.supported_versions)
+
+    def _import_post(self, data: Dict[str, Any], files: Dict[str, Any]) -> Any:
+        """POST a CSV/GPX import form: v1's web view, or v2's Django-admin action.
+
+        The two versions use different URLs (``import_endpoint`` / ``import_endpoint_v2``) and v2's
+        admin needs the CSRF token read from the form page.
+        """
+        if self.client.server_version == "v2":
+            return self.client.session_post_multipart(
+                self.import_endpoint_v2, data=data, files=files, csrf_from_page=True
+            )
+        return self.client.session_post_multipart(self.import_endpoint, data=data, files=files)
+
+    @staticmethod
+    def _import_accepted(response: Any) -> bool:
+        """Whether a classic-form import POST was accepted.
+
+        The server answers ``302`` to the changelist on success. A ``302`` back to a login
+        page means the session has no permission for the form (e.g. a non-staff user on
+        Trapper v2's admin), which must not be mistaken for success.
+        """
+        if response.status_code != 302:
+            return False
+        return "login" not in (response.headers.get("location") or "").lower()
+
+    def _import_error(self, label: str, response: Any) -> err.APIError:
+        """Build the ``APIError`` for a rejected import POST, naming the real cause."""
+        location = (response.headers.get("location") or "").lower()
+        if response.status_code == 302 and "login" in location:
+            return err.APIError(
+                f"{label} import refused: the server redirected to its login page. The account "
+                "is not allowed to use the import form (on Trapper v2 it needs a staff account "
+                "with the add permission)."
+            )
+        message = self.client._extract_html_error_text(response.text)
+        return err.APIError(f"{label} import failed (status {response.status_code}): {message}")
+
+    @staticmethod
+    def _unwrap_feature_collection(data: Any) -> Any:
+        """Return the GeoJSON ``FeatureCollection`` from ``client.get``'s envelope.
+
+        ``client.get`` wraps non-paginated bodies as ``{"pagination": ..., "results": [body]}``;
+        anything that is not exactly that is returned unchanged.
+        """
+        results = data.get("results") if isinstance(data, dict) else None
+        if (
+            isinstance(results, list)
+            and len(results) == 1
+            and isinstance(results[0], dict)
+            and results[0].get("type") == "FeatureCollection"
+        ):
+            return results[0]
+        return data
+
+    def _wait_for_ids(
+        self,
+        ids: Iterable[str],
+        id_attr: str,
+        timeout: float,
+        interval: float,
+        raise_on_timeout: bool,
+        label: str,
+    ) -> bool:
+        """Poll the list API until every id in ``ids`` shows up (``search`` + exact match)."""
+        pending = list(dict.fromkeys(str(i) for i in ids))
+        deadline = time.monotonic() + timeout
+        while True:
+            pending = [
+                i for i in pending
+                if not any(getattr(row, id_attr, None) == i for row in self.where(search=i, page_size=20))
+            ]
+            if not pending:
+                return True
+            if time.monotonic() >= deadline:
+                if raise_on_timeout:
+                    raise TimeoutError(
+                        f"{len(pending)} {label}(s) still missing after {timeout:g}s: {', '.join(pending[:10])}"
+                    )
+                return False
+            time.sleep(interval)
 
     def _merge_query(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """Merge ``query`` and ``kwargs`` into one query-params dictionary.
@@ -127,6 +232,7 @@ class TrapperComponent(Generic[TModel]):
         Returns:
             A ``PaginatedResult[TModel]`` containing only the requested page.
         """
+        self._ensure_supported()
         q = self._merge_query(query, kwargs)
         q = dict(q or {})
         q.setdefault("page", page)
@@ -152,6 +258,7 @@ class TrapperComponent(Generic[TModel]):
         The iterator fetches data page by page on demand. ``filter_fn`` is applied
         client-side to each yielded item.
         """
+        self._ensure_supported()
         q = dict(query or {})
         q.update(kwargs)
         endpoint = overwrite_endpoint or self.endpoint
@@ -216,6 +323,7 @@ class TrapperComponent(Generic[TModel]):
         Returns:
             A single ``PaginatedResult[TModel]`` containing merged results.
         """
+        self._ensure_supported()
         q = self._merge_query(query, kwargs)
         q.setdefault("page_size", page_size)
         endpoint = overwrite_endpoint or self.endpoint
@@ -253,6 +361,7 @@ class TrapperComponent(Generic[TModel]):
             ``Path`` to the generated CSV when ``file`` is provided,
             otherwise ``list[BaseModel]`` with parsed or constructed models.
         """
+        self._ensure_supported()
         q = self._merge_query(query, kwargs)
         endpoint = overwrite_endpoint or self.export_endpoint or self.endpoint
         target_schema = overwrite_schema or self.export_schema or self.schema
@@ -297,6 +406,7 @@ class TrapperComponent(Generic[TModel]):
             validated. If ``validate=False``, the model is built directly
             from the raw payload without running Pydantic validators.
         """
+        self._ensure_supported()
         q = self._merge_query(query, kwargs)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema

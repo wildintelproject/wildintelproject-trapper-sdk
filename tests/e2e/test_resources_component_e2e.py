@@ -15,7 +15,7 @@ import os
 
 import pytest
 
-from tests.base_component_tests import ComponentE2ETestBase
+from tests.base_component_tests import ComponentE2ETestBase, assert_page_size_respected
 from trapper_client.api_query import APIQuery
 from trapper_client.components.resources import ResourcesComponent
 from trapper_client.schemas import PaginatedResult, Resource
@@ -304,7 +304,7 @@ class TestResourcesByLocationE2E:
             pytest.skip("Set WILDINTEL_LOCATION_PK to run this test")
 
         result = component.get_by_location(int(pk), page_size=3)
-        assert len(result.results) <= 3
+        assert_page_size_respected(result, 3)
 
     # ── get_all_by_location ───────────────────────────────────────────────────
 

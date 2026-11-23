@@ -1,11 +1,15 @@
 site_name: wildintel-trapper-sdk
-site_description: Cliente Python para la API de Trapper
+site_description: Python client for the Trapper API (v1 and v2)
 site_url: https://wildintelproject.github.io/wildintelproject-trapper-sdk/
 repo_url: https://github.com/wildintelproject/wildintelproject-trapper-sdk
 repo_name: wildintelproject/wildintelproject-trapper-sdk
 copyright: Copyright &copy; 2026 <a href="https://wildintel.eu/">WildINTEL</a>
 
 docs_dir: docs
+
+validation:
+  links:
+    anchors: warn
 site_dir: site
 
 theme:
@@ -82,13 +86,15 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
 
 nav:
-  - Inicio: index.md
-  - Instalacion: installation.md
-  - Uso: usage.md
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
   - Component Guides:
       - Locations: guide/locations.md
+      - Trapper versions (v1 / v2): guide/versions.md
       - Locations GeoJSON: guide/locations_geojson.md
       - Deployments: guide/deployments.md
+      - Project deployments (v2): guide/project_deployments.md
       - Resources: guide/resources.md
       - Collections: guide/collections.md
       - Research Projects: guide/research_projects.md
@@ -118,6 +124,7 @@ nav:
           - Locations: api/components/locations.md
           - Locations GeoJSON: api/components/locations_geojson.md
           - Deployments: api/components/deployments.md
+          - ProjectDeployments: api/components/project_deployments.md
           - Resources: api/components/resources.md
           - Collections: api/components/collections.md
           - Research Projects: api/components/research_projects.md
@@ -139,6 +146,7 @@ nav:
           - Common: api/schemas/common.md
           - Locations: api/schemas/locations.md
           - Deployments: api/schemas/deployments.md
+          - ProjectDeployments: api/schemas/project_deployments.md
           - Resources: api/schemas/resources.md
           - Collections: api/schemas/collections.md
           - Research Projects: api/schemas/research_projects.md
@@ -155,6 +163,52 @@ nav:
 
 plugins:
   - search
+  - i18n:
+      docs_structure: suffix          # page.md = English, page.es.md = Spanish
+      fallback_to_default: true       # untranslated pages show the English text
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: es
+          name: Español
+          build: true
+          site_description: Cliente Python para la API de Trapper (v1 y v2)
+          nav_translations:
+            Home: Inicio
+            Installation: Instalación
+            Usage: Uso
+            Component Guides: Guías de componentes
+            "Trapper versions (v1 / v2)": "Versiones de Trapper (v1 / v2)"
+            Locations: Localizaciones
+            Locations GeoJSON: Localizaciones GeoJSON
+            Deployments: Despliegues
+            "Project deployments (v2)": "Despliegues de proyecto (v2)"
+            Resources: Recursos
+            Collections: Colecciones
+            Research Projects: Proyectos de investigación
+            Classification Projects: Proyectos de clasificación
+            Classifications: Clasificaciones
+            AI Classifications: Clasificaciones de IA
+            Classification Media: Medios de clasificación
+            Classification Results Agg: Resultados agregados
+            Classification Package: Paquete de clasificación
+            User Classifications: Clasificaciones de usuario
+            Classifications Map: Mapa de clasificaciones
+            Classificators: Clasificadores
+            Species: Especies
+            Maps: Mapas
+            Sequences: Secuencias
+            Users: Usuarios
+            Features: Características
+            Testing: Pruebas
+            API Reference: Referencia de la API
+            About: Acerca de
+  - autorefs:
+      resolve_closest: true           # the API reference exists once per language
   - mkdocstrings:
       handlers:
         python:

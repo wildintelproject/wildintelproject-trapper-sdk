@@ -7,8 +7,9 @@ from __future__ import annotations
 import time
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack
+from datetime import date
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 from tenacity import Retrying
 
@@ -73,6 +74,8 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
     export_schema = DeploymentExport
 
     import_endpoint = "geomap/deployment/import/"
+    #: Trapper v2 moved the import forms into the Django admin.
+    import_endpoint_v2 = "admin/geomap/deployment/import-deployments/"
 
     def import_deployments(
         self,
@@ -113,6 +116,11 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
         exists), when present. It still can't turn that into a structured
         report object the way :meth:`ClassificationsComponent.import_classifications`
         does for its proper REST endpoint — you get a joined string of messages.
+
+        On Trapper v2 the form is the import action of the Django admin
+        (``admin/geomap/deployment/import-deployments/``); the same arguments apply. The account must be a
+        staff user with the add permission, and the server imports
+        asynchronously, so ``True`` means the table was validated and queued.
 
         Warning:
             This is a workaround, not a stable integration: it depends on an
@@ -266,21 +274,79 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
                 # object, whose read position may have advanced past a
                 # partial read from a prior attempt that timed out mid-upload.
                 fh.seek(0)
-                return self.client.session_post_multipart(
-                    self.import_endpoint, data=data, files=files,
-                )
+                return self._import_post(data, files)
 
             response = retrying(_do_request)
 
-        if response.status_code == 302:
+        if self._import_accepted(response):
             return True
 
         if raise_on_error:
-            message = self.client._extract_html_error_text(response.text)
-            raise err.APIError(
-                f"Deployment import failed (status {response.status_code}): {message}"
-            )
+            raise self._import_error("Deployment", response)
         return False
+
+    geojson_endpoint = "api/deployments/geojson/"
+
+    def geojson(
+        self,
+        classification_project: int | None = None,
+        observation_type: str | list[str] | None = None,
+        species: int | str | list[int | str] | None = None,
+        start_date_gte: str | date | None = None,
+        end_date_lte: str | date | None = None,
+        refresh: bool = False,
+        query: Dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> Dict[str, Any]:
+        """Deployments as a GeoJSON ``FeatureCollection`` (**Trapper v2 only**).
+
+        Replaces ``client.maps`` and ``client.locations_geojson``, which v2 removed. Each feature is a
+        point whose ``properties`` follow the Camtrap DP shape (``deploymentID``, ``locationName``,
+        ``deploymentStart``, ...). Only deployments the current user can access are returned.
+
+        Args:
+            classification_project: Keep deployments linked to this classification project, and
+                scope ``observation_type`` / ``species`` to its classifications.
+            observation_type: One value or a list (``"animal"``, ``["animal", "human"]``): keep
+                deployments with at least one classification of that type.
+            species: One species primary key or a list: keep deployments where it was classified.
+            start_date_gte: Deployments that start on or after this date (``YYYY-MM-DD``).
+            end_date_lte: Deployments that end on or before this date.
+            refresh: Bypass the server's one-hour cache for this query and rebuild it.
+            query: Extra query parameters.
+
+        Returns:
+            The GeoJSON payload as a ``dict``.
+
+        Raises:
+            err.UnsupportedVersionError: On Trapper v1 (use ``client.locations_geojson`` there).
+
+        Example::
+
+            fc = client.deployments.geojson(classification_project=2, species=[3, 7])
+            for feature in fc["features"]:
+                lon, lat = feature["geometry"]["coordinates"]
+                print(feature["properties"]["deploymentID"], lon, lat)
+        """
+        self._require_version("v2", feature="deployments.geojson (api/deployments/geojson/)")
+
+        def csv(value: Any) -> Any:
+            return ",".join(str(v) for v in value) if isinstance(value, (list, tuple, set)) else value
+
+        q = dict(query or {})
+        q.update(kwargs)
+        for key, value in {
+            "classification_project": classification_project,
+            "observation_type": csv(observation_type),
+            "species": csv(species),
+            "start_date_gte": start_date_gte.isoformat() if isinstance(start_date_gte, date) else start_date_gte,
+            "end_date_lte": end_date_lte.isoformat() if isinstance(end_date_lte, date) else end_date_lte,
+        }.items():
+            if value is not None:
+                q[key] = value
+        if refresh:
+            q["refresh"] = 1
+        return self._unwrap_feature_collection(self.client.get(self.geojson_endpoint, query=q))
 
     def by_collection_with_counts(
         self,
@@ -383,3 +449,35 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
         output_path = self.client._select_file(file)
         self.client._write_csv([row.model_dump(mode="json") for row in rows], output_path)
         return output_path
+
+    def wait_for_import(
+        self,
+        deployment_ids: Iterable[str],
+        timeout: float = 60.0,
+        interval: float = 2.0,
+        raise_on_timeout: bool = True,
+    ) -> bool:
+        """Wait until the imported deployments are visible through the API.
+
+        Trapper v2 imports asynchronously: ``import_deployments()`` returning ``True`` only means the table was
+        validated and queued. Neither version offers an API to query the import task, so this
+        checks the outcome instead: it polls the list endpoint until every ID is there.
+
+        Args:
+            deployment_ids: The deployment IDs the import should create (the ``deploymentID`` column).
+            timeout: Seconds to wait in total.
+            interval: Seconds between polls.
+            raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.
+
+        Returns:
+            ``True`` once all of them exist; ``False`` on timeout when ``raise_on_timeout=False``.
+
+        Raises:
+            TimeoutError: Some IDs were still missing after ``timeout`` seconds.
+
+        Example::
+
+            client.deployments.import_deployments(file="deployments.csv", research_project=1, timezone="Europe/Madrid")
+            client.deployments.wait_for_import(["DON01-2024A"])
+        """
+        return self._wait_for_ids(deployment_ids, "deployment_id", timeout, interval, raise_on_timeout, "deployment ID")

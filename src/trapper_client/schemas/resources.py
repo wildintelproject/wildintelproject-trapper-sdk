@@ -8,7 +8,7 @@ class Resource(TrapperSchema):
     """Schema for ``/storage/api/resources`` items."""
 
     pk: int
-    name: str
+    name: str | None = None  # the /location/<pk> sub-endpoint omits it
     owner: str | None = None
     owner_profile: str | None = None
     resource_type: str | None = None

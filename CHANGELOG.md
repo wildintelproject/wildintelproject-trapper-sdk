@@ -16,10 +16,60 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Upcoming release
 
 ### Added
+- **Trapper v2 support** (issue #1). `TrapperClient(trapper_version="auto" | "v1" | "v2")`: with
+  `"auto"` (default) the version is detected once, on first use, from
+  the public `GET api/cs/version/` (major number of the release), falling back to probing
+  `GET storage/api/upload-auth/` (404 → v1; 200/401/403 → v2). Read it with `client.server_version`
+  and the exact release with `client.server_release`.
+- `client.upload_auth()` (v2): checks that the token may upload packages before sending data.
+- `TusUploader` (`trapper_client.components.tus_uploader`): resumable uploads through tusd (tus 1.0),
+  the v2 replacement for the v1 chunked uploader. `client.get_uploader()` returns the right uploader
+  for the server's version.
+- Components that Trapper v2 removed — `maps`, `locations_geojson`, `collections.*_ondemand` —
+  raise `UnsupportedVersionError` on a v2 server instead of failing with a bare 404.
+- `locations.import_locations()` and `deployments.import_deployments()` work on v2 too, through the
+  import actions of its Django admin (`admin/geomap/<location|deployment>/import-*/`). Same signature;
+  they need a staff account with the add permission, and v2 processes the import asynchronously (a
+  `True` result means the table was validated and queued, not that every row is already in the
+  database). Failures report the server's message and the per-row validation errors. A redirect to
+  the login page is no longer taken as success.
+- `deployments.geojson()` (Trapper v2): deployments as a GeoJSON `FeatureCollection`, filtered by
+  `classification_project`, `observation_type`, `species` and date range. It is the v2 replacement for
+  `maps` / `locations_geojson`.
+- Schemas of classification projects, classification results, the classifications map, classificators
+  and user classifications now parse Trapper v2 payloads (`null` UI links and profiles, no
+  `status`/`status_ai`/`classification`, attributes wrapped as `{"value": ...}`); v1 payloads still
+  parse. They raised `ValidationError` on v2 before.
+- `classification_results.import_classifications(overwrite_attrs=True)` raises `UnsupportedVersionError`
+  on v2, whose import endpoint no longer reads the option (it used to be dropped silently). The rest
+  of the import is the same REST endpoint in both versions.
+- A classification import whose table fails validation makes Trapper answer a bare HTTP 500 (it cannot serialize
+  its validation report; v1 and v2 alike). The `APIError` now says so and lists what to check.
+- `import_classifications(check_table=True)` checks the table locally before sending it (`_id` and
+  `classificationMethod` columns present, `sex` only `female`/`male`) and raises a `ValueError` naming
+  the problem, instead of letting Trapper answer with a bare 500. `check_table=False` skips it.
+- `client.project_deployments` (Trapper v2): the deployments of a classification project
+  (`api/deployments/<slug>/`) — list, `locations`, `find`, `update` (PATCH), `delete`,
+  `update_timestamps`, AI `progress`, and the depth-calibration / distance-estimation requests.
+- `locations.wait_for_import(ids)` / `deployments.wait_for_import(ids)`: wait until an imported
+  table is visible through the API. Trapper v2 imports asynchronously and neither version has an API to
+  query the import task, so it polls for the rows themselves.
 - `deployments.by_collection_with_counts()`: the deployments with at least one resource in a
   collection, each with how many resources it has there.
+- **Documentation in English and Spanish** (`mkdocs-static-i18n`, suffix structure: `page.md` is
+  English, `page.es.md` Spanish; the API reference stays English-only). Every guide now states which
+  Trapper versions it supports, `deployments.geojson()` is documented in the deployments guide, and
+  the home page says the SDK covers Trapper v1 and v2.
 
 ### Fixed
+- A client that had imported locations or deployments (session login) could no longer call any
+  token-authenticated POST, such as `import_classifications()`: the web session's cookies were sent
+  with every REST call and Trapper answered `403 CSRF Failed`. Session and token requests now use
+  separate HTTP clients.
+- `resources.get_by_location()` / `find_by_location()` raised `ValidationError`: the
+  `/storage/api/resources/location/<pk>` endpoint omits `name`, which `Resource` required. It is now optional.
+- `locations_geojson.get()` returned the `{pagination, results}` envelope instead of the documented
+  `FeatureCollection`.
 - `classification_results.where_project_results()` (and any other `where()` whose schema is a
   `Union`, such as `ClassificationRecordExport`) failed on the first page with
   `AttributeError: model_validate`: `APIQuery` called `model_validate`/`model_construct` on the

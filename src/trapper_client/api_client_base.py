@@ -18,6 +18,17 @@ import bz2
 
 logger = logging.getLogger(__name__)
 
+#: Accepted values for ``trapper_version``.
+TRAPPER_VERSIONS = ("auto", "v1", "v2")
+
+#: Public route that reports the server's release (``{"version": "v1.7.4"}``, ``{"version": "2.0.0a"}``).
+VERSION_ENDPOINT = "api/cs/version/"
+
+#: Route that exists only in Trapper v2 (``storage/api/upload-auth/``); fallback to tell versions apart.
+UPLOAD_AUTH_ENDPOINT = "storage/api/upload-auth/"
+
+_RELEASE_MAJOR = re.compile(r"^\s*v?(\d+)")
+
 
 @attr.s
 class APIClientBase:
@@ -35,6 +46,9 @@ class APIClientBase:
         verify_ssl: Whether to verify SSL certificates.
         base_url: Base URL of the Trapper API.
         timeout: Request timeout in seconds.
+        trapper_version: Trapper server major version: ``"v1"``, ``"v2"`` or ``"auto"``
+            (default). With ``"auto"`` the version is detected on first use by probing
+            ``storage/api/upload-auth/`` (see :meth:`detect_server_version`) and cached.
     """
 
     access_token: str = attr.ib(repr=False, default=None)
@@ -44,7 +58,12 @@ class APIClientBase:
     base_url: str = attr.ib(repr=False, default="https://trapper_api_client-trap.uhu.es")
     logger = attr.ib(repr=False, default=logger)
     timeout: int = attr.ib(default=30)
+    trapper_version: str = attr.ib(
+        default="auto",
+        validator=attr.validators.in_(TRAPPER_VERSIONS),
+    )
     _client: httpx.Client = attr.ib(init=False, repr=False)
+    _web_client: httpx.Client = attr.ib(init=False, repr=False)
     name = "trapper_api_client"
     user_id: str = "me"
 
@@ -59,8 +78,110 @@ class APIClientBase:
         """
         if not self.access_token and not (self.user_name and self.user_password):
             raise ValueError("Token or user/password must be provided for authentication")
+        # Token-authenticated REST calls. It must never hold the web session's cookies: with a
+        # ``sessionid`` cookie present DRF authenticates by session and demands a CSRF token.
         self._client = httpx.Client(verify=self.verify_ssl, timeout=self.timeout)
+        # Cookie-authenticated calls to the classic web views (imports of locations/deployments).
+        self._web_client = httpx.Client(verify=self.verify_ssl, timeout=self.timeout)
         self._web_csrf_token: str | None = None
+        self._detected_version: str | None = None
+        self._server_release: str | None = None
+        self._release_probed = False
+
+    @property
+    def server_release(self) -> str | None:
+        """Exact release string reported by the server (e.g. ``"v1.7.4-2-g7540e9ed"``, ``"2.0.0a"``).
+
+        Read from ``api/cs/version/`` once and cached. ``None`` when the server does not
+        expose it (old v1 builds); :attr:`server_version` still works then.
+        """
+        if not self._release_probed:
+            self._read_release()
+        return self._server_release
+
+    @property
+    def server_version(self) -> Literal["v1", "v2"]:
+        """Trapper major version this client talks to (``"v1"`` or ``"v2"``).
+
+        Returns ``trapper_version`` when it was set explicitly; otherwise detects the
+        version once with :meth:`detect_server_version` and caches it.
+        """
+        if self.trapper_version != "auto":
+            return self.trapper_version
+        if self._detected_version is None:
+            self._detected_version = self.detect_server_version()
+        return self._detected_version
+
+    def _read_release(self) -> str | None:
+        """Fetch ``api/cs/version/``; return the release string, or ``None`` if unusable.
+
+        Only a ``200`` JSON object with a string ``version`` counts. A 404, an HTML page
+        (SPA fallback) or any other answer returns ``None`` so the caller can fall back.
+        Network errors still propagate: an unreachable server is not a version question.
+        """
+        r = self._send_request(VERSION_ENDPOINT, "GET", None, None)
+        release = None
+        if r.status_code == 200:
+            try:
+                data = r.json()
+            except ValueError:
+                data = None
+            if isinstance(data, dict) and isinstance(data.get("version"), str):
+                release = data["version"]
+        self._release_probed = True
+        self._server_release = release
+        return release
+
+    def detect_server_version(self) -> Literal["v1", "v2"]:
+        """Tell Trapper v1 from v2.
+
+        1. Reads the public ``GET api/cs/version/`` and takes the major number of the
+           release (``v1.7.4-2-g7540e9ed`` -> v1, ``2.0.0a`` -> v2).
+        2. If that endpoint is missing or unreadable, falls back to ``GET storage/api/upload-auth/``,
+           a route that exists only in v2: ``404`` -> **v1**; ``200`` / ``401`` / ``403`` -> **v2**.
+
+        Returns:
+            ``"v1"`` or ``"v2"``.
+
+        Raises:
+            err.APIError: If neither check is conclusive; set ``trapper_version`` explicitly.
+        """
+        release = self._read_release()
+        m = _RELEASE_MAJOR.match(release) if release else None
+        if m and int(m.group(1)) >= 1:
+            return "v1" if int(m.group(1)) == 1 else "v2"
+        return self._detect_by_upload_auth()
+
+    def _detect_by_upload_auth(self) -> Literal["v1", "v2"]:
+        r = self._send_request(UPLOAD_AUTH_ENDPOINT, "GET", None, None)
+        if r.status_code == 404:
+            return "v1"
+        if r.status_code in (200, 401, 403):
+            return "v2"
+        raise err.APIError(
+            f"Could not detect the Trapper version: GET {VERSION_ENDPOINT} gave no release and "
+            f"GET {UPLOAD_AUTH_ENDPOINT} returned HTTP {r.status_code}. "
+            "Pass trapper_version='v1' or 'v2' explicitly."
+        )
+
+    def upload_auth(self) -> Dict[str, Any]:
+        """Check that the token may upload packages, before any byte is sent (Trapper v2).
+
+        Calls ``GET storage/api/upload-auth/``. Returns ``{"username": ...}`` when the
+        credentials are valid **and** the account has been granted HTTP-uploader access.
+
+        Raises:
+            err.UnsupportedVersionError: On a Trapper v1 server (the route does not exist).
+            err.UnauthorizedError: Unknown or missing credentials (401).
+            err.ForbiddenError: Valid credentials but no uploader account (403).
+        """
+        if self.server_version != "v2":
+            raise err.UnsupportedVersionError(
+                "upload_auth() is only available in Trapper v2, "
+                f"but this server runs Trapper {self.server_version}."
+            )
+        r = self.make_request(UPLOAD_AUTH_ENDPOINT, "GET")
+        return r.json()
 
     def make_request(
         self,
@@ -409,6 +530,15 @@ class APIClientBase:
         re.IGNORECASE | re.DOTALL,
     )
     _TAG_RE = re.compile(r"<[^>]+>")
+    # Trapper v2's admin (Unfold) renders import failures with these Tailwind-classed blocks.
+    _ADMIN_PANEL_RE = re.compile(r'<div class="[^"]*\bborder-red-600\b[^"]*">(.*?)</div>', re.DOTALL)
+    _ADMIN_COLUMNS_RE = re.compile(r'font-medium text-font-important-light[^"]*ml-2">(.*?)</span>', re.DOTALL)
+    _ADMIN_ROW_RE = re.compile(r'<tr class="hover:bg-base-50[^"]*">(.*?)</tr>', re.DOTALL)
+    _ADMIN_CELL_RE = re.compile(r"<td[^>]*>(.*?)</td>", re.DOTALL)
+    _ADMIN_BOILERPLATE_RE = re.compile(
+        r"Error:\s*Unfortunately, your table could not be imported;[^.]*\.\s*"
+        r"(?:Please note that the number of reported errors is limited to \d+\.)?\s*"
+    )
     _FRICTIONLESS_REPORT_RE = re.compile(r"const\s+report\s*=\s*(\{.*?\});", re.DOTALL)
 
     def _extract_frictionless_errors(
@@ -467,6 +597,36 @@ class APIClientBase:
             messages.append(f"(+{len(errors) - max_errors} more errors, truncated)")
         return messages
 
+    def _extract_admin_import_errors(self, html_text: str, max_errors: int = 20) -> str | None:
+        """Read the error panel of a failed import in Trapper v2's Django admin.
+
+        Returns the server's message, the provided/required columns when it complains
+        about them, and up to ``max_errors`` ``row N, field F: message`` lines from the
+        validation table; ``None`` when the page has no such panel.
+        """
+        def clean(fragment: str) -> str:
+            return " ".join(html.unescape(self._TAG_RE.sub(" ", fragment)).split())
+
+        panel = self._ADMIN_PANEL_RE.search(html_text)
+        if not panel:
+            return None
+        parts = []
+        message = self._ADMIN_BOILERPLATE_RE.sub("", clean(panel.group(1))).strip()
+        if message:
+            parts.append(message)
+        columns = [clean(c) for c in self._ADMIN_COLUMNS_RE.findall(html_text)]
+        if len(columns) >= 2:
+            parts.append(f"provided columns: {columns[0]}; required columns: {columns[1]}")
+        for row in self._ADMIN_ROW_RE.findall(html_text)[:max_errors]:
+            cells = [clean(c) for c in self._ADMIN_CELL_RE.findall(row)]
+            if len(cells) >= 6:
+                _, kind, row_no, field, cell, msg = cells[:6]
+                where = f"row {row_no}" if row_no != "—" else "table"
+                if field != "—":
+                    where += f", field {field}"
+                parts.append(f"{where}: {msg if msg != '—' else kind}" + (f" (cell {cell})" if cell != "—" else ""))
+        return "; ".join(parts) or None
+
     def _extract_html_error_text(self, html_text: str, max_len: int = 2000) -> str:
         """Best-effort extraction of a human-readable error from a Django page.
 
@@ -492,6 +652,10 @@ class APIClientBase:
         if frictionless_errors:
             return "; ".join(frictionless_errors)[:max_len]
 
+        admin_errors = self._extract_admin_import_errors(html_text)
+        if admin_errors:
+            return admin_errors[:max_len]
+
         blocks = self._ERROR_BLOCK_RE.findall(html_text)
         if blocks:
             texts = [" ".join(html.unescape(self._TAG_RE.sub(" ", b)).split()) for b in blocks]
@@ -515,7 +679,7 @@ class APIClientBase:
             err.APIError: If no token is available from either source yet —
                 call :meth:`session_login` first.
         """
-        token = self._client.cookies.get("csrftoken") or self._web_csrf_token
+        token = self._web_client.cookies.get("csrftoken") or self._web_csrf_token
         if not token:
             raise err.APIError(
                 "No CSRF token available (no csrftoken cookie, and none scraped "
@@ -565,7 +729,7 @@ class APIClientBase:
             err.APIError: If the login attempt does not result in an
                 authenticated session (wrong credentials, changed login form, ...).
         """
-        if not force and self._client.cookies.get("sessionid"):
+        if not force and self._web_client.cookies.get("sessionid"):
             return
 
         if not (self.user_name and self.user_password):
@@ -581,8 +745,8 @@ class APIClientBase:
         # response sets the CSRF cookie / embeds the csrfmiddlewaretoken
         # input. The login POST below deliberately does NOT follow redirects,
         # since a 302 there is how we detect a successful login.
-        login_page = self._client.get(login_url, follow_redirects=True)
-        csrf_token = self._client.cookies.get("csrftoken") or self._csrf_token_from_html(login_page.text)
+        login_page = self._web_client.get(login_url, follow_redirects=True)
+        csrf_token = self._web_client.cookies.get("csrftoken") or self._csrf_token_from_html(login_page.text)
 
         if not csrf_token:
             raise err.APIError(
@@ -593,7 +757,7 @@ class APIClientBase:
             )
         self._web_csrf_token = csrf_token
 
-        response = self._client.post(
+        response = self._web_client.post(
             str(login_page.url),
             data={
                 "login": self.user_name,
@@ -603,7 +767,7 @@ class APIClientBase:
             headers={"Referer": str(login_page.url)},
         )
 
-        if response.status_code != 302 or not self._client.cookies.get("sessionid"):
+        if response.status_code != 302 or not self._web_client.cookies.get("sessionid"):
             raise err.APIError(
                 f"Web session login failed (status {response.status_code} from "
                 f"{response.url}) — check user_name/user_password (user_name must "
@@ -616,6 +780,7 @@ class APIClientBase:
         endpoint: str,
         data: Dict[str, Any] | None = None,
         files: Dict[str, Any] | None = None,
+        csrf_from_page: bool = False,
     ) -> httpx.Response:
         """POST multipart/form-data to a classic (non-REST) Django view.
 
@@ -638,6 +803,11 @@ class APIClientBase:
             endpoint: Endpoint relative to ``base_url``.
             data: Form fields, excluding ``csrfmiddlewaretoken`` (added automatically).
             files: Mapping compatible with httpx's ``files`` parameter.
+            csrf_from_page: ``GET`` the endpoint first and use the ``csrfmiddlewaretoken``
+                embedded in the form, as a browser does. Needed by recent Django
+                versions (Trapper v2's admin), which reject the raw ``csrftoken`` cookie
+                value because form tokens are masked. Falls back to the cookie when the
+                page carries no token.
 
         Returns:
             Raw ``httpx.Response`` (redirects are not followed).
@@ -645,8 +815,16 @@ class APIClientBase:
         self.session_login()
         url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
         form_data = dict(data or {})
-        form_data["csrfmiddlewaretoken"] = self._csrf_cookie_value()
-        return self._client.post(url, data=form_data, files=files, headers={"Referer": url})
+        token = None
+        if csrf_from_page:
+            page = self._web_client.get(url)
+            if page.status_code != 200:
+                # Not allowed to see the form (redirect to login, 403, ...): hand that back
+                # instead of POSTing with a token the server would reject for the wrong reason.
+                return page
+            token = self._csrf_token_from_html(page.text)
+        form_data["csrfmiddlewaretoken"] = token or self._csrf_cookie_value()
+        return self._web_client.post(url, data=form_data, files=files, headers={"Referer": url})
 
     def patch(
         self,
