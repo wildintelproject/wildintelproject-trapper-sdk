@@ -1,6 +1,7 @@
 # wildintel-trapper-sdk
 
-![WildINTEL](img/wildIntel_logo.webp){ style="display: block; margin: 0 auto;" }
+![WildINTEL](img/wildIntel_logo_cropped.webp){ .logo }
+![wildintel-trapper-sdk](img/logo.png){ .logo }
 
 **wildintel-trapper-sdk** is a typed Python client for the REST API of
 [Trapper](https://gitlab.com/trapper-project/trapper), the open-source platform used to manage and
