@@ -84,10 +84,14 @@ class ResearchProjectCreate(BaseModel):
     @field_validator("keywords")
     @classmethod
     def _clean_keywords(cls, value: list[str]) -> list[str]:
-        """Trim the keywords and drop the empty ones; they travel comma-separated."""
+        """Trim the keywords and drop the empty ones.
+
+        A keyword may hold spaces and commas (they are sent quoted, see ``to_form()``), but not a
+        double quote: Trapper cannot represent it and would drop it.
+        """
         keywords = [k.strip() for k in value if k and k.strip()]
-        if any("," in k for k in keywords):
-            raise ValueError("a keyword cannot contain a comma: Trapper splits keywords on commas")
+        if any('"' in k for k in keywords):
+            raise ValueError("a keyword cannot contain a double quote")
         return keywords
 
     def to_form(self) -> dict[str, Any]:
@@ -100,7 +104,9 @@ class ResearchProjectCreate(BaseModel):
             "animal_types": int(self.animal_types),
             "bait_use": int(self.bait_use),
             "event_interval": self.event_interval,
-            "keywords": ", ".join(self.keywords),
+            # each one quoted: without quotes Trapper splits "camera trap" into two keywords when it
+            # is the only one (it splits on spaces when there is no comma), and on any comma
+            "keywords": ", ".join(f'"{keyword}"' for keyword in self.keywords),
             "abstract": self.abstract or "",
             "methods": self.methods or "",
             "description": self.description or "",

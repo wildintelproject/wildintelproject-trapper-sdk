@@ -231,12 +231,12 @@ class TestResearchProjectCreateE2E:
         name, acronym = f"e2e project {tag}", f"e2e{tag}"           # acronym: 9 of 10 characters
         project = session_writer.research_projects.create(ResearchProjectCreate(
             name=name, acronym=acronym, sampling_design=SamplingDesign.TARGETED, bait_use="scent",
-            keywords=["e2e", "sdk"], abstract="Created by the SDK e2e tests",
+            keywords=["e2e sdk", "tests, quoted"], abstract="Created by the SDK e2e tests",
         ))
         # A staff account gets the project back; any other one gets None until an admin approves it.
         if project is not None:
             assert (project.name, project.acronym) == (name, acronym)
-            assert sorted(project.keywords) == ["e2e", "sdk"]
+            assert sorted(project.keywords) == ["e2e sdk", "tests, quoted"]
 
         with pytest.raises(err.APIError, match="name: .*already exists"):
             session_writer.research_projects.create(ResearchProjectCreate(name=name, acronym=f"x{tag}"))

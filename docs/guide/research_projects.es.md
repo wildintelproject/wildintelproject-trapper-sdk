@@ -138,7 +138,7 @@ un YAML, por ejemplo) usa `ResearchProjectCreate.model_validate(datos)`.
 | `animal_types` | `AnimalTypes`: `unmarked` (1), `marked` (2), `both` (3) | `1` |
 | `bait_use` | `BaitUse`: `none` (1), `scent` (2), `food` (3), `visual` (4), `acoustic` (5), `other` (6) | `1` |
 | `event_interval` | segundos, `0` o más | `0` |
-| `keywords` | lista de textos; no pueden contener comas | vacía |
+| `keywords` | lista de textos; una palabra clave puede llevar espacios y comas, pero no comillas dobles | vacía |
 | `abstract`, `methods`, `description` | texto libre, hasta 2000 caracteres cada uno | ninguno |
 
 Los cuatro campos de opción tienen una enumeración en `trapper_client`. Sus miembros son los enteros que
