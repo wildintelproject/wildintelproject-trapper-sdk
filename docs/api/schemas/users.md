@@ -1,3 +1,3 @@
 # User Schemas
 
-::: trapper_client.schemas.users.UserRecord
+::: trapper_client.schemas.users.User

@@ -1,3 +1,3 @@
 # Species Schemas
 
-::: trapper_client.schemas.species.SpeciesRecord
+::: trapper_client.schemas.species.Species
