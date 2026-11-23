@@ -887,6 +887,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#creating-a-research-project-trapper-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating a research project (Trapper v1)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a research project (Trapper v1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-it-returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it returns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-the-server-rejects-the-form" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When the server rejects the form
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2792,6 +2831,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#creating-a-research-project-trapper-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating a research project (Trapper v1)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a research project (Trapper v1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-it-returns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it returns
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#when-the-server-rejects-the-form" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When the server rejects the form
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2815,7 +2893,7 @@
 <h1 id="research-projects">Research Projects</h1>
 <div class="admonition info">
 <p class="admonition-title">Trapper compatibility</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — same code on both. See <a href="../versions/">Trapper versions</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — except <code>create()</code>, which is <strong>v1 only</strong>. See <a href="../versions/">Trapper versions</a>.</p>
 </div>
 <p><code>client.research_projects</code> — top-level research projects; every collection and classification
 project belongs to exactly one.</p>
@@ -2922,6 +3000,111 @@ instance of <code>ResearchProjectsCollectionsComponent</code>), which you can al
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">research_projects</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where_project</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="creating-a-research-project-trapper-v1">Creating a research project (Trapper v1)</h2>
+<p>The REST API is read-only for research projects, so <code>create()</code> works around that by simulating the
+classic web form <code>research/project/create/</code> via cookie/session auth, like
+<a href="../locations/#importing-locations-write-access"><code>import_locations()</code></a>. The account that logs in
+becomes the project's owner and administrator. On Trapper v2 it raises <code>UnsupportedVersionError</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Not a stable API contract</p>
+<p>It depends on an unversioned HTML form and needs <code>user_name</code>/<code>user_password</code> (the account's
+<em>email</em> on servers that log in by email) — a token alone cannot authenticate it.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">trapper_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaitUse</span><span class="p">,</span> <span class="n">ResearchProjectCreate</span><span class="p">,</span> <span class="n">SamplingDesign</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">project</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">research_projects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">ResearchProjectCreate</span><span class="p">(</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Doñana mammals&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="n">acronym</span><span class="o">=</span><span class="s2">&quot;DONMAM&quot;</span><span class="p">,</span>                       <span class="c1"># 3 to 10 characters; name and acronym are unique</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="n">sampling_design</span><span class="o">=</span><span class="n">SamplingDesign</span><span class="o">.</span><span class="n">TARGETED</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="n">bait_use</span><span class="o">=</span><span class="n">BaitUse</span><span class="o">.</span><span class="n">SCENT</span><span class="p">,</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>        <span class="n">keywords</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;camera trap&quot;</span><span class="p">,</span> <span class="s2">&quot;mammals&quot;</span><span class="p">],</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="n">abstract</span><span class="o">=</span><span class="s2">&quot;Medium and large mammals of Doñana National Park.&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="p">)</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="p">)</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="nb">print</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</code></pre></div>
+<p><code>create()</code> takes a <code>ResearchProjectCreate</code>, a Pydantic model with every field of the creation form
+(a dict with those fields works too, and is validated the same way). It validates before anything is
+sent: it trims the text, rejects unknown fields (a typo fails instead of being ignored) and raises
+<code>pydantic.ValidationError</code>, a <code>ValueError</code>, naming the field that is wrong.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Values</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>up to 255 characters, unique</td>
+<td>required</td>
+</tr>
+<tr>
+<td><code>acronym</code></td>
+<td>3 to 10 characters, unique</td>
+<td>required</td>
+</tr>
+<tr>
+<td><code>sampling_design</code></td>
+<td><code>SamplingDesign</code>: <code>simpleRandom</code> (1), <code>systematicRandom</code> (2), <code>clusteredRandom</code> (3), <code>experimental</code> (4), <code>targeted</code> (5), <code>opportunistic</code> (6)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>sensor_method</code></td>
+<td><code>SensorMethod</code>: <code>activityDetection</code> (1), <code>timeLapse</code> (2), <code>both</code> (3)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>animal_types</code></td>
+<td><code>AnimalTypes</code>: <code>unmarked</code> (1), <code>marked</code> (2), <code>both</code> (3)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>bait_use</code></td>
+<td><code>BaitUse</code>: <code>none</code> (1), <code>scent</code> (2), <code>food</code> (3), <code>visual</code> (4), <code>acoustic</code> (5), <code>other</code> (6)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>event_interval</code></td>
+<td>seconds, <code>0</code> or more</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td>list of strings; they cannot contain commas</td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>abstract</code>, <code>methods</code>, <code>description</code></td>
+<td>free text, up to 2000 characters each</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p>The four choice fields have an enumeration in <code>trapper_client</code>. Its members are the integers Trapper
+stores and carry the label it shows, so an editor can autocomplete them. The field accepts the
+member, its number or its label, and anything else is rejected with the list of valid values:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">BaitUse</span><span class="o">.</span><span class="n">SCENT</span>            <span class="c1"># &lt;BaitUse.SCENT: 2&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">BaitUse</span><span class="o">.</span><span class="n">SCENT</span><span class="o">.</span><span class="n">label</span>      <span class="c1"># &quot;scent&quot;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">ResearchProjectCreate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="n">acronym</span><span class="o">=</span><span class="s2">&quot;ABC&quot;</span><span class="p">,</span> <span class="n">bait_use</span><span class="o">=</span><span class="s2">&quot;scent&quot;</span><span class="p">)</span>    <span class="c1"># same as BaitUse.SCENT or 2</span>
+</code></pre></div>
+<h3 id="what-it-returns">What it returns</h3>
+<ul>
+<li><strong>A staff account:</strong> the project is active at once and <code>create()</code> returns it.</li>
+<li><strong>Any other account:</strong> Trapper creates the project but keeps it <em>not approved</em>, and hides it from
+  the API until an administrator approves it. <code>create()</code> then returns <code>None</code>: the project exists, it
+  just cannot be read back yet.</li>
+</ul>
+<h3 id="when-the-server-rejects-the-form">When the server rejects the form</h3>
+<p>A name or acronym already in use, or an acronym of the wrong length, makes Trapper re-render the
+form (status <code>200</code>). <code>create()</code> raises <code>APIError</code> naming the field:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Research project creation failed (status 200): name: Research project with this Name already exists.
+</code></pre></div>
+<p>Pass <code>raise_on_error=False</code> to get <code>None</code> instead. What the model can check locally (empty name,
+acronym length, an unknown choice, ...) raises <code>ValidationError</code> before anything is sent.</p>
 
 
 

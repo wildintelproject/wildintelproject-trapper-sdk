@@ -889,6 +889,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#crear-un-proyecto-de-investigacion-trapper-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crear un proyecto de investigación (Trapper v1)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Crear un proyecto de investigación (Trapper v1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-devuelve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué devuelve
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cuando-el-servidor-rechaza-el-formulario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cuando el servidor rechaza el formulario
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2794,6 +2833,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#crear-un-proyecto-de-investigacion-trapper-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crear un proyecto de investigación (Trapper v1)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Crear un proyecto de investigación (Trapper v1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-devuelve" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué devuelve
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cuando-el-servidor-rechaza-el-formulario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cuando el servidor rechaza el formulario
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2817,7 +2895,7 @@
 <h1 id="proyectos-de-investigacion">Proyectos de investigación</h1>
 <div class="admonition info">
 <p class="admonition-title">Compatibilidad con Trapper</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — el mismo código en ambas. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — salvo <code>create()</code>, que es <strong>solo v1</strong>. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
 </div>
 <p><code>client.research_projects</code> — proyectos de investigación de primer nivel; cada colección y cada proyecto
 de clasificación pertenece exactamente a uno.</p>
@@ -2924,6 +3002,114 @@ de <code>ResearchProjectsCollectionsComponent</code>), que también puedes usar 
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">research_projects</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where_project</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="crear-un-proyecto-de-investigacion-trapper-v1">Crear un proyecto de investigación (Trapper v1)</h2>
+<p>La API REST es de solo lectura para los proyectos de investigación, así que <code>create()</code> lo resuelve
+simulando el formulario web clásico <code>research/project/create/</code> con autenticación por cookie/sesión,
+igual que <a href="../locations/#importar-localizaciones-acceso-de-escritura"><code>import_locations()</code></a>. La cuenta
+que inicia sesión pasa a ser la propietaria y administradora del proyecto. En Trapper v2 lanza
+<code>UnsupportedVersionError</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">No es un contrato estable de la API</p>
+<p>Depende de un formulario HTML sin versionar y requiere <code>user_name</code>/<code>user_password</code> (el <em>correo</em> de
+la cuenta en servidores que inician sesión por correo): un token por sí solo no puede autenticarlo.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">trapper_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaitUse</span><span class="p">,</span> <span class="n">ResearchProjectCreate</span><span class="p">,</span> <span class="n">SamplingDesign</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">project</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">research_projects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">ResearchProjectCreate</span><span class="p">(</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Doñana mammals&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>        <span class="n">acronym</span><span class="o">=</span><span class="s2">&quot;DONMAM&quot;</span><span class="p">,</span>                       <span class="c1"># de 3 a 10 caracteres; nombre y acrónimo son únicos</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>        <span class="n">sampling_design</span><span class="o">=</span><span class="n">SamplingDesign</span><span class="o">.</span><span class="n">TARGETED</span><span class="p">,</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>        <span class="n">bait_use</span><span class="o">=</span><span class="n">BaitUse</span><span class="o">.</span><span class="n">SCENT</span><span class="p">,</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>        <span class="n">keywords</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;camera trap&quot;</span><span class="p">,</span> <span class="s2">&quot;mammals&quot;</span><span class="p">],</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>        <span class="n">abstract</span><span class="o">=</span><span class="s2">&quot;Medium and large mammals of Doñana National Park.&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="p">)</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="p">)</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="nb">print</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</code></pre></div>
+<p><code>create()</code> recibe un <code>ResearchProjectCreate</code>, un modelo de Pydantic con todos los campos del
+formulario de creación (también vale un diccionario con esos campos, que se valida igual). Valida antes
+de enviar nada: recorta los textos, rechaza los campos desconocidos (una errata falla en lugar de
+ignorarse) y lanza <code>pydantic.ValidationError</code>, que es un <code>ValueError</code>, indicando el campo incorrecto.</p>
+<table>
+<thead>
+<tr>
+<th>Campo</th>
+<th>Valores</th>
+<th>Por defecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>hasta 255 caracteres, único</td>
+<td>obligatorio</td>
+</tr>
+<tr>
+<td><code>acronym</code></td>
+<td>de 3 a 10 caracteres, único</td>
+<td>obligatorio</td>
+</tr>
+<tr>
+<td><code>sampling_design</code></td>
+<td><code>SamplingDesign</code>: <code>simpleRandom</code> (1), <code>systematicRandom</code> (2), <code>clusteredRandom</code> (3), <code>experimental</code> (4), <code>targeted</code> (5), <code>opportunistic</code> (6)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>sensor_method</code></td>
+<td><code>SensorMethod</code>: <code>activityDetection</code> (1), <code>timeLapse</code> (2), <code>both</code> (3)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>animal_types</code></td>
+<td><code>AnimalTypes</code>: <code>unmarked</code> (1), <code>marked</code> (2), <code>both</code> (3)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>bait_use</code></td>
+<td><code>BaitUse</code>: <code>none</code> (1), <code>scent</code> (2), <code>food</code> (3), <code>visual</code> (4), <code>acoustic</code> (5), <code>other</code> (6)</td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td><code>event_interval</code></td>
+<td>segundos, <code>0</code> o más</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td>lista de textos; no pueden contener comas</td>
+<td>vacía</td>
+</tr>
+<tr>
+<td><code>abstract</code>, <code>methods</code>, <code>description</code></td>
+<td>texto libre, hasta 2000 caracteres cada uno</td>
+<td>ninguno</td>
+</tr>
+</tbody>
+</table>
+<p>Los cuatro campos de opción tienen una enumeración en <code>trapper_client</code>. Sus miembros son los enteros que
+guarda Trapper y llevan la etiqueta que muestra, así que el editor puede autocompletarlos. El campo
+acepta el miembro, su número o su etiqueta, y cualquier otra cosa se rechaza con la lista de valores
+válidos:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">BaitUse</span><span class="o">.</span><span class="n">SCENT</span>            <span class="c1"># &lt;BaitUse.SCENT: 2&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">BaitUse</span><span class="o">.</span><span class="n">SCENT</span><span class="o">.</span><span class="n">label</span>      <span class="c1"># &quot;scent&quot;</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">ResearchProjectCreate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="n">acronym</span><span class="o">=</span><span class="s2">&quot;ABC&quot;</span><span class="p">,</span> <span class="n">bait_use</span><span class="o">=</span><span class="s2">&quot;scent&quot;</span><span class="p">)</span>    <span class="c1"># igual que BaitUse.SCENT o 2</span>
+</code></pre></div>
+<h3 id="que-devuelve">Qué devuelve</h3>
+<ul>
+<li><strong>Una cuenta staff:</strong> el proyecto se activa al instante y <code>create()</code> lo devuelve.</li>
+<li><strong>Cualquier otra cuenta:</strong> Trapper crea el proyecto pero lo deja <em>sin aprobar</em>, y lo oculta de la API
+  hasta que un administrador lo apruebe. Entonces <code>create()</code> devuelve <code>None</code>: el proyecto existe, solo
+  que todavía no se puede leer.</li>
+</ul>
+<h3 id="cuando-el-servidor-rechaza-el-formulario">Cuando el servidor rechaza el formulario</h3>
+<p>Un nombre o acrónimo ya en uso, o un acrónimo de longitud incorrecta, hace que Trapper vuelva a mostrar
+el formulario (estado <code>200</code>). <code>create()</code> lanza <code>APIError</code> indicando el campo:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Research project creation failed (status 200): name: Research project with this Name already exists.
+</code></pre></div>
+<p>Pasa <code>raise_on_error=False</code> para recibir <code>None</code> en su lugar. Lo que el modelo puede comprobar en local
+(nombre vacío, longitud del acrónimo, una opción desconocida, ...) lanza <code>ValidationError</code> antes de
+enviar nada.</p>
 
 
 
