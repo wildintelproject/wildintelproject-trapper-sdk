@@ -419,11 +419,26 @@ leaves out `ignore_DST`, `coordinate_uncertainty` and `managers`, which the mode
 - `research_project` is the **acronym** (`"c50e23d"`), while the CSV export gives its primary key (`1`) in
   `researchProject`: the same field in two shapes.
 
+The same location comes in **three shapes**, and neither the JSON nor the export holds every field. Checked
+on v1.7.4 and on a v2 server: the JSON has the name, the owner, `is_public`, `date_created` and the place names
+that the export does not have; the export has `ignoreDST`, `habitat`, the research project as a key and the
+coordinates as two numbers, which the JSON does not. On v2 the JSON does not even carry `city`, `county`,
+`state` and `country`, while the export carries `country`.
+
+**Cause.** In Trapper's source there is one serializer per shape, each with its own hand-written field list:
+`LocationSerializer` (the JSON list and detail), `LocationGeoSerializer` (the GeoJSON, which only sends `pk`,
+`location_id` and `name`) and `LocationTableSerializer` (the CSV). They are not derived from one another, so
+they drift apart.
+
 **Proposal.** Return the missing fields, and the owner and the research project as primary keys (with the
 name or acronym next to them if it is wanted). Same as #14 and #20 for classification and research projects.
+Make the JSON detail the complete representation of a location, and build the other two from it (or from one
+shared field list) so that the same piece of data cannot change value with the format.
 
-**Workaround in the SDK.** None: `Location.research_project` is the acronym string, and the missing fields
-cannot be read.
+**Workaround in the SDK.** `locations.export(file=None)` returns `ignore_dst`, `habitat` and
+`research_project_id`, so those can be read from there; the SDK does not join the two shapes. `Location`
+gets `longitude` and `latitude` from the coordinates string. `coordinate_uncertainty` and `managers` are in
+neither, and cannot be read.
 
 ## 24. Return the coordinates of a location as numbers
 
