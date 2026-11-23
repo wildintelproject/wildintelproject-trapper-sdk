@@ -24,6 +24,8 @@ the SDK does in the meantime.
 | 12 | Accept token authentication for every write operation | cross-cutting |
 | 13 | Do not delete on a `GET` request | media_classification |
 | 14 | Return primary keys, not names, for the related objects of a classification project | media_classification |
+| 15 | Return the species and standard attributes of a classificator | media_classification |
+| 16 | Reject unknown species when saving a classificator | media_classification |
 
 ---
 
@@ -140,7 +142,7 @@ collections, and the collections must already be linked to the research project.
 the storage collection primary keys and say clearly when one is not part of the research project.
 
 **Workaround in the SDK.** `classification_projects.create()`, `.add_collections()` and
-`.remove_collection()` simulate the forms (classification projects are done; classificators are not).
+`.remove_collection()` and `classificators.create()` simulate the forms.
 
 ## 8. Import locations and deployments through the API
 
@@ -241,6 +243,34 @@ without a second lookup by name, and the add-collections form needs the primary 
 
 **Workaround in the SDK.** The research project's primary key is looked up by its name, which is
 unique.
+
+## 15. Return the species and standard attributes of a classificator
+
+**Labels:** enhancement, api
+
+**Problem.** `GET media_classification/api/classificators/` returns the name, the owner, the
+`predefined_attrs`/`custom_attrs` and the attribute order, but not what the creation form asks for:
+`species`, `tracked_species`, `template` and the standard flags (`sex`, `age`, `count_new`,
+`behaviour`, `individual_id`, `classification_confidence`). They can be set and not read back.
+
+**Proposal.** Return them. The attribute order only lists the enabled optional attributes, so the
+flags can be guessed from it, but the species and the template cannot.
+
+**Workaround in the SDK.** None.
+
+## 16. Reject unknown species when saving a classificator
+
+**Labels:** bug, media_classification
+
+**Problem.** `ClassificatorForm.clean()` turns the comma-separated species into
+`Species.objects.filter(pk__in=...)`. A primary key that does not exist is dropped without an error, so a
+classificator whose `species` are all unknown is saved with an empty list, which means *every species
+is valid*.
+
+**Proposal.** Compare the number of species found with the number asked for, and fail with the
+unknown keys. Same for `tracked_species`.
+
+**Workaround in the SDK.** None: the docs ask the user to check the keys with `client.species`.
 
 ---
 

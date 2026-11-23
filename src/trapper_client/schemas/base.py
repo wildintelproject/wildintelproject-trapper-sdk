@@ -1,9 +1,15 @@
 """Base schemas shared across all Trapper components."""
 from typing import Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, BeforeValidator, ConfigDict
 
 TTrapperSchema = TypeVar("TTrapperSchema", bound="TrapperSchema")
+
+
+def choice(enum: type) -> BeforeValidator:
+    """Validator for a field typed with one of :mod:`trapper_client.enums`: it accepts the enum's
+    member, number or label, whatever ``enum.parse()`` accepts."""
+    return BeforeValidator(lambda value: enum.parse(value, enum.__name__))
 
 
 class Pagination(BaseModel):

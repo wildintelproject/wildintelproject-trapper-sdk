@@ -67,7 +67,7 @@ from .classifications_map import (
     ResourceClassificationMap,
     ClassificationMapRecord,
 )
-from .classificators import ClassificatorRecord
+from .classificators import ClassificatorCreate, ClassificatorRecord
 from .species import SpeciesRecord
 from .maps import MapRecord
 from .sequences import SequenceRecord
@@ -138,6 +138,7 @@ __all__ = [
     "ClassificationMapRecord",
     "ResourceClassificationMap",
     # classificators
+    "ClassificatorCreate",
     "ClassificatorRecord",
     # species
     "SpeciesRecord",

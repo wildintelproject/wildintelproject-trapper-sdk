@@ -46,6 +46,7 @@ Para evitar la sonda, pasa `trapper_version="v1"` o `"v2"`.
 | `client.project_deployments` | `UnsupportedVersionError` | ✔ |
 | `research_projects.create()` | ✔ (formulario web) | `UnsupportedVersionError` |
 | `classification_projects.create()`, `.add_collections()`, `.remove_collection()` | ✔ (formularios web) | `UnsupportedVersionError` |
+| `classificators.create()` | ✔ (formulario web) | `UnsupportedVersionError` |
 | Todo lo demás | ✔ | ✔ |
 
 ## Subir ficheros

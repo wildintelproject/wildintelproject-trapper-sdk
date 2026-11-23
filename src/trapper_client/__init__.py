@@ -6,7 +6,13 @@ from trapper_client.api_client_base import APIClientBase
 from trapper_client.api_query import APIQuery
 from trapper_client.trapper_client import TrapperClient
 from trapper_client import err
-from trapper_client.enums import AnimalTypes, BaitUse, SamplingDesign, SensorMethod
+from trapper_client.enums import (
+    AnimalTypes,
+    BaitUse,
+    ClassificatorTemplate,
+    SamplingDesign,
+    SensorMethod,
+)
 
 # Re-export every component and schema declared by the sub-packages' own
 # __all__, instead of hand-duplicating a third list here. Components and
@@ -24,6 +30,7 @@ __all__ = [
     "err",
     "AnimalTypes",
     "BaitUse",
+    "ClassificatorTemplate",
     "SamplingDesign",
     "SensorMethod",
     *sorted(set(_components_all) | set(_schemas_all)),
