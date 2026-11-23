@@ -4,12 +4,13 @@ Component for the /api/deployments/ resource.
 
 from __future__ import annotations
 
+import math
 import time
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack
 from datetime import date
 from pathlib import Path
-from typing import Any, Dict, Iterable
+from typing import Any, Dict, Iterable, Mapping
 
 from tenacity import Retrying
 
@@ -495,3 +496,73 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
             client.deployments.wait_for_import(["DON01-2024A"])
         """
         return self._wait_for_ids(deployment_ids, "deployment_id", timeout, interval, raise_on_timeout, "deployment ID")
+
+    def wait_for_update(
+        self,
+        changes: Mapping[str, Mapping[str, Any]],
+        timeout: float = 60.0,
+        interval: float = 2.0,
+        raise_on_timeout: bool = True,
+    ) -> bool:
+        """Wait until an update import (``import_deployments(update=True)``) has been applied.
+
+        ``import_deployments()`` returns ``True`` as soon as the table is validated and queued: the changes
+        land a moment later, and :meth:`wait_for_import` cannot tell, because the IDs already exist. This
+        polls the export until every deployment has the values you expect.
+
+        Args:
+            changes: ``{deployment_id: {field: expected value}}``, with the field names of
+                :class:`~trapper_client.schemas.DeploymentExport` (``camera_height``, ``habitat``, ``tags``,
+                ...). Numbers are compared with a tolerance. The ID is the stored one: Trapper slugifies the
+                ``deploymentID`` of an import (``"Don 01"`` is stored as ``"don-01"``).
+            timeout: Seconds to wait in total.
+            interval: Seconds between polls.
+            raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.
+
+        Returns:
+            ``True`` once every deployment has every expected value; ``False`` on timeout when
+            ``raise_on_timeout=False``.
+
+        Raises:
+            ValueError: If a field is not a field of ``DeploymentExport`` (before any request).
+            TimeoutError: Some values were still different after ``timeout`` seconds.
+
+        Example::
+
+            client.deployments.import_deployments(file="edited.csv", research_project=1, timezone="Europe/Madrid", update=True)
+            client.deployments.wait_for_update({"don01-2024a": {"camera_height": 1.25, "habitat": "dehesa"}})
+        """
+        known = DeploymentExport.model_fields
+        for deployment_id, expected in changes.items():
+            unknown = sorted(f for f in expected if f not in known)
+            if unknown:
+                raise ValueError(f"{deployment_id}: not a field of DeploymentExport: {', '.join(unknown)}")
+
+        def same(actual: Any, wanted: Any) -> bool:
+            if isinstance(actual, float) or isinstance(wanted, float):
+                try:
+                    return math.isclose(float(actual), float(wanted), rel_tol=1e-9, abs_tol=1e-9)
+                except (TypeError, ValueError):
+                    return False
+            return actual == wanted
+
+        pending = {str(i): dict(e) for i, e in changes.items()}
+        deadline = time.monotonic() + timeout
+        while True:
+            for deployment_id in list(pending):
+                try:
+                    rows = self.export(file=None, search=deployment_id)
+                except err.BadRequestError:       # Trapper answers an empty export with a 400
+                    rows = []
+                row = next((r for r in rows if r.deployment_id == deployment_id), None)
+                if row is not None and all(same(getattr(row, f), v) for f, v in pending[deployment_id].items()):
+                    del pending[deployment_id]
+            if not pending:
+                return True
+            if time.monotonic() >= deadline:
+                if raise_on_timeout:
+                    raise TimeoutError(
+                        f"{len(pending)} deployment(s) not updated after {timeout:g}s: {', '.join(list(pending)[:10])}"
+                    )
+                return False
+            time.sleep(interval)

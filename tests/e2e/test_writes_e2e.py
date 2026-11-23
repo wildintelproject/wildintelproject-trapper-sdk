@@ -157,6 +157,42 @@ class TestLocationAndDeploymentImportE2E:
         session_writer.deployments.wait_for_import([dep_id], timeout=90)
 
     @pytest.mark.e2e
+    def test_update_deployments_by_exporting_editing_and_importing(self, session_writer, research_project, tmp_path):
+        """Export raw, edit a value, import with ``update=True`` and wait for it: the documented round trip."""
+        import csv
+
+        loc_id, dep_id = _new_id(), _new_id()
+        created = tmp_path / "created.csv"
+        created.write_text(
+            "deploymentID,locationID,longitude,latitude,deploymentStart,deploymentEnd,cameraHeight\n"
+            f"{dep_id},{loc_id},-6.44,37.05,2024-03-01T10:00:00,2024-04-01T10:00:00,0.5\n",
+            encoding="utf-8",
+        )
+        assert _retry_once_on_500(lambda: session_writer.deployments.import_deployments(
+            file=created, research_project=research_project, timezone=TIMEZONE, create_locations=True,
+        )) is True
+        session_writer.deployments.wait_for_import([dep_id], timeout=90)
+
+        raw = session_writer.deployments.export(file=tmp_path / "raw.csv", raw=True, search=dep_id)
+        rows = [r for r in csv.DictReader(raw.open(encoding="utf-8")) if r["deploymentID"] == dep_id]
+        assert len(rows) == 1 and "_id" in rows[0]
+        rows[0]["cameraHeight"] = "1.25"
+        rows[0]["habitat"] = "dehesa"
+        edited = tmp_path / "edited.csv"
+        with edited.open("w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+
+        assert _retry_once_on_500(lambda: session_writer.deployments.import_deployments(
+            file=edited, research_project=research_project, timezone=TIMEZONE, update=True,
+        )) is True
+        session_writer.deployments.wait_for_update({dep_id: {"camera_height": 1.25, "habitat": "dehesa"}}, timeout=90)
+
+        after = [r for r in session_writer.deployments.export(file=None, search=dep_id) if r.deployment_id == dep_id]
+        assert after[0].camera_height == 1.25 and after[0].habitat == "dehesa"
+
+    @pytest.mark.e2e
     def test_import_with_a_bad_table_reports_why(self, session_writer, research_project, tmp_path):
         """A table without the mandatory columns is refused with an error naming the problem."""
         bad = tmp_path / "bad.csv"

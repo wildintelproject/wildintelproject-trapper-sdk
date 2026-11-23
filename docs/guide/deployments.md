@@ -174,6 +174,45 @@ client.deployments.wait_for_import(["DON01-2024A", "DON01-2024B"], timeout=60)  
 
 Pass `raise_on_timeout=False` to get `False` back instead. It works the same on v1.
 
+### Updating deployments
+
+Trapper has no endpoint to edit a deployment, but the import updates the ones that exist when it gets
+`update=True` and an `_id` column with their primary keys. The CSV that Trapper exports has that column, so the
+way to correct deployments is **export, edit, import**:
+
+```python
+import csv
+
+# 1. Export the deployments exactly as Trapper sends them (raw=True keeps the _id column and the header)
+path = client.deployments.export(file="deployments.csv", raw=True, research_project=7)
+
+# 2. Edit the CSV: change the cells you want, keep the header and the _id
+with open(path, newline="", encoding="utf-8") as f:
+    rows = list(csv.DictReader(f))
+for row in rows:
+    if row["deploymentID"] == "don01-2024a":
+        row["cameraHeight"] = "1.25"
+        row["habitat"] = "dehesa"
+with open("edited.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+    writer.writeheader()
+    writer.writerows(rows)
+
+# 3. Import it with update=True, and wait until the new values are there
+client.deployments.import_deployments(
+    file="edited.csv", research_project=7, timezone="Europe/Madrid", update=True,
+)
+client.deployments.wait_for_update({"don01-2024a": {"camera_height": 1.25, "habitat": "dehesa"}})
+```
+
+`import_deployments()` returns `True` when the table is validated and queued, on v1 and v2: the changes are
+applied a moment later. `wait_for_import()` cannot tell, because the IDs exist already, so
+`wait_for_update()` polls the export until each deployment has the values you give, with the field names of
+`DeploymentExport` (numbers are compared with a tolerance). It raises `TimeoutError`, or returns `False` with
+`raise_on_timeout=False`, if they do not arrive in `timeout` seconds. Give it the stored ID: Trapper slugifies
+the `deploymentID` of an import (`"Don 01"` is stored as `"don-01"`). Checked on Trapper v1 and v2. As on the rest of the
+imports, the account must be staff on v2.
+
 ### What you get in the exception when the CSV itself is rejected
 
 Same as [locations](locations.md#what-you-get-in-the-exception-when-the-csv-itself-is-rejected):
