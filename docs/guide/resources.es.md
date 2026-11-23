@@ -105,6 +105,36 @@ for res in client.resources.where_by_collection(5):
 !!! warning "No es un contrato estable de la API"
     Depende de una vista web sin versionar, como las importaciones.
 
+### Descargar todos los ficheros de un deployment o de una colección
+
+Trapper no tiene un endpoint para eso: es `download()` una vez por resource. `deployments.download_resources()` y
+`collections.download_resources()` hacen ese bucle, y necesitan `user_name` y `user_password` como `download()`:
+
+```python
+report = client.deployments.download_resources(12, "downloads/")          # downloads/<deployment_id>/<name>.jpg
+report = client.collections.download_resources(5, "downloads/")           # downloads/<nombre de la colección>/<name>.jpg
+print(report)        # 40 downloaded, 0 already there, 0 failed, in downloads/don01-2024a
+```
+
+- **Elegir qué resources.** Cualquier filtro de la lista de resources pasa tal cual, así que elige el servidor
+  (`resource_type="I"`, `rdate_from`/`rdate_to`, `rtime_from`/`rtime_to`, `tags`, `species`, `search`, `pk=[...]`, y
+  `deployments=[...]` en una colección), y `filter_fn` lo hace en el cliente para lo que el servidor no puede filtrar:
+  `client.deployments.download_resources(12, "out/", rdate_from="2024-03-01", filter_fn=lambda r: r.date_recorded.hour < 6)`.
+  El primer argumento se llama `deployment_pk` / `collection_pk` porque `pk` es uno de esos filtros.
+- **Se puede repetir.** Un fichero que ya está en la carpeta se omite (`skip_existing=True`), y un fichero solo recibe
+  su nombre cuando está completo (hasta entonces es un `.part`), así que tras una interrupción o un fallo repites la
+  misma llamada y continúa.
+- **Un fallo no detiene el resto** (`on_error="continue"`): queda en `report.failed` (`{pk del resource: mensaje}`).
+  `on_error="raise"` se detiene en el primero. Cada fichero se reintenta como en `download()` (`retry_attempts`, ...).
+- **El informe** (`DownloadReport`): `downloaded`, `skipped` (listas de rutas), `failed`, `ok` y `total`.
+- **Nombres.** `<name><extensión>`, la extensión sale del `mime` del resource; se añade `-<pk>` cuando dos resources
+  comparten nombre; el nombre se limpia de los caracteres que un sistema de ficheros rechaza. `kind="thumbnail"` o
+  `"preview"` guarda `<name>-thumbnail.jpg`, junto a los originales. La carpeta de una colección es plana: la lista de
+  resources no dice a qué deployment pertenece cada uno.
+- **Progreso.** `progress_callback(event, data)` se llama por cada fichero con `"downloaded"`, `"skipped"` o `"failed"` y
+  `{"resource", "path", "index", "total"}` (también `"error"` en un fallo); `total` es `None` con un `filter_fn`.
+- Funciona también sobre la lista de resources que le des: `client.resources.download_many(resources, "folder/")`.
+
 ## Limitado a una colección o a una localización
 
 Cada patrón de acceso tiene una variante `_by_collection`/`_by_location`, que usa

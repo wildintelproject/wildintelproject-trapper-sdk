@@ -106,6 +106,36 @@ for res in client.resources.where_by_collection(5):
 !!! warning "Not a stable API contract"
     It depends on an unversioned web view, like the imports.
 
+### Downloading all the files of a deployment or a collection
+
+Trapper has no endpoint for it: it is `download()` once per resource. `deployments.download_resources()` and
+`collections.download_resources()` do that loop, and need `user_name` and `user_password` like `download()`:
+
+```python
+report = client.deployments.download_resources(12, "downloads/")          # downloads/<deployment_id>/<name>.jpg
+report = client.collections.download_resources(5, "downloads/")           # downloads/<collection name>/<name>.jpg
+print(report)        # 40 downloaded, 0 already there, 0 failed, in downloads/don01-2024a
+```
+
+- **Choosing which resources.** Any filter of the resource list goes through, so the server does the choosing
+  (`resource_type="I"`, `rdate_from`/`rdate_to`, `rtime_from`/`rtime_to`, `tags`, `species`, `search`, `pk=[...]`, and
+  `deployments=[...]` for a collection), and `filter_fn` does it on the client for what the server cannot filter:
+  `client.deployments.download_resources(12, "out/", rdate_from="2024-03-01", filter_fn=lambda r: r.date_recorded.hour < 6)`.
+  The first argument is called `deployment_pk` / `collection_pk` because `pk` is one of those filters.
+- **A run can be repeated.** A file that is already in the folder is skipped (`skip_existing=True`), and a file is
+  only given its name when it is complete (it is a `.part` until then), so after an interruption or a failure you
+  run the same call again and it carries on.
+- **A failure does not stop the rest** (`on_error="continue"`): it goes in `report.failed` (`{resource pk: message}`).
+  `on_error="raise"` stops at the first one. Each file is retried like `download()` does (`retry_attempts`, ...).
+- **The report** (`DownloadReport`): `downloaded`, `skipped` (lists of paths), `failed`, `ok` and `total`.
+- **Names.** `<name><extension>`, the extension from the resource's `mime`; `-<pk>` is added when two resources share a
+  name; a file name is cleaned of characters a file system refuses. `kind="thumbnail"` or `"preview"` saves
+  `<name>-thumbnail.jpg`, next to the originals. The folder of a collection is flat: the resource list does not say
+  which deployment a resource belongs to.
+- **Progress.** `progress_callback(event, data)` is called for every file with `"downloaded"`, `"skipped"` or `"failed"`
+  and `{"resource", "path", "index", "total"}` (`"error"` too for a failure); `total` is `None` with a `filter_fn`.
+- It works over the list of resources you give it, too: `client.resources.download_many(resources, "folder/")`.
+
 ## Scoped to a collection or a location
 
 Every access pattern has a `_by_collection`/`_by_location` counterpart, hitting

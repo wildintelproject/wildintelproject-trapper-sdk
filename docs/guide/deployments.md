@@ -131,6 +131,12 @@ for feature in fc["features"]:
 
 Only deployments the current user can access are returned.
 
+## Downloading the files
+
+`client.deployments.download_resources(pk, "downloads/")` saves the images or videos of a deployment into
+`downloads/<deployment_id>/`, with the filters of the resource list to choose which ones, skipping what is already
+there. See [Downloading all the files of a deployment or a collection](resources.md#downloading-all-the-files-of-a-deployment-or-a-collection).
+
 ## Fields: the list and the export
 
 Like locations, a deployment comes in two shapes, and neither holds every field. `where()`, `get()` and `find()`

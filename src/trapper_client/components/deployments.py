@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import ExitStack
 from datetime import date
 from pathlib import Path
-from typing import Any, Dict, Iterable, Iterator, Mapping
+from typing import Any, Callable, Dict, Iterable, Iterator, Literal, Mapping
 
 from tenacity import Retrying
 
@@ -18,7 +18,7 @@ from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
 from trapper_client.components.locations import LocationsComponent
-from trapper_client.components.resources import ResourcesComponent
+from trapper_client.components.resources import DownloadReport, ResourcesComponent, safe_filename
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
 from trapper_client.retry_utils import retrying_for_chunk_upload
 from trapper_client.schemas import Deployment, DeploymentExport
@@ -511,6 +511,66 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
         output_path = self.client._select_file(file)
         self.client._write_csv([row.model_dump(mode="json") for row in rows], output_path)
         return output_path
+
+    def download_resources(
+        self,
+        deployment_pk: int,
+        directory: str | Path,
+        kind: Literal["original", "preview", "thumbnail"] = "original",
+        filter_fn: Callable[[Any], bool] | None = None,
+        skip_existing: bool = True,
+        on_error: Literal["continue", "raise"] = "continue",
+        progress_callback: Callable[[str, Dict[str, Any]], None] | None = None,
+        retry_attempts: int = 3,
+        retry_min_wait: float = 1.0,
+        retry_max_wait: float = 10.0,
+        **filters: Any,
+    ) -> DownloadReport:
+        """Download the files of the resources of a deployment into ``<directory>/<deployment_id>/``.
+
+        The resources of the deployment are listed with ``resources.where(deployments=deployment_pk, **filters)`` and each one is
+        saved with :meth:`ResourcesComponent.download` (see :meth:`ResourcesComponent.download_many` for the file names,
+        the report and the errors): a file that is already in the folder is skipped, so a run can be repeated, and a
+        failure does not stop the others. Needs ``user_name`` and ``user_password``.
+
+        Args:
+            deployment_pk: Deployment primary key. (It is not called ``pk`` because ``pk`` is also a filter of the resource
+                list, which this method passes on: ``pk=[1, 2]`` chooses resources.)
+            directory: Where the folder of the deployment goes.
+            kind: ``"original"``, ``"preview"`` or ``"thumbnail"``.
+            filter_fn: ``predicate(resource) -> bool`` applied on the client to choose which resources, for what the
+                server cannot filter (``lambda r: r.date_recorded.hour < 6``).
+            skip_existing: Leave alone the files that are already there.
+            on_error: ``"continue"`` (default) or ``"raise"`` at the first failure.
+            progress_callback: ``callback(event, data)`` for each file (see :meth:`ResourcesComponent.download_many`).
+            retry_attempts: Attempts per file (see :meth:`ResourcesComponent.download`).
+            retry_min_wait: Minimum backoff in seconds.
+            retry_max_wait: Maximum backoff in seconds.
+            **filters: Any filter of the resource list: ``resource_type``, ``status``, ``rdate_from``/``rdate_to``,
+                ``rtime_from``/``rtime_to``, ``tags``, ``species``, ``observation_type``, ``timestamp_error``,
+                ``search``, ... (see ``client.resources``).
+
+        Returns:
+            A :class:`~trapper_client.components.resources.DownloadReport`.
+
+        Example::
+
+            report = client.deployments.download_resources(
+                12, "downloads/", rdate_from="2024-03-01", rdate_to="2024-03-31", resource_type="I",
+            )
+            print(report)                     # 40 downloaded, 0 already there, 0 failed, in downloads/don01-2024a
+        """
+        if "deployments" in filters:
+            raise ValueError("download_resources() chooses the deployment itself: do not pass `deployments`")
+        deployment = self.find(deployment_pk)
+        folder = Path(directory) / safe_filename(deployment.deployment_id, fallback=f"deployment-{deployment_pk}")
+        resources = ResourcesComponent(self.client)
+        total = None if filter_fn else resources.get(page_size=1, deployments=deployment_pk, **filters).pagination.count
+        return resources.download_many(
+            resources.where(deployments=deployment_pk, filter_fn=filter_fn, page_size=100, **filters), folder, kind=kind,
+            skip_existing=skip_existing, on_error=on_error, progress_callback=progress_callback, total=total,
+            retry_attempts=retry_attempts, retry_min_wait=retry_min_wait, retry_max_wait=retry_max_wait,
+        )
 
     def wait_for_import(
         self,

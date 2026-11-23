@@ -5,12 +5,13 @@ Component for the ``storage/api/collections`` resource.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, Callable
+from typing import Any, Dict, Callable, Literal
 
 import httpx
 
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
+from trapper_client.components.resources import DownloadReport, ResourcesComponent, safe_filename
 from trapper_client.enums import CollectionStatus
 from trapper_client.schemas import Collection, PaginatedResult, Resource
 
@@ -498,6 +499,62 @@ class CollectionsComponent(TrapperComponent[Collection]):
             pk=pk,
             validate=validate,
             overwrite_endpoint=self._append_endpoint,
+        )
+
+    def download_resources(
+        self,
+        collection_pk: int,
+        directory: str | Path,
+        kind: Literal["original", "preview", "thumbnail"] = "original",
+        filter_fn: Callable[[Any], bool] | None = None,
+        skip_existing: bool = True,
+        on_error: Literal["continue", "raise"] = "continue",
+        progress_callback: Callable[[str, Dict[str, Any]], None] | None = None,
+        retry_attempts: int = 3,
+        retry_min_wait: float = 1.0,
+        retry_max_wait: float = 10.0,
+        **filters: Any,
+    ) -> DownloadReport:
+        """Download the files of the resources of a collection into ``<directory>/<collection name>/``.
+
+        The resources are listed with ``resources.where_by_collection(collection_pk, **filters)`` and each one is saved with
+        :meth:`ResourcesComponent.download` (see :meth:`ResourcesComponent.download_many` for the file names, the
+        report and the errors). The folder is flat: the resource list does not say which deployment a resource belongs
+        to, so for one folder per deployment use ``client.deployments.download_resources()``. A file that is already in
+        the folder is skipped, so a run can be repeated, and a failure does not stop the others. Needs ``user_name``
+        and ``user_password``.
+
+        Args:
+            collection_pk: Collection primary key. (It is not called ``pk`` because ``pk`` is also a filter of the resource
+                list, which this method passes on.)
+            directory: Where the folder of the collection goes.
+            kind: ``"original"``, ``"preview"`` or ``"thumbnail"``.
+            filter_fn: ``predicate(resource) -> bool`` applied on the client to choose which resources.
+            skip_existing: Leave alone the files that are already there.
+            on_error: ``"continue"`` (default) or ``"raise"`` at the first failure.
+            progress_callback: ``callback(event, data)`` for each file (see :meth:`ResourcesComponent.download_many`).
+            retry_attempts: Attempts per file (see :meth:`ResourcesComponent.download`).
+            retry_min_wait: Minimum backoff in seconds.
+            retry_max_wait: Maximum backoff in seconds.
+            **filters: Any filter of the resource list: ``resource_type``, ``status``, ``rdate_from``/``rdate_to``,
+                ``tags``, ``deployments``, ``search``, ... (see ``client.resources``).
+
+        Returns:
+            A :class:`~trapper_client.components.resources.DownloadReport`.
+
+        Example::
+
+            report = client.collections.download_resources(5, "downloads/", deployments=[12, 13], resource_type="I")
+            print(report.failed)              # {resource pk: message} of what could not be downloaded
+        """
+        collection = self.find(collection_pk)
+        folder = Path(directory) / safe_filename(collection.name, fallback=f"collection-{collection_pk}")
+        resources = ResourcesComponent(self.client)
+        total = None if filter_fn else resources.get_by_collection(collection_pk, page_size=1, **filters).pagination.count
+        return resources.download_many(
+            resources.where_by_collection(collection_pk, filter_fn=filter_fn, page_size=100, **filters), folder, kind=kind,
+            skip_existing=skip_existing, on_error=on_error, progress_callback=progress_callback, total=total,
+            retry_attempts=retry_attempts, retry_min_wait=retry_min_wait, retry_max_wait=retry_max_wait,
         )
 
     def trigger_collection(

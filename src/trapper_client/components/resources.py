@@ -5,8 +5,10 @@ Component for the /storage/api/resources/ resource.
 from __future__ import annotations
 
 import mimetypes
+import re
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, Literal
+from typing import Any, Callable, Dict, Iterable, Literal
 
 import httpx
 
@@ -15,6 +17,46 @@ from trapper_client.components.base import TrapperComponent
 from trapper_client.retry_utils import retrying_for_download
 from trapper_client.schemas import PaginatedResult, Resource
 from trapper_client.api_query import APIQuery
+
+
+@dataclass
+class DownloadReport:
+    """What a :meth:`~ResourcesComponent.download_many` run did, file by file.
+
+    Attributes:
+        downloaded: Paths written in this run.
+        skipped: Paths that were already there (``skip_existing``).
+        failed: ``{resource pk: message}`` for the files that could not be downloaded.
+        directory: Where the files went.
+    """
+
+    directory: Path
+    downloaded: list[Path] = field(default_factory=list)
+    skipped: list[Path] = field(default_factory=list)
+    failed: dict[int, str] = field(default_factory=dict)
+
+    @property
+    def total(self) -> int:
+        """How many resources were looked at."""
+        return len(self.downloaded) + len(self.skipped) + len(self.failed)
+
+    @property
+    def ok(self) -> bool:
+        """``True`` when no file failed."""
+        return not self.failed
+
+    def __str__(self) -> str:
+        return (f"{len(self.downloaded)} downloaded, {len(self.skipped)} already there, "
+                f"{len(self.failed)} failed, in {self.directory}")
+
+
+_UNSAFE = re.compile(r'[\\/:*?"<>|\x00-\x1f]+')
+
+
+def safe_filename(name: str, fallback: str = "resource") -> str:
+    """A name that is safe as a file name: no path separators or characters Windows refuses, no dot-only names."""
+    cleaned = _UNSAFE.sub("_", str(name or "")).strip(" .")
+    return cleaned or fallback
 
 
 class ResourcesComponent(TrapperComponent[Resource]):
@@ -532,3 +574,98 @@ class ResourcesComponent(TrapperComponent[Resource]):
             validate=validate,
             overwrite_endpoint=endpoint,
         )
+
+    def download_many(
+        self,
+        resources: Iterable[Resource],
+        directory: str | Path,
+        kind: Literal["original", "preview", "thumbnail"] = "original",
+        skip_existing: bool = True,
+        on_error: Literal["continue", "raise"] = "continue",
+        progress_callback: Callable[[str, Dict[str, Any]], None] | None = None,
+        total: int | None = None,
+        retry_attempts: int = 3,
+        retry_min_wait: float = 1.0,
+        retry_max_wait: float = 10.0,
+    ) -> DownloadReport:
+        """Download the files of some resources into one folder.
+
+        Each one is saved as ``<name><extension>`` (the extension comes from the resource's ``mime``), with ``-<pk>`` added
+        when two resources share a name. A preview or a thumbnail, which Trapper makes as JPEG, is
+        ``<name>-preview.jpg`` or ``<name>-thumbnail.jpg``, so that they can share a folder with the originals.
+        Trapper has no endpoint for this: it is :meth:`download` once per resource (so the same requirements apply:
+        ``user_name``/``user_password``), with a report, and it carries on after a failure by default.
+
+        Args:
+            resources: The resources to download (a list, or the lazy ``where()`` iterator).
+            directory: The folder; it is created.
+            kind: ``"original"``, ``"preview"`` or ``"thumbnail"``.
+            skip_existing: Leave alone a file that is already there, so that a run can be repeated after an
+                interruption. A file that was cut never exists under its final name (it is a ``.part`` first).
+            on_error: ``"continue"`` (default) records the failure in the report and goes on; ``"raise"`` stops at the
+                first one.
+            progress_callback: ``callback(event, data)``, called with ``"downloaded"``, ``"skipped"`` or ``"failed"`` and
+                ``{"resource": ..., "path": ..., "index": n, "total": ...}`` (``"error"`` too, for a failure).
+            total: How many resources there are, if known, for the callback.
+            retry_attempts: Attempts for each file, the first one included (see :meth:`download`).
+            retry_min_wait: Minimum backoff in seconds.
+            retry_max_wait: Maximum backoff in seconds.
+
+        Returns:
+            A :class:`DownloadReport`.
+
+        Raises:
+            ValueError: ``kind`` or ``on_error`` is not valid, or ``user_name``/``user_password`` are missing.
+        """
+        if kind not in self.media_fields:
+            raise ValueError(f"kind must be one of {', '.join(self.media_fields)}, not {kind!r}")
+        if on_error not in ("continue", "raise"):
+            raise ValueError("on_error must be 'continue' or 'raise'")
+        self.client.session_login()
+
+        folder = Path(directory)
+        folder.mkdir(parents=True, exist_ok=True)
+        report = DownloadReport(directory=folder)
+        used: set[str] = set()
+
+        def notify(event: str, resource: Resource, index: int, **extra: Any) -> None:
+            if progress_callback:
+                progress_callback(event, {"resource": resource, "index": index, "total": total, **extra})
+
+        for index, resource in enumerate(resources, start=1):
+            target = folder / self._file_name(resource, kind, used)
+            try:
+                if skip_existing and target.exists():
+                    report.skipped.append(target)
+                    notify("skipped", resource, index, path=target)
+                    continue
+                self.download(resource.pk, target, kind=kind, retry_attempts=retry_attempts,
+                              retry_min_wait=retry_min_wait, retry_max_wait=retry_max_wait)
+            except Exception as exc:
+                if on_error == "raise":
+                    raise
+                report.failed[resource.pk] = str(exc)
+                notify("failed", resource, index, path=target, error=exc)
+                continue
+            report.downloaded.append(target)
+            notify("downloaded", resource, index, path=target)
+        return report
+
+    @staticmethod
+    def _file_name(resource: Resource, kind: str, used: set[str]) -> str:
+        """``<name><extension>`` for a resource, unique among ``used`` (it is added to it)."""
+        if kind == "original":
+            extension = mimetypes.guess_extension((resource.mime or "").split(";")[0].strip()) or ""
+            extension = ".jpg" if extension == ".jpe" else extension
+        else:
+            extension = ".jpg"
+        name = safe_filename(resource.name, fallback=f"resource-{resource.pk}")
+        if kind != "original":
+            name = f"{name}-{kind}"          # next to the original, not over it
+        if extension and name.lower().endswith(extension.lower()):
+            name, extension = name[: -len(extension)], name[-len(extension):]       # keep its own spelling
+        candidate = f"{name}{extension}"
+        if candidate.lower() in used:
+            candidate = f"{name}-{resource.pk}{extension}"
+        used.add(candidate.lower())
+        return candidate
