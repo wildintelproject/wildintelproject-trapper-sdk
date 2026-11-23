@@ -693,6 +693,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#coordenadas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordenadas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importar-localizaciones-acceso-de-escritura" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2855,6 +2866,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#coordenadas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordenadas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importar-localizaciones-acceso-de-escritura" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3032,6 +3054,19 @@ más abajo para la única operación de escritura que admite este componente.</p
 <a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;research_project&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;project5_locations.csv&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Consulta <a href="../../usage/">Uso</a> si algo de esto te resulta desconocido: es la misma interfaz en todos los componentes.</p>
+<h2 id="coordenadas">Coordenadas</h2>
+<p>Trapper devuelve las coordenadas de una location como una sola cadena, con la <strong>longitud primero</strong>
+(<code>"-6.44, 37.05"</code>), en v1 y en v2. <code>Location.coordinates</code> la conserva tal como llega, y <code>longitude</code> y
+<code>latitude</code> la dan como números:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">loc</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">loc</span><span class="o">.</span><span class="n">coordinates</span>         <span class="c1"># &quot;-6.44, 37.05&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">loc</span><span class="o">.</span><span class="n">longitude</span>           <span class="c1"># -6.44</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">loc</span><span class="o">.</span><span class="n">latitude</span>            <span class="c1"># 37.05</span>
+</code></pre></div>
+<p>Valen <code>None</code> cuando las coordenadas faltan, no se pueden leer o están fuera de rango (longitud más allá de
+±180, latitud más allá de ±90): una location rara no rompe un listado. Se leen de <code>coordinates</code> cada vez y
+no son campos del modelo, así que <code>model_dump()</code> no cambia. Las filas de <code>export(file=None)</code> ya llevan
+<code>longitude</code> y <code>latitude</code>.</p>
 <h2 id="importar-localizaciones-acceso-de-escritura">Importar localizaciones (acceso de escritura)</h2>
 <p><code>/geomap/api/locations</code> es de solo lectura, así que <code>import_locations()</code> lo resuelve simulando el
 formulario <code>geomap/location/import/</code> de la interfaz web clásica, con autenticación por cookie/sesión en
@@ -3049,11 +3084,11 @@ dirección de <em>correo</em> de la cuenta en servidores con <code>ACCOUNT_LOGIN
 token por sí solo no puede autenticarlo. Consulta la advertencia completa en el docstring del
 método antes de depender de ello.</p>
 </div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>       <span class="c1"># obligatorio: ver la nota más abajo</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span> <span class="c1"># obligatorio: ver la nota más abajo</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>       <span class="c1"># obligatorio: ver la nota más abajo</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span> <span class="c1"># obligatorio: ver la nota más abajo</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title"><code>research_project</code> y <code>timezone</code> son obligatorios, aunque los campos del servidor digan lo contrario</p>
@@ -3078,8 +3113,8 @@ método antes de depender de ello.</p>
 significa que la tabla se validó y se puso en cola, no que las filas ya existan. Ninguna de las dos
 versiones expone la tarea de importación a través de la API, así que <code>wait_for_import()</code> comprueba el
 resultado: consulta periódicamente hasta que todos los <code>locationID</code> aparecen en el listado:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">)</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;don-01&quot;</span><span class="p">,</span> <span class="s2">&quot;don-02&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># lanza TimeoutError si faltan</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;don-01&quot;</span><span class="p">,</span> <span class="s2">&quot;don-02&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># lanza TimeoutError si faltan</span>
 </code></pre></div>
 <p>Pasa <code>raise_on_timeout=False</code> para recibir <code>False</code> en su lugar. Funciona igual en v1.</p>
 <p>También hay un script listo para ejecutar: <a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_locations.py"><code>examples/import_locations.py</code></a>.</p>
@@ -3087,7 +3122,7 @@ resultado: consulta periódicamente hasta que todos los <code>locationID</code> 
 <p>Si el CSV falla la validación de tabla del servidor (columnas incorrectas o ausentes, un <code>locationID</code>
 que ya existe en este proyecto de investigación, ...), el <code>err.APIError</code> lanzado incluye los mensajes
 reales por fila, no solo el aviso genérico. Por ejemplo:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Location import failed (status 200): locationID &#39;dona-001&#39; already exists; longitude must be a number
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Location import failed (status 200): locationID &#39;dona-001&#39; already exists; longitude must be a number
 </code></pre></div>
 <p>El servidor presenta esos detalles como un bloque JSON para un widget JS, no como texto HTML plano;
 consulta <a href="../../api/api_client_base/"><code>APIClientBase._extract_html_error_text</code></a> para ver cómo se extraen.</p>
@@ -3097,14 +3132,14 @@ consulta <a href="../../api/api_client_base/"><code>APIClientBase._extract_html_
 formulario en una sola petición. Si un CSV grande se rechaza o agota el tiempo, pasa <code>split=True</code> para
 dividirlo en varios CSV más pequeños y autocontenidos (cada uno repite la fila de cabecera) e importarlos
 de uno en uno:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>        <span class="c1"># segundos entre fragmentos; por defecto 1</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes por fragmento; también es el valor por defecto</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>        <span class="c1"># segundos entre fragmentos; por defecto 1</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes por fragmento; también es el valor por defecto</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">)</span>
 </code></pre></div>
 <p><code>split</code> no es compatible con <code>gpx_file</code> (lanza <code>ValueError</code>): dividir solo tiene sentido para la ruta
 del CSV, y el servidor rechaza de todos modos una petición con ambos tipos de fichero. Con
@@ -3116,16 +3151,16 @@ devuelve <code>False</code> si alguno falló.</p>
 tiempo de espera a nivel de red (en lugar de una respuesta de error normal) antes de que el servidor
 llegue a responder. Eso se reintenta automáticamente, con <a href="https://github.com/jd/tenacity">tenacity</a> y
 espera exponencial, hasta <code>retry_attempts</code> veces:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># prueba fragmentos más pequeños si el servidor sigue agotando el tiempo</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">retry_attempts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># por defecto 3</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">retry_min_wait</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># segundos, por defecto 1</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">retry_max_wait</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>      <span class="c1"># segundos, por defecto 10</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># prueba fragmentos más pequeños si el servidor sigue agotando el tiempo</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">retry_attempts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># por defecto 3</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="n">retry_min_wait</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># segundos, por defecto 1</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="n">retry_max_wait</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>      <span class="c1"># segundos, por defecto 10</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="p">)</span>
 </code></pre></div>
 <p>Solo se reintentan los fallos a nivel de red (tiempos de espera, conexiones reiniciadas, ...), nunca una
 respuesta de error HTTP (un 4xx/5xx del servidor es un fallo de validación, no algo que arregle un

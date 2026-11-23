@@ -691,6 +691,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#coordinates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordinates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importing-locations-write-access" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2853,6 +2864,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#coordinates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coordinates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importing-locations-write-access" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3030,6 +3052,19 @@ below for the one write operation this component supports.</p>
 <a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;research_project&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;project5_locations.csv&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>See <a href="../../usage/">Usage</a> if any of this looks unfamiliar — it's the same interface on every component.</p>
+<h2 id="coordinates">Coordinates</h2>
+<p>Trapper returns the coordinates of a location as one string, with the <strong>longitude first</strong>
+(<code>"-6.44, 37.05"</code>), in v1 and v2. <code>Location.coordinates</code> keeps it as it comes, and <code>longitude</code> and
+<code>latitude</code> give it as numbers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">loc</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">loc</span><span class="o">.</span><span class="n">coordinates</span>         <span class="c1"># &quot;-6.44, 37.05&quot;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">loc</span><span class="o">.</span><span class="n">longitude</span>           <span class="c1"># -6.44</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">loc</span><span class="o">.</span><span class="n">latitude</span>            <span class="c1"># 37.05</span>
+</code></pre></div>
+<p>They are <code>None</code> when the coordinates are missing, cannot be read or are out of range (longitude beyond
+±180, latitude beyond ±90): one odd location does not break a listing. They are read from <code>coordinates</code> each
+time, not fields of the model, so <code>model_dump()</code> does not change. The rows of <code>export(file=None)</code> carry
+<code>longitude</code> and <code>latitude</code> already.</p>
 <h2 id="importing-locations-write-access">Importing locations (write access)</h2>
 <p><code>/geomap/api/locations</code> is read-only, so <code>import_locations()</code> works around that by simulating the
 classic web UI's <code>geomap/location/import/</code> form via cookie/session auth instead of the API's token
@@ -3045,11 +3080,11 @@ page can break it silently. It requires <code>user_name</code>/<code>user_passwo
 address on servers with <code>ACCOUNT_LOGIN_METHODS = {"email"}</code>) — a token alone cannot
 authenticate it. See the full caveat in the method's docstring before relying on it.</p>
 </div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>       <span class="c1"># required — see note below</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span> <span class="c1"># required — see note below</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>       <span class="c1"># required — see note below</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span> <span class="c1"># required — see note below</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">)</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title"><code>research_project</code> and <code>timezone</code> are required, despite the server's fields saying otherwise</p>
@@ -3073,8 +3108,8 @@ authenticate it. See the full caveat in the method's docstring before relying on
 table was validated and queued, not that the rows exist yet. Neither version exposes the import
 task through the API, so <code>wait_for_import()</code> checks the outcome instead — it polls until every
 <code>locationID</code> is listed:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">)</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;don-01&quot;</span><span class="p">,</span> <span class="s2">&quot;don-02&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># raises TimeoutError if missing</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;don-01&quot;</span><span class="p">,</span> <span class="s2">&quot;don-02&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># raises TimeoutError if missing</span>
 </code></pre></div>
 <p>Pass <code>raise_on_timeout=False</code> to get <code>False</code> back instead. It works the same on v1.</p>
 <p>There's also a ready-to-run script: <a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_locations.py"><code>examples/import_locations.py</code></a>.</p>
@@ -3082,7 +3117,7 @@ task through the API, so <code>wait_for_import()</code> checks the outcome inste
 <p>If the CSV fails the server's table validation (wrong/missing columns, a <code>locationID</code> that already
 exists in this research project, ...), the raised <code>err.APIError</code> includes the actual per-row
 messages, not just the generic banner — e.g.:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Location import failed (status 200): locationID &#39;dona-001&#39; already exists; longitude must be a number
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Location import failed (status 200): locationID &#39;dona-001&#39; already exists; longitude must be a number
 </code></pre></div>
 <p>The server renders those details as a JSON blob for a JS widget, not as plain HTML text — see
 <a href="../../api/api_client_base/"><code>APIClientBase._extract_html_error_text</code></a> for how this is parsed out.</p>
@@ -3091,14 +3126,14 @@ messages, not just the generic banner — e.g.:</p>
 (a separate, true chunked uploader for a different endpoint), it's a plain single-request form POST.
 If a large CSV gets rejected or times out, pass <code>split=True</code> to break it into several smaller,
 self-contained CSV chunks (each repeating the header row) and import them one request at a time:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>        <span class="c1"># seconds between chunk uploads — defaults to 1</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes per chunk — this is also the default</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>        <span class="c1"># seconds between chunk uploads — defaults to 1</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes per chunk — this is also the default</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="p">)</span>
 </code></pre></div>
 <p><code>split</code> is not compatible with <code>gpx_file</code> (raises <code>ValueError</code>) — splitting only makes sense for
 the CSV path, and the server rejects a request carrying both file types anyway. With
@@ -3110,16 +3145,16 @@ uploading the rest; with <code>raise_on_error=False</code> it uploads every chun
 timeout (rather than a normal error response) before the server even gets to respond. That's
 retried automatically — using <a href="https://github.com/jd/tenacity">tenacity</a>, with exponential
 backoff — up to <code>retry_attempts</code> times:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># try smaller chunks if the server keeps timing out</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">retry_attempts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># default is 3</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">retry_min_wait</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># seconds, default 1</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">retry_max_wait</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>      <span class="c1"># seconds, default 10</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># try smaller chunks if the server keeps timing out</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">retry_attempts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># default is 3</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="n">retry_min_wait</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># seconds, default 1</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="n">retry_max_wait</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>      <span class="c1"># seconds, default 10</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="p">)</span>
 </code></pre></div>
 <p>Only network-level failures (timeouts, connection resets, ...) are retried — never an HTTP error
 response (a 4xx/5xx from the server is a validation failure, not something a retry fixes). Set
