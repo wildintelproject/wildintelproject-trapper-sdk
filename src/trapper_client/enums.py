@@ -146,3 +146,33 @@ class ClassificatorTemplate(str, Enum):
                     return member
         options = ", ".join(f"{m.value} ({m.label})" for m in cls)
         raise ValueError(f"{field}: {value!r} is not valid; use one of {options}")
+
+
+class CollectionStatus(str, Enum):
+    """Who can see a collection (``Collection.status``).
+
+    The members are the strings Trapper stores and filters by, which are case-sensitive there (``"private"`` is an
+    empty result, not an error); ``label`` is what its forms show. ``parse()`` accepts any case.
+    """
+
+    PRIVATE = "Private"
+    ON_DEMAND = "OnDemand"
+    PUBLIC = "Public"
+    ARCHIVED = "Archived"
+
+    @property
+    def label(self) -> str:
+        return {"Private": "Private", "OnDemand": "On demand", "Public": "Public", "Archived": "Archived"}[self.value]
+
+    @classmethod
+    def parse(cls, value: Any, field: str = "value") -> "CollectionStatus":
+        """Resolve a member from itself, its value (``"OnDemand"``), its label or its name, in any case."""
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, str):
+            wanted = value.strip().lower().replace(" ", "").replace("_", "")
+            for member in cls:
+                if wanted in (member.value.lower(), member.name.lower().replace("_", ""), member.label.lower().replace(" ", "")):
+                    return member
+        options = ", ".join(f"{m.value}" for m in cls)
+        raise ValueError(f"{field}: {value!r} is not valid; use one of {options}")

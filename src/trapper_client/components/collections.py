@@ -9,6 +9,7 @@ from typing import Any, Dict, Callable
 
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
+from trapper_client.enums import CollectionStatus
 from trapper_client.schemas import Collection, PaginatedResult, Resource
 
 
@@ -29,12 +30,13 @@ class CollectionsComponent(TrapperComponent[Collection]):
 
     **Available filter fields:**
 
-    - ``pk`` (comma-separated PKs): Filter by specific collection PKs
-    - ``status`` (choice): Filter by collection status
+    - ``pk`` (list of PKs): Filter by specific collection PKs
+    - ``status`` (choice): ``Private``, ``OnDemand``, ``Public`` or ``Archived``, in any case
+      (:class:`~trapper_client.enums.CollectionStatus`); any other value raises ``ValueError``
     - ``owner`` (boolean): ``true`` = only collections owned/managed by current user
     - ``owners`` (list of PKs): Filter by one or more owner user PKs
     - ``research_projects`` (list of PKs): Filter by one or more research project PKs
-    - ``locations_map`` (comma-separated PKs): Filter via ``resources__deployment__location``
+    - ``locations_map`` (list of PKs): Filter via ``resources__deployment__location`` (v1 only)
     - ``search`` (string): Full-text search across ``name`` and ``owner__username``
 
     **Examples:**
@@ -68,6 +70,33 @@ class CollectionsComponent(TrapperComponent[Collection]):
 
     endpoint = "storage/api/collections"
     schema = Collection
+
+    # What each version applies (checked live on v1 and v2): a parameter that is not here is ignored.
+    _COMMON_FILTERS = frozenset({
+        "pk", "status", "owner", "owners", "research_projects", "search", "name", "period_begin", "period_end",
+        "is_complete_cs_collection", "cs_deployment", "managers", "members",
+    })
+    known_filters = {
+        "v1": _COMMON_FILTERS | {"locations_map"},
+        "v2": _COMMON_FILTERS,       # v2 ignores locations_map: it has no maps
+    }
+
+    #: Filters Trapper reads from repeated parameters, and from one comma-separated string.
+    _REPEATED_FILTERS = frozenset({"owners", "research_projects", "managers", "members"})
+    _COMMA_FILTERS = frozenset({"pk", "locations_map"})
+
+    def _normalize_query(self, query: Dict[str, Any]) -> Dict[str, Any]:
+        """Send the list filters the way Trapper reads each one, and check ``status``.
+
+        ``pk=[2, 1]`` keeps one pk in Trapper (``"2,1"`` works). ``status`` is compared as it is, in upper and
+        lower case, and a value that does not exist is an empty result, not an error: it is resolved to
+        :class:`~trapper_client.enums.CollectionStatus` (any case) and refused with a ``ValueError`` if it is
+        none of the four.
+        """
+        query = self._normalize_lists(query, repeated=self._REPEATED_FILTERS, comma=self._COMMA_FILTERS)
+        if query.get("status") is not None:
+            query["status"] = CollectionStatus.parse(query["status"], "status").value
+        return query
     _ondemand_endpoint = "storage/api/collections_ondemand"
     _map_endpoint = "storage/api/collections_map"
     _append_endpoint = "storage/api/collections_append"
