@@ -68,3 +68,14 @@ class TestLocationsComponentE2E(ComponentE2ETestBase):
         with pytest.warns(err.UnknownFilterWarning):
             ignored = component.get(page_size=1, ordering="-name", radius="0,0,1")
         assert ignored.pagination.count == total      # and it really is ignored
+    def test_export_raw_keeps_trappers_header(self, component, tmp_path):
+        """``raw=True`` saves Trapper's CSV with its own header, not the SDK's column names."""
+        raw = component.export(file=tmp_path / "raw.csv", raw=True)
+        parsed = component.export(file=tmp_path / "parsed.csv")
+        raw_header = raw.read_text(encoding="utf-8").splitlines()[0].split(",")
+        assert {"locationID", "longitude", "latitude", "_id"} <= set(raw_header)
+        assert "pk" not in raw_header and "location_id" not in raw_header
+        parsed_header = parsed.read_text(encoding="utf-8").splitlines()[0].split(",")
+        assert "pk" in parsed_header and "_id" not in parsed_header
+        # same rows in both
+        assert len(raw.read_text(encoding="utf-8").splitlines()) == len(parsed.read_text(encoding="utf-8").splitlines())

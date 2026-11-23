@@ -123,6 +123,10 @@ devuelven una `Location`, construida con el JSON de Trapper; `export(file=None)`
 | `habitat` | no | **sí** |
 | `coordinate_uncertainty`, `managers` | no | no |
 
+Para guardar la exportación tal como la envía Trapper, con su cabecera (`locationID`, `ignoreDST`, `_id`,
+`researchProject`, ...) en lugar de los nombres de columna del SDK, usa
+`client.locations.export(file="locations.csv", raw=True)`.
+
 Así que para leer el `ignore_dst` de una location, o la clave primaria de su research project, usa la
 exportación; para leer su nombre o su propietario, usa la lista. `coordinate_uncertainty` y `managers`
 existen en Trapper pero no están en ninguna de las dos, y no se pueden leer. Cuando necesites las dos

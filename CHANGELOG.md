@@ -91,6 +91,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `UnknownFilterWarning` (issue #37): the locations list ignores a filter it does not know without an error, so
   passing one (a typo, `radius`, `ordering`, or `country` on v2) now warns and names it. The filters are those
   each Trapper version applies, checked live; the request is still sent.
+- `export(file=..., raw=True)` (issue #36): saves the CSV exactly as Trapper sends it, with its own header,
+  column order and values, instead of the SDK's column names sorted alphabetically. `False` by default, so
+  nothing changes; it needs `file`.
 
 ### Changed
 - **The schemas the API returns are named after the resource.** The `Record` suffix is gone:

@@ -466,6 +466,7 @@ class TrapperComponent(Generic[TModel]):
             validate: bool = True,
             overwrite_endpoint: str | None = None,
             overwrite_schema: type[TModel] | None = None,
+            raw: bool = False,
             **kwargs: Any,
     ) -> Path | list[BaseModel]:
         """
@@ -483,15 +484,26 @@ class TrapperComponent(Generic[TModel]):
                       If ``False``, models are built without validation using
                       ``model_construct``.
             overwrite_endpoint: Override the export endpoint for this call.
+            raw: Save the CSV exactly as Trapper sends it (its own header, column order and values)
+                instead of parsing the rows and writing them with the SDK's column names, sorted
+                alphabetically. Needs ``file``; ``validate`` and ``overwrite_schema`` do not apply.
             **kwargs: Extra query params merged into ``query``.
 
         Returns:
             ``Path`` to the generated CSV when ``file`` is provided,
             otherwise ``list[BaseModel]`` with parsed or constructed models.
+
+        Raises:
+            ValueError: If ``raw`` is ``True`` and ``file`` is ``None``.
         """
         self._ensure_supported()
+        if raw and file is None:
+            raise ValueError("raw=True saves Trapper's CSV as it comes: give a file")
         q = self._merge_query(query, kwargs)
         endpoint = overwrite_endpoint or self.export_endpoint or self.endpoint
+
+        if raw:
+            return self.client.export_all(endpoint, query=q, file=file)
         target_schema = overwrite_schema or self.export_schema or self.schema
 
 
