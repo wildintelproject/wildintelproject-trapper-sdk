@@ -44,6 +44,7 @@ theme:
 
 extra:
   sdk_logo: img/logo.png
+  wildintel_logo: img/wildIntel_logo_cropped.webp
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/wildintelproject/wildintelproject-trapper-sdk
