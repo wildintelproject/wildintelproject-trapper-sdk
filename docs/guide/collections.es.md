@@ -112,6 +112,71 @@ El SDK envuelve una lista plana como una sola página, así que `get_map()` y `g
 demás y `pagination.count` es la longitud de la lista. `delete_data`, `update_data`, `detail_data` y `owner_profile` son
 URLs de la página web en v1 y `None` en v2.
 
+## Crear una colección desde un paquete
+
+Una colección con sus resources se crea desde un **paquete**: un ZIP con los ficheros y un YAML que los describe. El
+SDK tiene los dos pasos, y nada más crea una colección con datos: `get_uploader()` deja los dos ficheros en la carpeta
+`collections/` de la cuenta en el servidor, y `trigger_collection()` hace que Trapper los procese.
+
+```python
+from pathlib import Path
+
+uploader = client.get_uploader()                       # por trozos en v1, reanudable (tus) en v2
+uploader.upload(Path("package.yaml"), "collections/package.yaml")
+uploader.upload(Path("package.zip"), "collections/package.zip")
+
+response = client.collections.trigger_collection({"yaml_file": "package.yaml", "zip_file": "package.zip"})
+print(response.json()["data"]["task_id"])              # la tarea ha empezado: la colección aún no está
+
+# espera: la colección y sus resources aparecen unos segundos después
+import time
+while not (found := list(client.collections.where(search="Mi colección"))):
+    time.sleep(3)
+```
+
+El YAML (Trapper lo valida con `collection_schema.yaml`; un problema es un `BadRequestError` con el detalle en
+`data.errors`):
+
+```yaml
+collections:
+  - name: Mi colección               # se reutiliza si la cuenta ya tiene una con este nombre (en el código de Trapper)
+    resources_dir: res               # la carpeta del ZIP con una carpeta por deployment
+    project_id: 3                    # un proyecto de CLASIFICACIÓN (el proyecto de investigación sale de él)
+    timezone: Europe/Madrid          # debe ser la de las locations de los deployments
+    timezone_ignore_dst: false       # y esto también
+    managers:                        # opcional
+      - username: ana
+    deployments:
+      - deployment_id: don01-2024a   # un deployment existente del proyecto de investigación del proyecto
+        resources:
+          - name: don01-2024a_0001
+            file: IMG_0001.JPG       # res/don01-2024a/IMG_0001.JPG en el ZIP
+            date_recorded: '2024-03-01T10:00:00+01:00'
+            mime_type: image/jpeg    # opcional, como file_width, file_height, file_size, file_fps, file_duration
+```
+
+y el ZIP tiene `res/don01-2024a/IMG_0001.JPG`, es decir `<resources_dir>/<deployment_id>/<file>`.
+
+Lo que necesita (comprobado en Trapper v1 y v2, salvo lo que dice *en el código de Trapper*):
+
+- El **proyecto de clasificación** y los **deployments** deben existir y la cuenta debe poder subir al proyecto. El SDK
+  crea deployments por [importación](deployments.md#importar-despliegues-acceso-de-escritura), y proyectos de
+  clasificación solo en v1 (`client.classification_projects.create()`).
+- La `timezone` y `timezone_ignore_dst` del YAML deben coincidir con las de las locations de los deployments, o
+  Trapper lo rechaza.
+- La cuenta necesita **acceso al uploader** (en v2 una *cuenta de uploader HTTP*, véase [versiones](versions.md)), y en
+  **v1 el uploader lo sirve el nginx de Trapper**: un servidor de desarrollo en su propio puerto contesta `404` al login.
+- *En el código de Trapper:* un fichero idéntico (mismo contenido) a otro que ya está en el deployment, o con una
+  extensión que Trapper no acepta, se **omite** y queda en un fichero `.log` junto al ZIP, sin que falle el resto.
+- En **v2 los ficheros subidos pueden tardar un momento en estar en su sitio**: si `trigger_collection()` contesta
+  `NotFoundError` («not found in your upload directory») justo después de la subida, espera un par de segundos y
+  vuelve a llamarla.
+- `trigger_ai_pipeline` es `True` por defecto y lanza la detección de IA sobre los resources nuevos; pasa `False` para
+  evitarlo.
+- *En el código de Trapper:* las miniaturas y las vistas previas se generan después de crear los resources, así que
+  `resources.download(pk, ..., kind="thumbnail")` puede dar `NotFoundError` durante un momento. Una vez generadas se
+  descargan (comprobado en v1).
+
 ## Lanzar el procesado de una colección subida por FTP
 
 `trigger_collection()` inicia el procesado de un paquete de datos (una definición YAML y un ZIP) que **ya está en la

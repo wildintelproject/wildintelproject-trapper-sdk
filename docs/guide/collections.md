@@ -112,6 +112,68 @@ The SDK wraps a plain list as a single page, so `get_map()` and `get_all_append(
 `pagination.count` is the length of the list. `delete_data`, `update_data`, `detail_data` and `owner_profile` are web
 page URLs on v1 and `None` on v2.
 
+## Creating a collection from a package
+
+A collection with its resources is created from a **package**: a ZIP with the files and a YAML that describes
+them. The SDK has the two steps, and nothing else creates a collection with data: `get_uploader()` puts the two
+files in the account's `collections/` folder on the server, and `trigger_collection()` makes Trapper process them.
+
+```python
+from pathlib import Path
+
+uploader = client.get_uploader()                       # chunked on v1, resumable (tus) on v2
+uploader.upload(Path("package.yaml"), "collections/package.yaml")
+uploader.upload(Path("package.zip"), "collections/package.zip")
+
+response = client.collections.trigger_collection({"yaml_file": "package.yaml", "zip_file": "package.zip"})
+print(response.json()["data"]["task_id"])              # the task has started: the collection is not there yet
+
+# wait for it: the collection and its resources appear a few seconds later
+import time
+while not (found := list(client.collections.where(search="My collection"))):
+    time.sleep(3)
+```
+
+The YAML (Trapper validates it against `collection_schema.yaml`; a problem is a `BadRequestError` with the details in
+`data.errors`):
+
+```yaml
+collections:
+  - name: My collection              # reused if the account already has one with this name (in Trapper's code)
+    resources_dir: res               # the folder of the ZIP that holds one folder per deployment
+    project_id: 3                    # a CLASSIFICATION project (the research project comes from it)
+    timezone: Europe/Madrid          # must be the one of the deployments' locations
+    timezone_ignore_dst: false       # and so must this
+    managers:                        # optional
+      - username: ana
+    deployments:
+      - deployment_id: don01-2024a   # an existing deployment of the project's research project
+        resources:
+          - name: don01-2024a_0001
+            file: IMG_0001.JPG       # res/don01-2024a/IMG_0001.JPG in the ZIP
+            date_recorded: '2024-03-01T10:00:00+01:00'
+            mime_type: image/jpeg    # optional, like file_width, file_height, file_size, file_fps, file_duration
+```
+
+and the ZIP has `res/don01-2024a/IMG_0001.JPG`, that is `<resources_dir>/<deployment_id>/<file>`.
+
+What it needs (checked on Trapper v1 and v2, except what says *in Trapper's code*):
+
+- The **classification project** and the **deployments** must exist and the account must be able to upload to the
+  project. The SDK creates deployments by [import](deployments.md#importing-deployments-write-access), and
+  classification projects on v1 only (`client.classification_projects.create()`).
+- The `timezone` and `timezone_ignore_dst` of the YAML must match the deployments' locations, or Trapper refuses it.
+- The account needs **uploader access** (on v2 an *HTTP uploader account*, see [versions](versions.md)), and on **v1
+  the uploader is served by Trapper's nginx**: a development server on its own port answers `404` to the login.
+- *In Trapper's code:* a file that is identical (same content) to one already in the deployment, or that has an
+  extension Trapper does not accept, is **skipped** and written to a `.log` file next to the ZIP, without failing the rest.
+- On **v2 the uploaded files can take a moment to be in place**: if `trigger_collection()` answers `NotFoundError`
+  ("not found in your upload directory") right after the upload, wait a couple of seconds and call it again.
+- `trigger_ai_pipeline` is `True` by default, and starts the AI detection on the new resources; pass `False` to skip it.
+- *In Trapper's code:* the thumbnails and previews are built after the resources exist, so
+  `resources.download(pk, ..., kind="thumbnail")` may answer `NotFoundError` for a moment. Once built, they download
+  (checked on v1).
+
 ## Triggering FTP-uploaded collection processing
 
 `trigger_collection()` starts the processing of a data package (a YAML definition and a ZIP) that is **already in
