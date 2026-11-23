@@ -34,6 +34,10 @@ the SDK does in the meantime.
 | 19 | Expose the valid values of the research project choice fields | research |
 | 20 | Return the primary keys of the owner and the members of a research project | research |
 | 21 | Use one URL convention, and answer API paths with JSON | cross-cutting |
+| 22 | Create, update and delete locations through the API | geomap |
+| 23 | Return every field of a location, and its related objects as keys | geomap |
+| 24 | Return the coordinates of a location as numbers | geomap |
+| 25 | Filter the list of locations by area | geomap |
 
 ---
 
@@ -324,6 +328,9 @@ acronym, abstract and owner but is a partial match. Checked against a v1.7.4 ser
 - `keywords` filters by the primary key of the tag, but no endpoint lists the keywords, so a client
   cannot know the key. An unknown key answers `400`, as it should.
 
+The same happens on the other endpoints: `GET geomap/api/locations?unknown_filter=1` returns all 16 locations
+of the test server, as no filter would.
+
 **Proposal.** Add `name` (exact) and `status` filters; accept keywords by name (`?keywords=mammals`) or
 add a keywords endpoint; and answer `400` for a query parameter the endpoint does not know, as it does
 for a bad `keywords` value.
@@ -380,6 +387,71 @@ A client has to know which convention each route uses, and cannot read the error
 with a redirect, and a JSON body for every error under the API, including `404`.
 
 **Workaround in the SDK.** Each component spells its endpoint the way the server expects it.
+
+## 22. Create, update and delete locations through the API
+
+**Labels:** enhancement, api
+
+**Problem.** `LocationViewSet` is a `PaginatedReadOnlyModelViewSet`: `OPTIONS geomap/api/locations` answers
+`Allow: GET, HEAD, OPTIONS`. A location can only be created in bulk, by the CSV import form (#8), and can
+only be edited or deleted in the web map (`update_data` points to `/geomap/map/?locations=16&edit=true`).
+The import creates locations; it does not update the ones that exist.
+
+**Proposal.** `POST geomap/api/locations`, and `PATCH`/`PUT`/`DELETE geomap/api/locations/<pk>`, with token
+authentication and the permissions the web views already check (owner and managers). Fields: `location_id`,
+`name`, `description`, `coordinates`, `timezone`, `ignore_DST`, `coordinate_uncertainty`, `is_public` and
+`research_project`. Validate the `timezone` (see #11).
+
+**Workaround in the SDK.** `locations.import_locations()` creates locations from a CSV, one row or many. There
+is no way to correct or delete one.
+
+## 23. Return every field of a location, and its related objects as keys
+
+**Labels:** enhancement, api
+
+**Problem.** Checked against a v1.7.4 server, `GET geomap/api/locations` returns `city`, `coordinates`,
+`country`, `county`, `date_created`, `description`, `is_public`, `location_id`, `name`, `owner`,
+`owner_profile`, `pk`, `research_project`, `state`, `timezone` and the `update_data`/`delete_data` URLs. It
+leaves out `ignore_DST`, `coordinate_uncertainty` and `managers`, which the model has and the CSV export
+(`geomap/api/locations/export/`) partly carries (`ignoreDST`). Related objects are display values, not keys:
+
+- `owner` is a user name (`"rp_staff"`);
+- `research_project` is the **acronym** (`"c50e23d"`), while the CSV export gives its primary key (`1`) in
+  `researchProject`: the same field in two shapes.
+
+**Proposal.** Return the missing fields, and the owner and the research project as primary keys (with the
+name or acronym next to them if it is wanted). Same as #14 and #20 for classification and research projects.
+
+**Workaround in the SDK.** None: `Location.research_project` is the acronym string, and the missing fields
+cannot be read.
+
+## 24. Return the coordinates of a location as numbers
+
+**Labels:** enhancement, api
+
+**Problem.** The list returns `"coordinates": "-6.44, 37.05"`, a single string with the longitude first.
+There is no GeoJSON or pair of numbers, and nothing says which is the axis order. The GeoJSON endpoint
+(`geomap/api/locations/geojson/`) returns a proper `Point` (`[-6.44, 37.05]`), but it was removed in Trapper
+v2.
+
+**Proposal.** `longitude` and `latitude` as numbers in the list and the detail (or a GeoJSON `geometry`), in
+Trapper v1 and v2.
+
+**Workaround in the SDK.** `Location.coordinates` is the raw string; the caller splits it. The GeoJSON
+endpoint is wrapped by `client.locations_geojson` (Trapper v1 only).
+
+## 25. Filter the list of locations by area
+
+**Labels:** enhancement, api
+
+**Problem.** `LocationFilter` excludes `coordinates`, so the list has no spatial filter: `?in_bbox=0,0,1,1` and
+`?radius=0,0,1` are **ignored silently** and return every location (16 of 16), while the GeoJSON endpoint
+applies them and returns none. The spatial filters exist only on the endpoint that Trapper v2 removed.
+
+**Proposal.** Accept `in_bbox` and `radius` on the list, and keep them when the GeoJSON endpoint goes.
+
+**Workaround in the SDK.** `client.locations_geojson.get(in_bbox=..., radius=...)` on Trapper v1. On v2 there is
+no spatial filter.
 
 ---
 
