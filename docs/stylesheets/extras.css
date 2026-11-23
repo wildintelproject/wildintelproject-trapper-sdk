@@ -26,3 +26,9 @@ article img {
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
+
+/* the logo has its own rounded corners and a transparent background: no frame or shadow */
+article img.logo {
+  border-radius: 0;
+  box-shadow: none;
+}

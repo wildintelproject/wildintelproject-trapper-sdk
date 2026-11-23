@@ -1,4 +1,4 @@
-# <img src="docs/img/wildIntel_logo.webp" alt="WildINTEL Logo" height="60"> wildintel-trapper-sdk
+# <img src="docs/img/logo.png" alt="wildintel-trapper-sdk logo" height="40" align="absmiddle"> wildintel-trapper-sdk
 
 ![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
 ![License](https://img.shields.io/badge/license-GPLv3-blue.svg)

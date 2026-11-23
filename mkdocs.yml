@@ -15,8 +15,8 @@ site_dir: site
 theme:
   name: material
   language: en
-  logo: img/WildINTEL_onlyCircle_25.png
-  favicon: img/WildINTEL_onlyCircle_25.png
+  logo: img/logo.png
+  favicon: img/favicon.png
 
   palette:
     - scheme: default
