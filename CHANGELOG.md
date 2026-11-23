@@ -92,6 +92,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `UnknownFilterWarning` (issue #37): the locations list ignores a filter it does not know without an error, so
   passing one (a typo, `radius`, `ordering`, or `country` on v2) now warns and names it. The filters are those
   each Trapper version applies, checked live; the request is still sent.
+- `UnknownFilterWarning` also on the deployments list (issue #45), with the filters each Trapper version applies
+  (`in_bbox` only on v2). `colls` and the like are named instead of silently returning every deployment.
 - `export(file=..., raw=True)` (issue #36): saves the CSV exactly as Trapper sends it, with its own header,
   column order and values, instead of the SDK's column names sorted alphabetically. `False` by default, so
   nothing changes; it needs `file`.

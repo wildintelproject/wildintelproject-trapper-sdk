@@ -35,3 +35,19 @@ class TestLocationsComponentE2E(ComponentE2ETestBase):
             assert "deploymentTags" not in (parsed[pk].model_extra or {})
         if not any(line["deploymentTags"] for line in raw.values()):
             pytest.skip("No deployment with tags on this server")
+
+    @pytest.mark.e2e
+    def test_unknown_filter_warns_and_a_known_one_does_not(self, component):
+        """The filters the warning knows are the ones this server applies (checked on v1 and v2)."""
+        import warnings
+
+        from trapper_client import err
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", err.UnknownFilterWarning)
+            total = component.get(page_size=1).pagination.count
+            assert component.get(page_size=1, deployment_id="zzz-no-such-deployment").pagination.count == 0
+            assert component.get(page_size=1, setup_by="zzz-no-such-person").pagination.count == 0
+        with pytest.warns(err.UnknownFilterWarning):
+            ignored = component.get(page_size=1, colls=1, ordering="-pk")
+        assert ignored.pagination.count == total      # and it really is ignored

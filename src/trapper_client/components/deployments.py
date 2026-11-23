@@ -69,6 +69,20 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
     """
 
     endpoint = "geomap/api/deployments"
+
+    # Checked against live Trapper v1 and v2: a parameter that is not here is ignored by the server.
+    _V1_FILTERS = frozenset({
+        "pk", "location", "research_project", "tags", "owner", "sdate_from", "sdate_to", "edate_from",
+        "edate_to", "classification_project", "correct_setup", "correct_tstamp", "search",
+        "deployment_code", "deployment_id", "view_quality", "setup_by", "camera_id", "camera_model",
+        "camera_interval", "camera_height", "camera_depth", "camera_tilt", "camera_heading",
+        "detection_distance", "bait_type", "feature_type", "habitat", "session", "array", "comments",
+        "date_created", "managers", "start_date", "end_date", "is_incomplete", "capture_method", "status",
+    })
+    known_filters = {
+        "v1": _V1_FILTERS,
+        "v2": _V1_FILTERS | {"in_bbox"},  # v2 only: v1's list ignores it
+    }
     export_endpoint = "geomap/api/deployments/export/"
     schema = Deployment
     export_schema = DeploymentExport
