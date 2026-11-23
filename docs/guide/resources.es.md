@@ -22,15 +22,29 @@
 | `udate_from`, `udate_to` | fecha | Rango de `date_uploaded` |
 | `rtime_from`, `rtime_to` | HH:MM | Rango de hora del día sobre `date_recorded` |
 | `owner` | booleano | `true` = solo recursos propiedad o gestionados por el usuario actual |
-| `locations_map` | PK separadas por comas | Filtra mediante `deployment__location` |
-| `collections` | lista de PK | Filtra por una o más PK de colección |
-| `deployments` | PK repetibles | Filtra por PK de despliegue |
-| `deployment__isnull` | booleano | `true` = recursos sin despliegue |
+| `locations_map` | lista de PK | Filtra mediante `deployment__location` (**solo v1**: Trapper v2 lo ignora) |
+| `collections` | lista de PK | Filtra por una o más PK de colección (cualquiera de ellas) |
+| `deployments` | lista de PK | Filtra por PK de despliegue (cualquiera de ellas) |
 | `tags` | lista de PK | Filtra por PK de etiqueta |
 | `observation_type` | cadena | Búsqueda de texto completo de `observation_type:<valor>` |
-| `species` | repetible | Búsqueda de texto completo de `species_id:<valor>` |
+| `species` | lista de PK | Búsqueda de texto completo de `species_id:<valor>` |
 | `timestamp_error` | booleano | `true` = recursos fuera del rango de fechas del despliegue |
 | `search` | cadena | Búsqueda de texto completo en el nombre y los vectores de datos |
+
+Las listas (`pk`, `locations_map`, `collections`, `deployments`, `tags`, `species`) se pueden dar como lista o como
+cadena separada por comas: `collections=[2, 3]` y `collections="2,3"` son lo mismo. Trapper lee cada una de forma
+distinta (`deployments` y `collections` como parámetros repetidos, `pk` y `locations_map` como una cadena con comas)
+y se equivoca sin avisar si recibe la otra: `deployments="1,2"` se ignora y devuelve todos los recursos,
+`collections="2,3"` da un `400`, `pk=[1, 2]` se queda con un solo pk y `locations_map=[1, 2]` no encuentra nada. El
+SDK envía cada una como Trapper la lee.
+
+!!! warning "Un filtro que Trapper no aplica"
+    Trapper ignora un parámetro que no es uno de sus filtros **sin dar error**, y la lista vuelve sin filtrar; el SDK
+    emite un `UnknownFilterWarning` que lo nombra (la petición se envía igualmente). Además de los de la tabla, la
+    lista aplica `name`, `deployment`, `mime_type`, `file_size`, `token` y `file_checksum_hash`. `locations_map` lo
+    ignora v2, y `ordering` e `in_bbox` las dos. `deployment__isnull`, que una versión anterior de esta guía
+    listaba, hace que Trapper conteste **`500`** en v1 y v2, valga lo que valga: el SDK avisa y no hay filtro para
+    los recursos sin despliegue. Para silenciar el aviso: `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
 
 ## Los seis patrones de acceso
 

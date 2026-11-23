@@ -95,6 +95,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `client.resources.download(pk, file, kind="original" | "preview" | "thumbnail")` (issue #56): saves the file of a
   resource. The API token cannot fetch it (the web view answers `404`), so it logs in with `user_name` and
   `user_password`, streams to a `.part` file, and retries network failures and `502`/`503`/`504` with tenacity.
+- Resource list filters (issue #58): `pk`, `locations_map`, `collections`, `deployments`, `tags` and `species` take a list
+  or a comma-separated string and are sent the way Trapper reads each one (`deployments="1,2"` used to be ignored
+  and return every resource, `collections="2,3"` was a `400`). `UnknownFilterWarning` also on the resource list
+  (`locations_map` only on v1), and it names `deployment__isnull`, which Trapper answers with a `500`.
 - `client.locations.in_area(bbox=..., center=..., radius=..., **filters)` (issue #34): the locations inside a
   bounding box or a circle (radius in metres). Trapper v1's list ignores `in_bbox` and `radius` silently and
   v2's ignores `radius`, so the SDK filters on the client; on v2 a box is also sent as `in_bbox` (issue #40) so
@@ -109,6 +113,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- **`deployment__isnull` is no longer documented as a resource filter** (issue #58): Trapper answers `500` to it on v1
+  and v2. The SDK warns when it is passed.
 - **The dates of a deployment are `datetime`** (issue #49): `Deployment.start_date`/`end_date` and
   `DeploymentExport.start_date`/`end_date` were text, and the JSON and the CSV spell them differently
   (`+01:00` and `+0100`). Both are timezone-aware `datetime` now; one that cannot be read stays as text and an

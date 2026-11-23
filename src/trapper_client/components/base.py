@@ -253,19 +253,36 @@ class TrapperComponent(Generic[TModel]):
     #: (:class:`~trapper_client.err.UnknownFilterWarning`). ``None`` means "not known": no check.
     known_filters: Dict[str, frozenset[str]] | None = None
 
+    #: Filters that Trapper does apply but answers with an error (a ``500``), with the reason:
+    #: ``{"name": "answers 500"}``. They get an :class:`~trapper_client.err.UnknownFilterWarning` too.
+    broken_filters: Dict[str, str] = {}
+
+    def _normalize_query(self, query: Dict[str, Any]) -> Dict[str, Any]:
+        """Hook: put the values of a query in the form the server reads (see ``ResourcesComponent``)."""
+        return query
+
     def _warn_unknown_filters(self, query: Dict[str, Any], stacklevel: int = 3) -> None:
-        """Warn about the parameters of ``query`` that the server would ignore silently."""
+        """Warn about the parameters of ``query`` that the server would ignore silently, or fail on."""
+        broken = sorted(k for k in query if k in self.broken_filters)
+        if broken:
+            warnings.warn(
+                f"{self.endpoint}: " + "; ".join(f"{k!r}: Trapper {self.broken_filters[k]}" for k in broken),
+                err.UnknownFilterWarning,
+                stacklevel=stacklevel,
+            )
         if not self.known_filters:
             return
         # Not every call has to learn the server version (that is a request): only a parameter that some
         # version does not apply needs it.
-        common = frozenset.intersection(*self.known_filters.values()) | self._PAGING_PARAMS
+        common = frozenset.intersection(*self.known_filters.values()) | self._PAGING_PARAMS | set(self.broken_filters)
         if all(k in common for k in query):
             return
         known = self.known_filters.get(self.client.server_version)
         if known is None:
             return
-        unknown = sorted(k for k in query if k not in known and k not in self._PAGING_PARAMS)
+        unknown = sorted(
+            k for k in query if k not in known and k not in self._PAGING_PARAMS and k not in self.broken_filters
+        )
         if unknown:
             warnings.warn(
                 f"{self.endpoint}: Trapper {self.client.server_version} ignores "
@@ -287,6 +304,7 @@ class TrapperComponent(Generic[TModel]):
         """
         q = dict(query or {})
         q.update(kwargs)
+        q = self._normalize_query(q)
         self._warn_unknown_filters(q, stacklevel=4)
         return q
 
@@ -388,6 +406,7 @@ class TrapperComponent(Generic[TModel]):
         self._ensure_supported()
         q = dict(query or {})
         q.update(kwargs)
+        q = self._normalize_query(q)
         self._warn_unknown_filters(q)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema

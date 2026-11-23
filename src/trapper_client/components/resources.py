@@ -51,13 +51,11 @@ class ResourcesComponent(TrapperComponent[Resource]):
     +----------------------------+-----------------------------+--------------------------------------------------------------+
     | ``owner``                  | boolean                     | ``true`` = only resources owned/managed by current user      |
     +----------------------------+-----------------------------+--------------------------------------------------------------+
-    | ``locations_map``          | comma-separated PKs         | Filter via ``deployment__location``                          |
+    | ``locations_map``          | list of PKs                 | Filter via ``deployment__location`` (v1 only)                |
     +----------------------------+-----------------------------+--------------------------------------------------------------+
     | ``collections``            | list of PKs                 | Filter by one or more collection PKs                         |
     +----------------------------+-----------------------------+--------------------------------------------------------------+
     | ``deployments``            | repeatable PKs              | Filter by deployment PKs                                     |
-    +----------------------------+-----------------------------+--------------------------------------------------------------+
-    | ``deployment__isnull``     | boolean                     | ``true`` = resources with no deployment                      |
     +----------------------------+-----------------------------+--------------------------------------------------------------+
     | ``tags``                   | list of PKs                 | Filter by tag PKs                                            |
     +----------------------------+-----------------------------+--------------------------------------------------------------+
@@ -69,6 +67,11 @@ class ResourcesComponent(TrapperComponent[Resource]):
     +----------------------------+-----------------------------+--------------------------------------------------------------+
     | ``search``                 | string                      | Full-text search across name and data vectors                |
     +----------------------------+-----------------------------+--------------------------------------------------------------+
+
+    The lists (``pk``, ``locations_map``, ``collections``, ``deployments``, ``tags``, ``species``) can be a list
+    or a comma-separated string; the SDK sends each one the way Trapper reads it. A parameter Trapper does not
+    apply is ignored by the server, and the SDK warns (:class:`~trapper_client.err.UnknownFilterWarning`).
+    ``deployment__isnull`` makes Trapper answer ``500``: it is not a usable filter.
 
     **Examples:**
 
@@ -106,6 +109,55 @@ class ResourcesComponent(TrapperComponent[Resource]):
 
     endpoint = "storage/api/resources"
     schema = Resource
+
+    # What each version applies (checked live on v1 and v2): a parameter that is not here is ignored.
+    _COMMON_FILTERS = frozenset({
+        "pk", "resource_type", "status", "rdate_from", "rdate_to", "udate_from", "udate_to", "rtime_from",
+        "rtime_to", "owner", "collections", "deployments", "tags", "observation_type", "species",
+        "timestamp_error", "search", "name", "deployment", "mime_type", "file_size", "token",
+        "file_checksum_hash",
+    })
+    known_filters = {
+        "v1": _COMMON_FILTERS | {"locations_map"},
+        "v2": _COMMON_FILTERS,       # v2 ignores locations_map: it has no maps
+    }
+    broken_filters = {"deployment__isnull": "answers 500 (a server error) whatever the value"}
+
+    #: Filters that Trapper reads from repeated parameters (``collections=2&collections=3``) ...
+    _REPEATED_FILTERS = frozenset({"collections", "deployments", "tags", "species"})
+    #: ... and the ones it reads from one comma-separated string (``pk=1,2,3``).
+    _COMMA_FILTERS = frozenset({"pk", "locations_map"})
+
+    def _normalize_query(self, query: Dict[str, Any]) -> Dict[str, Any]:
+        """Send the list filters the way Trapper reads each one, whichever way the caller gave them.
+
+        ``deployments="1,2"`` is ignored by Trapper (every resource comes back), ``collections="2,3"`` is a
+        400, ``pk=[1, 2]`` keeps one pk and ``locations_map=[1, 2]`` finds nothing; the opposite forms work.
+        A list, a tuple, a set or a comma-separated string is accepted for all of them.
+        """
+        query = dict(query)
+        for key in self._REPEATED_FILTERS & query.keys():
+            values = self._as_list(query[key])
+            if values is not None:
+                query[key] = values
+        for key in self._COMMA_FILTERS & query.keys():
+            values = self._as_list(query[key])
+            if values is not None:
+                query[key] = ",".join(str(v) for v in values)
+        return query
+
+    @staticmethod
+    def _as_list(value: Any) -> list[Any] | None:
+        """The items of a list-like or comma-separated value, or ``None`` if it is neither."""
+        if isinstance(value, (list, tuple, set, frozenset)):
+            items = list(value)
+        elif isinstance(value, str):
+            items = value.split(",")
+        elif value is None:
+            return None
+        else:
+            return [value]
+        return [v.strip() if isinstance(v, str) else v for v in items if not (isinstance(v, str) and not v.strip())]
 
     #: The web view that serves the files of a resource (not part of the REST API: it needs a web session).
     media_endpoint = "storage/resource/media/{pk}/{field}/"
