@@ -4,8 +4,11 @@ Component for Classificators data endpoint.
 
 from __future__ import annotations
 
+import re
+from typing import Any, Dict
+
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import ClassificatorRecord
+from trapper_client.schemas import ClassificatorCreate, ClassificatorRecord
 
 
 class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
@@ -31,3 +34,72 @@ class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
 
     endpoint = "/media_classification/api/classificators"
     schema = ClassificatorRecord
+    create_endpoint = "media_classification/classificator/create/"
+    _CREATED_RE = re.compile(r"/classificator/update/(\d+)/")
+
+    def create(
+        self,
+        classificator: ClassificatorCreate | Dict[str, Any],
+        *,
+        raise_on_error: bool = True,
+    ) -> ClassificatorRecord | None:
+        """Create a classificator (**Trapper v1 only**).
+
+        The REST API is read-only for classificators, so this simulates the classic web form
+        ``media_classification/classificator/create/`` with cookie/session authentication, as
+        :meth:`~trapper_client.components.research_projects.ResearchProjectsComponent.create` does.
+        The account that logs in becomes the owner.
+
+        Trapper silently drops a species primary key that does not exist: a classificator whose
+        ``species`` are all unknown ends up accepting every species. Check the keys against
+        ``client.species`` first when it matters.
+
+        Only the standard attributes are covered: species, tracked species, the optional
+        attributes (sex, age, ...) and the layout. Custom and predefined attributes are not.
+
+        Warning:
+            It depends on an unversioned HTML form, and needs ``user_name``/``user_password`` (the
+            *email* on servers that log in by email): a token alone cannot authenticate it.
+
+        Args:
+            classificator: A :class:`~trapper_client.schemas.classificators.ClassificatorCreate`
+                (or a dict with its fields).
+            raise_on_error: Raise ``APIError`` when the server rejects the form (the default);
+                with ``False`` return ``None`` instead.
+
+        Returns:
+            The created classificator, or ``None`` when the server rejected the form and
+            ``raise_on_error=False``.
+
+        Raises:
+            pydantic.ValidationError: ``classificator`` is not valid (a ``ValueError``): nothing
+                is sent.
+            err.UnsupportedVersionError: On Trapper v2.
+            err.APIError: The server rejected the form (a name already in use, unknown species,
+                ...) or redirected to its login page.
+
+        Example::
+
+            clf = client.classificators.create(
+                ClassificatorCreate(
+                    name="Iberian mammals",
+                    species=[12, 15, 40],
+                    tracked_species=[40],
+                    sex=True,
+                    age=True,
+                )
+            )
+        """
+        self._require_version("v1", feature="classificators.create()")
+        if not isinstance(classificator, ClassificatorCreate):
+            classificator = ClassificatorCreate.model_validate(classificator)
+
+        response = self._submit_create_form(
+            self.create_endpoint, classificator.to_form(), "Classificator", raise_on_error,
+            field_prefix="classificator-",
+        )
+        if response is None:
+            return None
+        # Trapper redirects to the update page of the classificator it has just saved
+        created = self._CREATED_RE.search(response.headers.get("location") or "")
+        return self.find(int(created.group(1))) if created else None

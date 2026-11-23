@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import pytest
 
-from trapper_client import AnimalTypes, BaitUse, SamplingDesign, SensorMethod
+from trapper_client import AnimalTypes, BaitUse, ClassificatorTemplate, SamplingDesign, SensorMethod
 
 
 class TestChoice:
@@ -37,3 +37,20 @@ class TestChoice:
     ])
     def test_numbers_are_consecutive_from_one(self, enum, count):
         assert [m.value for m in enum] == list(range(1, count + 1))
+
+
+class TestClassificatorTemplate:
+
+    def test_members_are_the_strings_trapper_stores(self):
+        assert ClassificatorTemplate.TAB == "tab"
+        assert ClassificatorTemplate.TAB.value == "tab" and ClassificatorTemplate.TAB.label == "Tabbed"
+        assert ClassificatorTemplate.INLINE.label == "Inline"
+
+    @pytest.mark.parametrize("value", [ClassificatorTemplate.INLINE, "inline", "INLINE", "Inline", " inline "])
+    def test_parse_accepts_member_value_label_and_name(self, value):
+        assert ClassificatorTemplate.parse(value) is ClassificatorTemplate.INLINE
+
+    @pytest.mark.parametrize("value", ["grid", "", None, 1])
+    def test_parse_rejects_anything_else(self, value):
+        with pytest.raises(ValueError, match="template.*inline"):
+            ClassificatorTemplate.parse(value, "template")

@@ -14,10 +14,10 @@ mean the same.
 """
 from __future__ import annotations
 
-from enum import IntEnum
+from enum import Enum, IntEnum
 from typing import Any
 
-__all__ = ["SamplingDesign", "SensorMethod", "AnimalTypes", "BaitUse"]
+__all__ = ["SamplingDesign", "SensorMethod", "AnimalTypes", "BaitUse", "ClassificatorTemplate"]
 
 
 class _Choice(IntEnum):
@@ -89,3 +89,30 @@ class BaitUse(_Choice):
     VISUAL = (4, "visual")
     ACOUSTIC = (5, "acoustic")
     OTHER = (6, "other")
+
+
+class ClassificatorTemplate(str, Enum):
+    """How a classificator's form is laid out (``Classificator.template``).
+
+    The members are the strings Trapper stores; ``label`` is what its form shows.
+    """
+
+    INLINE = "inline"
+    TAB = "tab"
+
+    @property
+    def label(self) -> str:
+        return {"inline": "Inline", "tab": "Tabbed"}[self.value]
+
+    @classmethod
+    def parse(cls, value: Any, field: str = "value") -> "ClassificatorTemplate":
+        """Resolve a member from itself, its value (``"tab"``), its label or its name, in any case."""
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, str):
+            wanted = value.strip().lower()
+            for member in cls:
+                if wanted in (member.value, member.name.lower(), member.label.lower()):
+                    return member
+        options = ", ".join(f"{m.value} ({m.label})" for m in cls)
+        raise ValueError(f"{field}: {value!r} is not valid; use one of {options}")

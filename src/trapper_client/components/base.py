@@ -125,24 +125,32 @@ class TrapperComponent(Generic[TModel]):
         }
 
     def _submit_create_form(
-        self, form_endpoint: str, data: Dict[str, Any], label: str, raise_on_error: bool
-    ) -> bool:
-        """POST a classic create form and say whether the server accepted it.
+        self,
+        form_endpoint: str,
+        data: Dict[str, Any],
+        label: str,
+        raise_on_error: bool,
+        field_prefix: str | None = None,
+    ) -> Any | None:
+        """POST a classic create form; return the server's response when it accepted it.
 
         Trapper answers ``302`` to the project list when it saves, and ``200`` with the form
         re-rendered (and the reasons in it) when it does not. A ``302`` to the login page is a
-        refusal, not a success.
+        refusal, not a success. ``field_prefix`` is the prefix of the form's fields when the page
+        carries several forms, so that only its own errors are reported.
         """
         response = self.client.session_post_multipart(form_endpoint, data=data)
         if self._import_accepted(response):
-            return True
+            return response
         if not raise_on_error:
-            return False
+            return None
         if response.status_code == 302:
             raise err.APIError(
                 f"{label} creation refused: the server redirected to its login page."
             )
-        message = self.client._extract_html_error_text(response.text)
+        message = (
+            field_prefix and self.client._extract_form_field_errors(response.text, field_prefix)
+        ) or self.client._extract_html_error_text(response.text)
         raise err.APIError(f"{label} creation failed (status {response.status_code}): {message}")
 
     @staticmethod

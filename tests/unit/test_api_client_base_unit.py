@@ -1124,3 +1124,17 @@ def test_extract_html_error_text_names_the_invalid_form_fields(token_client):
         "acronym: Ensure this value has at least 3 characters (it has 2).; "
         "name: Research project with this Name already exists."
     )
+
+
+def test_extract_form_field_errors_keeps_only_the_wanted_form(token_client):
+    """A page that re-renders several forms: only the errors of the form with the prefix count."""
+    html = (
+        '<span id="error_1_id_classificator-name" class="help-block"><strong>Already exists.</strong></span>'
+        '<span id="error_1_id_name" class="help-block"><strong>You have forgotten about this field.</strong></span>'
+    )
+    assert token_client._extract_form_field_errors(html, "classificator-") == "name: Already exists."
+    assert "forgotten" in token_client._extract_form_field_errors(html)
+
+
+def test_extract_form_field_errors_finds_nothing_in_a_plain_page(token_client):
+    assert token_client._extract_form_field_errors("<p>nothing</p>") is None

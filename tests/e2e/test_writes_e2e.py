@@ -25,6 +25,7 @@ import pytest
 
 from trapper_client import (
     ClassificationProjectCreate,
+    ClassificatorCreate,
     ResearchProjectCreate,
     SamplingDesign,
     TrapperClient,
@@ -290,3 +291,27 @@ class TestClassificationProjectCreateE2E:
             session_writer.classification_projects.create(
                 ClassificationProjectCreate(name="e2e", research_project=99999999, classificator=1)
             )
+
+
+# ── classificator creation (Trapper v1) ───────────────────────────────────────
+
+class TestClassificatorCreateE2E:
+
+    @pytest.mark.e2e
+    def test_create_then_reject_a_duplicate(self, session_writer):
+        if session_writer.server_version == "v2":
+            with pytest.raises(err.UnsupportedVersionError):
+                session_writer.classificators.create(ClassificatorCreate(name="e2e"))
+            return
+
+        name = f"e2e classificator {uuid.uuid4().hex[:6]}"
+        created = session_writer.classificators.create(
+            ClassificatorCreate(name=name, template="tab", sex=True, age=True)
+        )
+        assert created is not None and created.name == name
+        assert session_writer.classificators.find(created.pk).name == name
+        # the optional attributes that were ticked are part of the form the classifier will see
+        assert "sex" in created.dynamic_attrs_order and "age" in created.dynamic_attrs_order
+
+        with pytest.raises(err.APIError, match="name: .*already exists"):
+            session_writer.classificators.create(ClassificatorCreate(name=name))

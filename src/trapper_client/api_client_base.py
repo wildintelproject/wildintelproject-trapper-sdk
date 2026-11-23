@@ -632,14 +632,24 @@ class APIClientBase:
                 parts.append(f"{where}: {msg if msg != '—' else kind}" + (f" (cell {cell})" if cell != "—" else ""))
         return "; ".join(parts) or None
 
-    def _extract_form_field_errors(self, html_text: str) -> str | None:
+    def _extract_form_field_errors(self, html_text: str, prefix: str | None = None) -> str | None:
         """Field-level errors of a re-rendered Django form, as ``"field: message; ..."``.
 
         The page-level banner ("Error creating new project") says nothing about *which* field is
         wrong; the reason is in the ``help-block`` next to each invalid input.
+
+        Args:
+            html_text: The re-rendered page.
+            prefix: Keep only the fields of the form with this prefix (``"classificator-"``) and
+                show them without it. A page that carries several forms re-renders the others with
+                errors that are not the cause.
         """
         errors = []
         for field, message in self._FIELD_ERROR_RE.findall(html_text):
+            if prefix:
+                if not field.startswith(prefix):
+                    continue
+                field = field[len(prefix):]
             text = " ".join(html.unescape(self._TAG_RE.sub(" ", message)).split())
             if text:
                 errors.append(f"{field}: {text}")

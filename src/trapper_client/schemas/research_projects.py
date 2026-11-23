@@ -2,16 +2,11 @@
 from datetime import datetime
 from typing import Annotated, Any
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from trapper_client.enums import AnimalTypes, BaitUse, SamplingDesign, SensorMethod
 
-from .base import TrapperSchema
-
-
-def _choice(enum: type) -> BeforeValidator:
-    """Accept an enumeration's member, its number, its label or its name."""
-    return BeforeValidator(lambda value: enum.parse(value, enum.__name__))
+from .base import TrapperSchema, choice
 
 
 class ResearchProjectRole(TrapperSchema):
@@ -76,10 +71,10 @@ class ResearchProjectCreate(BaseModel):
 
     name: str = Field(min_length=1, max_length=255, description="Unique.")
     acronym: str = Field(min_length=3, max_length=10, description="Unique.")
-    sampling_design: Annotated[SamplingDesign, _choice(SamplingDesign)] = SamplingDesign.SIMPLE_RANDOM
-    sensor_method: Annotated[SensorMethod, _choice(SensorMethod)] = SensorMethod.ACTIVITY_DETECTION
-    animal_types: Annotated[AnimalTypes, _choice(AnimalTypes)] = AnimalTypes.UNMARKED
-    bait_use: Annotated[BaitUse, _choice(BaitUse)] = BaitUse.NONE
+    sampling_design: Annotated[SamplingDesign, choice(SamplingDesign)] = SamplingDesign.SIMPLE_RANDOM
+    sensor_method: Annotated[SensorMethod, choice(SensorMethod)] = SensorMethod.ACTIVITY_DETECTION
+    animal_types: Annotated[AnimalTypes, choice(AnimalTypes)] = AnimalTypes.UNMARKED
+    bait_use: Annotated[BaitUse, choice(BaitUse)] = BaitUse.NONE
     event_interval: int = Field(default=0, ge=0, description="Seconds.")
     keywords: list[str] = Field(default_factory=list)
     abstract: str | None = Field(default=None, max_length=2000)

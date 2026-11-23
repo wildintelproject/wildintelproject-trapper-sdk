@@ -72,6 +72,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   classic web forms (the REST API is read-only for them). `create()` takes a
   `ClassificationProjectCreate` model. A project can only use the collections of its research
   project; unlinking deletes the classifications made on that collection in the project.
+- `classificators.create(ClassificatorCreate(...))` (Trapper v1): creates a classificator through the
+  classic web form: layout (`ClassificatorTemplate`), the species it offers and the ones Trapper
+  watches, and the optional attributes. Custom and predefined attributes are not covered.
 
 ### Fixed
 - A client that had imported locations or deployments (session login) could no longer call any

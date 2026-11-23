@@ -140,7 +140,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         data = request.to_form()
         data.update(self._owner_role_fields(self.create_endpoint, _ROLES_PREFIX, "research project"))
 
-        if self._submit_create_form(self.create_endpoint, data, "Research project", raise_on_error):
+        if self._submit_create_form(self.create_endpoint, data, "Research project", raise_on_error) is not None:
             return next(iter(self.where(acronym=acronym, page_size=5)), None)
         return None
 
