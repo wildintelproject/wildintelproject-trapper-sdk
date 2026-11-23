@@ -9,6 +9,7 @@ They change the server, so they are opt-in on top of the usual e2e switches:
                                                       (an e-mail address; staff account on v2)
     WILDINTEL_RPROJECT_PK                           — research project that receives the data
     WILDINTEL_CLASSIFICATION_PROJECT_PK             — only for the classification import
+    WILDINTEL_CLASSIFICATOR_PK                      — only for creating a classification project
 
 Every location and deployment they create has a unique ID (``e2e-<random>``), so the tests can be
 repeated; they do not delete what they create (the SDK has no delete for these resources).
@@ -22,7 +23,13 @@ from pathlib import Path
 
 import pytest
 
-from trapper_client import ResearchProjectCreate, SamplingDesign, TrapperClient, err
+from trapper_client import (
+    ClassificationProjectCreate,
+    ResearchProjectCreate,
+    SamplingDesign,
+    TrapperClient,
+    err,
+)
 
 TIMEZONE = "Europe/Madrid"
 
@@ -234,3 +241,52 @@ class TestResearchProjectCreateE2E:
             session_writer.research_projects.create(ResearchProjectCreate(name=name, acronym=f"x{tag}"))
         with pytest.raises(err.APIError, match="acronym: .*already exists"):
             session_writer.research_projects.create(ResearchProjectCreate(name=f"other {tag}", acronym=acronym))
+
+
+# ── classification project creation (Trapper v1) ──────────────────────────────
+
+class TestClassificationProjectCreateE2E:
+
+    @pytest.mark.e2e
+    def test_create_add_and_remove_a_collection(self, session_writer, research_project):
+        """WILDINTEL_RPROJECT_PK must be a research project the account administers, ideally with
+        collections: a classification project can only use the collections of its research project."""
+        classificator = _env("WILDINTEL_CLASSIFICATOR_PK")
+        if not classificator:
+            pytest.skip("Set WILDINTEL_CLASSIFICATOR_PK")
+        projects = session_writer.classification_projects
+        if session_writer.server_version == "v2":
+            with pytest.raises(err.UnsupportedVersionError):
+                projects.create({"name": "e2e", "research_project": 1, "classificator": 1})
+            return
+
+        name = f"e2e cproject {uuid.uuid4().hex[:6]}"
+        project = projects.create(ClassificationProjectCreate(
+            name=name, research_project=research_project, classificator=int(classificator),
+        ))
+        assert project is not None and project.name == name
+
+        collections = [
+            link.collection_pk
+            for link in session_writer.research_projects.where_project_collections(project_pk=research_project)
+        ]
+        if not collections:
+            pytest.skip("the research project has no collections to link")
+        pk = collections[0]
+
+        links = projects.add_collections(project.pk, [pk])
+        assert [link.collection_pk for link in links] == [pk]
+        assert projects.add_collections(project.pk, [pk])[0].pk == links[0].pk      # idempotent
+
+        assert projects.remove_collection(project.pk, pk) is True
+        assert projects.find_collection_in_project(project.pk, pk) is None
+        assert projects.remove_collection(project.pk, pk) is False
+
+    @pytest.mark.e2e
+    def test_unknown_research_project_is_rejected_with_the_field(self, session_writer):
+        if session_writer.server_version == "v2":
+            pytest.skip("Trapper v1 only")
+        with pytest.raises(err.APIError, match="research_project: .*valid choice"):
+            session_writer.classification_projects.create(
+                ClassificationProjectCreate(name="e2e", research_project=99999999, classificator=1)
+            )

@@ -44,6 +44,7 @@ Skip the probe by passing `trapper_version="v1"` or `"v2"`.
 | `classification_results.import_classifications(overwrite_attrs=True)` | ✔ | `UnsupportedVersionError` (v2 removed the option) |
 | `client.project_deployments` | `UnsupportedVersionError` | ✔ |
 | `research_projects.create()` | ✔ (web form) | `UnsupportedVersionError` |
+| `classification_projects.create()`, `.add_collections()`, `.remove_collection()` | ✔ (web forms) | `UnsupportedVersionError` |
 | Everything else | ✔ | ✔ |
 
 ## Uploading

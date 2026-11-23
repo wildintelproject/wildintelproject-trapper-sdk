@@ -1,7 +1,7 @@
 # Classification Projects
 
 !!! info "Trapper compatibility"
-    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+    **v1** ✔ · **v2** ✔ — except `create()`, `add_collections()` and `remove_collection()`, which are **v1 only**. See [Trapper versions](versions.md).
 
 `client.classification_projects` — classification projects: the workspace where resources from one
 or more collections get classified against a classificator.
@@ -99,3 +99,63 @@ print(page.pagination.total, page.pagination.filtered)  # not .count/.pages here
 for res in page.results:
     print(res.pk, res.name)
 ```
+
+## Creating a classification project (Trapper v1)
+
+The REST API is read-only for classification projects, so `create()`, `add_collections()` and
+`remove_collection()` work around that by simulating Trapper's classic web forms via cookie/session
+auth, like [`import_locations()`](locations.md#importing-locations-write-access). On Trapper v2 they
+raise `UnsupportedVersionError`.
+
+!!! warning "Not a stable API contract"
+    They depend on unversioned HTML forms and need `user_name`/`user_password` (the account's *email*
+    on servers that log in by email): a token alone cannot authenticate them.
+
+```python
+from trapper_client import ClassificationProjectCreate
+
+project = client.classification_projects.create(
+    ClassificationProjectCreate(name="Doñana 2026", research_project=3, classificator=2)
+)
+print(project.pk, project.name, project.status)        # 12 Doñana 2026 Ongoing
+```
+
+`create()` takes a `ClassificationProjectCreate`, a Pydantic model (a dict with its fields works too).
+It validates before anything is sent: a name, and the primary keys of the research project and of
+the classificator. The project starts *ongoing*, and the account that logs in becomes its owner and
+administrator. The research project must be one the account can edit; otherwise Trapper rejects the
+form and `create()` raises `APIError` naming the field:
+
+```
+Classification project creation failed (status 200): research_project: Select a valid choice. That choice is not one of the available choices.
+```
+
+It returns the created project, or `None` if it cannot be read back (or the form was rejected and
+`raise_on_error=False`).
+
+### Adding collections
+
+A new project is empty. `add_collections()` links *storage collections* to it:
+
+```python
+links = client.classification_projects.add_collections(project.pk, [1, 2])
+print([(link.pk, link.collection_pk) for link in links])
+```
+
+- The numbers you pass are the primary keys of the storage collections (`Collection.pk`), as in the
+  rest of the SDK. The SDK works out the link records Trapper needs by itself.
+- **A classification project can only use the collections of its research project**, and the account
+  must administer that research project. A collection that is not there raises `ValueError` before
+  anything is sent. Linking a collection to a research project is a web action the SDK does not cover.
+- A collection that is already in the project is left as it is, so the call can be repeated.
+- It returns the project's link for each collection.
+
+### Removing a collection
+
+```python
+client.classification_projects.remove_collection(project.pk, 1)    # True; False if it was not linked
+```
+
+!!! danger "It deletes classifications"
+    Unlinking is irreversible, and the classifications made on that collection **in this project are
+    deleted with the link**. The collection and its resources are not touched.

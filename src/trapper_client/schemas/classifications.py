@@ -344,6 +344,34 @@ class ClassificationProject(TrapperSchema):
     delete_data: str | None = None
 
 
+class ClassificationProjectCreate(BaseModel):
+    """What it takes to create a classification project
+    (``client.classification_projects.create()``).
+
+    ``ClassificationProject`` is what the API answers (it names the research project, not its pk);
+    this is what the creation form asks. Unknown fields are rejected, so a typo fails here and not
+    silently on the server.
+
+    The project starts *ongoing*, and the account that creates it becomes its owner and
+    administrator. Collections are added afterwards with ``add_collections()``.
+    """
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    name: str = Field(min_length=1, max_length=255)
+    research_project: int = Field(gt=0, description="Primary key of the research project.")
+    classificator: int = Field(gt=0, description="Primary key of the classificator.")
+
+    def to_form(self) -> Dict[str, Any]:
+        """The fields of Trapper's ``media_classification/project/create/`` form."""
+        return {
+            "name": self.name,
+            "research_project": self.research_project,
+            "classificator": self.classificator,
+            "status": 1,  # ongoing: the form hides the field and posts this value on creation
+        }
+
+
 class ClassificationProjectCollection(TrapperSchema):
     """Schema for collection entries inside a classification project."""
 

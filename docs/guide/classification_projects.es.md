@@ -1,7 +1,7 @@
 # Proyectos de clasificación
 
 !!! info "Compatibilidad con Trapper"
-    **v1** ✔ · **v2** ✔ — el mismo código en ambas. Consulta [Versiones de Trapper](versions.md).
+    **v1** ✔ · **v2** ✔ — salvo `create()`, `add_collections()` y `remove_collection()`, que son **solo v1**. Consulta [Versiones de Trapper](versions.md).
 
 `client.classification_projects` — proyectos de clasificación: el espacio de trabajo donde los recursos
 de una o más colecciones se clasifican con un clasificador.
@@ -99,3 +99,66 @@ print(page.pagination.total, page.pagination.filtered)  # aquí no existen .coun
 for res in page.results:
     print(res.pk, res.name)
 ```
+
+## Crear un proyecto de clasificación (Trapper v1)
+
+La API REST es de solo lectura para los proyectos de clasificación, así que `create()`,
+`add_collections()` y `remove_collection()` lo resuelven simulando los formularios web clásicos de
+Trapper con autenticación por cookie/sesión, igual que
+[`import_locations()`](locations.md#importar-localizaciones-acceso-de-escritura). En Trapper v2 lanzan
+`UnsupportedVersionError`.
+
+!!! warning "No es un contrato estable de la API"
+    Dependen de formularios HTML sin versionar y requieren `user_name`/`user_password` (el *correo* de
+    la cuenta en servidores que inician sesión por correo): un token por sí solo no puede
+    autenticarlos.
+
+```python
+from trapper_client import ClassificationProjectCreate
+
+project = client.classification_projects.create(
+    ClassificationProjectCreate(name="Doñana 2026", research_project=3, classificator=2)
+)
+print(project.pk, project.name, project.status)        # 12 Doñana 2026 Ongoing
+```
+
+`create()` recibe un `ClassificationProjectCreate`, un modelo de Pydantic (también vale un diccionario
+con sus campos). Valida antes de enviar nada: un nombre y las claves primarias del research project y
+del clasificador. El proyecto empieza *en curso* (`Ongoing`), y la cuenta que inicia sesión pasa a ser
+su propietaria y administradora. El research project debe ser uno que la cuenta pueda editar; si no,
+Trapper rechaza el formulario y `create()` lanza `APIError` indicando el campo:
+
+```
+Classification project creation failed (status 200): research_project: Select a valid choice. That choice is not one of the available choices.
+```
+
+Devuelve el proyecto creado, o `None` si no se puede leer de vuelta (o si se rechazó el formulario con
+`raise_on_error=False`).
+
+### Añadir colecciones
+
+Un proyecto nuevo está vacío. `add_collections()` le vincula *colecciones de almacenamiento*:
+
+```python
+links = client.classification_projects.add_collections(project.pk, [1, 2])
+print([(link.pk, link.collection_pk) for link in links])
+```
+
+- Los números que pasas son las claves primarias de las colecciones de almacenamiento
+  (`Collection.pk`), como en el resto del SDK. El SDK calcula por sí solo los registros de vínculo que
+  necesita Trapper.
+- **Un proyecto de clasificación solo puede usar las colecciones de su research project**, y la cuenta
+  debe administrar ese research project. Una colección que no esté ahí lanza `ValueError` antes de
+  enviar nada. Vincular una colección a un research project es una acción web que el SDK no cubre.
+- Una colección que ya está en el proyecto se deja como está, así que la llamada se puede repetir.
+- Devuelve el vínculo del proyecto para cada colección.
+
+### Quitar una colección
+
+```python
+client.classification_projects.remove_collection(project.pk, 1)    # True; False si no estaba vinculada
+```
+
+!!! danger "Borra clasificaciones"
+    Desvincular es irreversible, y las clasificaciones hechas sobre esa colección **en este proyecto se
+    borran junto con el vínculo**. La colección y sus recursos no se tocan.
