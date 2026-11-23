@@ -1109,3 +1109,18 @@ def test_session_cookies_never_reach_token_requests():
 
     assert "sessionid" not in client._client.cookies
     assert client._client is not client._web_client
+
+
+def test_extract_html_error_text_names_the_invalid_form_fields(token_client):
+    """A re-rendered crispy form: the reason is in the help-block, not in the page banner."""
+    html = (
+        '<div class="alert alert-danger"><div>Error creating new project</div></div>'
+        '<span id="error_1_id_acronym" class="help-block"><strong>Ensure this value has at least '
+        "3 characters (it has 2).</strong></span>"
+        '<span id="error_1_id_name" class="help-block"><strong>Research project with this Name '
+        "already exists.</strong></span>"
+    )
+    assert token_client._extract_html_error_text(html) == (
+        "acronym: Ensure this value has at least 3 characters (it has 2).; "
+        "name: Research project with this Name already exists."
+    )

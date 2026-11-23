@@ -530,6 +530,11 @@ class APIClientBase:
         re.IGNORECASE | re.DOTALL,
     )
     _TAG_RE = re.compile(r"<[^>]+>")
+    # A crispy-forms field error: ``<span id="error_1_id_acronym" class="help-block"><strong>...``
+    _FIELD_ERROR_RE = re.compile(
+        r'<span[^>]*id="error_\d+_id_([\w-]+)"[^>]*class="help-block"[^>]*>\s*<strong>(.*?)</strong>',
+        re.DOTALL,
+    )
     # Trapper v2's admin (Unfold) renders import failures with these Tailwind-classed blocks.
     _ADMIN_PANEL_RE = re.compile(r'<div class="[^"]*\bborder-red-600\b[^"]*">(.*?)</div>', re.DOTALL)
     _ADMIN_COLUMNS_RE = re.compile(r'font-medium text-font-important-light[^"]*ml-2">(.*?)</span>', re.DOTALL)
@@ -627,6 +632,19 @@ class APIClientBase:
                 parts.append(f"{where}: {msg if msg != '—' else kind}" + (f" (cell {cell})" if cell != "—" else ""))
         return "; ".join(parts) or None
 
+    def _extract_form_field_errors(self, html_text: str) -> str | None:
+        """Field-level errors of a re-rendered Django form, as ``"field: message; ..."``.
+
+        The page-level banner ("Error creating new project") says nothing about *which* field is
+        wrong; the reason is in the ``help-block`` next to each invalid input.
+        """
+        errors = []
+        for field, message in self._FIELD_ERROR_RE.findall(html_text):
+            text = " ".join(html.unescape(self._TAG_RE.sub(" ", message)).split())
+            if text:
+                errors.append(f"{field}: {text}")
+        return "; ".join(dict.fromkeys(errors)) or None
+
     def _extract_html_error_text(self, html_text: str, max_len: int = 2000) -> str:
         """Best-effort extraction of a human-readable error from a Django page.
 
@@ -635,10 +653,11 @@ class APIClientBase:
 
         1. :meth:`_extract_frictionless_errors` — the specific per-row/per-field
            validation errors, when the page is a table-import failure.
-        2. Common Bootstrap/Django error markup (``alert-danger``, ``errorlist``,
+        2. Field-level errors of a re-rendered form (``help-block`` next to each invalid input).
+        3. Common Bootstrap/Django error markup (``alert-danger``, ``errorlist``,
            ``invalid-feedback``) — e.g. a form's ``clean()``/field validation
            errors — stripped and deduplicated.
-        3. A plain-text snippet of the whole ``<body>``, if neither of the above
+        4. A plain-text snippet of the whole ``<body>``, if neither of the above
            found anything (the page structure may differ from what's handled here).
 
         Args:
@@ -655,6 +674,10 @@ class APIClientBase:
         admin_errors = self._extract_admin_import_errors(html_text)
         if admin_errors:
             return admin_errors[:max_len]
+
+        field_errors = self._extract_form_field_errors(html_text)
+        if field_errors:
+            return field_errors[:max_len]
 
         blocks = self._ERROR_BLOCK_RE.findall(html_text)
         if blocks:
