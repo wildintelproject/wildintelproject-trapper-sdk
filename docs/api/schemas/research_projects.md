@@ -5,3 +5,5 @@
 ::: trapper_client.schemas.research_projects.ResearchProjectCollection
 
 ::: trapper_client.schemas.research_projects.ResearchProjectRole
+
+::: trapper_client.schemas.research_projects.ResearchProjectCreate

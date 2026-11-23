@@ -60,6 +60,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   English, `page.es.md` Spanish; the API reference stays English-only). Every guide now states which
   Trapper versions it supports, `deployments.geojson()` is documented in the deployments guide, and
   the home page says the SDK covers Trapper v1 and v2.
+- `research_projects.create(ResearchProjectCreate(...))` (Trapper v1): creates a research project
+  through the classic web form, since the REST API is read-only for it. `ResearchProjectCreate` is a
+  Pydantic model with every field of the form, validated before anything is sent. Returns the project, or `None` when the account is
+  not staff and the project awaits approval. Form errors now name the invalid field
+  (`name: ... already exists`) instead of the generic banner, for every form-based write.
+- `trapper_client.SamplingDesign`, `SensorMethod`, `AnimalTypes` and `BaitUse`: enumerations of the
+  fixed choices of the research project form; the request model accepts a member, its number or its label.
 
 ### Fixed
 - A client that had imported locations or deployments (session login) could no longer call any

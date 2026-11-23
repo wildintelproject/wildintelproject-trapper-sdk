@@ -42,6 +42,8 @@ Skip the probe by passing `trapper_version="v1"` or `"v2"`.
 | `collections.*_ondemand` | ✔ | `UnsupportedVersionError` |
 | `locations.import_locations`, `deployments.import_deployments` | ✔ (web import form) | ✔ (Django admin import action; needs a staff account, runs asynchronously) |
 | `classification_results.import_classifications(overwrite_attrs=True)` | ✔ | `UnsupportedVersionError` (v2 removed the option) |
+| `client.project_deployments` | `UnsupportedVersionError` | ✔ |
+| `research_projects.create()` | ✔ (web form) | `UnsupportedVersionError` |
 | Everything else | ✔ | ✔ |
 
 ## Uploading

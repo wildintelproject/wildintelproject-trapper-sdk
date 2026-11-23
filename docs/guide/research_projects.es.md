@@ -1,7 +1,7 @@
 # Proyectos de investigación
 
 !!! info "Compatibilidad con Trapper"
-    **v1** ✔ · **v2** ✔ — el mismo código en ambas. Consulta [Versiones de Trapper](versions.md).
+    **v1** ✔ · **v2** ✔ — salvo `create()`, que es **solo v1**. Consulta [Versiones de Trapper](versions.md).
 
 `client.research_projects` — proyectos de investigación de primer nivel; cada colección y cada proyecto
 de clasificación pertenece exactamente a uno.
@@ -94,3 +94,79 @@ de `ResearchProjectsCollectionsComponent`), que también puedes usar directament
 for col in client.research_projects.collections.where_project(project_pk=7):
     print(col)
 ```
+
+## Crear un proyecto de investigación (Trapper v1)
+
+La API REST es de solo lectura para los proyectos de investigación, así que `create()` lo resuelve
+simulando el formulario web clásico `research/project/create/` con autenticación por cookie/sesión,
+igual que [`import_locations()`](locations.md#importar-localizaciones-acceso-de-escritura). La cuenta
+que inicia sesión pasa a ser la propietaria y administradora del proyecto. En Trapper v2 lanza
+`UnsupportedVersionError`.
+
+!!! warning "No es un contrato estable de la API"
+    Depende de un formulario HTML sin versionar y requiere `user_name`/`user_password` (el *correo* de
+    la cuenta en servidores que inician sesión por correo): un token por sí solo no puede autenticarlo.
+
+```python
+from trapper_client import BaitUse, ResearchProjectCreate, SamplingDesign
+
+project = client.research_projects.create(
+    ResearchProjectCreate(
+        name="Doñana mammals",
+        acronym="DONMAM",                       # de 3 a 10 caracteres; nombre y acrónimo son únicos
+        sampling_design=SamplingDesign.TARGETED,
+        bait_use=BaitUse.SCENT,
+        keywords=["camera trap", "mammals"],
+        abstract="Medium and large mammals of Doñana National Park.",
+    )
+)
+print(project.pk, project.name)
+```
+
+`create()` recibe un `ResearchProjectCreate`, un modelo de Pydantic con todos los campos del
+formulario de creación (también vale un diccionario con esos campos, que se valida igual). Valida antes
+de enviar nada: recorta los textos, rechaza los campos desconocidos (una errata falla en lugar de
+ignorarse) y lanza `pydantic.ValidationError`, que es un `ValueError`, indicando el campo incorrecto.
+
+| Campo | Valores | Por defecto |
+|---|---|---|
+| `name` | hasta 255 caracteres, único | obligatorio |
+| `acronym` | de 3 a 10 caracteres, único | obligatorio |
+| `sampling_design` | `SamplingDesign`: `simpleRandom` (1), `systematicRandom` (2), `clusteredRandom` (3), `experimental` (4), `targeted` (5), `opportunistic` (6) | `1` |
+| `sensor_method` | `SensorMethod`: `activityDetection` (1), `timeLapse` (2), `both` (3) | `1` |
+| `animal_types` | `AnimalTypes`: `unmarked` (1), `marked` (2), `both` (3) | `1` |
+| `bait_use` | `BaitUse`: `none` (1), `scent` (2), `food` (3), `visual` (4), `acoustic` (5), `other` (6) | `1` |
+| `event_interval` | segundos, `0` o más | `0` |
+| `keywords` | lista de textos; no pueden contener comas | vacía |
+| `abstract`, `methods`, `description` | texto libre, hasta 2000 caracteres cada uno | ninguno |
+
+Los cuatro campos de opción tienen una enumeración en `trapper_client`. Sus miembros son los enteros que
+guarda Trapper y llevan la etiqueta que muestra, así que el editor puede autocompletarlos. El campo
+acepta el miembro, su número o su etiqueta, y cualquier otra cosa se rechaza con la lista de valores
+válidos:
+
+```python
+BaitUse.SCENT            # <BaitUse.SCENT: 2>
+BaitUse.SCENT.label      # "scent"
+ResearchProjectCreate(name="N", acronym="ABC", bait_use="scent")    # igual que BaitUse.SCENT o 2
+```
+
+### Qué devuelve
+
+- **Una cuenta staff:** el proyecto se activa al instante y `create()` lo devuelve.
+- **Cualquier otra cuenta:** Trapper crea el proyecto pero lo deja *sin aprobar*, y lo oculta de la API
+  hasta que un administrador lo apruebe. Entonces `create()` devuelve `None`: el proyecto existe, solo
+  que todavía no se puede leer.
+
+### Cuando el servidor rechaza el formulario
+
+Un nombre o acrónimo ya en uso, o un acrónimo de longitud incorrecta, hace que Trapper vuelva a mostrar
+el formulario (estado `200`). `create()` lanza `APIError` indicando el campo:
+
+```
+Research project creation failed (status 200): name: Research project with this Name already exists.
+```
+
+Pasa `raise_on_error=False` para recibir `None` en su lugar. Lo que el modelo puede comprobar en local
+(nombre vacío, longitud del acrónimo, una opción desconocida, ...) lanza `ValidationError` antes de
+enviar nada.

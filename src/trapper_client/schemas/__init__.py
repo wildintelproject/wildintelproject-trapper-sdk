@@ -22,7 +22,12 @@ from .project_deployments import (
 )
 from .resources import Resource
 from .collections import Collection
-from .research_projects import ResearchProject, ResearchProjectCollection, ResearchProjectRole
+from .research_projects import (
+    ResearchProject,
+    ResearchProjectCollection,
+    ResearchProjectCreate,
+    ResearchProjectRole,
+)
 from .classifications import (
     BBox,
     ClassificationAggRecord,
@@ -94,6 +99,7 @@ __all__ = [
     # research projects
     "ResearchProject",
     "ResearchProjectCollection",
+    "ResearchProjectCreate",
     "ResearchProjectRole",
     # classifications
     "BBox",
