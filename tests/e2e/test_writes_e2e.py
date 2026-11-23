@@ -22,7 +22,7 @@ from pathlib import Path
 
 import pytest
 
-from trapper_client import TrapperClient, err
+from trapper_client import ResearchProjectCreate, SamplingDesign, TrapperClient, err
 
 TIMEZONE = "Europe/Madrid"
 
@@ -206,3 +206,31 @@ class TestClassificationImportE2E:
 
         with pytest.raises(ValueError, match="sex"):
             writer.classification_results.import_classifications(project_id=project, file=table)
+
+
+# ── research project creation (Trapper v1) ────────────────────────────────────
+
+class TestResearchProjectCreateE2E:
+
+    @pytest.mark.e2e
+    def test_create_then_reject_a_duplicate(self, session_writer):
+        if session_writer.server_version == "v2":
+            with pytest.raises(err.UnsupportedVersionError):
+                session_writer.research_projects.create(ResearchProjectCreate(name="e2e", acronym="e2e"))
+            return
+
+        tag = uuid.uuid4().hex[:6]
+        name, acronym = f"e2e project {tag}", f"e2e{tag}"           # acronym: 9 of 10 characters
+        project = session_writer.research_projects.create(ResearchProjectCreate(
+            name=name, acronym=acronym, sampling_design=SamplingDesign.TARGETED, bait_use="scent",
+            keywords=["e2e", "sdk"], abstract="Created by the SDK e2e tests",
+        ))
+        # A staff account gets the project back; any other one gets None until an admin approves it.
+        if project is not None:
+            assert (project.name, project.acronym) == (name, acronym)
+            assert sorted(project.keywords) == ["e2e", "sdk"]
+
+        with pytest.raises(err.APIError, match="name: .*already exists"):
+            session_writer.research_projects.create(ResearchProjectCreate(name=name, acronym=f"x{tag}"))
+        with pytest.raises(err.APIError, match="acronym: .*already exists"):
+            session_writer.research_projects.create(ResearchProjectCreate(name=f"other {tag}", acronym=acronym))

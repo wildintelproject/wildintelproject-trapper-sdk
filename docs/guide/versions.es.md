@@ -44,6 +44,7 @@ Para evitar la sonda, pasa `trapper_version="v1"` o `"v2"`.
 | `locations.import_locations`, `deployments.import_deployments` | ✔ (formulario web de importación) | ✔ (acción de importación del admin de Django; requiere una cuenta staff y se ejecuta de forma asíncrona) |
 | `classification_results.import_classifications(overwrite_attrs=True)` | ✔ | `UnsupportedVersionError` (v2 eliminó la opción) |
 | `client.project_deployments` | `UnsupportedVersionError` | ✔ |
+| `research_projects.create()` | ✔ (formulario web) | `UnsupportedVersionError` |
 | Todo lo demás | ✔ | ✔ |
 
 ## Subir ficheros
