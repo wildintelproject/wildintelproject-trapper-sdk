@@ -478,7 +478,7 @@ goes.
 
 **Workaround in the SDK.** `client.locations.in_area(bbox=..., center=..., radius=...)` filters on the client, in
 both versions (on v2 it also sends the box as `in_bbox`, to read fewer pages), and the SDK warns when a filter
-the list does not apply is passed (see #26). `client.locations_geojson.get(in_bbox=..., radius=...)` still works
+the list does not apply is passed (see entry 26). `client.locations_geojson.get(in_bbox=..., radius=...)` still works
 on Trapper v1.
 
 ## 26. Reject the filters and the ordering the list does not apply
