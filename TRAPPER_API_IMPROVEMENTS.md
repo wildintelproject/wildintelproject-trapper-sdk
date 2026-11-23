@@ -46,6 +46,13 @@ the SDK does in the meantime.
 | 31 | Answer an empty export with an empty CSV, not a `400` | cross-cutting |
 | 32 | Filter the list of deployments by collection | geomap |
 | 33 | Filter the list of deployments by area in every version | geomap |
+| 34 | Create, update and delete resources through the API | storage |
+| 35 | Return every field of a resource, and its related objects as keys | storage |
+| 36 | Serve the files of a resource with the API token | storage |
+| 37 | Do not answer `deployment__isnull` with a `500` | storage |
+| 38 | Read every list filter of a resource the same way | storage |
+| 39 | Do not turn every model field of a resource into a filter | storage |
+| 40 | Add an export endpoint for resources | storage |
 
 ---
 
@@ -503,8 +510,8 @@ nothing. (A filter with an invalid value is answered with a `400` and the field,
 
 **Workaround in the SDK.** For locations and deployments, `UnknownFilterWarning` names the filters the server would
 ignore; the filters each version applies are listed in their guides (checked live on v1 and v2: `colls`,
-`collections`, `ordering`, `radius`, `bait_use` and a typo are ignored on the deployment list too). Other
-endpoints are not checked yet.
+`collections`, `ordering`, `radius`, `bait_use` and a typo are ignored on the deployment list too), and for
+resources (`ordering`, `in_bbox`, `radius` and a typo; `locations_map` on v2). Other endpoints are not checked yet.
 
 ## 27. Create, update and delete deployments through the API
 
@@ -630,6 +637,115 @@ is ignored by both. The export has `latitude` and `longitude` but no spatial fil
 
 **Workaround in the SDK.** `deployments.in_area()` finds the locations in the area and asks for their
 deployments; the SDK warns when a filter the list does not apply is passed (see entry 26).
+
+## 34. Create, update and delete resources through the API
+
+**Labels:** enhancement, api
+
+**Problem.** `ResourceViewSet` is a read-only viewset: `OPTIONS storage/api/resources` answers `Allow: GET, HEAD,
+OPTIONS` on v1 and v2. A resource is created by an upload (its own endpoints and the uploader), and can only be
+edited or deleted in the web views: the list gives their URLs in `update_data` and `delete_data` (v1; `null` on v2).
+There is no way to correct the name, the tags or the date of a resource by script, or to delete one.
+
+**Proposal.** `PATCH`/`PUT`/`DELETE storage/api/resources/<pk>`, with token authentication and the permissions the
+web views already check. Delete on `DELETE`, not on a `GET` (see #13).
+
+**Workaround in the SDK.** None: resources can be read and downloaded, not changed.
+
+## 35. Return every field of a resource, and its related objects as keys
+
+**Labels:** enhancement, api
+
+**Problem.** `GET storage/api/resources` gives 18 keys (checked on v1 and v2): `pk`, `name`, `owner`,
+`owner_profile`, `resource_type`, `date_recorded`, `observation_type`, `species`, `tags`, `url`, `url_original`,
+`mime`, `preview_url`, `thumbnail_url`, `update_data`, `detail_data`, `delete_data` and `date_recorded_correct`.
+It does **not** say which deployment a resource belongs to, which collections it is in, its `status`, when it was
+uploaded, or its size and checksum, although the model has them and the list can be filtered by deployment,
+collection and status. The deployment only appears on `storage/api/resources/location/<pk>`, as the text
+`deployment_id` (v2; that sub-endpoint also leaves out the name, the owner and the URLs), so finding the deployment
+of a resource takes one request per deployment. The related objects that do come are names (`owner`, `tags`), and
+`observation_type` and `species` are lists of strings *(not seen with data: no resource of the test servers is
+classified)*. As with locations (#23), the keys the web page needs (`update_data`, `detail_data`, `delete_data`,
+`owner_profile`) are in the API: URLs on v1 and `null` on v2.
+
+**Proposal.** One serializer with the whole resource, the related objects as primary keys (`deployment`,
+`collections`, `owner`), and the other shapes built from it. Leave the web-page fields out.
+
+**Workaround in the SDK.** `resources.where(deployments=...)` and `where_by_collection()` go the other way: from a
+deployment or a collection to its resources. The deployment of one resource cannot be read.
+
+## 36. Serve the files of a resource with the API token
+
+**Labels:** enhancement, api
+
+**Problem.** The API lists resources but the files are served by a web view, `storage/resource/media/<pk>/file/`
+(and `pfile`, `tfile`), which does not take the API token: with a token, or none, it answers `404`, and it answers
+`404` too when the account has no permission (the view raises `Http404` instead of `403`), so a missing file and a
+forbidden one look alike. With a web session it serves the file (checked on v2: the original JPEG). `url` is the
+preview, which does not exist if it was not generated (`404`), and `preview_url` and `thumbnail_url` fall back to a
+placeholder that is a static file. The only other way in is a per-resource token (`?rt=`) that the API does not
+give. Behind no proxy, a development v1 answers `200` with an empty body and an `X-Accel-Redirect` header.
+
+**Proposal.** `GET storage/api/resources/<pk>/file` (and `/preview`, `/thumbnail`), with token authentication, `401`,
+`403` and `404` told apart, and the file in the body whatever serves it.
+
+**Workaround in the SDK.** `resources.download()` logs in with a web session (`user_name`/`user_password`), streams
+the file to disk and retries network failures with tenacity.
+
+## 37. Do not answer `deployment__isnull` with a `500`
+
+**Labels:** bug, api
+
+**Problem.** `ResourceFilter` declares `deployment__isnull = django_filters.BooleanFilter()` and
+`GET storage/api/resources?deployment__isnull=true` (or `false`) answers `500` with an **HTML** page, on v1 and v2
+(an empty value is fine). The resources without a deployment cannot be listed.
+
+**Proposal.** Give the filter its `field_name="deployment"` and `lookup_expr="isnull"`, and answer a server error
+with JSON.
+
+**Workaround in the SDK.** `UnknownFilterWarning` names it, and the guide no longer lists it.
+
+## 38. Read every list filter of a resource the same way
+
+**Labels:** bug, api
+
+**Problem.** The list filters take their lists in two ways and fail quietly with the other one (checked on v1 and
+v2): `deployments` and `collections` read repeated parameters, `pk` and `locations_map` one string with commas.
+`?deployments=1,2` is **ignored** and returns every resource (29 of 29), `?collections=2,3` is a `400`, `?pk=1&pk=2`
+keeps one pk, and `?locations_map=1&locations_map=2` finds nothing. `locations_map` is ignored on v2 (it has no
+maps).
+
+**Proposal.** One convention (repeated parameters or commas) for all of them, and a `400` for a value that cannot
+be read instead of ignoring it.
+
+**Workaround in the SDK.** The list filters accept a list or a comma-separated string and are sent the way Trapper
+reads each one; the SDK warns about `locations_map` on v2.
+
+## 39. Do not turn every model field of a resource into a filter
+
+**Labels:** enhancement, api
+
+**Problem.** `ResourceFilter` excludes some fields and exposes the rest as filters, so the list accepts
+`token`, `file_checksum_hash`, `file_size`, `mime_type` and `deployment` (checked: each one changes the result on v1
+and v2). `token` is the secret that gives access to a resource with `?rt=`, and the list filters on it. Meanwhile
+the useful ones are not documented.
+
+**Proposal.** List the filters that are meant to exist, drop `token` and `file_checksum_hash`, and answer `400` to
+the rest of the parameters (see entry 26).
+
+**Workaround in the SDK.** The guide lists the filters each version applies.
+
+## 40. Add an export endpoint for resources
+
+**Labels:** enhancement, api
+
+**Problem.** Locations and deployments have `.../export/` (a CSV), and resources do not:
+`storage/api/resources/export` and `.../export/` answer `404` on v1 and v2.
+
+**Proposal.** `GET storage/api/resources/export/`, with the same filters as the list and the same columns as the
+list, plus the ones entry 35 asks for.
+
+**Workaround in the SDK.** `resources.export()` builds the CSV from the JSON list, so it reads every page.
 
 ---
 
