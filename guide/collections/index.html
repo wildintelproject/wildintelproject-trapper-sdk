@@ -898,6 +898,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#downloading-the-files-of-a-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downloading the files of a collection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#triggering-ftp-uploaded-collection-processing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2870,6 +2881,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#downloading-the-files-of-a-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downloading the files of a collection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#triggering-ftp-uploaded-collection-processing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3118,6 +3140,10 @@ files in the account's <code>collections/</code> folder on the server, and <code
   <code>resources.download(pk, ..., kind="thumbnail")</code> may answer <code>NotFoundError</code> for a moment. Once built, they download
   (checked on v1).</li>
 </ul>
+<h2 id="downloading-the-files-of-a-collection">Downloading the files of a collection</h2>
+<p><code>client.collections.download_resources(pk, "downloads/")</code> saves the files of a collection into
+<code>downloads/&lt;collection name&gt;/</code>, with the filters of the resource list to choose which ones, skipping what is already
+there. See <a href="../resources/#downloading-all-the-files-of-a-deployment-or-a-collection">Downloading all the files of a deployment or a collection</a>.</p>
 <h2 id="triggering-ftp-uploaded-collection-processing">Triggering FTP-uploaded collection processing</h2>
 <p><code>trigger_collection()</code> starts the processing of a data package (a YAML definition and a ZIP) that is <strong>already in
 the account's own folder on the server</strong>: it does not upload anything (see the uploader for that).</p>

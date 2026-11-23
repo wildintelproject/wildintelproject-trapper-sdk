@@ -850,6 +850,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Downloading the file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#downloading-all-the-files-of-a-deployment-or-a-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downloading all the files of a deployment or a collection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2833,6 +2850,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Downloading the file">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#downloading-all-the-files-of-a-deployment-or-a-collection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downloading all the files of a deployment or a collection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3032,25 +3066,52 @@ like the imports do, and saves the file:</p>
 <p class="admonition-title">Not a stable API contract</p>
 <p>It depends on an unversioned web view, like the imports.</p>
 </div>
+<h3 id="downloading-all-the-files-of-a-deployment-or-a-collection">Downloading all the files of a deployment or a collection</h3>
+<p>Trapper has no endpoint for it: it is <code>download()</code> once per resource. <code>deployments.download_resources()</code> and
+<code>collections.download_resources()</code> do that loop, and need <code>user_name</code> and <code>user_password</code> like <code>download()</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">report</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">download_resources</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;downloads/&quot;</span><span class="p">)</span>          <span class="c1"># downloads/&lt;deployment_id&gt;/&lt;name&gt;.jpg</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">report</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">download_resources</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;downloads/&quot;</span><span class="p">)</span>           <span class="c1"># downloads/&lt;collection name&gt;/&lt;name&gt;.jpg</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>        <span class="c1"># 40 downloaded, 0 already there, 0 failed, in downloads/don01-2024a</span>
+</code></pre></div>
+<ul>
+<li><strong>Choosing which resources.</strong> Any filter of the resource list goes through, so the server does the choosing
+  (<code>resource_type="I"</code>, <code>rdate_from</code>/<code>rdate_to</code>, <code>rtime_from</code>/<code>rtime_to</code>, <code>tags</code>, <code>species</code>, <code>search</code>, <code>pk=[...]</code>, and
+  <code>deployments=[...]</code> for a collection), and <code>filter_fn</code> does it on the client for what the server cannot filter:
+  <code>client.deployments.download_resources(12, "out/", rdate_from="2024-03-01", filter_fn=lambda r: r.date_recorded.hour &lt; 6)</code>.
+  The first argument is called <code>deployment_pk</code> / <code>collection_pk</code> because <code>pk</code> is one of those filters.</li>
+<li><strong>A run can be repeated.</strong> A file that is already in the folder is skipped (<code>skip_existing=True</code>), and a file is
+  only given its name when it is complete (it is a <code>.part</code> until then), so after an interruption or a failure you
+  run the same call again and it carries on.</li>
+<li><strong>A failure does not stop the rest</strong> (<code>on_error="continue"</code>): it goes in <code>report.failed</code> (<code>{resource pk: message}</code>).
+  <code>on_error="raise"</code> stops at the first one. Each file is retried like <code>download()</code> does (<code>retry_attempts</code>, ...).</li>
+<li><strong>The report</strong> (<code>DownloadReport</code>): <code>downloaded</code>, <code>skipped</code> (lists of paths), <code>failed</code>, <code>ok</code> and <code>total</code>.</li>
+<li><strong>Names.</strong> <code>&lt;name&gt;&lt;extension&gt;</code>, the extension from the resource's <code>mime</code>; <code>-&lt;pk&gt;</code> is added when two resources share a
+  name; a file name is cleaned of characters a file system refuses. <code>kind="thumbnail"</code> or <code>"preview"</code> saves
+  <code>&lt;name&gt;-thumbnail.jpg</code>, next to the originals. The folder of a collection is flat: the resource list does not say
+  which deployment a resource belongs to.</li>
+<li><strong>Progress.</strong> <code>progress_callback(event, data)</code> is called for every file with <code>"downloaded"</code>, <code>"skipped"</code> or <code>"failed"</code>
+  and <code>{"resource", "path", "index", "total"}</code> (<code>"error"</code> too for a failure); <code>total</code> is <code>None</code> with a <code>filter_fn</code>.</li>
+<li>It works over the list of resources you give it, too: <code>client.resources.download_many(resources, "folder/")</code>.</li>
+</ul>
 <h2 id="scoped-to-a-collection-or-a-location">Scoped to a collection or a location</h2>
 <p>Every access pattern has a <code>_by_collection</code>/<code>_by_location</code> counterpart, hitting
 <code>/storage/api/resources/collection/{collection_pk}</code> or <code>/storage/api/resources/location/{location_pk}</code>
 instead of the unscoped endpoint:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># All resources by collection (lazy)</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_all_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">find_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">resource_pk</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1"># All resources by location (lazy)</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_all_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">find_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">resource_pk</span><span class="o">=</span><span class="mi">99</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># All resources by collection (lazy)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_all_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">find_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">resource_pk</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># All resources by location (lazy)</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_all_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">find_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">resource_pk</span><span class="o">=</span><span class="mi">99</span><span class="p">)</span>
 </code></pre></div>
 <p>This is also how you list resources within a <a href="../collections/">collection</a> — <code>CollectionsComponent</code>
 itself only lists <em>collections</em>, not the resources inside one.</p>

@@ -808,6 +808,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#downloading-the-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downloading the files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fields-the-list-and-the-export" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2930,6 +2941,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#downloading-the-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Downloading the files
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fields-the-list-and-the-export" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3212,6 +3234,10 @@ removed; on a v1 server it raises <code>UnsupportedVersionError</code>.</p>
 </tbody>
 </table>
 <p>Only deployments the current user can access are returned.</p>
+<h2 id="downloading-the-files">Downloading the files</h2>
+<p><code>client.deployments.download_resources(pk, "downloads/")</code> saves the images or videos of a deployment into
+<code>downloads/&lt;deployment_id&gt;/</code>, with the filters of the resource list to choose which ones, skipping what is already
+there. See <a href="../resources/#downloading-all-the-files-of-a-deployment-or-a-collection">Downloading all the files of a deployment or a collection</a>.</p>
 <h2 id="fields-the-list-and-the-export">Fields: the list and the export</h2>
 <p>Like locations, a deployment comes in two shapes, and neither holds every field. <code>where()</code>, <code>get()</code> and <code>find()</code>
 return a <code>Deployment</code> (Trapper's JSON): <code>pk</code>, <code>deployment_code</code>, <code>deployment_id</code>, <code>location</code> (the location's

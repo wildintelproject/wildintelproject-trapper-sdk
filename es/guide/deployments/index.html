@@ -810,6 +810,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#descargar-los-ficheros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descargar los ficheros
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#campos-la-lista-y-la-exportacion" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2932,6 +2943,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#descargar-los-ficheros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descargar los ficheros
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#campos-la-lista-y-la-exportacion" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3214,6 +3236,10 @@ en un servidor v1 lanza <code>UnsupportedVersionError</code>.</p>
 </tbody>
 </table>
 <p>Solo se devuelven los despliegues a los que puede acceder el usuario actual.</p>
+<h2 id="descargar-los-ficheros">Descargar los ficheros</h2>
+<p><code>client.deployments.download_resources(pk, "downloads/")</code> guarda las imágenes o vídeos de un deployment en
+<code>downloads/&lt;deployment_id&gt;/</code>, con los filtros de la lista de resources para elegir cuáles, omitiendo lo que ya está.
+Véase <a href="../resources/#descargar-todos-los-ficheros-de-un-deployment-o-de-una-coleccion">Descargar todos los ficheros de un deployment o de una colección</a>.</p>
 <h2 id="campos-la-lista-y-la-exportacion">Campos: la lista y la exportación</h2>
 <p>Igual que las locations, un despliegue viene en dos formas y ninguna tiene todos los campos. <code>where()</code>,
 <code>get()</code> y <code>find()</code> devuelven un <code>Deployment</code> (el JSON de Trapper): <code>pk</code>, <code>deployment_code</code>, <code>deployment_id</code>,

@@ -900,6 +900,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#descargar-los-ficheros-de-una-coleccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descargar los ficheros de una colección
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#lanzar-el-procesado-de-una-coleccion-subida-por-ftp" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2872,6 +2883,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#descargar-los-ficheros-de-una-coleccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descargar los ficheros de una colección
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#lanzar-el-procesado-de-una-coleccion-subida-por-ftp" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3123,6 +3145,10 @@ SDK tiene los dos pasos, y nada más crea una colección con datos: <code>get_up
   <code>resources.download(pk, ..., kind="thumbnail")</code> puede dar <code>NotFoundError</code> durante un momento. Una vez generadas se
   descargan (comprobado en v1).</li>
 </ul>
+<h2 id="descargar-los-ficheros-de-una-coleccion">Descargar los ficheros de una colección</h2>
+<p><code>client.collections.download_resources(pk, "downloads/")</code> guarda los ficheros de una colección en
+<code>downloads/&lt;nombre de la colección&gt;/</code>, con los filtros de la lista de resources para elegir cuáles, omitiendo lo que ya
+está. Véase <a href="../resources/#descargar-todos-los-ficheros-de-un-deployment-o-de-una-coleccion">Descargar todos los ficheros de un deployment o de una colección</a>.</p>
 <h2 id="lanzar-el-procesado-de-una-coleccion-subida-por-ftp">Lanzar el procesado de una colección subida por FTP</h2>
 <p><code>trigger_collection()</code> inicia el procesado de un paquete de datos (una definición YAML y un ZIP) que <strong>ya está en la
 carpeta propia de la cuenta en el servidor</strong>: no sube nada (para eso está el uploader).</p>

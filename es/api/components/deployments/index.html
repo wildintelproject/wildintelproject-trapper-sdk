@@ -1743,6 +1743,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#trapper_client.components.deployments.DeploymentsComponent.download_resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        download_resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#trapper_client.components.deployments.DeploymentsComponent.wait_for_import" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2959,6 +2970,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#trapper_client.components.deployments.DeploymentsComponent.download_resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        download_resources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#trapper_client.components.deployments.DeploymentsComponent.wait_for_import" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3667,7 +3689,67 @@ UI's <code>geomap/deployment/import/</code> form via cookie/session auth instead
 <span class="normal"><a href="#__codelineno-0-612">612</a></span>
 <span class="normal"><a href="#__codelineno-0-613">613</a></span>
 <span class="normal"><a href="#__codelineno-0-614">614</a></span>
-<span class="normal"><a href="#__codelineno-0-615">615</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">class</span><span class="w"> </span><span class="nc">DeploymentsComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Deployment</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-615">615</a></span>
+<span class="normal"><a href="#__codelineno-0-616">616</a></span>
+<span class="normal"><a href="#__codelineno-0-617">617</a></span>
+<span class="normal"><a href="#__codelineno-0-618">618</a></span>
+<span class="normal"><a href="#__codelineno-0-619">619</a></span>
+<span class="normal"><a href="#__codelineno-0-620">620</a></span>
+<span class="normal"><a href="#__codelineno-0-621">621</a></span>
+<span class="normal"><a href="#__codelineno-0-622">622</a></span>
+<span class="normal"><a href="#__codelineno-0-623">623</a></span>
+<span class="normal"><a href="#__codelineno-0-624">624</a></span>
+<span class="normal"><a href="#__codelineno-0-625">625</a></span>
+<span class="normal"><a href="#__codelineno-0-626">626</a></span>
+<span class="normal"><a href="#__codelineno-0-627">627</a></span>
+<span class="normal"><a href="#__codelineno-0-628">628</a></span>
+<span class="normal"><a href="#__codelineno-0-629">629</a></span>
+<span class="normal"><a href="#__codelineno-0-630">630</a></span>
+<span class="normal"><a href="#__codelineno-0-631">631</a></span>
+<span class="normal"><a href="#__codelineno-0-632">632</a></span>
+<span class="normal"><a href="#__codelineno-0-633">633</a></span>
+<span class="normal"><a href="#__codelineno-0-634">634</a></span>
+<span class="normal"><a href="#__codelineno-0-635">635</a></span>
+<span class="normal"><a href="#__codelineno-0-636">636</a></span>
+<span class="normal"><a href="#__codelineno-0-637">637</a></span>
+<span class="normal"><a href="#__codelineno-0-638">638</a></span>
+<span class="normal"><a href="#__codelineno-0-639">639</a></span>
+<span class="normal"><a href="#__codelineno-0-640">640</a></span>
+<span class="normal"><a href="#__codelineno-0-641">641</a></span>
+<span class="normal"><a href="#__codelineno-0-642">642</a></span>
+<span class="normal"><a href="#__codelineno-0-643">643</a></span>
+<span class="normal"><a href="#__codelineno-0-644">644</a></span>
+<span class="normal"><a href="#__codelineno-0-645">645</a></span>
+<span class="normal"><a href="#__codelineno-0-646">646</a></span>
+<span class="normal"><a href="#__codelineno-0-647">647</a></span>
+<span class="normal"><a href="#__codelineno-0-648">648</a></span>
+<span class="normal"><a href="#__codelineno-0-649">649</a></span>
+<span class="normal"><a href="#__codelineno-0-650">650</a></span>
+<span class="normal"><a href="#__codelineno-0-651">651</a></span>
+<span class="normal"><a href="#__codelineno-0-652">652</a></span>
+<span class="normal"><a href="#__codelineno-0-653">653</a></span>
+<span class="normal"><a href="#__codelineno-0-654">654</a></span>
+<span class="normal"><a href="#__codelineno-0-655">655</a></span>
+<span class="normal"><a href="#__codelineno-0-656">656</a></span>
+<span class="normal"><a href="#__codelineno-0-657">657</a></span>
+<span class="normal"><a href="#__codelineno-0-658">658</a></span>
+<span class="normal"><a href="#__codelineno-0-659">659</a></span>
+<span class="normal"><a href="#__codelineno-0-660">660</a></span>
+<span class="normal"><a href="#__codelineno-0-661">661</a></span>
+<span class="normal"><a href="#__codelineno-0-662">662</a></span>
+<span class="normal"><a href="#__codelineno-0-663">663</a></span>
+<span class="normal"><a href="#__codelineno-0-664">664</a></span>
+<span class="normal"><a href="#__codelineno-0-665">665</a></span>
+<span class="normal"><a href="#__codelineno-0-666">666</a></span>
+<span class="normal"><a href="#__codelineno-0-667">667</a></span>
+<span class="normal"><a href="#__codelineno-0-668">668</a></span>
+<span class="normal"><a href="#__codelineno-0-669">669</a></span>
+<span class="normal"><a href="#__codelineno-0-670">670</a></span>
+<span class="normal"><a href="#__codelineno-0-671">671</a></span>
+<span class="normal"><a href="#__codelineno-0-672">672</a></span>
+<span class="normal"><a href="#__codelineno-0-673">673</a></span>
+<span class="normal"><a href="#__codelineno-0-674">674</a></span>
+<span class="normal"><a href="#__codelineno-0-675">675</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="k">class</span><span class="w"> </span><span class="nc">DeploymentsComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Deployment</span><span class="p">]):</span>
 <a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    Component for the ``/geomap/api/deployments`` resource.</span>
 <a id="__codelineno-0-30" name="__codelineno-0-30"></a>
@@ -4155,107 +4237,167 @@ UI's <code>geomap/deployment/import/</code> form via cookie/session auth instead
 <a id="__codelineno-0-512" name="__codelineno-0-512"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">_write_csv</span><span class="p">([</span><span class="n">row</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span> <span class="n">output_path</span><span class="p">)</span>
 <a id="__codelineno-0-513" name="__codelineno-0-513"></a>        <span class="k">return</span> <span class="n">output_path</span>
 <a id="__codelineno-0-514" name="__codelineno-0-514"></a>
-<a id="__codelineno-0-515" name="__codelineno-0-515"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_import</span><span class="p">(</span>
+<a id="__codelineno-0-515" name="__codelineno-0-515"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">download_resources</span><span class="p">(</span>
 <a id="__codelineno-0-516" name="__codelineno-0-516"></a>        <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="n">deployment_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a>        <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a>        <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a>        <span class="n">raise_on_timeout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Wait until the imported deployments are visible through the API.</span>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">        Trapper v2 imports asynchronously: ``import_deployments()`` returning ``True`` only means the table was</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">        validated and queued. Neither version offers an API to query the import task, so this</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">        checks the outcome instead: it polls the list endpoint until every ID is there.</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">            deployment_ids: The deployment IDs the import should create (the ``deploymentID`` column).</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="sd">            timeout: Seconds to wait in total.</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="sd">            interval: Seconds between polls.</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">            raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="sd">            ``True`` once all of them exist; ``False`` on timeout when ``raise_on_timeout=False``.</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">        Raises:</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">            TimeoutError: Some IDs were still missing after ``timeout`` seconds.</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a>
-<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">        Example::</span>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">            client.deployments.import_deployments(file=&quot;deployments.csv&quot;, research_project=1, timezone=&quot;Europe/Madrid&quot;)</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">            client.deployments.wait_for_import([&quot;DON01-2024A&quot;])</span>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_ids</span><span class="p">(</span><span class="n">deployment_ids</span><span class="p">,</span> <span class="s2">&quot;deployment_id&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">raise_on_timeout</span><span class="p">,</span> <span class="s2">&quot;deployment ID&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-546" name="__codelineno-0-546"></a>
-<a id="__codelineno-0-547" name="__codelineno-0-547"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_update</span><span class="p">(</span>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a>        <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a>        <span class="n">changes</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a>        <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a>        <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a>        <span class="n">raise_on_timeout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Wait until an update import (``import_deployments(update=True)``) has been applied.</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a>        <span class="n">deployment_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>        <span class="n">kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;original&quot;</span><span class="p">,</span> <span class="s2">&quot;preview&quot;</span><span class="p">,</span> <span class="s2">&quot;thumbnail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;original&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>        <span class="n">filter_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a>        <span class="n">skip_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a>        <span class="n">on_error</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;continue&quot;</span><span class="p">,</span> <span class="s2">&quot;raise&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;continue&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>        <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>        <span class="n">retry_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>        <span class="n">retry_min_wait</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a>        <span class="n">retry_max_wait</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a>        <span class="o">**</span><span class="n">filters</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DownloadReport</span><span class="p">:</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Download the files of the resources of a deployment into ``&lt;directory&gt;/&lt;deployment_id&gt;/``.</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="sd">        The resources of the deployment are listed with ``resources.where(deployments=deployment_pk, **filters)`` and each one is</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">        saved with :meth:`ResourcesComponent.download` (see :meth:`ResourcesComponent.download_many` for the file names,</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="sd">        the report and the errors): a file that is already in the folder is skipped, so a run can be repeated, and a</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="sd">        failure does not stop the others. Needs ``user_name`` and ``user_password``.</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">            deployment_pk: Deployment primary key. (It is not called ``pk`` because ``pk`` is also a filter of the resource</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">                list, which this method passes on: ``pk=[1, 2]`` chooses resources.)</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="sd">            directory: Where the folder of the deployment goes.</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">            kind: ``&quot;original&quot;``, ``&quot;preview&quot;`` or ``&quot;thumbnail&quot;``.</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">            filter_fn: ``predicate(resource) -&gt; bool`` applied on the client to choose which resources, for what the</span>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">                server cannot filter (``lambda r: r.date_recorded.hour &lt; 6``).</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">            skip_existing: Leave alone the files that are already there.</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">            on_error: ``&quot;continue&quot;`` (default) or ``&quot;raise&quot;`` at the first failure.</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">            progress_callback: ``callback(event, data)`` for each file (see :meth:`ResourcesComponent.download_many`).</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">            retry_attempts: Attempts per file (see :meth:`ResourcesComponent.download`).</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">            retry_min_wait: Minimum backoff in seconds.</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">            retry_max_wait: Maximum backoff in seconds.</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">            **filters: Any filter of the resource list: ``resource_type``, ``status``, ``rdate_from``/``rdate_to``,</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">                ``rtime_from``/``rtime_to``, ``tags``, ``species``, ``observation_type``, ``timestamp_error``,</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">                ``search``, ... (see ``client.resources``).</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">            A :class:`~trapper_client.components.resources.DownloadReport`.</span>
 <a id="__codelineno-0-555" name="__codelineno-0-555"></a>
-<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">        ``import_deployments()`` returns ``True`` as soon as the table is validated and queued: the changes</span>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">        land a moment later, and :meth:`wait_for_import` cannot tell, because the IDs already exist. This</span>
-<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">        polls the export until every deployment has the values you expect.</span>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">            changes: ``{deployment_id: {field: expected value}}``, with the field names of</span>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">                :class:`~trapper_client.schemas.DeploymentExport` (``camera_height``, ``habitat``, ``tags``,</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">                ...). Numbers are compared with a tolerance. The ID is the stored one: Trapper slugifies the</span>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">                ``deploymentID`` of an import (``&quot;Don 01&quot;`` is stored as ``&quot;don-01&quot;``).</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">            timeout: Seconds to wait in total.</span>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">            interval: Seconds between polls.</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="sd">            raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.</span>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a><span class="sd">            ``True`` once every deployment has every expected value; ``False`` on timeout when</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="sd">            ``raise_on_timeout=False``.</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">        Raises:</span>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a><span class="sd">            ValueError: If a field is not a field of ``DeploymentExport`` (before any request).</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">            TimeoutError: Some values were still different after ``timeout`` seconds.</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">        Example::</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">            client.deployments.import_deployments(file=&quot;edited.csv&quot;, research_project=1, timezone=&quot;Europe/Madrid&quot;, update=True)</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a><span class="sd">            client.deployments.wait_for_update({&quot;don01-2024a&quot;: {&quot;camera_height&quot;: 1.25, &quot;habitat&quot;: &quot;dehesa&quot;}})</span>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a>        <span class="n">known</span> <span class="o">=</span> <span class="n">DeploymentExport</span><span class="o">.</span><span class="n">model_fields</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a>        <span class="k">for</span> <span class="n">deployment_id</span><span class="p">,</span> <span class="n">expected</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a>            <span class="n">unknown</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">expected</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known</span><span class="p">)</span>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>            <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">deployment_id</span><span class="si">}</span><span class="s2">: not a field of DeploymentExport: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">        Example::</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">            report = client.deployments.download_resources(</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="sd">                12, &quot;downloads/&quot;, rdate_from=&quot;2024-03-01&quot;, rdate_to=&quot;2024-03-31&quot;, resource_type=&quot;I&quot;,</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">            )</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">            print(report)                     # 40 downloaded, 0 already there, 0 failed, in downloads/don01-2024a</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a>        <span class="k">if</span> <span class="s2">&quot;deployments&quot;</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;download_resources() chooses the deployment itself: do not pass `deployments`&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a>        <span class="n">deployment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">deployment_pk</span><span class="p">)</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a>        <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">/</span> <span class="n">safe_filename</span><span class="p">(</span><span class="n">deployment</span><span class="o">.</span><span class="n">deployment_id</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;deployment-</span><span class="si">{</span><span class="n">deployment_pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>        <span class="n">resources</span> <span class="o">=</span> <span class="n">ResourcesComponent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">)</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a>        <span class="n">total</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">filter_fn</span> <span class="k">else</span> <span class="n">resources</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">deployments</span><span class="o">=</span><span class="n">deployment_pk</span><span class="p">,</span> <span class="o">**</span><span class="n">filters</span><span class="p">)</span><span class="o">.</span><span class="n">pagination</span><span class="o">.</span><span class="n">count</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a>        <span class="k">return</span> <span class="n">resources</span><span class="o">.</span><span class="n">download_many</span><span class="p">(</span>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>            <span class="n">resources</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">deployments</span><span class="o">=</span><span class="n">deployment_pk</span><span class="p">,</span> <span class="n">filter_fn</span><span class="o">=</span><span class="n">filter_fn</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">filters</span><span class="p">),</span> <span class="n">folder</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a>            <span class="n">skip_existing</span><span class="o">=</span><span class="n">skip_existing</span><span class="p">,</span> <span class="n">on_error</span><span class="o">=</span><span class="n">on_error</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="n">total</span><span class="p">,</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a>            <span class="n">retry_attempts</span><span class="o">=</span><span class="n">retry_attempts</span><span class="p">,</span> <span class="n">retry_min_wait</span><span class="o">=</span><span class="n">retry_min_wait</span><span class="p">,</span> <span class="n">retry_max_wait</span><span class="o">=</span><span class="n">retry_max_wait</span><span class="p">,</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a>        <span class="p">)</span>
+<a id="__codelineno-0-574" name="__codelineno-0-574"></a>
+<a id="__codelineno-0-575" name="__codelineno-0-575"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_import</span><span class="p">(</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a>        <span class="n">deployment_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a>        <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a>        <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a>        <span class="n">raise_on_timeout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Wait until the imported deployments are visible through the API.</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a><span class="sd">        Trapper v2 imports asynchronously: ``import_deployments()`` returning ``True`` only means the table was</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a><span class="sd">        validated and queued. Neither version offers an API to query the import task, so this</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a><span class="sd">        checks the outcome instead: it polls the list endpoint until every ID is there.</span>
 <a id="__codelineno-0-587" name="__codelineno-0-587"></a>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a>        <span class="k">def</span><span class="w"> </span><span class="nf">same</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">wanted</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a>            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wanted</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>                <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a>                    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">actual</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">wanted</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">)</span>
-<a id="__codelineno-0-592" name="__codelineno-0-592"></a>                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-<a id="__codelineno-0-593" name="__codelineno-0-593"></a>                    <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a>            <span class="k">return</span> <span class="n">actual</span> <span class="o">==</span> <span class="n">wanted</span>
-<a id="__codelineno-0-595" name="__codelineno-0-595"></a>
-<a id="__codelineno-0-596" name="__codelineno-0-596"></a>        <span class="n">pending</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="nb">dict</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a>        <span class="n">deadline</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">+</span> <span class="n">timeout</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a>        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a>            <span class="k">for</span> <span class="n">deployment_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">pending</span><span class="p">):</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>                <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-601" name="__codelineno-0-601"></a>                    <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="n">deployment_id</span><span class="p">)</span>
-<a id="__codelineno-0-602" name="__codelineno-0-602"></a>                <span class="k">except</span> <span class="n">err</span><span class="o">.</span><span class="n">BadRequestError</span><span class="p">:</span>       <span class="c1"># Trapper answers an empty export with a 400</span>
-<a id="__codelineno-0-603" name="__codelineno-0-603"></a>                    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-604" name="__codelineno-0-604"></a>                <span class="n">row</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">deployment_id</span> <span class="o">==</span> <span class="n">deployment_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-0-605" name="__codelineno-0-605"></a>                <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">same</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pending</span><span class="p">[</span><span class="n">deployment_id</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-<a id="__codelineno-0-606" name="__codelineno-0-606"></a>                    <span class="k">del</span> <span class="n">pending</span><span class="p">[</span><span class="n">deployment_id</span><span class="p">]</span>
-<a id="__codelineno-0-607" name="__codelineno-0-607"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">pending</span><span class="p">:</span>
-<a id="__codelineno-0-608" name="__codelineno-0-608"></a>                <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-609" name="__codelineno-0-609"></a>            <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">deadline</span><span class="p">:</span>
-<a id="__codelineno-0-610" name="__codelineno-0-610"></a>                <span class="k">if</span> <span class="n">raise_on_timeout</span><span class="p">:</span>
-<a id="__codelineno-0-611" name="__codelineno-0-611"></a>                    <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span>
-<a id="__codelineno-0-612" name="__codelineno-0-612"></a>                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span><span class="si">}</span><span class="s2"> deployment(s) not updated after </span><span class="si">{</span><span class="n">timeout</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">s: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pending</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-613" name="__codelineno-0-613"></a>                    <span class="p">)</span>
-<a id="__codelineno-0-614" name="__codelineno-0-614"></a>                <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-615" name="__codelineno-0-615"></a>            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+<a id="__codelineno-0-588" name="__codelineno-0-588"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="sd">            deployment_ids: The deployment IDs the import should create (the ``deploymentID`` column).</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a><span class="sd">            timeout: Seconds to wait in total.</span>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="sd">            interval: Seconds between polls.</span>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="sd">            raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.</span>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">            ``True`` once all of them exist; ``False`` on timeout when ``raise_on_timeout=False``.</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">        Raises:</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">            TimeoutError: Some IDs were still missing after ``timeout`` seconds.</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a><span class="sd">        Example::</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a>
+<a id="__codelineno-0-602" name="__codelineno-0-602"></a><span class="sd">            client.deployments.import_deployments(file=&quot;deployments.csv&quot;, research_project=1, timezone=&quot;Europe/Madrid&quot;)</span>
+<a id="__codelineno-0-603" name="__codelineno-0-603"></a><span class="sd">            client.deployments.wait_for_import([&quot;DON01-2024A&quot;])</span>
+<a id="__codelineno-0-604" name="__codelineno-0-604"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-605" name="__codelineno-0-605"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_ids</span><span class="p">(</span><span class="n">deployment_ids</span><span class="p">,</span> <span class="s2">&quot;deployment_id&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">raise_on_timeout</span><span class="p">,</span> <span class="s2">&quot;deployment ID&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-606" name="__codelineno-0-606"></a>
+<a id="__codelineno-0-607" name="__codelineno-0-607"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">wait_for_update</span><span class="p">(</span>
+<a id="__codelineno-0-608" name="__codelineno-0-608"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-609" name="__codelineno-0-609"></a>        <span class="n">changes</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+<a id="__codelineno-0-610" name="__codelineno-0-610"></a>        <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
+<a id="__codelineno-0-611" name="__codelineno-0-611"></a>        <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+<a id="__codelineno-0-612" name="__codelineno-0-612"></a>        <span class="n">raise_on_timeout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-613" name="__codelineno-0-613"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-614" name="__codelineno-0-614"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Wait until an update import (``import_deployments(update=True)``) has been applied.</span>
+<a id="__codelineno-0-615" name="__codelineno-0-615"></a>
+<a id="__codelineno-0-616" name="__codelineno-0-616"></a><span class="sd">        ``import_deployments()`` returns ``True`` as soon as the table is validated and queued: the changes</span>
+<a id="__codelineno-0-617" name="__codelineno-0-617"></a><span class="sd">        land a moment later, and :meth:`wait_for_import` cannot tell, because the IDs already exist. This</span>
+<a id="__codelineno-0-618" name="__codelineno-0-618"></a><span class="sd">        polls the export until every deployment has the values you expect.</span>
+<a id="__codelineno-0-619" name="__codelineno-0-619"></a>
+<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="sd">            changes: ``{deployment_id: {field: expected value}}``, with the field names of</span>
+<a id="__codelineno-0-622" name="__codelineno-0-622"></a><span class="sd">                :class:`~trapper_client.schemas.DeploymentExport` (``camera_height``, ``habitat``, ``tags``,</span>
+<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">                ...). Numbers are compared with a tolerance. The ID is the stored one: Trapper slugifies the</span>
+<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">                ``deploymentID`` of an import (``&quot;Don 01&quot;`` is stored as ``&quot;don-01&quot;``).</span>
+<a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="sd">            timeout: Seconds to wait in total.</span>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">            interval: Seconds between polls.</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a><span class="sd">            raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a><span class="sd">            ``True`` once every deployment has every expected value; ``False`` on timeout when</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a><span class="sd">            ``raise_on_timeout=False``.</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a><span class="sd">        Raises:</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a><span class="sd">            ValueError: If a field is not a field of ``DeploymentExport`` (before any request).</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="sd">            TimeoutError: Some values were still different after ``timeout`` seconds.</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a>
+<a id="__codelineno-0-637" name="__codelineno-0-637"></a><span class="sd">        Example::</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a>
+<a id="__codelineno-0-639" name="__codelineno-0-639"></a><span class="sd">            client.deployments.import_deployments(file=&quot;edited.csv&quot;, research_project=1, timezone=&quot;Europe/Madrid&quot;, update=True)</span>
+<a id="__codelineno-0-640" name="__codelineno-0-640"></a><span class="sd">            client.deployments.wait_for_update({&quot;don01-2024a&quot;: {&quot;camera_height&quot;: 1.25, &quot;habitat&quot;: &quot;dehesa&quot;}})</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-642" name="__codelineno-0-642"></a>        <span class="n">known</span> <span class="o">=</span> <span class="n">DeploymentExport</span><span class="o">.</span><span class="n">model_fields</span>
+<a id="__codelineno-0-643" name="__codelineno-0-643"></a>        <span class="k">for</span> <span class="n">deployment_id</span><span class="p">,</span> <span class="n">expected</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-644" name="__codelineno-0-644"></a>            <span class="n">unknown</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">expected</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known</span><span class="p">)</span>
+<a id="__codelineno-0-645" name="__codelineno-0-645"></a>            <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+<a id="__codelineno-0-646" name="__codelineno-0-646"></a>                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">deployment_id</span><span class="si">}</span><span class="s2">: not a field of DeploymentExport: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-647" name="__codelineno-0-647"></a>
+<a id="__codelineno-0-648" name="__codelineno-0-648"></a>        <span class="k">def</span><span class="w"> </span><span class="nf">same</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">wanted</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-649" name="__codelineno-0-649"></a>            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wanted</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+<a id="__codelineno-0-650" name="__codelineno-0-650"></a>                <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-651" name="__codelineno-0-651"></a>                    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">actual</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">wanted</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">)</span>
+<a id="__codelineno-0-652" name="__codelineno-0-652"></a>                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+<a id="__codelineno-0-653" name="__codelineno-0-653"></a>                    <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-654" name="__codelineno-0-654"></a>            <span class="k">return</span> <span class="n">actual</span> <span class="o">==</span> <span class="n">wanted</span>
+<a id="__codelineno-0-655" name="__codelineno-0-655"></a>
+<a id="__codelineno-0-656" name="__codelineno-0-656"></a>        <span class="n">pending</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="nb">dict</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<a id="__codelineno-0-657" name="__codelineno-0-657"></a>        <span class="n">deadline</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">+</span> <span class="n">timeout</span>
+<a id="__codelineno-0-658" name="__codelineno-0-658"></a>        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<a id="__codelineno-0-659" name="__codelineno-0-659"></a>            <span class="k">for</span> <span class="n">deployment_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">pending</span><span class="p">):</span>
+<a id="__codelineno-0-660" name="__codelineno-0-660"></a>                <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-661" name="__codelineno-0-661"></a>                    <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="n">deployment_id</span><span class="p">)</span>
+<a id="__codelineno-0-662" name="__codelineno-0-662"></a>                <span class="k">except</span> <span class="n">err</span><span class="o">.</span><span class="n">BadRequestError</span><span class="p">:</span>       <span class="c1"># Trapper answers an empty export with a 400</span>
+<a id="__codelineno-0-663" name="__codelineno-0-663"></a>                    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-664" name="__codelineno-0-664"></a>                <span class="n">row</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">deployment_id</span> <span class="o">==</span> <span class="n">deployment_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-665" name="__codelineno-0-665"></a>                <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">same</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pending</span><span class="p">[</span><span class="n">deployment_id</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<a id="__codelineno-0-666" name="__codelineno-0-666"></a>                    <span class="k">del</span> <span class="n">pending</span><span class="p">[</span><span class="n">deployment_id</span><span class="p">]</span>
+<a id="__codelineno-0-667" name="__codelineno-0-667"></a>            <span class="k">if</span> <span class="ow">not</span> <span class="n">pending</span><span class="p">:</span>
+<a id="__codelineno-0-668" name="__codelineno-0-668"></a>                <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-669" name="__codelineno-0-669"></a>            <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">deadline</span><span class="p">:</span>
+<a id="__codelineno-0-670" name="__codelineno-0-670"></a>                <span class="k">if</span> <span class="n">raise_on_timeout</span><span class="p">:</span>
+<a id="__codelineno-0-671" name="__codelineno-0-671"></a>                    <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span>
+<a id="__codelineno-0-672" name="__codelineno-0-672"></a>                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span><span class="si">}</span><span class="s2"> deployment(s) not updated after </span><span class="si">{</span><span class="n">timeout</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">s: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pending</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-673" name="__codelineno-0-673"></a>                    <span class="p">)</span>
+<a id="__codelineno-0-674" name="__codelineno-0-674"></a>                <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-675" name="__codelineno-0-675"></a>            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -6191,6 +6333,375 @@ finds in the collection.</p>
 <div class="doc doc-object doc-function">
 
 
+<h4 id="trapper_client.components.deployments.DeploymentsComponent.download_resources" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">download_resources</span>
+
+
+</h4>
+<div class="doc-signature highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">download_resources</span><span class="p">(</span><span class="n">deployment_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;original&#39;</span><span class="p">,</span> <span class="s1">&#39;preview&#39;</span><span class="p">,</span> <span class="s1">&#39;thumbnail&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;original&#39;</span><span class="p">,</span> <span class="n">filter_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">skip_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">on_error</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;continue&#39;</span><span class="p">,</span> <span class="s1">&#39;raise&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;continue&#39;</span><span class="p">,</span> <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">retry_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">retry_min_wait</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">retry_max_wait</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span> <span class="o">**</span><span class="n">filters</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DownloadReport</span>
+</code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Download the files of the resources of a deployment into <code>&lt;directory&gt;/&lt;deployment_id&gt;/</code>.</p>
+<p>The resources of the deployment are listed with <code>resources.where(deployments=deployment_pk, **filters)</code> and each one is
+saved with :meth:<code>ResourcesComponent.download</code> (see :meth:<code>ResourcesComponent.download_many</code> for the file names,
+the report and the errors): a file that is already in the folder is skipped, so a run can be repeated, and a
+failure does not stop the others. Needs <code>user_name</code> and <code>user_password</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>deployment_pk</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Deployment primary key. (It is not called <code>pk</code> because <code>pk</code> is also a filter of the resource
+list, which this method passes on: <code>pk=[1, 2]</code> chooses resources.)</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>directory</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span> | <span title="pathlib.Path">Path</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Where the folder of the deployment goes.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>kind</code>
+            </td>
+            <td>
+                  <code><span title="typing.Literal">Literal</span>[&#39;original&#39;, &#39;preview&#39;, &#39;thumbnail&#39;]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>"original"</code>, <code>"preview"</code> or <code>"thumbnail"</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;original&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>filter_fn</code>
+            </td>
+            <td>
+                  <code><span title="typing.Callable">Callable</span>[[<span title="typing.Any">Any</span>], <span title="bool">bool</span>] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>predicate(resource) -&gt; bool</code> applied on the client to choose which resources, for what the
+server cannot filter (<code>lambda r: r.date_recorded.hour &lt; 6</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>skip_existing</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Leave alone the files that are already there.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>on_error</code>
+            </td>
+            <td>
+                  <code><span title="typing.Literal">Literal</span>[&#39;continue&#39;, &#39;raise&#39;]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>"continue"</code> (default) or <code>"raise"</code> at the first failure.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;continue&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>progress_callback</code>
+            </td>
+            <td>
+                  <code><span title="typing.Callable">Callable</span>[[<span title="str">str</span>, <span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.Any">Any</span>]], None] | None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>callback(event, data)</code> for each file (see :meth:<code>ResourcesComponent.download_many</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>retry_attempts</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Attempts per file (see :meth:<code>ResourcesComponent.download</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code>3</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>retry_min_wait</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Minimum backoff in seconds.</p>
+              </div>
+            </td>
+            <td>
+                  <code>1.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>retry_max_wait</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Maximum backoff in seconds.</p>
+              </div>
+            </td>
+            <td>
+                  <code>10.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>**filters</code>
+            </td>
+            <td>
+                  <code><span title="typing.Any">Any</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Any filter of the resource list: <code>resource_type</code>, <code>status</code>, <code>rdate_from</code>/<code>rdate_to</code>,
+<code>rtime_from</code>/<code>rtime_to</code>, <code>tags</code>, <code>species</code>, <code>observation_type</code>, <code>timestamp_error</code>,
+<code>search</code>, ... (see <code>client.resources</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code>{}</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>A</code></td>            <td>
+                  <code><span title="trapper_client.components.resources.DownloadReport">DownloadReport</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>class:<code>~trapper_client.components.resources.DownloadReport</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+        <p>Example::</p>
+<div class="highlight"><pre><span></span><code>report = client.deployments.download_resources(
+    12, &quot;downloads/&quot;, rdate_from=&quot;2024-03-01&quot;, rdate_to=&quot;2024-03-31&quot;, resource_type=&quot;I&quot;,
+)
+print(report)                     # 40 downloaded, 0 already there, 0 failed, in downloads/don01-2024a
+</code></pre></div>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/trapper_client/components/deployments.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-515">515</a></span>
+<span class="normal"><a href="#__codelineno-0-516">516</a></span>
+<span class="normal"><a href="#__codelineno-0-517">517</a></span>
+<span class="normal"><a href="#__codelineno-0-518">518</a></span>
+<span class="normal"><a href="#__codelineno-0-519">519</a></span>
+<span class="normal"><a href="#__codelineno-0-520">520</a></span>
+<span class="normal"><a href="#__codelineno-0-521">521</a></span>
+<span class="normal"><a href="#__codelineno-0-522">522</a></span>
+<span class="normal"><a href="#__codelineno-0-523">523</a></span>
+<span class="normal"><a href="#__codelineno-0-524">524</a></span>
+<span class="normal"><a href="#__codelineno-0-525">525</a></span>
+<span class="normal"><a href="#__codelineno-0-526">526</a></span>
+<span class="normal"><a href="#__codelineno-0-527">527</a></span>
+<span class="normal"><a href="#__codelineno-0-528">528</a></span>
+<span class="normal"><a href="#__codelineno-0-529">529</a></span>
+<span class="normal"><a href="#__codelineno-0-530">530</a></span>
+<span class="normal"><a href="#__codelineno-0-531">531</a></span>
+<span class="normal"><a href="#__codelineno-0-532">532</a></span>
+<span class="normal"><a href="#__codelineno-0-533">533</a></span>
+<span class="normal"><a href="#__codelineno-0-534">534</a></span>
+<span class="normal"><a href="#__codelineno-0-535">535</a></span>
+<span class="normal"><a href="#__codelineno-0-536">536</a></span>
+<span class="normal"><a href="#__codelineno-0-537">537</a></span>
+<span class="normal"><a href="#__codelineno-0-538">538</a></span>
+<span class="normal"><a href="#__codelineno-0-539">539</a></span>
+<span class="normal"><a href="#__codelineno-0-540">540</a></span>
+<span class="normal"><a href="#__codelineno-0-541">541</a></span>
+<span class="normal"><a href="#__codelineno-0-542">542</a></span>
+<span class="normal"><a href="#__codelineno-0-543">543</a></span>
+<span class="normal"><a href="#__codelineno-0-544">544</a></span>
+<span class="normal"><a href="#__codelineno-0-545">545</a></span>
+<span class="normal"><a href="#__codelineno-0-546">546</a></span>
+<span class="normal"><a href="#__codelineno-0-547">547</a></span>
+<span class="normal"><a href="#__codelineno-0-548">548</a></span>
+<span class="normal"><a href="#__codelineno-0-549">549</a></span>
+<span class="normal"><a href="#__codelineno-0-550">550</a></span>
+<span class="normal"><a href="#__codelineno-0-551">551</a></span>
+<span class="normal"><a href="#__codelineno-0-552">552</a></span>
+<span class="normal"><a href="#__codelineno-0-553">553</a></span>
+<span class="normal"><a href="#__codelineno-0-554">554</a></span>
+<span class="normal"><a href="#__codelineno-0-555">555</a></span>
+<span class="normal"><a href="#__codelineno-0-556">556</a></span>
+<span class="normal"><a href="#__codelineno-0-557">557</a></span>
+<span class="normal"><a href="#__codelineno-0-558">558</a></span>
+<span class="normal"><a href="#__codelineno-0-559">559</a></span>
+<span class="normal"><a href="#__codelineno-0-560">560</a></span>
+<span class="normal"><a href="#__codelineno-0-561">561</a></span>
+<span class="normal"><a href="#__codelineno-0-562">562</a></span>
+<span class="normal"><a href="#__codelineno-0-563">563</a></span>
+<span class="normal"><a href="#__codelineno-0-564">564</a></span>
+<span class="normal"><a href="#__codelineno-0-565">565</a></span>
+<span class="normal"><a href="#__codelineno-0-566">566</a></span>
+<span class="normal"><a href="#__codelineno-0-567">567</a></span>
+<span class="normal"><a href="#__codelineno-0-568">568</a></span>
+<span class="normal"><a href="#__codelineno-0-569">569</a></span>
+<span class="normal"><a href="#__codelineno-0-570">570</a></span>
+<span class="normal"><a href="#__codelineno-0-571">571</a></span>
+<span class="normal"><a href="#__codelineno-0-572">572</a></span>
+<span class="normal"><a href="#__codelineno-0-573">573</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="k">def</span><span class="w"> </span><span class="nf">download_resources</span><span class="p">(</span>
+<a id="__codelineno-0-516" name="__codelineno-0-516"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-517" name="__codelineno-0-517"></a>    <span class="n">deployment_pk</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<a id="__codelineno-0-518" name="__codelineno-0-518"></a>    <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span>
+<a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="n">kind</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;original&quot;</span><span class="p">,</span> <span class="s2">&quot;preview&quot;</span><span class="p">,</span> <span class="s2">&quot;thumbnail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;original&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="n">filter_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-521" name="__codelineno-0-521"></a>    <span class="n">skip_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-522" name="__codelineno-0-522"></a>    <span class="n">on_error</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;continue&quot;</span><span class="p">,</span> <span class="s2">&quot;raise&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;continue&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-523" name="__codelineno-0-523"></a>    <span class="n">progress_callback</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-524" name="__codelineno-0-524"></a>    <span class="n">retry_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+<a id="__codelineno-0-525" name="__codelineno-0-525"></a>    <span class="n">retry_min_wait</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+<a id="__codelineno-0-526" name="__codelineno-0-526"></a>    <span class="n">retry_max_wait</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">,</span>
+<a id="__codelineno-0-527" name="__codelineno-0-527"></a>    <span class="o">**</span><span class="n">filters</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DownloadReport</span><span class="p">:</span>
+<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Download the files of the resources of a deployment into ``&lt;directory&gt;/&lt;deployment_id&gt;/``.</span>
+<a id="__codelineno-0-530" name="__codelineno-0-530"></a>
+<a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="sd">    The resources of the deployment are listed with ``resources.where(deployments=deployment_pk, **filters)`` and each one is</span>
+<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">    saved with :meth:`ResourcesComponent.download` (see :meth:`ResourcesComponent.download_many` for the file names,</span>
+<a id="__codelineno-0-533" name="__codelineno-0-533"></a><span class="sd">    the report and the errors): a file that is already in the folder is skipped, so a run can be repeated, and a</span>
+<a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="sd">    failure does not stop the others. Needs ``user_name`` and ``user_password``.</span>
+<a id="__codelineno-0-535" name="__codelineno-0-535"></a>
+<a id="__codelineno-0-536" name="__codelineno-0-536"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">        deployment_pk: Deployment primary key. (It is not called ``pk`` because ``pk`` is also a filter of the resource</span>
+<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">            list, which this method passes on: ``pk=[1, 2]`` chooses resources.)</span>
+<a id="__codelineno-0-539" name="__codelineno-0-539"></a><span class="sd">        directory: Where the folder of the deployment goes.</span>
+<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">        kind: ``&quot;original&quot;``, ``&quot;preview&quot;`` or ``&quot;thumbnail&quot;``.</span>
+<a id="__codelineno-0-541" name="__codelineno-0-541"></a><span class="sd">        filter_fn: ``predicate(resource) -&gt; bool`` applied on the client to choose which resources, for what the</span>
+<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">            server cannot filter (``lambda r: r.date_recorded.hour &lt; 6``).</span>
+<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">        skip_existing: Leave alone the files that are already there.</span>
+<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">        on_error: ``&quot;continue&quot;`` (default) or ``&quot;raise&quot;`` at the first failure.</span>
+<a id="__codelineno-0-545" name="__codelineno-0-545"></a><span class="sd">        progress_callback: ``callback(event, data)`` for each file (see :meth:`ResourcesComponent.download_many`).</span>
+<a id="__codelineno-0-546" name="__codelineno-0-546"></a><span class="sd">        retry_attempts: Attempts per file (see :meth:`ResourcesComponent.download`).</span>
+<a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="sd">        retry_min_wait: Minimum backoff in seconds.</span>
+<a id="__codelineno-0-548" name="__codelineno-0-548"></a><span class="sd">        retry_max_wait: Maximum backoff in seconds.</span>
+<a id="__codelineno-0-549" name="__codelineno-0-549"></a><span class="sd">        **filters: Any filter of the resource list: ``resource_type``, ``status``, ``rdate_from``/``rdate_to``,</span>
+<a id="__codelineno-0-550" name="__codelineno-0-550"></a><span class="sd">            ``rtime_from``/``rtime_to``, ``tags``, ``species``, ``observation_type``, ``timestamp_error``,</span>
+<a id="__codelineno-0-551" name="__codelineno-0-551"></a><span class="sd">            ``search``, ... (see ``client.resources``).</span>
+<a id="__codelineno-0-552" name="__codelineno-0-552"></a>
+<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="sd">        A :class:`~trapper_client.components.resources.DownloadReport`.</span>
+<a id="__codelineno-0-555" name="__codelineno-0-555"></a>
+<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">    Example::</span>
+<a id="__codelineno-0-557" name="__codelineno-0-557"></a>
+<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">        report = client.deployments.download_resources(</span>
+<a id="__codelineno-0-559" name="__codelineno-0-559"></a><span class="sd">            12, &quot;downloads/&quot;, rdate_from=&quot;2024-03-01&quot;, rdate_to=&quot;2024-03-31&quot;, resource_type=&quot;I&quot;,</span>
+<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">        )</span>
+<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">        print(report)                     # 40 downloaded, 0 already there, 0 failed, in downloads/don01-2024a</span>
+<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-563" name="__codelineno-0-563"></a>    <span class="k">if</span> <span class="s2">&quot;deployments&quot;</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+<a id="__codelineno-0-564" name="__codelineno-0-564"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;download_resources() chooses the deployment itself: do not pass `deployments`&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-565" name="__codelineno-0-565"></a>    <span class="n">deployment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">deployment_pk</span><span class="p">)</span>
+<a id="__codelineno-0-566" name="__codelineno-0-566"></a>    <span class="n">folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">/</span> <span class="n">safe_filename</span><span class="p">(</span><span class="n">deployment</span><span class="o">.</span><span class="n">deployment_id</span><span class="p">,</span> <span class="n">fallback</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;deployment-</span><span class="si">{</span><span class="n">deployment_pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-567" name="__codelineno-0-567"></a>    <span class="n">resources</span> <span class="o">=</span> <span class="n">ResourcesComponent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="p">)</span>
+<a id="__codelineno-0-568" name="__codelineno-0-568"></a>    <span class="n">total</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">filter_fn</span> <span class="k">else</span> <span class="n">resources</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">deployments</span><span class="o">=</span><span class="n">deployment_pk</span><span class="p">,</span> <span class="o">**</span><span class="n">filters</span><span class="p">)</span><span class="o">.</span><span class="n">pagination</span><span class="o">.</span><span class="n">count</span>
+<a id="__codelineno-0-569" name="__codelineno-0-569"></a>    <span class="k">return</span> <span class="n">resources</span><span class="o">.</span><span class="n">download_many</span><span class="p">(</span>
+<a id="__codelineno-0-570" name="__codelineno-0-570"></a>        <span class="n">resources</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">deployments</span><span class="o">=</span><span class="n">deployment_pk</span><span class="p">,</span> <span class="n">filter_fn</span><span class="o">=</span><span class="n">filter_fn</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">filters</span><span class="p">),</span> <span class="n">folder</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+<a id="__codelineno-0-571" name="__codelineno-0-571"></a>        <span class="n">skip_existing</span><span class="o">=</span><span class="n">skip_existing</span><span class="p">,</span> <span class="n">on_error</span><span class="o">=</span><span class="n">on_error</span><span class="p">,</span> <span class="n">progress_callback</span><span class="o">=</span><span class="n">progress_callback</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="n">total</span><span class="p">,</span>
+<a id="__codelineno-0-572" name="__codelineno-0-572"></a>        <span class="n">retry_attempts</span><span class="o">=</span><span class="n">retry_attempts</span><span class="p">,</span> <span class="n">retry_min_wait</span><span class="o">=</span><span class="n">retry_min_wait</span><span class="p">,</span> <span class="n">retry_max_wait</span><span class="o">=</span><span class="n">retry_max_wait</span><span class="p">,</span>
+<a id="__codelineno-0-573" name="__codelineno-0-573"></a>    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h4 id="trapper_client.components.deployments.DeploymentsComponent.wait_for_import" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">wait_for_import</span>
 
@@ -6338,67 +6849,67 @@ client.deployments.wait_for_import([&quot;DON01-2024A&quot;])
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/trapper_client/components/deployments.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-515">515</a></span>
-<span class="normal"><a href="#__codelineno-0-516">516</a></span>
-<span class="normal"><a href="#__codelineno-0-517">517</a></span>
-<span class="normal"><a href="#__codelineno-0-518">518</a></span>
-<span class="normal"><a href="#__codelineno-0-519">519</a></span>
-<span class="normal"><a href="#__codelineno-0-520">520</a></span>
-<span class="normal"><a href="#__codelineno-0-521">521</a></span>
-<span class="normal"><a href="#__codelineno-0-522">522</a></span>
-<span class="normal"><a href="#__codelineno-0-523">523</a></span>
-<span class="normal"><a href="#__codelineno-0-524">524</a></span>
-<span class="normal"><a href="#__codelineno-0-525">525</a></span>
-<span class="normal"><a href="#__codelineno-0-526">526</a></span>
-<span class="normal"><a href="#__codelineno-0-527">527</a></span>
-<span class="normal"><a href="#__codelineno-0-528">528</a></span>
-<span class="normal"><a href="#__codelineno-0-529">529</a></span>
-<span class="normal"><a href="#__codelineno-0-530">530</a></span>
-<span class="normal"><a href="#__codelineno-0-531">531</a></span>
-<span class="normal"><a href="#__codelineno-0-532">532</a></span>
-<span class="normal"><a href="#__codelineno-0-533">533</a></span>
-<span class="normal"><a href="#__codelineno-0-534">534</a></span>
-<span class="normal"><a href="#__codelineno-0-535">535</a></span>
-<span class="normal"><a href="#__codelineno-0-536">536</a></span>
-<span class="normal"><a href="#__codelineno-0-537">537</a></span>
-<span class="normal"><a href="#__codelineno-0-538">538</a></span>
-<span class="normal"><a href="#__codelineno-0-539">539</a></span>
-<span class="normal"><a href="#__codelineno-0-540">540</a></span>
-<span class="normal"><a href="#__codelineno-0-541">541</a></span>
-<span class="normal"><a href="#__codelineno-0-542">542</a></span>
-<span class="normal"><a href="#__codelineno-0-543">543</a></span>
-<span class="normal"><a href="#__codelineno-0-544">544</a></span>
-<span class="normal"><a href="#__codelineno-0-545">545</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-515" name="__codelineno-0-515"></a><span class="k">def</span><span class="w"> </span><span class="nf">wait_for_import</span><span class="p">(</span>
-<a id="__codelineno-0-516" name="__codelineno-0-516"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-517" name="__codelineno-0-517"></a>    <span class="n">deployment_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-<a id="__codelineno-0-518" name="__codelineno-0-518"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
-<a id="__codelineno-0-519" name="__codelineno-0-519"></a>    <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
-<a id="__codelineno-0-520" name="__codelineno-0-520"></a>    <span class="n">raise_on_timeout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-521" name="__codelineno-0-521"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-522" name="__codelineno-0-522"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wait until the imported deployments are visible through the API.</span>
-<a id="__codelineno-0-523" name="__codelineno-0-523"></a>
-<a id="__codelineno-0-524" name="__codelineno-0-524"></a><span class="sd">    Trapper v2 imports asynchronously: ``import_deployments()`` returning ``True`` only means the table was</span>
-<a id="__codelineno-0-525" name="__codelineno-0-525"></a><span class="sd">    validated and queued. Neither version offers an API to query the import task, so this</span>
-<a id="__codelineno-0-526" name="__codelineno-0-526"></a><span class="sd">    checks the outcome instead: it polls the list endpoint until every ID is there.</span>
-<a id="__codelineno-0-527" name="__codelineno-0-527"></a>
-<a id="__codelineno-0-528" name="__codelineno-0-528"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-529" name="__codelineno-0-529"></a><span class="sd">        deployment_ids: The deployment IDs the import should create (the ``deploymentID`` column).</span>
-<a id="__codelineno-0-530" name="__codelineno-0-530"></a><span class="sd">        timeout: Seconds to wait in total.</span>
-<a id="__codelineno-0-531" name="__codelineno-0-531"></a><span class="sd">        interval: Seconds between polls.</span>
-<a id="__codelineno-0-532" name="__codelineno-0-532"></a><span class="sd">        raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.</span>
-<a id="__codelineno-0-533" name="__codelineno-0-533"></a>
-<a id="__codelineno-0-534" name="__codelineno-0-534"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-535" name="__codelineno-0-535"></a><span class="sd">        ``True`` once all of them exist; ``False`` on timeout when ``raise_on_timeout=False``.</span>
-<a id="__codelineno-0-536" name="__codelineno-0-536"></a>
-<a id="__codelineno-0-537" name="__codelineno-0-537"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-538" name="__codelineno-0-538"></a><span class="sd">        TimeoutError: Some IDs were still missing after ``timeout`` seconds.</span>
-<a id="__codelineno-0-539" name="__codelineno-0-539"></a>
-<a id="__codelineno-0-540" name="__codelineno-0-540"></a><span class="sd">    Example::</span>
-<a id="__codelineno-0-541" name="__codelineno-0-541"></a>
-<a id="__codelineno-0-542" name="__codelineno-0-542"></a><span class="sd">        client.deployments.import_deployments(file=&quot;deployments.csv&quot;, research_project=1, timezone=&quot;Europe/Madrid&quot;)</span>
-<a id="__codelineno-0-543" name="__codelineno-0-543"></a><span class="sd">        client.deployments.wait_for_import([&quot;DON01-2024A&quot;])</span>
-<a id="__codelineno-0-544" name="__codelineno-0-544"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-545" name="__codelineno-0-545"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_ids</span><span class="p">(</span><span class="n">deployment_ids</span><span class="p">,</span> <span class="s2">&quot;deployment_id&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">raise_on_timeout</span><span class="p">,</span> <span class="s2">&quot;deployment ID&quot;</span><span class="p">)</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-575">575</a></span>
+<span class="normal"><a href="#__codelineno-0-576">576</a></span>
+<span class="normal"><a href="#__codelineno-0-577">577</a></span>
+<span class="normal"><a href="#__codelineno-0-578">578</a></span>
+<span class="normal"><a href="#__codelineno-0-579">579</a></span>
+<span class="normal"><a href="#__codelineno-0-580">580</a></span>
+<span class="normal"><a href="#__codelineno-0-581">581</a></span>
+<span class="normal"><a href="#__codelineno-0-582">582</a></span>
+<span class="normal"><a href="#__codelineno-0-583">583</a></span>
+<span class="normal"><a href="#__codelineno-0-584">584</a></span>
+<span class="normal"><a href="#__codelineno-0-585">585</a></span>
+<span class="normal"><a href="#__codelineno-0-586">586</a></span>
+<span class="normal"><a href="#__codelineno-0-587">587</a></span>
+<span class="normal"><a href="#__codelineno-0-588">588</a></span>
+<span class="normal"><a href="#__codelineno-0-589">589</a></span>
+<span class="normal"><a href="#__codelineno-0-590">590</a></span>
+<span class="normal"><a href="#__codelineno-0-591">591</a></span>
+<span class="normal"><a href="#__codelineno-0-592">592</a></span>
+<span class="normal"><a href="#__codelineno-0-593">593</a></span>
+<span class="normal"><a href="#__codelineno-0-594">594</a></span>
+<span class="normal"><a href="#__codelineno-0-595">595</a></span>
+<span class="normal"><a href="#__codelineno-0-596">596</a></span>
+<span class="normal"><a href="#__codelineno-0-597">597</a></span>
+<span class="normal"><a href="#__codelineno-0-598">598</a></span>
+<span class="normal"><a href="#__codelineno-0-599">599</a></span>
+<span class="normal"><a href="#__codelineno-0-600">600</a></span>
+<span class="normal"><a href="#__codelineno-0-601">601</a></span>
+<span class="normal"><a href="#__codelineno-0-602">602</a></span>
+<span class="normal"><a href="#__codelineno-0-603">603</a></span>
+<span class="normal"><a href="#__codelineno-0-604">604</a></span>
+<span class="normal"><a href="#__codelineno-0-605">605</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="k">def</span><span class="w"> </span><span class="nf">wait_for_import</span><span class="p">(</span>
+<a id="__codelineno-0-576" name="__codelineno-0-576"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-577" name="__codelineno-0-577"></a>    <span class="n">deployment_ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<a id="__codelineno-0-578" name="__codelineno-0-578"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
+<a id="__codelineno-0-579" name="__codelineno-0-579"></a>    <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+<a id="__codelineno-0-580" name="__codelineno-0-580"></a>    <span class="n">raise_on_timeout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-582" name="__codelineno-0-582"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wait until the imported deployments are visible through the API.</span>
+<a id="__codelineno-0-583" name="__codelineno-0-583"></a>
+<a id="__codelineno-0-584" name="__codelineno-0-584"></a><span class="sd">    Trapper v2 imports asynchronously: ``import_deployments()`` returning ``True`` only means the table was</span>
+<a id="__codelineno-0-585" name="__codelineno-0-585"></a><span class="sd">    validated and queued. Neither version offers an API to query the import task, so this</span>
+<a id="__codelineno-0-586" name="__codelineno-0-586"></a><span class="sd">    checks the outcome instead: it polls the list endpoint until every ID is there.</span>
+<a id="__codelineno-0-587" name="__codelineno-0-587"></a>
+<a id="__codelineno-0-588" name="__codelineno-0-588"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-589" name="__codelineno-0-589"></a><span class="sd">        deployment_ids: The deployment IDs the import should create (the ``deploymentID`` column).</span>
+<a id="__codelineno-0-590" name="__codelineno-0-590"></a><span class="sd">        timeout: Seconds to wait in total.</span>
+<a id="__codelineno-0-591" name="__codelineno-0-591"></a><span class="sd">        interval: Seconds between polls.</span>
+<a id="__codelineno-0-592" name="__codelineno-0-592"></a><span class="sd">        raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.</span>
+<a id="__codelineno-0-593" name="__codelineno-0-593"></a>
+<a id="__codelineno-0-594" name="__codelineno-0-594"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-595" name="__codelineno-0-595"></a><span class="sd">        ``True`` once all of them exist; ``False`` on timeout when ``raise_on_timeout=False``.</span>
+<a id="__codelineno-0-596" name="__codelineno-0-596"></a>
+<a id="__codelineno-0-597" name="__codelineno-0-597"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-598" name="__codelineno-0-598"></a><span class="sd">        TimeoutError: Some IDs were still missing after ``timeout`` seconds.</span>
+<a id="__codelineno-0-599" name="__codelineno-0-599"></a>
+<a id="__codelineno-0-600" name="__codelineno-0-600"></a><span class="sd">    Example::</span>
+<a id="__codelineno-0-601" name="__codelineno-0-601"></a>
+<a id="__codelineno-0-602" name="__codelineno-0-602"></a><span class="sd">        client.deployments.import_deployments(file=&quot;deployments.csv&quot;, research_project=1, timezone=&quot;Europe/Madrid&quot;)</span>
+<a id="__codelineno-0-603" name="__codelineno-0-603"></a><span class="sd">        client.deployments.wait_for_import([&quot;DON01-2024A&quot;])</span>
+<a id="__codelineno-0-604" name="__codelineno-0-604"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-605" name="__codelineno-0-605"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_ids</span><span class="p">(</span><span class="n">deployment_ids</span><span class="p">,</span> <span class="s2">&quot;deployment_id&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">raise_on_timeout</span><span class="p">,</span> <span class="s2">&quot;deployment ID&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6578,67 +7089,7 @@ client.deployments.wait_for_update({&quot;don01-2024a&quot;: {&quot;camera_heigh
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/trapper_client/components/deployments.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-547">547</a></span>
-<span class="normal"><a href="#__codelineno-0-548">548</a></span>
-<span class="normal"><a href="#__codelineno-0-549">549</a></span>
-<span class="normal"><a href="#__codelineno-0-550">550</a></span>
-<span class="normal"><a href="#__codelineno-0-551">551</a></span>
-<span class="normal"><a href="#__codelineno-0-552">552</a></span>
-<span class="normal"><a href="#__codelineno-0-553">553</a></span>
-<span class="normal"><a href="#__codelineno-0-554">554</a></span>
-<span class="normal"><a href="#__codelineno-0-555">555</a></span>
-<span class="normal"><a href="#__codelineno-0-556">556</a></span>
-<span class="normal"><a href="#__codelineno-0-557">557</a></span>
-<span class="normal"><a href="#__codelineno-0-558">558</a></span>
-<span class="normal"><a href="#__codelineno-0-559">559</a></span>
-<span class="normal"><a href="#__codelineno-0-560">560</a></span>
-<span class="normal"><a href="#__codelineno-0-561">561</a></span>
-<span class="normal"><a href="#__codelineno-0-562">562</a></span>
-<span class="normal"><a href="#__codelineno-0-563">563</a></span>
-<span class="normal"><a href="#__codelineno-0-564">564</a></span>
-<span class="normal"><a href="#__codelineno-0-565">565</a></span>
-<span class="normal"><a href="#__codelineno-0-566">566</a></span>
-<span class="normal"><a href="#__codelineno-0-567">567</a></span>
-<span class="normal"><a href="#__codelineno-0-568">568</a></span>
-<span class="normal"><a href="#__codelineno-0-569">569</a></span>
-<span class="normal"><a href="#__codelineno-0-570">570</a></span>
-<span class="normal"><a href="#__codelineno-0-571">571</a></span>
-<span class="normal"><a href="#__codelineno-0-572">572</a></span>
-<span class="normal"><a href="#__codelineno-0-573">573</a></span>
-<span class="normal"><a href="#__codelineno-0-574">574</a></span>
-<span class="normal"><a href="#__codelineno-0-575">575</a></span>
-<span class="normal"><a href="#__codelineno-0-576">576</a></span>
-<span class="normal"><a href="#__codelineno-0-577">577</a></span>
-<span class="normal"><a href="#__codelineno-0-578">578</a></span>
-<span class="normal"><a href="#__codelineno-0-579">579</a></span>
-<span class="normal"><a href="#__codelineno-0-580">580</a></span>
-<span class="normal"><a href="#__codelineno-0-581">581</a></span>
-<span class="normal"><a href="#__codelineno-0-582">582</a></span>
-<span class="normal"><a href="#__codelineno-0-583">583</a></span>
-<span class="normal"><a href="#__codelineno-0-584">584</a></span>
-<span class="normal"><a href="#__codelineno-0-585">585</a></span>
-<span class="normal"><a href="#__codelineno-0-586">586</a></span>
-<span class="normal"><a href="#__codelineno-0-587">587</a></span>
-<span class="normal"><a href="#__codelineno-0-588">588</a></span>
-<span class="normal"><a href="#__codelineno-0-589">589</a></span>
-<span class="normal"><a href="#__codelineno-0-590">590</a></span>
-<span class="normal"><a href="#__codelineno-0-591">591</a></span>
-<span class="normal"><a href="#__codelineno-0-592">592</a></span>
-<span class="normal"><a href="#__codelineno-0-593">593</a></span>
-<span class="normal"><a href="#__codelineno-0-594">594</a></span>
-<span class="normal"><a href="#__codelineno-0-595">595</a></span>
-<span class="normal"><a href="#__codelineno-0-596">596</a></span>
-<span class="normal"><a href="#__codelineno-0-597">597</a></span>
-<span class="normal"><a href="#__codelineno-0-598">598</a></span>
-<span class="normal"><a href="#__codelineno-0-599">599</a></span>
-<span class="normal"><a href="#__codelineno-0-600">600</a></span>
-<span class="normal"><a href="#__codelineno-0-601">601</a></span>
-<span class="normal"><a href="#__codelineno-0-602">602</a></span>
-<span class="normal"><a href="#__codelineno-0-603">603</a></span>
-<span class="normal"><a href="#__codelineno-0-604">604</a></span>
-<span class="normal"><a href="#__codelineno-0-605">605</a></span>
-<span class="normal"><a href="#__codelineno-0-606">606</a></span>
-<span class="normal"><a href="#__codelineno-0-607">607</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-607">607</a></span>
 <span class="normal"><a href="#__codelineno-0-608">608</a></span>
 <span class="normal"><a href="#__codelineno-0-609">609</a></span>
 <span class="normal"><a href="#__codelineno-0-610">610</a></span>
@@ -6646,75 +7097,135 @@ client.deployments.wait_for_update({&quot;don01-2024a&quot;: {&quot;camera_heigh
 <span class="normal"><a href="#__codelineno-0-612">612</a></span>
 <span class="normal"><a href="#__codelineno-0-613">613</a></span>
 <span class="normal"><a href="#__codelineno-0-614">614</a></span>
-<span class="normal"><a href="#__codelineno-0-615">615</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-547" name="__codelineno-0-547"></a><span class="k">def</span><span class="w"> </span><span class="nf">wait_for_update</span><span class="p">(</span>
-<a id="__codelineno-0-548" name="__codelineno-0-548"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-549" name="__codelineno-0-549"></a>    <span class="n">changes</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
-<a id="__codelineno-0-550" name="__codelineno-0-550"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
-<a id="__codelineno-0-551" name="__codelineno-0-551"></a>    <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
-<a id="__codelineno-0-552" name="__codelineno-0-552"></a>    <span class="n">raise_on_timeout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-0-553" name="__codelineno-0-553"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-554" name="__codelineno-0-554"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wait until an update import (``import_deployments(update=True)``) has been applied.</span>
-<a id="__codelineno-0-555" name="__codelineno-0-555"></a>
-<a id="__codelineno-0-556" name="__codelineno-0-556"></a><span class="sd">    ``import_deployments()`` returns ``True`` as soon as the table is validated and queued: the changes</span>
-<a id="__codelineno-0-557" name="__codelineno-0-557"></a><span class="sd">    land a moment later, and :meth:`wait_for_import` cannot tell, because the IDs already exist. This</span>
-<a id="__codelineno-0-558" name="__codelineno-0-558"></a><span class="sd">    polls the export until every deployment has the values you expect.</span>
-<a id="__codelineno-0-559" name="__codelineno-0-559"></a>
-<a id="__codelineno-0-560" name="__codelineno-0-560"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-561" name="__codelineno-0-561"></a><span class="sd">        changes: ``{deployment_id: {field: expected value}}``, with the field names of</span>
-<a id="__codelineno-0-562" name="__codelineno-0-562"></a><span class="sd">            :class:`~trapper_client.schemas.DeploymentExport` (``camera_height``, ``habitat``, ``tags``,</span>
-<a id="__codelineno-0-563" name="__codelineno-0-563"></a><span class="sd">            ...). Numbers are compared with a tolerance. The ID is the stored one: Trapper slugifies the</span>
-<a id="__codelineno-0-564" name="__codelineno-0-564"></a><span class="sd">            ``deploymentID`` of an import (``&quot;Don 01&quot;`` is stored as ``&quot;don-01&quot;``).</span>
-<a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="sd">        timeout: Seconds to wait in total.</span>
-<a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="sd">        interval: Seconds between polls.</span>
-<a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="sd">        raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.</span>
-<a id="__codelineno-0-568" name="__codelineno-0-568"></a>
-<a id="__codelineno-0-569" name="__codelineno-0-569"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-570" name="__codelineno-0-570"></a><span class="sd">        ``True`` once every deployment has every expected value; ``False`` on timeout when</span>
-<a id="__codelineno-0-571" name="__codelineno-0-571"></a><span class="sd">        ``raise_on_timeout=False``.</span>
-<a id="__codelineno-0-572" name="__codelineno-0-572"></a>
-<a id="__codelineno-0-573" name="__codelineno-0-573"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-574" name="__codelineno-0-574"></a><span class="sd">        ValueError: If a field is not a field of ``DeploymentExport`` (before any request).</span>
-<a id="__codelineno-0-575" name="__codelineno-0-575"></a><span class="sd">        TimeoutError: Some values were still different after ``timeout`` seconds.</span>
-<a id="__codelineno-0-576" name="__codelineno-0-576"></a>
-<a id="__codelineno-0-577" name="__codelineno-0-577"></a><span class="sd">    Example::</span>
-<a id="__codelineno-0-578" name="__codelineno-0-578"></a>
-<a id="__codelineno-0-579" name="__codelineno-0-579"></a><span class="sd">        client.deployments.import_deployments(file=&quot;edited.csv&quot;, research_project=1, timezone=&quot;Europe/Madrid&quot;, update=True)</span>
-<a id="__codelineno-0-580" name="__codelineno-0-580"></a><span class="sd">        client.deployments.wait_for_update({&quot;don01-2024a&quot;: {&quot;camera_height&quot;: 1.25, &quot;habitat&quot;: &quot;dehesa&quot;}})</span>
-<a id="__codelineno-0-581" name="__codelineno-0-581"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-582" name="__codelineno-0-582"></a>    <span class="n">known</span> <span class="o">=</span> <span class="n">DeploymentExport</span><span class="o">.</span><span class="n">model_fields</span>
-<a id="__codelineno-0-583" name="__codelineno-0-583"></a>    <span class="k">for</span> <span class="n">deployment_id</span><span class="p">,</span> <span class="n">expected</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-<a id="__codelineno-0-584" name="__codelineno-0-584"></a>        <span class="n">unknown</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">expected</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known</span><span class="p">)</span>
-<a id="__codelineno-0-585" name="__codelineno-0-585"></a>        <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
-<a id="__codelineno-0-586" name="__codelineno-0-586"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">deployment_id</span><span class="si">}</span><span class="s2">: not a field of DeploymentExport: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-587" name="__codelineno-0-587"></a>
-<a id="__codelineno-0-588" name="__codelineno-0-588"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">same</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">wanted</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<a id="__codelineno-0-589" name="__codelineno-0-589"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wanted</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-<a id="__codelineno-0-590" name="__codelineno-0-590"></a>            <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-591" name="__codelineno-0-591"></a>                <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">actual</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">wanted</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">)</span>
-<a id="__codelineno-0-592" name="__codelineno-0-592"></a>            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-<a id="__codelineno-0-593" name="__codelineno-0-593"></a>                <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-594" name="__codelineno-0-594"></a>        <span class="k">return</span> <span class="n">actual</span> <span class="o">==</span> <span class="n">wanted</span>
-<a id="__codelineno-0-595" name="__codelineno-0-595"></a>
-<a id="__codelineno-0-596" name="__codelineno-0-596"></a>    <span class="n">pending</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="nb">dict</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-<a id="__codelineno-0-597" name="__codelineno-0-597"></a>    <span class="n">deadline</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">+</span> <span class="n">timeout</span>
-<a id="__codelineno-0-598" name="__codelineno-0-598"></a>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-<a id="__codelineno-0-599" name="__codelineno-0-599"></a>        <span class="k">for</span> <span class="n">deployment_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">pending</span><span class="p">):</span>
-<a id="__codelineno-0-600" name="__codelineno-0-600"></a>            <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-601" name="__codelineno-0-601"></a>                <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="n">deployment_id</span><span class="p">)</span>
-<a id="__codelineno-0-602" name="__codelineno-0-602"></a>            <span class="k">except</span> <span class="n">err</span><span class="o">.</span><span class="n">BadRequestError</span><span class="p">:</span>       <span class="c1"># Trapper answers an empty export with a 400</span>
-<a id="__codelineno-0-603" name="__codelineno-0-603"></a>                <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-0-604" name="__codelineno-0-604"></a>            <span class="n">row</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">deployment_id</span> <span class="o">==</span> <span class="n">deployment_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-<a id="__codelineno-0-605" name="__codelineno-0-605"></a>            <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">same</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pending</span><span class="p">[</span><span class="n">deployment_id</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-<a id="__codelineno-0-606" name="__codelineno-0-606"></a>                <span class="k">del</span> <span class="n">pending</span><span class="p">[</span><span class="n">deployment_id</span><span class="p">]</span>
-<a id="__codelineno-0-607" name="__codelineno-0-607"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">pending</span><span class="p">:</span>
-<a id="__codelineno-0-608" name="__codelineno-0-608"></a>            <span class="k">return</span> <span class="kc">True</span>
-<a id="__codelineno-0-609" name="__codelineno-0-609"></a>        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">deadline</span><span class="p">:</span>
-<a id="__codelineno-0-610" name="__codelineno-0-610"></a>            <span class="k">if</span> <span class="n">raise_on_timeout</span><span class="p">:</span>
-<a id="__codelineno-0-611" name="__codelineno-0-611"></a>                <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span>
-<a id="__codelineno-0-612" name="__codelineno-0-612"></a>                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span><span class="si">}</span><span class="s2"> deployment(s) not updated after </span><span class="si">{</span><span class="n">timeout</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">s: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pending</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
-<a id="__codelineno-0-613" name="__codelineno-0-613"></a>                <span class="p">)</span>
-<a id="__codelineno-0-614" name="__codelineno-0-614"></a>            <span class="k">return</span> <span class="kc">False</span>
-<a id="__codelineno-0-615" name="__codelineno-0-615"></a>        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-615">615</a></span>
+<span class="normal"><a href="#__codelineno-0-616">616</a></span>
+<span class="normal"><a href="#__codelineno-0-617">617</a></span>
+<span class="normal"><a href="#__codelineno-0-618">618</a></span>
+<span class="normal"><a href="#__codelineno-0-619">619</a></span>
+<span class="normal"><a href="#__codelineno-0-620">620</a></span>
+<span class="normal"><a href="#__codelineno-0-621">621</a></span>
+<span class="normal"><a href="#__codelineno-0-622">622</a></span>
+<span class="normal"><a href="#__codelineno-0-623">623</a></span>
+<span class="normal"><a href="#__codelineno-0-624">624</a></span>
+<span class="normal"><a href="#__codelineno-0-625">625</a></span>
+<span class="normal"><a href="#__codelineno-0-626">626</a></span>
+<span class="normal"><a href="#__codelineno-0-627">627</a></span>
+<span class="normal"><a href="#__codelineno-0-628">628</a></span>
+<span class="normal"><a href="#__codelineno-0-629">629</a></span>
+<span class="normal"><a href="#__codelineno-0-630">630</a></span>
+<span class="normal"><a href="#__codelineno-0-631">631</a></span>
+<span class="normal"><a href="#__codelineno-0-632">632</a></span>
+<span class="normal"><a href="#__codelineno-0-633">633</a></span>
+<span class="normal"><a href="#__codelineno-0-634">634</a></span>
+<span class="normal"><a href="#__codelineno-0-635">635</a></span>
+<span class="normal"><a href="#__codelineno-0-636">636</a></span>
+<span class="normal"><a href="#__codelineno-0-637">637</a></span>
+<span class="normal"><a href="#__codelineno-0-638">638</a></span>
+<span class="normal"><a href="#__codelineno-0-639">639</a></span>
+<span class="normal"><a href="#__codelineno-0-640">640</a></span>
+<span class="normal"><a href="#__codelineno-0-641">641</a></span>
+<span class="normal"><a href="#__codelineno-0-642">642</a></span>
+<span class="normal"><a href="#__codelineno-0-643">643</a></span>
+<span class="normal"><a href="#__codelineno-0-644">644</a></span>
+<span class="normal"><a href="#__codelineno-0-645">645</a></span>
+<span class="normal"><a href="#__codelineno-0-646">646</a></span>
+<span class="normal"><a href="#__codelineno-0-647">647</a></span>
+<span class="normal"><a href="#__codelineno-0-648">648</a></span>
+<span class="normal"><a href="#__codelineno-0-649">649</a></span>
+<span class="normal"><a href="#__codelineno-0-650">650</a></span>
+<span class="normal"><a href="#__codelineno-0-651">651</a></span>
+<span class="normal"><a href="#__codelineno-0-652">652</a></span>
+<span class="normal"><a href="#__codelineno-0-653">653</a></span>
+<span class="normal"><a href="#__codelineno-0-654">654</a></span>
+<span class="normal"><a href="#__codelineno-0-655">655</a></span>
+<span class="normal"><a href="#__codelineno-0-656">656</a></span>
+<span class="normal"><a href="#__codelineno-0-657">657</a></span>
+<span class="normal"><a href="#__codelineno-0-658">658</a></span>
+<span class="normal"><a href="#__codelineno-0-659">659</a></span>
+<span class="normal"><a href="#__codelineno-0-660">660</a></span>
+<span class="normal"><a href="#__codelineno-0-661">661</a></span>
+<span class="normal"><a href="#__codelineno-0-662">662</a></span>
+<span class="normal"><a href="#__codelineno-0-663">663</a></span>
+<span class="normal"><a href="#__codelineno-0-664">664</a></span>
+<span class="normal"><a href="#__codelineno-0-665">665</a></span>
+<span class="normal"><a href="#__codelineno-0-666">666</a></span>
+<span class="normal"><a href="#__codelineno-0-667">667</a></span>
+<span class="normal"><a href="#__codelineno-0-668">668</a></span>
+<span class="normal"><a href="#__codelineno-0-669">669</a></span>
+<span class="normal"><a href="#__codelineno-0-670">670</a></span>
+<span class="normal"><a href="#__codelineno-0-671">671</a></span>
+<span class="normal"><a href="#__codelineno-0-672">672</a></span>
+<span class="normal"><a href="#__codelineno-0-673">673</a></span>
+<span class="normal"><a href="#__codelineno-0-674">674</a></span>
+<span class="normal"><a href="#__codelineno-0-675">675</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-607" name="__codelineno-0-607"></a><span class="k">def</span><span class="w"> </span><span class="nf">wait_for_update</span><span class="p">(</span>
+<a id="__codelineno-0-608" name="__codelineno-0-608"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-609" name="__codelineno-0-609"></a>    <span class="n">changes</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
+<a id="__codelineno-0-610" name="__codelineno-0-610"></a>    <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">60.0</span><span class="p">,</span>
+<a id="__codelineno-0-611" name="__codelineno-0-611"></a>    <span class="n">interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
+<a id="__codelineno-0-612" name="__codelineno-0-612"></a>    <span class="n">raise_on_timeout</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-0-613" name="__codelineno-0-613"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-614" name="__codelineno-0-614"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wait until an update import (``import_deployments(update=True)``) has been applied.</span>
+<a id="__codelineno-0-615" name="__codelineno-0-615"></a>
+<a id="__codelineno-0-616" name="__codelineno-0-616"></a><span class="sd">    ``import_deployments()`` returns ``True`` as soon as the table is validated and queued: the changes</span>
+<a id="__codelineno-0-617" name="__codelineno-0-617"></a><span class="sd">    land a moment later, and :meth:`wait_for_import` cannot tell, because the IDs already exist. This</span>
+<a id="__codelineno-0-618" name="__codelineno-0-618"></a><span class="sd">    polls the export until every deployment has the values you expect.</span>
+<a id="__codelineno-0-619" name="__codelineno-0-619"></a>
+<a id="__codelineno-0-620" name="__codelineno-0-620"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-621" name="__codelineno-0-621"></a><span class="sd">        changes: ``{deployment_id: {field: expected value}}``, with the field names of</span>
+<a id="__codelineno-0-622" name="__codelineno-0-622"></a><span class="sd">            :class:`~trapper_client.schemas.DeploymentExport` (``camera_height``, ``habitat``, ``tags``,</span>
+<a id="__codelineno-0-623" name="__codelineno-0-623"></a><span class="sd">            ...). Numbers are compared with a tolerance. The ID is the stored one: Trapper slugifies the</span>
+<a id="__codelineno-0-624" name="__codelineno-0-624"></a><span class="sd">            ``deploymentID`` of an import (``&quot;Don 01&quot;`` is stored as ``&quot;don-01&quot;``).</span>
+<a id="__codelineno-0-625" name="__codelineno-0-625"></a><span class="sd">        timeout: Seconds to wait in total.</span>
+<a id="__codelineno-0-626" name="__codelineno-0-626"></a><span class="sd">        interval: Seconds between polls.</span>
+<a id="__codelineno-0-627" name="__codelineno-0-627"></a><span class="sd">        raise_on_timeout: Raise ``TimeoutError`` instead of returning ``False``.</span>
+<a id="__codelineno-0-628" name="__codelineno-0-628"></a>
+<a id="__codelineno-0-629" name="__codelineno-0-629"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-630" name="__codelineno-0-630"></a><span class="sd">        ``True`` once every deployment has every expected value; ``False`` on timeout when</span>
+<a id="__codelineno-0-631" name="__codelineno-0-631"></a><span class="sd">        ``raise_on_timeout=False``.</span>
+<a id="__codelineno-0-632" name="__codelineno-0-632"></a>
+<a id="__codelineno-0-633" name="__codelineno-0-633"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-634" name="__codelineno-0-634"></a><span class="sd">        ValueError: If a field is not a field of ``DeploymentExport`` (before any request).</span>
+<a id="__codelineno-0-635" name="__codelineno-0-635"></a><span class="sd">        TimeoutError: Some values were still different after ``timeout`` seconds.</span>
+<a id="__codelineno-0-636" name="__codelineno-0-636"></a>
+<a id="__codelineno-0-637" name="__codelineno-0-637"></a><span class="sd">    Example::</span>
+<a id="__codelineno-0-638" name="__codelineno-0-638"></a>
+<a id="__codelineno-0-639" name="__codelineno-0-639"></a><span class="sd">        client.deployments.import_deployments(file=&quot;edited.csv&quot;, research_project=1, timezone=&quot;Europe/Madrid&quot;, update=True)</span>
+<a id="__codelineno-0-640" name="__codelineno-0-640"></a><span class="sd">        client.deployments.wait_for_update({&quot;don01-2024a&quot;: {&quot;camera_height&quot;: 1.25, &quot;habitat&quot;: &quot;dehesa&quot;}})</span>
+<a id="__codelineno-0-641" name="__codelineno-0-641"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-642" name="__codelineno-0-642"></a>    <span class="n">known</span> <span class="o">=</span> <span class="n">DeploymentExport</span><span class="o">.</span><span class="n">model_fields</span>
+<a id="__codelineno-0-643" name="__codelineno-0-643"></a>    <span class="k">for</span> <span class="n">deployment_id</span><span class="p">,</span> <span class="n">expected</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<a id="__codelineno-0-644" name="__codelineno-0-644"></a>        <span class="n">unknown</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">expected</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">known</span><span class="p">)</span>
+<a id="__codelineno-0-645" name="__codelineno-0-645"></a>        <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span>
+<a id="__codelineno-0-646" name="__codelineno-0-646"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">deployment_id</span><span class="si">}</span><span class="s2">: not a field of DeploymentExport: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-647" name="__codelineno-0-647"></a>
+<a id="__codelineno-0-648" name="__codelineno-0-648"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">same</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">wanted</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<a id="__codelineno-0-649" name="__codelineno-0-649"></a>        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">wanted</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+<a id="__codelineno-0-650" name="__codelineno-0-650"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-651" name="__codelineno-0-651"></a>                <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">actual</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="n">wanted</span><span class="p">),</span> <span class="n">rel_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">)</span>
+<a id="__codelineno-0-652" name="__codelineno-0-652"></a>            <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+<a id="__codelineno-0-653" name="__codelineno-0-653"></a>                <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-654" name="__codelineno-0-654"></a>        <span class="k">return</span> <span class="n">actual</span> <span class="o">==</span> <span class="n">wanted</span>
+<a id="__codelineno-0-655" name="__codelineno-0-655"></a>
+<a id="__codelineno-0-656" name="__codelineno-0-656"></a>    <span class="n">pending</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">):</span> <span class="nb">dict</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">changes</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+<a id="__codelineno-0-657" name="__codelineno-0-657"></a>    <span class="n">deadline</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">+</span> <span class="n">timeout</span>
+<a id="__codelineno-0-658" name="__codelineno-0-658"></a>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<a id="__codelineno-0-659" name="__codelineno-0-659"></a>        <span class="k">for</span> <span class="n">deployment_id</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">pending</span><span class="p">):</span>
+<a id="__codelineno-0-660" name="__codelineno-0-660"></a>            <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-661" name="__codelineno-0-661"></a>                <span class="n">rows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">search</span><span class="o">=</span><span class="n">deployment_id</span><span class="p">)</span>
+<a id="__codelineno-0-662" name="__codelineno-0-662"></a>            <span class="k">except</span> <span class="n">err</span><span class="o">.</span><span class="n">BadRequestError</span><span class="p">:</span>       <span class="c1"># Trapper answers an empty export with a 400</span>
+<a id="__codelineno-0-663" name="__codelineno-0-663"></a>                <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-0-664" name="__codelineno-0-664"></a>            <span class="n">row</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span> <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">deployment_id</span> <span class="o">==</span> <span class="n">deployment_id</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-665" name="__codelineno-0-665"></a>            <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">same</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">pending</span><span class="p">[</span><span class="n">deployment_id</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<a id="__codelineno-0-666" name="__codelineno-0-666"></a>                <span class="k">del</span> <span class="n">pending</span><span class="p">[</span><span class="n">deployment_id</span><span class="p">]</span>
+<a id="__codelineno-0-667" name="__codelineno-0-667"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">pending</span><span class="p">:</span>
+<a id="__codelineno-0-668" name="__codelineno-0-668"></a>            <span class="k">return</span> <span class="kc">True</span>
+<a id="__codelineno-0-669" name="__codelineno-0-669"></a>        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="n">deadline</span><span class="p">:</span>
+<a id="__codelineno-0-670" name="__codelineno-0-670"></a>            <span class="k">if</span> <span class="n">raise_on_timeout</span><span class="p">:</span>
+<a id="__codelineno-0-671" name="__codelineno-0-671"></a>                <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span>
+<a id="__codelineno-0-672" name="__codelineno-0-672"></a>                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span><span class="si">}</span><span class="s2"> deployment(s) not updated after </span><span class="si">{</span><span class="n">timeout</span><span class="si">:</span><span class="s2">g</span><span class="si">}</span><span class="s2">s: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pending</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
+<a id="__codelineno-0-673" name="__codelineno-0-673"></a>                <span class="p">)</span>
+<a id="__codelineno-0-674" name="__codelineno-0-674"></a>            <span class="k">return</span> <span class="kc">False</span>
+<a id="__codelineno-0-675" name="__codelineno-0-675"></a>        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

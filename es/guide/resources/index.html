@@ -852,6 +852,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Descargar el fichero">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#descargar-todos-los-ficheros-de-un-deployment-o-de-una-coleccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descargar todos los ficheros de un deployment o de una colección
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2835,6 +2852,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Descargar el fichero">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#descargar-todos-los-ficheros-de-un-deployment-o-de-una-coleccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descargar todos los ficheros de un deployment o de una colección
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3033,25 +3067,52 @@ hacen las importaciones, y guarda el fichero:</p>
 <p class="admonition-title">No es un contrato estable de la API</p>
 <p>Depende de una vista web sin versionar, como las importaciones.</p>
 </div>
+<h3 id="descargar-todos-los-ficheros-de-un-deployment-o-de-una-coleccion">Descargar todos los ficheros de un deployment o de una colección</h3>
+<p>Trapper no tiene un endpoint para eso: es <code>download()</code> una vez por resource. <code>deployments.download_resources()</code> y
+<code>collections.download_resources()</code> hacen ese bucle, y necesitan <code>user_name</code> y <code>user_password</code> como <code>download()</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">report</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">download_resources</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;downloads/&quot;</span><span class="p">)</span>          <span class="c1"># downloads/&lt;deployment_id&gt;/&lt;name&gt;.jpg</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">report</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">download_resources</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">&quot;downloads/&quot;</span><span class="p">)</span>           <span class="c1"># downloads/&lt;nombre de la colección&gt;/&lt;name&gt;.jpg</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>        <span class="c1"># 40 downloaded, 0 already there, 0 failed, in downloads/don01-2024a</span>
+</code></pre></div>
+<ul>
+<li><strong>Elegir qué resources.</strong> Cualquier filtro de la lista de resources pasa tal cual, así que elige el servidor
+  (<code>resource_type="I"</code>, <code>rdate_from</code>/<code>rdate_to</code>, <code>rtime_from</code>/<code>rtime_to</code>, <code>tags</code>, <code>species</code>, <code>search</code>, <code>pk=[...]</code>, y
+  <code>deployments=[...]</code> en una colección), y <code>filter_fn</code> lo hace en el cliente para lo que el servidor no puede filtrar:
+  <code>client.deployments.download_resources(12, "out/", rdate_from="2024-03-01", filter_fn=lambda r: r.date_recorded.hour &lt; 6)</code>.
+  El primer argumento se llama <code>deployment_pk</code> / <code>collection_pk</code> porque <code>pk</code> es uno de esos filtros.</li>
+<li><strong>Se puede repetir.</strong> Un fichero que ya está en la carpeta se omite (<code>skip_existing=True</code>), y un fichero solo recibe
+  su nombre cuando está completo (hasta entonces es un <code>.part</code>), así que tras una interrupción o un fallo repites la
+  misma llamada y continúa.</li>
+<li><strong>Un fallo no detiene el resto</strong> (<code>on_error="continue"</code>): queda en <code>report.failed</code> (<code>{pk del resource: mensaje}</code>).
+  <code>on_error="raise"</code> se detiene en el primero. Cada fichero se reintenta como en <code>download()</code> (<code>retry_attempts</code>, ...).</li>
+<li><strong>El informe</strong> (<code>DownloadReport</code>): <code>downloaded</code>, <code>skipped</code> (listas de rutas), <code>failed</code>, <code>ok</code> y <code>total</code>.</li>
+<li><strong>Nombres.</strong> <code>&lt;name&gt;&lt;extensión&gt;</code>, la extensión sale del <code>mime</code> del resource; se añade <code>-&lt;pk&gt;</code> cuando dos resources
+  comparten nombre; el nombre se limpia de los caracteres que un sistema de ficheros rechaza. <code>kind="thumbnail"</code> o
+  <code>"preview"</code> guarda <code>&lt;name&gt;-thumbnail.jpg</code>, junto a los originales. La carpeta de una colección es plana: la lista de
+  resources no dice a qué deployment pertenece cada uno.</li>
+<li><strong>Progreso.</strong> <code>progress_callback(event, data)</code> se llama por cada fichero con <code>"downloaded"</code>, <code>"skipped"</code> o <code>"failed"</code> y
+  <code>{"resource", "path", "index", "total"}</code> (también <code>"error"</code> en un fallo); <code>total</code> es <code>None</code> con un <code>filter_fn</code>.</li>
+<li>Funciona también sobre la lista de resources que le des: <code>client.resources.download_many(resources, "folder/")</code>.</li>
+</ul>
 <h2 id="limitado-a-una-coleccion-o-a-una-localizacion">Limitado a una colección o a una localización</h2>
 <p>Cada patrón de acceso tiene una variante <code>_by_collection</code>/<code>_by_location</code>, que usa
 <code>/storage/api/resources/collection/{collection_pk}</code> o <code>/storage/api/resources/location/{location_pk}</code>
 en lugar del endpoint general:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Todos los recursos de una colección (perezoso)</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_all_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">find_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">resource_pk</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1"># Todos los recursos de una localización (perezoso)</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_all_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">find_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">resource_pk</span><span class="o">=</span><span class="mi">99</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Todos los recursos de una colección (perezoso)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">page</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_all_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">find_by_collection</span><span class="p">(</span><span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">resource_pk</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="c1"># Todos los recursos de una localización (perezoso)</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_all_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">find_by_location</span><span class="p">(</span><span class="n">location_pk</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">resource_pk</span><span class="o">=</span><span class="mi">99</span><span class="p">)</span>
 </code></pre></div>
 <p>Así es también como se listan los recursos de una <a href="../collections/">colección</a>: <code>CollectionsComponent</code>
 solo lista <em>colecciones</em>, no los recursos que contienen.</p>
