@@ -34,6 +34,27 @@ más abajo para la única operación de escritura que admite este componente.
     `is_incomplete`, `view_quality`, `capture_method` y `status`, y v2 aplica también `in_bbox`. Para silenciarlo:
     `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
 
+## Filtrar por área
+
+Un despliegue no tiene coordenadas propias: son las de su location, y la lista de despliegues da solo el pk de la
+location, así que `where()` no tiene filtro espacial. `in_area()` recibe la misma área que
+[`client.locations.in_area()`](locations.md#filtrar-por-area) y devuelve los despliegues cuya location está dentro:
+
+```python
+# un rectángulo: (min_lon, min_lat, max_lon, max_lat)
+for dep in client.deployments.in_area(bbox=(-7.0, 36.5, -5.5, 37.5)):
+    print(dep.deployment_id, dep.location_id)
+
+# un círculo: el centro como (longitud, latitud), el radio en metros, y los filtros de siempre
+cerca = list(client.deployments.in_area(center=(-6.44, 37.05), radius=5_000, research_project=3, sdate_from="2024-01-01"))
+```
+
+Primero busca las locations del área (se leen todas las que la cuenta puede ver y se filtran en el cliente) y
+después pide los despliegues de esas locations, 50 pks de location por petición. Los demás argumentos son filtros
+de los **despliegues**, no de las locations, y `location` no se puede combinar con el área. Un despliegue cuya
+location no tiene coordenadas legibles queda fuera, y un área incorrecta lanza `ValueError` antes de pedir
+despliegues.
+
 ## Los seis patrones de acceso
 
 ```python

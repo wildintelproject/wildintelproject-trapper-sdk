@@ -12,7 +12,7 @@ import csv
 import pytest
 
 from tests.base_component_tests import ComponentE2ETestBase
-from trapper_client import DeploymentsComponent
+from trapper_client import DeploymentsComponent, LocationsComponent
 from trapper_client.schemas import Deployment, DeploymentExport
 
 
@@ -67,3 +67,34 @@ class TestLocationsComponentE2E(ComponentE2ETestBase):
                 assert isinstance(value, datetime) and value.tzinfo is not None
             assert listed[pk].start_date == exported[pk].start_date
             assert listed[pk].end_date == exported[pk].end_date
+
+    @pytest.mark.e2e
+    def test_in_area_gives_the_deployments_of_the_locations_in_the_area(self, component):
+        """``in_area`` agrees with doing it by hand: the locations in the area, then their deployments."""
+
+        everything = list(component.where(page_size=100))
+        if not everything:
+            pytest.skip("No deployments on this server")
+        by_location = {}
+        for dep in everything:
+            by_location.setdefault(dep.location, []).append(dep.pk)
+
+        locations = LocationsComponent(component.client)
+        located = [loc for loc in locations.where(page_size=100) if loc.longitude is not None]
+        target = next((loc for loc in located if loc.pk in by_location), None)
+        if target is None:
+            pytest.skip("No deployment on a location with coordinates")
+        lon, lat = target.longitude, target.latitude
+
+        box = (lon - 0.001, lat - 0.001, lon + 0.001, lat + 0.001)
+        inside = {l.pk for l in located if box[0] <= l.longitude <= box[2] and box[1] <= l.latitude <= box[3]}
+        expected = {pk for loc in inside for pk in by_location.get(loc, [])}
+        found = list(component.in_area(bbox=box, page_size=100))
+        assert {d.pk for d in found} == expected and expected
+        assert {d.location for d in found} <= inside
+
+        around = {d.pk for d in component.in_area(center=(lon, lat), radius=1, page_size=100)}
+        assert set(by_location[target.pk]) <= around
+
+        far = (lon + 90 if lon <= 0 else lon - 90, -1.0, lon + 91 if lon <= 0 else lon - 89, 1.0)
+        assert not {d.pk for d in component.in_area(bbox=far)} & set(by_location[target.pk])
