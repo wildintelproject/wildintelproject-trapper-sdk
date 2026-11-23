@@ -122,6 +122,12 @@ Igual que las locations, un despliegue viene en dos formas y ninguna tiene todos
 ni `correct_setup` y `correct_tstamp`. Las dos tienen `pk`, `deployment_id`, `location_id`, `start_date`,
 `end_date` y `tags`. Comprobado en Trapper v1 y v2.
 
+`start_date` y `end_date` son objetos `datetime` con zona horaria en las dos formas, aunque Trapper las escribe
+distinto (`2024-01-01T00:00:00+01:00` en el JSON, `2024-01-01T00:00:00+0100` en el CSV), así que se pueden
+comparar y ordenar leas la que leas. Una fecha que no se puede leer se conserva como el texto con el que llegó, y
+una vacía es `None`. `export(file="x.csv")` las escribe de vuelta como texto ISO con los dos puntos (`+01:00`);
+`raw=True` conserva la escritura de Trapper.
+
 El CSV de Trapper no tiene columna para `session`, `array`, `tags` ni `bait_type`: pone las dos primeras en
 `deploymentGroups` (`session:S | array:A`) y las etiquetas en `deploymentTags`, con `baitType:<valor>` añadido
 cuando el despliegue tiene un tipo de cebo. `DeploymentExport` las lee de ahí, así que `tags` solo tiene las
