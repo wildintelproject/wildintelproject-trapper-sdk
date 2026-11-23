@@ -700,8 +700,8 @@ the file to disk and retries network failures with tenacity.
 `GET storage/api/resources?deployment__isnull=true` (or `false`) answers `500` with an **HTML** page, on v1 and v2
 (an empty value is fine). The resources without a deployment cannot be listed.
 
-**Proposal.** Give the filter its `field_name="deployment"` and `lookup_expr="isnull"`, and answer a server error
-with JSON.
+**Proposal.** Fix the filter (it is probably missing its `field_name` and `lookup_expr`, *not checked*), so that it
+lists the resources with no deployment, and answer a server error with JSON.
 
 **Workaround in the SDK.** `UnknownFilterWarning` names it, and the guide no longer lists it.
 
@@ -726,8 +726,8 @@ reads each one; the SDK warns about `locations_map` on v2.
 **Labels:** enhancement, api
 
 **Problem.** `ResourceFilter` excludes some fields and exposes the rest as filters, so the list accepts
-`token`, `file_checksum_hash`, `file_size`, `mime_type` and `deployment` (checked: each one changes the result on v1
-and v2). `token` is the secret that gives access to a resource with `?rt=`, and the list filters on it. Meanwhile
+`token`, `file_checksum_hash`, `file_size`, `mime_type` and `deployment` (checked: each one is applied on v1 and
+v2). `token` is the secret that gives access to a resource with `?rt=`, and the list filters on it. Meanwhile
 the useful ones are not documented.
 
 **Proposal.** List the filters that are meant to exist, drop `token` and `file_checksum_hash`, and answer `400` to
