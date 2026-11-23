@@ -831,6 +831,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#downloading-the-file" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2803,6 +2814,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#dates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Dates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#downloading-the-file" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2974,6 +2996,10 @@ it and there is no filter for the resources without a deployment. To silence the
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;resources.csv&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;Public&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>See <a href="../../usage/">Usage</a> if any of this looks unfamiliar — it's the same interface on every component.</p>
+<h2 id="dates">Dates</h2>
+<p><code>date_recorded</code> is a timezone-aware <code>datetime</code> (<code>2024-03-10T20:49:43+01:00</code> in Trapper's JSON), so resources can be
+compared and sorted by when they were taken. One that cannot be read stays as the text it came as, and an empty one
+is <code>None</code>. <code>export(file="x.csv")</code> writes it back as ISO text.</p>
 <h2 id="downloading-the-file">Downloading the file</h2>
 <p>The REST API lists resources but does not serve their files: <code>url</code> and <code>url_original</code> are paths of a classic web
 view (<code>/storage/resource/media/&lt;pk&gt;/file/</code>) that <strong>does not accept the API token</strong>. With a token, or with no

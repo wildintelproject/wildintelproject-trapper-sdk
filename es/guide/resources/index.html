@@ -833,6 +833,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fechas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fechas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#descargar-el-fichero" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2805,6 +2816,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fechas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fechas
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#descargar-el-fichero" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2975,6 +2997,10 @@ los recursos sin despliegue. Para silenciar el aviso: <code>warnings.simplefilte
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;resources.csv&quot;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s2">&quot;Public&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Consulta <a href="../../usage/">Uso</a> si algo de esto te resulta desconocido: es la misma interfaz en todos los componentes.</p>
+<h2 id="fechas">Fechas</h2>
+<p><code>date_recorded</code> es un <code>datetime</code> con zona horaria (<code>2024-03-10T20:49:43+01:00</code> en el JSON de Trapper), así que los
+recursos se pueden comparar y ordenar por cuándo se tomaron. Una que no se puede leer se queda como el texto con el
+que llegó, y una vacía es <code>None</code>. <code>export(file="x.csv")</code> la escribe de vuelta como texto ISO.</p>
 <h2 id="descargar-el-fichero">Descargar el fichero</h2>
 <p>La API REST lista los resources pero no sirve sus ficheros: <code>url</code> y <code>url_original</code> son rutas de una vista web
 clásica (<code>/storage/resource/media/&lt;pk&gt;/file/</code>) que <strong>no acepta el token de la API</strong>. Con un token, o sin sesión,
