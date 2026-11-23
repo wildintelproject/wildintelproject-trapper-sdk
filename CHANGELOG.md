@@ -95,6 +95,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `client.resources.download(pk, file, kind="original" | "preview" | "thumbnail")` (issue #56): saves the file of a
   resource. The API token cannot fetch it (the web view answers `404`), so it logs in with `user_name` and
   `user_password`, streams to a `.part` file, and retries network failures and `502`/`503`/`504` with tenacity.
+- Creating a collection from a package is described and tested (issue #67): upload a YAML and a ZIP with the uploader,
+  `collections.trigger_collection()`, and wait for the collection to appear. The guide has the YAML format, what the
+  package needs and the gotchas (v1 needs Trapper's nginx for the uploader, and on v2 the first trigger can answer
+  `NotFoundError` until the files are in place). An e2e runs the whole path on v1 and v2.
 - Resource list filters (issue #58): `pk`, `locations_map`, `collections`, `deployments`, `tags` and `species` take a list
   or a comma-separated string and are sent the way Trapper reads each one (`deployments="1,2"` used to be ignored
   and return every resource, `collections="2,3"` was a `400`). `UnknownFilterWarning` also on the resource list
