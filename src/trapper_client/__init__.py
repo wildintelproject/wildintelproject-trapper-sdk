@@ -9,7 +9,9 @@ from trapper_client import err
 from trapper_client.enums import (
     AnimalTypes,
     BaitUse,
+    ClassificationProjectRoleType,
     ClassificatorTemplate,
+    ResearchProjectRoleType,
     SamplingDesign,
     SensorMethod,
 )
@@ -31,7 +33,9 @@ __all__ = [
     "err",
     "AnimalTypes",
     "BaitUse",
+    "ClassificationProjectRoleType",
     "ClassificatorTemplate",
+    "ResearchProjectRoleType",
     "SamplingDesign",
     "SensorMethod",
     *sorted(set(_components_all) | set(_schemas_all)),

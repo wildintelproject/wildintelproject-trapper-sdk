@@ -75,6 +75,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `classificators.create(ClassificatorCreate(...))` (Trapper v1): creates a classificator through the
   classic web form: layout (`ClassificatorTemplate`), the species it offers and the ones Trapper
   watches, and the optional attributes. Custom and predefined attributes are not covered.
+- `ResearchProjectCreate(members=[ResearchProjectMember(user, role)])` (Trapper v1): the users that
+  join a research project when it is created, with the role they have in it
+  (`ResearchProjectRoleType`: admin, expert or collaborator). `user` is a `User` or its primary key.
+  Enumeration labels are now matched in any case.
 
 ### Changed
 - **The schemas the API returns are named after the resource.** The `Record` suffix is gone:

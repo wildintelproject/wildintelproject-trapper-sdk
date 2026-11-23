@@ -26,6 +26,7 @@ from .research_projects import (
     ResearchProject,
     ResearchProjectCollection,
     ResearchProjectCreate,
+    ResearchProjectMember,
     ResearchProjectRole,
 )
 from .classifications import (
@@ -102,6 +103,7 @@ __all__ = [
     "ResearchProject",
     "ResearchProjectCollection",
     "ResearchProjectCreate",
+    "ResearchProjectMember",
     "ResearchProjectRole",
     # classifications
     "BBox",

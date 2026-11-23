@@ -4,9 +4,16 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from trapper_client.enums import AnimalTypes, BaitUse, SamplingDesign, SensorMethod
+from trapper_client.enums import (
+    AnimalTypes,
+    BaitUse,
+    ResearchProjectRoleType,
+    SamplingDesign,
+    SensorMethod,
+)
 
 from .base import TrapperSchema, choice
+from .users import User
 
 
 class ResearchProjectRole(TrapperSchema):
@@ -53,6 +60,23 @@ class ResearchProject(TrapperSchema):
     status: bool | int | str | None = None
 
 
+class ResearchProjectMember(BaseModel):
+    """A user that joins a research project when it is created, and the role they have in it."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    user: int | User = Field(description="The user the SDK returns, or their primary key.")
+    role: Annotated[ResearchProjectRoleType, choice(ResearchProjectRoleType)]
+
+    @field_validator("user")
+    @classmethod
+    def _primary_key(cls, value: int | User) -> int:
+        pk = value if isinstance(value, int) else value.pk
+        if pk <= 0:
+            raise ValueError("the user primary key must be positive")
+        return pk
+
+
 class ResearchProjectCreate(BaseModel):
     """What it takes to create a research project (``client.research_projects.create()``).
 
@@ -80,6 +104,10 @@ class ResearchProjectCreate(BaseModel):
     abstract: str | None = Field(default=None, max_length=2000)
     methods: str | None = Field(default=None, max_length=2000)
     description: str | None = Field(default=None, max_length=2000)
+    members: list[ResearchProjectMember] = Field(
+        default_factory=list,
+        description="The users that join the project besides its creator, who is its administrator.",
+    )
 
     @field_validator("keywords")
     @classmethod
@@ -89,6 +117,20 @@ class ResearchProjectCreate(BaseModel):
         if any("," in k for k in keywords):
             raise ValueError("a keyword cannot contain a comma: Trapper splits keywords on commas")
         return keywords
+
+    @field_validator("members")
+    @classmethod
+    def _one_role_per_user(cls, value: list[ResearchProjectMember]) -> list[ResearchProjectMember]:
+        """Trapper refuses a user that appears twice in a project."""
+        seen: set[int] = set()
+        repeated = sorted({m.user for m in value if m.user in seen or seen.add(m.user)})
+        if repeated:
+            raise ValueError(f"users {repeated} appear more than once in members")
+        return value
+
+    def role_rows(self) -> list[tuple[int, int]]:
+        """The members as the ``(user pk, role)`` pairs of the form's role rows."""
+        return [(m.user, int(m.role)) for m in self.members]
 
     def to_form(self) -> dict[str, Any]:
         """The fields of Trapper's ``research/project/create/`` form, as it expects them."""
