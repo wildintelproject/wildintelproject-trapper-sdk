@@ -82,6 +82,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `ClassificationProjectCreate(members=[ClassificationProjectMember(user, role)])` (Trapper v1): the
   users that join a classification project when it is created, with their role
   (`ClassificationProjectRoleType`: admin, expert, collaborator, error proof or citizen).
+- `Location.longitude` and `Location.latitude`: the coordinates of a location as numbers. Trapper returns them as
+  one string (`"-6.44, 37.05"`, longitude first, in v1 and v2); `coordinates` keeps it as it comes. They are
+  `None` when the string is missing, cannot be read or is out of range.
 
 ### Changed
 - **The schemas the API returns are named after the resource.** The `Record` suffix is gone:

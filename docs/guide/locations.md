@@ -52,6 +52,24 @@ client.locations.export(query={"research_project": 5}, file="project5_locations.
 
 See [Usage](../usage.md) if any of this looks unfamiliar — it's the same interface on every component.
 
+## Coordinates
+
+Trapper returns the coordinates of a location as one string, with the **longitude first**
+(`"-6.44, 37.05"`), in v1 and v2. `Location.coordinates` keeps it as it comes, and `longitude` and
+`latitude` give it as numbers:
+
+```python
+loc = client.locations.find(16)
+loc.coordinates         # "-6.44, 37.05"
+loc.longitude           # -6.44
+loc.latitude            # 37.05
+```
+
+They are `None` when the coordinates are missing, cannot be read or are out of range (longitude beyond
+±180, latitude beyond ±90): one odd location does not break a listing. They are read from `coordinates` each
+time, not fields of the model, so `model_dump()` does not change. The rows of `export(file=None)` carry
+`longitude` and `latitude` already.
+
 ## Importing locations (write access)
 
 `/geomap/api/locations` is read-only, so `import_locations()` works around that by simulating the

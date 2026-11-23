@@ -1,9 +1,39 @@
 """Schemas for location-related Trapper endpoints."""
+import re
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .base import TrapperSchema
+
+_NUMBER = r"[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?"
+_WKT_PREFIX = re.compile(r"^\s*(?:SRID=\d+;)?\s*POINT\s*\(\s*(.*?)\s*\)\s*$", re.IGNORECASE)
+_PAIR = re.compile(rf"^\s*({_NUMBER})\s*(?:,|\s)\s*({_NUMBER})\s*$")
+
+
+def parse_lon_lat(value: object) -> tuple[float, float] | None:
+    """Read the coordinates Trapper gives for a location as ``(longitude, latitude)``.
+
+    Trapper returns one string with the longitude first (``"-6.44, 37.05"``), in v1 and v2. The WKT
+    forms (``POINT (-6.44 37.05)``, ``SRID=4326;POINT (-6.44 37.05)``) are read too.
+
+    Returns:
+        The two numbers, or ``None`` when ``value`` is missing, cannot be read, or is out of range
+        (longitude beyond ±180, latitude beyond ±90): a wrong number is worse than none.
+    """
+    if not isinstance(value, str):
+        return None
+    text = value
+    wkt = _WKT_PREFIX.match(text)
+    if wkt:
+        text = wkt.group(1)
+    pair = _PAIR.match(text)
+    if not pair:
+        return None
+    longitude, latitude = float(pair.group(1)), float(pair.group(2))
+    if not (-180.0 <= longitude <= 180.0 and -90.0 <= latitude <= 90.0):
+        return None
+    return longitude, latitude
 
 
 class Location(TrapperSchema):
@@ -30,6 +60,18 @@ class Location(TrapperSchema):
 
     update_data: str | None = None
     delete_data: str | None = None
+
+    @property
+    def longitude(self) -> float | None:
+        """Longitude in degrees, read from ``coordinates`` (``None`` if it cannot be read)."""
+        point = parse_lon_lat(self.coordinates)
+        return point[0] if point else None
+
+    @property
+    def latitude(self) -> float | None:
+        """Latitude in degrees, read from ``coordinates`` (``None`` if it cannot be read)."""
+        point = parse_lon_lat(self.coordinates)
+        return point[1] if point else None
 
 
 class LocationExport(BaseModel):
