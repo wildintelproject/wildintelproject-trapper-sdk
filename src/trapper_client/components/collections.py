@@ -1,11 +1,13 @@
 """
-Component for the /api/storage/collections/ resource.
+Component for the ``storage/api/collections`` resource.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Dict, Callable
+
+import httpx
 
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
@@ -15,18 +17,24 @@ from trapper_client.schemas import Collection, PaginatedResult, Resource
 
 class CollectionsComponent(TrapperComponent[Collection]):
     """
-    Component for the ``api/storage/collections/`` resource.
+    Component for the ``storage/api/collections`` resource.
 
     Retrieve, filter, and export collection data from Trapper.
 
     **Main endpoints:**
 
-    - ``GET /storage/api/collections/``: Paginated list of accessible collections
+    - ``GET /storage/api/collections``: Paginated list of accessible collections
     - ``GET /storage/api/collections/{id}``: Single collection detail
-    - ``GET /storage/api/collections_ondemand``: On-demand collections for current user (**Trapper v1 only**)
-    - ``GET /storage/api/collections_map``: Collections list for map rendering
-    - ``GET /storage/api//collections_append``: Collections the user can append resources to
-    - ``POST api/storage/collection/process/``: Trigger processing of an FTP-uploaded collection
+    - ``GET /storage/api/collections_ondemand``: On-demand collections for current user, paginated
+      (**Trapper v1 only**: ``404`` on v2)
+    - ``GET /storage/api/collections_map``: Same fields as the list, but one plain list: **not paginated**
+      (``page_size`` is ignored)
+    - ``GET /storage/api/collections_append``: Collections the user can append resources to, one plain list
+      of ``pk`` and ``name`` only (**not paginated**)
+    - ``POST /storage/api/collection/process/``: Trigger processing of an FTP-uploaded collection
+
+    The paginated and the plain endpoints are read through the same methods (``where_map()``, ``get_append()``,
+    ...): the plain ones are wrapped as a single page.
 
     **Available filter fields:**
 
@@ -113,7 +121,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
     ) -> APIQuery[Collection]:
         """Return a lazy iterator over on-demand collections for the current user.
 
-        Fetches pages on demand from ``api/storage/collections_ondemand``.
+        Fetches pages on demand from ``storage/api/collections_ondemand``.
 
         Args:
             query: Base query parameters.
@@ -246,7 +254,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
     ) -> APIQuery[Collection]:
         """Return a lazy iterator over map collections for the current user.
 
-        Fetches pages on demand from ``api/storage/collections_map``.
+        Fetches the plain list of ``storage/api/collections_map`` as one page.
 
         Args:
             query: Base query parameters.
@@ -375,7 +383,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
     ) -> APIQuery[Collection]:
         """Return a lazy iterator over append collections for the current user.
 
-        Fetches pages on demand from ``api/storage/collections_append``.
+        Fetches the plain list of ``storage/api/collections_append`` as one page; its items only have ``pk`` and ``name``.
 
         Args:
             query: Base query parameters.
@@ -496,33 +504,38 @@ class CollectionsComponent(TrapperComponent[Collection]):
             self,
             payload: Dict[str, Any],
             raise_on_error: bool = True,
-    ):
-        """
-        Trigger collection processing on the server.
+    ) -> httpx.Response:
+        """Start the processing of a collection that was uploaded to the account's FTP folder.
 
-        Parameters
-        ----------
-        collection_id : int
-            Collection ID.
-        payload : dict
-            Payload sent to the server.
+        ``POST /storage/api/collection/process/``. Trapper checks the YAML definition and starts a task that
+        reads the ZIP and creates the collection and its resources; the answer is ``{"data": {"message": ...,
+        "errors": ..., "task_id": ...}}``. The task runs in the background (``task_id`` identifies it; only a server
+        with Celery off runs it in the request), so a ``200`` means it was started, not that the collection exists.
 
-            Example
-            -------
-            payload = {
+        Args:
+            payload: The JSON body. ``yaml_file`` and ``zip_file`` are required: the names of two files that are
+                already in the **account's own external folder** on the server. The rest is optional:
+                ``remove_zip`` (default ``False``: delete the ZIP when done), ``extract_metadata`` (default
+                ``False``) and ``trigger_ai_pipeline`` (default ``True``).
+            raise_on_error: Raise the mapped exception for an error answer (see below). With ``False`` the
+                ``httpx.Response`` is returned whatever its status.
+
+        Returns:
+            The raw ``httpx.Response``; ``response.json()["data"]["task_id"]`` is the task.
+
+        Raises:
+            err.BadRequestError: ``yaml_file`` or ``zip_file`` is missing (``"Both 'yaml_file' and 'zip_file' must
+                be provided."``), or the YAML definition is invalid (the problems are in ``data.errors``).
+            err.NotFoundError: One of the two files is not in the account's folder on the server.
+
+        Example::
+
+            response = client.collections.trigger_collection({
                 "yaml_file": "package_123.yaml",
                 "zip_file": "package_123.zip",
-                "remove_zip": False
-            }
-
-        endpoint : str, optional
-            Optional endpoint override.
-        raise_on_error : bool, optional
-            Whether to raise on API error.
-
-        Returns
-        -------
-        requests.Response
+                "remove_zip": False,
+            })
+            print(response.json()["data"]["task_id"])
         """
 
         endpoint = f"/storage/api/collection/process/"

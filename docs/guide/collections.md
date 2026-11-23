@@ -99,14 +99,39 @@ for col in client.collections.where_append():
     print(col)
 ```
 
+What each one gives (checked on Trapper v1 and v2):
+
+| Method | Fields | Pagination | v2 |
+|---|---|---|---|
+| main (`where()`, `get()`, ...) | the nine of `Collection` | paginated | yes |
+| `*_ondemand` | the same nine | paginated | **no**: `UnsupportedVersionError` (Trapper answers `404`) |
+| `*_map` | the same nine | **none**: Trapper returns one plain list and ignores `page_size` | yes |
+| `*_append` | only `pk` and `name` (the other fields are `None`) | **none**: one plain list | yes |
+
+The SDK wraps a plain list as a single page, so `get_map()` and `get_all_append()` work like the others and
+`pagination.count` is the length of the list. `delete_data`, `update_data`, `detail_data` and `owner_profile` are web
+page URLs on v1 and `None` on v2.
+
 ## Triggering FTP-uploaded collection processing
 
+`trigger_collection()` starts the processing of a data package (a YAML definition and a ZIP) that is **already in
+the account's own folder on the server**: it does not upload anything (see the uploader for that).
+
 ```python
-client.collections.trigger_collection(
+response = client.collections.trigger_collection(
     payload={
         "yaml_file": "package_123.yaml",
         "zip_file": "package_123.zip",
         "remove_zip": False,
     },
 )
+print(response.json()["data"]["task_id"])
 ```
+
+`yaml_file` and `zip_file` are required; `remove_zip` (default `False`), `extract_metadata` (default `False`) and
+`trigger_ai_pipeline` (default `True`) are optional. Trapper checks the YAML definition and starts a background
+task (it runs in the request itself only if the server has Celery off), so a `200` means it was **started**, not that
+the collection exists. The answer is
+`{"data": {"message": ..., "errors": ..., "task_id": ...}}`. A missing name or an invalid YAML is a `BadRequestError`
+(the problems are in `data.errors`), and a file that is not in the account's folder is a `NotFoundError`; with
+`raise_on_error=False` the raw response is returned instead.

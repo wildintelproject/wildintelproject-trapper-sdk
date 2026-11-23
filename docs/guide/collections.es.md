@@ -99,14 +99,39 @@ for col in client.collections.where_append():
     print(col)
 ```
 
+Qué da cada una (comprobado en Trapper v1 y v2):
+
+| Método | Campos | Paginación | v2 |
+|---|---|---|---|
+| principal (`where()`, `get()`, ...) | los nueve de `Collection` | paginada | sí |
+| `*_ondemand` | los mismos nueve | paginada | **no**: `UnsupportedVersionError` (Trapper contesta `404`) |
+| `*_map` | los mismos nueve | **ninguna**: Trapper devuelve una lista plana e ignora `page_size` | sí |
+| `*_append` | solo `pk` y `name` (los demás campos son `None`) | **ninguna**: una lista plana | sí |
+
+El SDK envuelve una lista plana como una sola página, así que `get_map()` y `get_all_append()` funcionan como las
+demás y `pagination.count` es la longitud de la lista. `delete_data`, `update_data`, `detail_data` y `owner_profile` son
+URLs de la página web en v1 y `None` en v2.
+
 ## Lanzar el procesado de una colección subida por FTP
 
+`trigger_collection()` inicia el procesado de un paquete de datos (una definición YAML y un ZIP) que **ya está en la
+carpeta propia de la cuenta en el servidor**: no sube nada (para eso está el uploader).
+
 ```python
-client.collections.trigger_collection(
+response = client.collections.trigger_collection(
     payload={
         "yaml_file": "package_123.yaml",
         "zip_file": "package_123.zip",
         "remove_zip": False,
     },
 )
+print(response.json()["data"]["task_id"])
 ```
+
+`yaml_file` y `zip_file` son obligatorios; `remove_zip` (por defecto `False`), `extract_metadata` (por defecto `False`)
+y `trigger_ai_pipeline` (por defecto `True`) son opcionales. Trapper comprueba la definición YAML y lanza una tarea en
+segundo plano (se ejecuta en la propia petición solo si el servidor tiene Celery desactivado), así que un `200`
+significa que **se inició**, no que la colección exista. La respuesta es
+`{"data": {"message": ..., "errors": ..., "task_id": ...}}`. Un nombre que falta o un YAML inválido es un
+`BadRequestError` (los problemas están en `data.errors`), y un fichero que no está en la carpeta de la cuenta es un
+`NotFoundError`; con `raise_on_error=False` se devuelve la respuesta cruda.
