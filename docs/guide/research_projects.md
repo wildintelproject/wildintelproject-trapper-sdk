@@ -150,6 +150,39 @@ BaitUse.SCENT.label      # "scent"
 ResearchProjectCreate(name="N", acronym="ABC", bait_use="scent")    # same as BaitUse.SCENT or 2
 ```
 
+### Members
+
+The creator becomes the project's administrator. `members` adds the other users that join it, each
+with a role:
+
+```python
+from trapper_client import ResearchProjectCreate, ResearchProjectMember, ResearchProjectRoleType
+
+ana = next(iter(client.users.where(search="ana")))
+
+project = client.research_projects.create(
+    ResearchProjectCreate(
+        name="Doñana mammals",
+        acronym="DONMAM",
+        members=[
+            ResearchProjectMember(user=ana, role=ResearchProjectRoleType.EXPERT),
+            ResearchProjectMember(user=7, role="collaborator"),
+        ],
+    )
+)
+print([(r.username, r.roles) for r in project.project_roles])
+# [('ana', ['Expert']), ('rp_staff', ['Admin']), ('user7', ['Collaborator'])]
+```
+
+- `user` is the `User` that `client.users` returns, or its primary key.
+- `role` is a `ResearchProjectRoleType` (`ADMIN`, `EXPERT` or `COLLABORATOR`), its number or its label,
+  in any case.
+- A user cannot appear twice (the model refuses it), and the account that creates the project cannot
+  be listed: it is already the administrator. Both fail before anything is sent. A user that does not
+  exist is rejected by Trapper, naming the row (`project_roles-1-user: Select a valid choice.`).
+- The members can only be given **when the project is created**: changing the roles of an existing
+  project is a web action the SDK does not cover.
+
 ### What it returns
 
 - **A staff account:** the project is active at once and `create()` returns it.

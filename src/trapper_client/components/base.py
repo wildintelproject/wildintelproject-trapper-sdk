@@ -93,12 +93,25 @@ class TrapperComponent(Generic[TModel]):
             )
         return self.client.session_post_multipart(self.import_endpoint, data=data, files=files)
 
-    def _owner_role_fields(self, form_endpoint: str, prefix: str, label: str) -> Dict[str, Any]:
-        """The role formset a create form always posts: the logged-in user as administrator.
+    def _owner_role_fields(
+        self,
+        form_endpoint: str,
+        prefix: str,
+        label: str,
+        members: Iterable[tuple[int, int]] = (),
+    ) -> Dict[str, Any]:
+        """The role formset a create form always posts: the logged-in user as administrator, and
+        after them the ``members`` (``(user pk, role)`` pairs).
 
-        The form page already says who that is (the owner is pre-selected in the first row of the
-        formset ``prefix``), so read it from there instead of looking the user up through the API.
+        The form page already says who the creator is (the owner is pre-selected in the first row
+        of the formset ``prefix``), so read it from there instead of looking the user up through the
+        API.
+
+        Raises:
+            ValueError: A member is the account that creates the project, who is already its
+                administrator.
         """
+        members = list(members)
         self.client.session_login()
         url = f"{self.client.base_url.rstrip('/')}/{form_endpoint.lstrip('/')}"
         page = self.client._web_client.get(url)
@@ -114,8 +127,13 @@ class TrapperComponent(Generic[TModel]):
                 f"The {label} form has no pre-selected owner role: Trapper changed the "
                 "form and this workaround needs updating."
             )
-        return {
-            f"{prefix}-TOTAL_FORMS": 1,
+        if any(str(pk) == str(user) for pk, _ in members):
+            raise ValueError(
+                f"user {user} is the account that creates the {label}, who is already its "
+                "administrator: leave them out of the members"
+            )
+        fields: Dict[str, Any] = {
+            f"{prefix}-TOTAL_FORMS": 1 + len(members),
             f"{prefix}-INITIAL_FORMS": 0,
             f"{prefix}-MIN_NUM_FORMS": 0,
             f"{prefix}-MAX_NUM_FORMS": 1000,
@@ -123,6 +141,11 @@ class TrapperComponent(Generic[TModel]):
             f"{prefix}-0-user": user,
             f"{prefix}-0-name": role,
         }
+        for row, (member_pk, member_role) in enumerate(members, start=1):
+            fields[f"{prefix}-{row}-id"] = ""
+            fields[f"{prefix}-{row}-user"] = member_pk
+            fields[f"{prefix}-{row}-name"] = member_role
+        return fields
 
     def _submit_create_form(
         self,

@@ -17,7 +17,15 @@ from __future__ import annotations
 from enum import Enum, IntEnum
 from typing import Any
 
-__all__ = ["SamplingDesign", "SensorMethod", "AnimalTypes", "BaitUse", "ClassificatorTemplate"]
+__all__ = [
+    "SamplingDesign",
+    "SensorMethod",
+    "AnimalTypes",
+    "BaitUse",
+    "ClassificatorTemplate",
+    "ResearchProjectRoleType",
+    "ClassificationProjectRoleType",
+]
 
 
 class _Choice(IntEnum):
@@ -31,7 +39,7 @@ class _Choice(IntEnum):
 
     @classmethod
     def parse(cls, value: Any, field: str = "value") -> "_Choice":
-        """Resolve a member from itself, its number, its label or its name.
+        """Resolve a member from itself, its number, its label or its name (in any case).
 
         Raises:
             ValueError: ``value`` is none of those. The message lists the valid ones.
@@ -46,8 +54,9 @@ class _Choice(IntEnum):
                 if member.value == value:
                     return member
         elif isinstance(value, str):
+            wanted = value.strip().lower()
             for member in cls:
-                if value in (member.label, member.name):
+                if wanted in (member.label.lower(), member.name.lower()):
                     return member
         options = ", ".join(f"{m.label} ({m.value})" for m in cls)
         raise ValueError(f"{field}: {value!r} is not valid; use one of {options}")
@@ -89,6 +98,27 @@ class BaitUse(_Choice):
     VISUAL = (4, "visual")
     ACOUSTIC = (5, "acoustic")
     OTHER = (6, "other")
+
+
+class ResearchProjectRoleType(_Choice):
+    """What a user can do in a research project (``ResearchProjectRole.name``)."""
+
+    ADMIN = (1, "Admin")
+    EXPERT = (2, "Expert")
+    COLLABORATOR = (3, "Collaborator")
+
+
+class ClassificationProjectRoleType(_Choice):
+    """What a user can do in a classification project (``ClassificationProjectRole.name``).
+
+    ``ERROR_PROOF`` and ``CITIZEN`` belong to Trapper's citizen science features.
+    """
+
+    ADMIN = (1, "Admin")
+    EXPERT = (2, "Expert")
+    COLLABORATOR = (3, "Collaborator")
+    ERROR_PROOF = (4, "Error proof")
+    CITIZEN = (5, "Citizen")
 
 
 class ClassificatorTemplate(str, Enum):

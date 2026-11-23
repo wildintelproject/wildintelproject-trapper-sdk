@@ -10,6 +10,7 @@ They change the server, so they are opt-in on top of the usual e2e switches:
     WILDINTEL_RPROJECT_PK                           — research project that receives the data
     WILDINTEL_CLASSIFICATION_PROJECT_PK             — only for the classification import
     WILDINTEL_CLASSIFICATOR_PK                      — only for creating a classification project
+    WILDINTEL_MEMBER_USER_PK                        — only for creating a project with a member
 
 Every location and deployment they create has a unique ID (``e2e-<random>``), so the tests can be
 repeated; they do not delete what they create (the SDK has no delete for these resources).
@@ -27,6 +28,7 @@ from trapper_client import (
     ClassificationProjectCreate,
     ClassificatorCreate,
     ResearchProjectCreate,
+    ResearchProjectMember,
     SamplingDesign,
     TrapperClient,
     err,
@@ -242,6 +244,23 @@ class TestResearchProjectCreateE2E:
             session_writer.research_projects.create(ResearchProjectCreate(name=name, acronym=f"x{tag}"))
         with pytest.raises(err.APIError, match="acronym: .*already exists"):
             session_writer.research_projects.create(ResearchProjectCreate(name=f"other {tag}", acronym=acronym))
+
+    @pytest.mark.e2e
+    def test_create_with_a_member_and_read_the_roles_back(self, session_writer):
+        member = _env("WILDINTEL_MEMBER_USER_PK")
+        if not member:
+            pytest.skip("Set WILDINTEL_MEMBER_USER_PK (a user other than the account that logs in)")
+        if session_writer.server_version == "v2":
+            pytest.skip("Trapper v1 only")
+        tag = uuid.uuid4().hex[:6]
+        project = session_writer.research_projects.create(ResearchProjectCreate(
+            name=f"e2e team {tag}", acronym=f"e2t{tag}",
+            members=[ResearchProjectMember(user=int(member), role="expert")],
+        ))
+        if project is None:
+            pytest.skip("the account is not staff: the project awaits approval and cannot be read back")
+        roles = {role.username: role.roles for role in project.project_roles}
+        assert ["Expert"] in roles.values() and ["Admin"] in roles.values()
 
 
 # ── classification project creation (Trapper v1) ──────────────────────────────
