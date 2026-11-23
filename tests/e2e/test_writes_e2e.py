@@ -257,7 +257,7 @@ class TestClassificationProjectCreateE2E:
         projects = session_writer.classification_projects
         if session_writer.server_version == "v2":
             with pytest.raises(err.UnsupportedVersionError):
-                projects.create({"name": "e2e", "research_project": 1, "classificator": 1})
+                projects.create(ClassificationProjectCreate(name="e2e", research_project=1, classificator=1))
             return
 
         name = f"e2e cproject {uuid.uuid4().hex[:6]}"

@@ -218,7 +218,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
 
     def create(
         self,
-        project: ClassificationProjectCreate | Dict[str, Any],
+        project: ClassificationProjectCreate,
         *,
         raise_on_error: bool = True,
     ) -> ClassificationProject | None:
@@ -235,8 +235,9 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             *email* on servers that log in by email): a token alone cannot authenticate it.
 
         Args:
-            project: A :class:`~trapper_client.schemas.classifications.ClassificationProjectCreate`
-                (or a dict with its fields). The research project must be one the account can edit.
+            project: A :class:`~trapper_client.schemas.classifications.ClassificationProjectCreate`,
+                which validates it before anything is sent. The research project must be one the
+                account can edit.
             raise_on_error: Raise ``APIError`` when the server rejects the form (the default);
                 with ``False`` return ``None`` instead.
 
@@ -245,7 +246,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             the form and ``raise_on_error=False``).
 
         Raises:
-            pydantic.ValidationError: ``project`` is not valid (a ``ValueError``): nothing is sent.
+            TypeError: ``project`` is not a ``ClassificationProjectCreate``.
             err.UnsupportedVersionError: On Trapper v2.
             err.APIError: The server rejected the form (an unknown research project or classificator,
                 no permission, ...) or redirected to its login page.
@@ -258,7 +259,11 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         """
         self._require_version("v1", feature="classification_projects.create()")
         if not isinstance(project, ClassificationProjectCreate):
-            project = ClassificationProjectCreate.model_validate(project)
+            raise TypeError(
+                f"create() takes a ClassificationProjectCreate, not {type(project).__name__}; "
+                "build one with ClassificationProjectCreate(...) or "
+                "ClassificationProjectCreate.model_validate(data)"
+            )
 
         known = {p.pk for p in self.where(search=project.name, page_size=50) if p.name == project.name}
         data = project.to_form()

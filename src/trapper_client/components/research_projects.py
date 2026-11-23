@@ -80,7 +80,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
 
     def create(
         self,
-        request: ResearchProjectCreate | Dict[str, Any],
+        request: ResearchProjectCreate,
         *,
         raise_on_error: bool = True,
     ) -> ResearchProject | None:
@@ -98,8 +98,8 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
 
         Args:
             request: The project to create, as a
-                :class:`~trapper_client.schemas.research_projects.ResearchProjectCreate` (a dict
-                with its fields is validated into one). ``name`` and ``acronym`` (3 to 10
+                :class:`~trapper_client.schemas.research_projects.ResearchProjectCreate`, which
+                validates it before anything is sent. ``name`` and ``acronym`` (3 to 10
                 characters) must be unique; the sampling design, sensor method, animal types and
                 bait use are the enumerations of :mod:`trapper_client.enums`.
             raise_on_error: Raise ``APIError`` when the server rejects the form (the default);
@@ -112,7 +112,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
             server rejects the form and ``raise_on_error=False``.)
 
         Raises:
-            pydantic.ValidationError: ``request`` is not valid (a ``ValueError``): nothing is sent.
+            TypeError: ``request`` is not a ``ResearchProjectCreate``.
             err.UnsupportedVersionError: On Trapper v2.
             err.APIError: The server rejected the form (a name or acronym already in use, ...) or
                 redirected to its login page.
@@ -131,7 +131,10 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         """
         self._require_version("v1", feature="research_projects.create()")
         if not isinstance(request, ResearchProjectCreate):
-            request = ResearchProjectCreate.model_validate(request)
+            raise TypeError(
+                f"create() takes a ResearchProjectCreate, not {type(request).__name__}; "
+                "build one with ResearchProjectCreate(...) or ResearchProjectCreate.model_validate(data)"
+            )
         acronym = request.acronym
 
         data = request.to_form()

@@ -492,7 +492,7 @@ class TestCreate:
         assert project.pk == 7
 
     def test_posts_the_form_with_the_owner_as_admin(self, component, client):
-        component.create({"name": " Doñana ", "research_project": 1, "classificator": 2})
+        component.create(ClassificationProjectCreate(name=" Doñana ", research_project=1, classificator=2))
         endpoint = client.session_post_multipart.call_args.args[0]
         data = client.session_post_multipart.call_args.kwargs["data"]
         assert endpoint == "media_classification/project/create/"
@@ -505,15 +505,20 @@ class TestCreate:
         client.session_post_multipart.return_value = MagicMock(status_code=200, text="<html/>")
         client._extract_html_error_text.return_value = "classificator: Select a valid choice."
         with pytest.raises(err.APIError, match="classificator: Select a valid choice"):
-            component.create({"name": "N", "research_project": 1, "classificator": 2})
+            component.create(ClassificationProjectCreate(name="N", research_project=1, classificator=2))
 
     def test_rejected_form_returns_none_without_raise_on_error(self, component, client):
         client.session_post_multipart.return_value = MagicMock(status_code=200, text="<html/>")
-        assert component.create({"name": "N", "research_project": 1, "classificator": 2}, raise_on_error=False) is None
+        assert component.create(ClassificationProjectCreate(name="N", research_project=1, classificator=2), raise_on_error=False) is None
 
     def test_not_available_on_v2(self, component, client):
         client.server_version = "v2"
         with pytest.raises(err.UnsupportedVersionError):
+            component.create(ClassificationProjectCreate(name="N", research_project=1, classificator=2))
+        client.session_post_multipart.assert_not_called()
+
+    def test_only_takes_the_model(self, component, client):
+        with pytest.raises(TypeError, match="takes a ClassificationProjectCreate, not dict"):
             component.create({"name": "N", "research_project": 1, "classificator": 2})
         client.session_post_multipart.assert_not_called()
 
@@ -524,10 +529,9 @@ class TestCreate:
         {"name": "N", "research_project": 1, "classificator": 2, "typo": 1},
         {"name": "N", "research_project": 1},
     ])
-    def test_an_invalid_model_never_reaches_the_server(self, component, client, data):
+    def test_the_model_rejects_invalid_data_before_create_is_reached(self, data):
         with pytest.raises(ValueError):
-            component.create(data)
-        client.session_post_multipart.assert_not_called()
+            ClassificationProjectCreate.model_validate(data)
 
 
 class TestAddAndRemoveCollections:

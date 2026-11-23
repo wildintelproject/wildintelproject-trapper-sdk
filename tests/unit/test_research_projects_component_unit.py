@@ -266,8 +266,13 @@ class TestCreate:
         assert data["project_roles-0-user"] == "4"
         assert data["project_roles-0-name"] == "1"
 
-    def test_accepts_a_dict_and_validates_it(self, component, client):
-        component.create({"name": "N", "acronym": "ABC", "bait_use": "scent"})
+    def test_only_takes_the_model(self, component, client):
+        with pytest.raises(TypeError, match="takes a ResearchProjectCreate, not dict"):
+            component.create({"name": "N", "acronym": "ABC"})
+        client.session_post_multipart.assert_not_called()
+
+    def test_a_dict_is_turned_into_the_model_by_the_caller(self, component, client):
+        component.create(ResearchProjectCreate.model_validate({"name": "N", "acronym": "ABC", "bait_use": "scent"}))
         assert client.session_post_multipart.call_args.kwargs["data"]["bait_use"] == 2
 
     def test_none_when_the_project_is_not_visible_yet(self, component):
@@ -306,17 +311,6 @@ class TestCreate:
         client.server_version = "v2"
         with pytest.raises(err.UnsupportedVersionError):
             component.create(REQUEST)
-        client.session_post_multipart.assert_not_called()
-
-    @pytest.mark.parametrize("request_", [
-        {"name": "", "acronym": "ABC"},
-        {"name": "N", "acronym": "ab"},
-        {"name": "N", "acronym": "ABC", "bait_use": "nope"},
-        {"name": "N", "acronym": "ABC", "typo": 1},
-    ])
-    def test_an_invalid_request_never_reaches_the_server(self, component, client, request_):
-        with pytest.raises(ValueError):
-            component.create(request_)
         client.session_post_multipart.assert_not_called()
 
 

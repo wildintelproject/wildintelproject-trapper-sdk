@@ -120,9 +120,9 @@ project = client.classification_projects.create(
 print(project.pk, project.name, project.status)        # 12 Doñana 2026 Ongoing
 ```
 
-`create()` takes a `ClassificationProjectCreate`, a Pydantic model (a dict with its fields works too).
-It validates before anything is sent: a name, and the primary keys of the research project and of
-the classificator. The project starts *ongoing*, and the account that logs in becomes its owner and
+`create()` takes a `ClassificationProjectCreate`, a Pydantic model. Building it validates the data before
+anything is sent: a name, and the primary keys of the research project and of the classificator. To
+build it from a dict, use `ClassificationProjectCreate.model_validate(data)`. The project starts *ongoing*, and the account that logs in becomes its owner and
 administrator. The research project must be one the account can edit; otherwise Trapper rejects the
 form and `create()` raises `APIError` naming the field:
 
