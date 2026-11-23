@@ -593,6 +593,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#instalar-una-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instalar una release
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalar-el-extra-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instalar el extra upload
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#instalar-para-desarrollo" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2822,6 +2844,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#instalar-una-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instalar una release
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#instalar-el-extra-upload" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Instalar el extra upload
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#instalar-para-desarrollo" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2869,12 +2913,17 @@
 <li>Python <strong>3.10</strong> o superior</li>
 <li>Una instancia de Trapper (v1 o v2) en funcionamiento y con acceso a la API</li>
 </ul>
+<div class="admonition note">
+<p class="admonition-title">No está publicado en PyPI</p>
+<p>El paquete se instala desde su repositorio de GitHub: <code>pip install wildintel-trapper-sdk</code> y
+<code>uv add wildintel-trapper-sdk</code> no encuentran nada, porque ese paquete no existe en PyPI.</p>
+</div>
 <h2 id="instalar-con-pip">Instalar con pip</h2>
 <div class="termy">
 
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>wildintel-trapper-sdk
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/wildintelproject/wildintelproject-trapper-sdk
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="go">---&gt; 100%</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">Successfully installed wildintel-trapper-sdk</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="go">Successfully installed wildintel-trapper-sdk-0.1.0</span>
 </code></pre></div>
 
 </div>
@@ -2882,24 +2931,40 @@
 <h2 id="instalar-con-uv">Instalar con uv</h2>
 <div class="termy">
 
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gp">$ </span>uv<span class="w"> </span>add<span class="w"> </span>wildintel-trapper-sdk
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gp">$ </span>uv<span class="w"> </span>add<span class="w"> </span>git+https://github.com/wildintelproject/wildintelproject-trapper-sdk
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="go">Resolved 1 package in 340ms</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="go">Installed 1 package in 12ms</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="go"> + wildintel-trapper-sdk==0.1.0</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="go"> + wildintel-trapper-sdk==0.1.0 (from git+https://github.com/wildintelproject/wildintelproject-trapper-sdk)</span>
 </code></pre></div>
 
 </div>
 
+<h2 id="instalar-una-release">Instalar una release</h2>
+<p>Por defecto se instala el último código del repositorio. Para instalar una
+<a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/releases">release</a>, indica su etiqueta (<code>vX.Y.Z</code>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/wildintelproject/wildintelproject-trapper-sdk@vX.Y.Z
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>uv<span class="w"> </span>add<span class="w"> </span>git+https://github.com/wildintelproject/wildintelproject-trapper-sdk<span class="w"> </span>--tag<span class="w"> </span>vX.Y.Z
+</code></pre></div>
+<p>O instala el wheel que lleva cada release, desde su URL en la página de releases:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pip<span class="w"> </span>install<span class="w"> </span>https://github.com/wildintelproject/wildintelproject-trapper-sdk/releases/download/vX.Y.Z/wildintel_trapper_sdk-X.Y.Z-py3-none-any.whl
+</code></pre></div>
+<h2 id="instalar-el-extra-upload">Instalar el extra <code>upload</code></h2>
+<p>Subir paquetes a un servidor Trapper v1 necesita <a href="https://github.com/Tinche/aiofiles">aiofiles</a> y
+<a href="https://github.com/oconnor663/blake3-py">BLAKE3</a>, que trae el extra <code>upload</code>. (Las subidas a Trapper v2 no
+lo necesitan.)</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;wildintel-trapper-sdk[upload] @ git+https://github.com/wildintelproject/wildintelproject-trapper-sdk&quot;</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>uv<span class="w"> </span>add<span class="w"> </span><span class="s2">&quot;wildintel-trapper-sdk[upload] @ git+https://github.com/wildintelproject/wildintelproject-trapper-sdk&quot;</span>
+</code></pre></div>
 <h2 id="instalar-para-desarrollo">Instalar para desarrollo</h2>
 <p>Clona el repositorio e instala el paquete en modo editable junto con las dependencias de desarrollo:</p>
 <div class="termy">
 
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/wildintelproject/wildintelproject-trapper-sdk.git
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="go">Cloning into &#39;wildintel-trapper-sdk&#39;...</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>wildintel-trapper-sdk
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="gp">$ </span>uv<span class="w"> </span>sync
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="go">Resolved 42 packages in 120ms</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="go">Installed 42 packages in 850ms</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gp">$ </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/wildintelproject/wildintelproject-trapper-sdk.git
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="go">Cloning into &#39;wildintel-trapper-sdk&#39;...</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="gp">$ </span><span class="nb">cd</span><span class="w"> </span>wildintel-trapper-sdk
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="gp">$ </span>uv<span class="w"> </span>sync
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="go">Resolved 42 packages in 120ms</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="go">Installed 42 packages in 850ms</span>
 </code></pre></div>
 
 </div>
@@ -2909,19 +2974,19 @@
 envuelve <code>mkdocs</code> para que no tengas que recordar sus opciones:</p>
 <div class="termy">
 
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>docs<span class="w"> </span>serve
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="go">Documentación en http://127.0.0.1:8000</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="go">INFO    -  Building documentation...</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="go">INFO    -  Documentation built in 0.32 seconds</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="go">INFO    -  [12:00:00] Watching paths for changes: &#39;docs&#39;, &#39;mkdocs.yml&#39;</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="go">INFO    -  [12:00:00] Serving on http://127.0.0.1:8000/</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="go">// O, para generar el sitio estático una vez:</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>docs<span class="w"> </span>build
-<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="go">Generando documentación...</span>
-<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="go">INFO    -  Documentation built in 2.27 seconds</span>
-<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="go">✔  Sitio generado en site/</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>docs<span class="w"> </span>serve
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="go">Documentación en http://127.0.0.1:8000</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="go">INFO    -  Building documentation...</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="go">INFO    -  Documentation built in 0.32 seconds</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="go">INFO    -  [12:00:00] Watching paths for changes: &#39;docs&#39;, &#39;mkdocs.yml&#39;</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="go">INFO    -  [12:00:00] Serving on http://127.0.0.1:8000/</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="go">// O, para generar el sitio estático una vez:</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>docs<span class="w"> </span>build
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a><span class="go">Generando documentación...</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a><span class="go">INFO    -  Documentation built in 2.27 seconds</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="go">✔  Sitio generado en site/</span>
 </code></pre></div>
 
 </div>
