@@ -3002,15 +3002,65 @@ one, just scoped to a different collection subset:</p>
 <a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where_append</span><span class="p">():</span>
 <a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
 </code></pre></div>
+<p>What each one gives (checked on Trapper v1 and v2):</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Fields</th>
+<th>Pagination</th>
+<th>v2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>main (<code>where()</code>, <code>get()</code>, ...)</td>
+<td>the nine of <code>Collection</code></td>
+<td>paginated</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>*_ondemand</code></td>
+<td>the same nine</td>
+<td>paginated</td>
+<td><strong>no</strong>: <code>UnsupportedVersionError</code> (Trapper answers <code>404</code>)</td>
+</tr>
+<tr>
+<td><code>*_map</code></td>
+<td>the same nine</td>
+<td><strong>none</strong>: Trapper returns one plain list and ignores <code>page_size</code></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>*_append</code></td>
+<td>only <code>pk</code> and <code>name</code> (the other fields are <code>None</code>)</td>
+<td><strong>none</strong>: one plain list</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+<p>The SDK wraps a plain list as a single page, so <code>get_map()</code> and <code>get_all_append()</code> work like the others and
+<code>pagination.count</code> is the length of the list. <code>delete_data</code>, <code>update_data</code>, <code>detail_data</code> and <code>owner_profile</code> are web
+page URLs on v1 and <code>None</code> on v2.</p>
 <h2 id="triggering-ftp-uploaded-collection-processing">Triggering FTP-uploaded collection processing</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">trigger_collection</span><span class="p">(</span>
+<p><code>trigger_collection()</code> starts the processing of a data package (a YAML definition and a ZIP) that is <strong>already in
+the account's own folder on the server</strong>: it does not upload anything (see the uploader for that).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">trigger_collection</span><span class="p">(</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">payload</span><span class="o">=</span><span class="p">{</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="s2">&quot;yaml_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.yaml&quot;</span><span class="p">,</span>
 <a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="s2">&quot;zip_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.zip&quot;</span><span class="p">,</span>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="s2">&quot;remove_zip&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="p">},</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">)</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;task_id&quot;</span><span class="p">])</span>
 </code></pre></div>
+<p><code>yaml_file</code> and <code>zip_file</code> are required; <code>remove_zip</code> (default <code>False</code>), <code>extract_metadata</code> (default <code>False</code>) and
+<code>trigger_ai_pipeline</code> (default <code>True</code>) are optional. Trapper checks the YAML definition and starts a background
+task (it runs in the request itself only if the server has Celery off), so a <code>200</code> means it was <strong>started</strong>, not that
+the collection exists. The answer is
+<code>{"data": {"message": ..., "errors": ..., "task_id": ...}}</code>. A missing name or an invalid YAML is a <code>BadRequestError</code>
+(the problems are in <code>data.errors</code>), and a file that is not in the account's folder is a <code>NotFoundError</code>; with
+<code>raise_on_error=False</code> the raw response is returned instead.</p>
 
 
 
