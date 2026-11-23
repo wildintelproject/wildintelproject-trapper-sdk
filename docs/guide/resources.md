@@ -22,15 +22,30 @@
 | `udate_from`, `udate_to` | date | `date_uploaded` range |
 | `rtime_from`, `rtime_to` | HH:MM | Time-of-day range on `date_recorded` |
 | `owner` | boolean | `true` = only resources owned/managed by current user |
-| `locations_map` | comma-separated PKs | Filter via `deployment__location` |
-| `collections` | list of PKs | Filter by one or more collection PKs |
-| `deployments` | repeatable PKs | Filter by deployment PKs |
-| `deployment__isnull` | boolean | `true` = resources with no deployment |
+| `locations_map` | list of PKs | Filter via `deployment__location` (**v1 only**: Trapper v2 ignores it) |
+| `collections` | list of PKs | Filter by one or more collection PKs (any of them) |
+| `deployments` | list of PKs | Filter by deployment PKs (any of them) |
 | `tags` | list of PKs | Filter by tag PKs |
 | `observation_type` | string | Full-text search for `observation_type:<value>` |
-| `species` | repeatable | Full-text search for `species_id:<value>` |
+| `species` | list of PKs | Full-text search for `species_id:<value>` |
 | `timestamp_error` | boolean | `true` = resources outside the deployment's date range |
 | `search` | string | Full-text search across name and data vectors |
+
+Lists (`pk`, `locations_map`, `collections`, `deployments`, `tags`, `species`) can be given as a list or as a
+comma-separated string: `collections=[2, 3]` and `collections="2,3"` are the same. Trapper reads each one in a
+different form (`deployments` and `collections` as repeated parameters, `pk` and `locations_map` as one string with
+commas), and gets it wrong without telling you when given the other: `deployments="1,2"` is ignored and returns
+every resource, `collections="2,3"` is a `400`, `pk=[1, 2]` keeps one pk and `locations_map=[1, 2]` finds nothing.
+The SDK sends each one the way Trapper reads it.
+
+!!! warning "A filter that Trapper does not apply"
+    Trapper ignores a parameter that is not one of its filters **without an error**, and the list comes back
+    unfiltered; the SDK emits an `UnknownFilterWarning` that names it (the request is still sent). Besides those in
+    the table, the list applies `name`, `deployment`, `mime_type`, `file_size`, `token` and `file_checksum_hash`.
+    `locations_map` is ignored by v2, and `ordering` and `in_bbox` by both. `deployment__isnull`, which an older
+    version of this guide listed, makes Trapper answer **`500`** on v1 and v2, whatever the value: the SDK warns about
+    it and there is no filter for the resources without a deployment. To silence the warning:
+    `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
 
 ## The six access patterns
 

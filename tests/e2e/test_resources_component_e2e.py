@@ -425,3 +425,74 @@ class TestResourceDownloadE2E:
             pytest.skip("this client has credentials")
         with pytest.raises(ValueError, match="user_name"):
             ResourcesComponent(client).download(1, tmp_path / "x.jpg")
+
+
+# ── list filters ──────────────────────────────────────────────────────────────
+
+class TestResourceFiltersE2E:
+
+    @pytest.fixture(scope="class")
+    def component(self, real_api_base):
+        return ResourcesComponent(real_api_base)
+
+    @staticmethod
+    def count(component, **filters) -> int:
+        return component.get(page_size=1, **filters).pagination.count
+
+    @pytest.mark.e2e
+    def test_lists_and_comma_strings_filter_the_same_way(self, component):
+        """Every spelling of a list filter gives the same result, instead of ignoring it or failing."""
+        everything = list(component.where(page_size=100))
+        if len(everything) < 3:
+            pytest.skip("Not enough resources on this server")
+        pks = [r.pk for r in everything[:3]]
+        assert self.count(component, pk=pks) == 3
+        assert self.count(component, pk=",".join(map(str, pks))) == 3
+
+        deployments = sorted({d for d in (self._deployment_of(component, r.pk) for r in everything[:6]) if d})
+        if len(deployments) >= 2:
+            as_list = self.count(component, deployments=deployments)
+            assert as_list == self.count(component, deployments=",".join(map(str, deployments)))
+            assert as_list < len(everything)             # it filters: "1,2" used to be ignored and gave everything
+
+    @staticmethod
+    def _deployment_of(component, resource_pk):
+        """The deployment of a resource, found through the deployments filter (the list does not say)."""
+        from trapper_client.components.deployments import DeploymentsComponent
+
+        for dep in DeploymentsComponent(component.client).where(page_size=100):
+            if component.get(page_size=1, pk=resource_pk, deployments=dep.pk).pagination.count:
+                return dep.pk
+        return None
+
+    @pytest.mark.e2e
+    def test_collections_as_list_or_string_agree(self, component):
+        from trapper_client.components.collections import CollectionsComponent
+
+        pks = [c.pk for c in CollectionsComponent(component.client).where(page_size=10)][:2]
+        if len(pks) < 2:
+            pytest.skip("Fewer than two collections on this server")
+        assert self.count(component, collections=pks) == self.count(component, collections=",".join(map(str, pks)))
+        assert self.count(component, collections=pks) >= self.count(component, collections=pks[0])
+
+    @pytest.mark.e2e
+    def test_unknown_filters_warn_and_known_ones_do_not(self, component):
+        import warnings
+
+        from trapper_client import err
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", err.UnknownFilterWarning)
+            total = self.count(component)
+            assert self.count(component, name="zzz-no-such-resource") == 0
+        with pytest.warns(err.UnknownFilterWarning):
+            ignored = component.get(page_size=1, ordering="-pk", radius="0,0,1")
+        assert ignored.pagination.count == total
+
+    @pytest.mark.e2e
+    def test_deployment_isnull_is_still_a_server_error(self, component):
+        """The warning says Trapper answers 500: if this stops failing, the warning has to go."""
+        from trapper_client import err
+
+        with pytest.warns(err.UnknownFilterWarning, match="500"), pytest.raises(err.APIError):
+            component.get(page_size=1, deployment__isnull=True)
