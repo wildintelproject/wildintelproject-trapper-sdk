@@ -5,6 +5,7 @@ Base class for all Trapper API components.
 from __future__ import annotations
 
 import logging
+import re
 import time
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, Iterable, TypeVar, Union
@@ -21,6 +22,17 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 TModel = TypeVar("TModel", bound=BaseModel)
+
+
+def selected_option(html: str, select_name: str) -> str | None:
+    """The value of the ``selected`` option of ``<select name=select_name>`` in a rendered form."""
+    block = re.search(
+        rf'<select[^>]*name="{re.escape(select_name)}"[^>]*>(.*?)</select>', html, re.DOTALL
+    )
+    if not block:
+        return None
+    option = re.search(r'<option[^>]*value="([^"]+)"[^>]*selected', block.group(1))
+    return option.group(1) if option else None
 
 
 class TrapperComponent(Generic[TModel]):
@@ -80,6 +92,58 @@ class TrapperComponent(Generic[TModel]):
                 self.import_endpoint_v2, data=data, files=files, csrf_from_page=True
             )
         return self.client.session_post_multipart(self.import_endpoint, data=data, files=files)
+
+    def _owner_role_fields(self, form_endpoint: str, prefix: str, label: str) -> Dict[str, Any]:
+        """The role formset a create form always posts: the logged-in user as administrator.
+
+        The form page already says who that is (the owner is pre-selected in the first row of the
+        formset ``prefix``), so read it from there instead of looking the user up through the API.
+        """
+        self.client.session_login()
+        url = f"{self.client.base_url.rstrip('/')}/{form_endpoint.lstrip('/')}"
+        page = self.client._web_client.get(url)
+        if page.status_code != 200:
+            raise err.APIError(
+                f"Cannot open the {label} form (status {page.status_code}): the account "
+                "may not be allowed to create it."
+            )
+        user = selected_option(page.text, f"{prefix}-0-user")
+        role = selected_option(page.text, f"{prefix}-0-name")
+        if user is None or role is None:
+            raise err.APIError(
+                f"The {label} form has no pre-selected owner role: Trapper changed the "
+                "form and this workaround needs updating."
+            )
+        return {
+            f"{prefix}-TOTAL_FORMS": 1,
+            f"{prefix}-INITIAL_FORMS": 0,
+            f"{prefix}-MIN_NUM_FORMS": 0,
+            f"{prefix}-MAX_NUM_FORMS": 1000,
+            f"{prefix}-0-id": "",
+            f"{prefix}-0-user": user,
+            f"{prefix}-0-name": role,
+        }
+
+    def _submit_create_form(
+        self, form_endpoint: str, data: Dict[str, Any], label: str, raise_on_error: bool
+    ) -> bool:
+        """POST a classic create form and say whether the server accepted it.
+
+        Trapper answers ``302`` to the project list when it saves, and ``200`` with the form
+        re-rendered (and the reasons in it) when it does not. A ``302`` to the login page is a
+        refusal, not a success.
+        """
+        response = self.client.session_post_multipart(form_endpoint, data=data)
+        if self._import_accepted(response):
+            return True
+        if not raise_on_error:
+            return False
+        if response.status_code == 302:
+            raise err.APIError(
+                f"{label} creation refused: the server redirected to its login page."
+            )
+        message = self.client._extract_html_error_text(response.text)
+        raise err.APIError(f"{label} creation failed (status {response.status_code}): {message}")
 
     @staticmethod
     def _import_accepted(response: Any) -> bool:
