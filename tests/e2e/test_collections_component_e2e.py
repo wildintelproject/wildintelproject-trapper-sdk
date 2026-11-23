@@ -239,3 +239,59 @@ class TestCollectionAppendE2E:
         result = component.find_append(int(pk))
 
         assert isinstance(result, Collection)
+
+# ── list filters ──────────────────────────────────────────────────────────────
+
+class TestCollectionFiltersE2E:
+
+    @pytest.fixture(scope="class")
+    def component(self, real_api_base):
+        return CollectionsComponent(real_api_base)
+
+    @staticmethod
+    def count(component, **filters) -> int:
+        return component.get(page_size=1, **filters).pagination.count
+
+    @pytest.mark.e2e
+    def test_pk_as_list_or_string_filters_the_same(self, component):
+        """``pk=[a, b]`` used to keep one collection; every spelling gives the same result now."""
+        pks = [c.pk for c in component.where(page_size=50)][:2]
+        if len(pks) < 2:
+            pytest.skip("Fewer than two collections on this server")
+        assert self.count(component, pk=pks) == 2
+        assert self.count(component, pk=",".join(map(str, pks))) == 2
+        assert self.count(component, pk=tuple(pks)) == 2
+
+    @pytest.mark.e2e
+    def test_status_in_any_case_is_the_status_trapper_stores(self, component):
+        """``status="private"`` was an empty result; it is the same as ``"Private"`` now."""
+        from trapper_client import CollectionStatus
+
+        everything = list(component.where(page_size=50))
+        if not everything:
+            pytest.skip("No collections on this server")
+        status = everything[0].status
+        expected = sum(1 for c in everything if c.status == status)
+        assert expected >= 1
+        assert self.count(component, status=status) == expected
+        assert self.count(component, status=status.lower()) == expected
+        assert self.count(component, status=CollectionStatus.parse(status)) == expected
+
+    @pytest.mark.e2e
+    def test_an_unknown_status_is_refused_not_an_empty_result(self, component):
+        with pytest.raises(ValueError, match="OnDemand"):
+            component.get(status="Bogus")
+
+    @pytest.mark.e2e
+    def test_unknown_filters_warn_and_known_ones_do_not(self, component):
+        import warnings
+
+        from trapper_client import err
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", err.UnknownFilterWarning)
+            total = self.count(component)
+            assert self.count(component, name="zzz-no-such-collection") == 0
+        with pytest.warns(err.UnknownFilterWarning):
+            ignored = component.get(page_size=1, ordering="-pk", description="x")
+        assert ignored.pagination.count == total

@@ -135,29 +135,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         400, ``pk=[1, 2]`` keeps one pk and ``locations_map=[1, 2]`` finds nothing; the opposite forms work.
         A list, a tuple, a set or a comma-separated string is accepted for all of them.
         """
-        query = dict(query)
-        for key in self._REPEATED_FILTERS & query.keys():
-            values = self._as_list(query[key])
-            if values is not None:
-                query[key] = values
-        for key in self._COMMA_FILTERS & query.keys():
-            values = self._as_list(query[key])
-            if values is not None:
-                query[key] = ",".join(str(v) for v in values)
-        return query
-
-    @staticmethod
-    def _as_list(value: Any) -> list[Any] | None:
-        """The items of a list-like or comma-separated value, or ``None`` if it is neither."""
-        if isinstance(value, (list, tuple, set, frozenset)):
-            items = list(value)
-        elif isinstance(value, str):
-            items = value.split(",")
-        elif value is None:
-            return None
-        else:
-            return [value]
-        return [v.strip() if isinstance(v, str) else v for v in items if not (isinstance(v, str) and not v.strip())]
+        return self._normalize_lists(query, repeated=self._REPEATED_FILTERS, comma=self._COMMA_FILTERS)
 
     #: The web view that serves the files of a resource (not part of the REST API: it needs a web session).
     media_endpoint = "storage/resource/media/{pk}/{field}/"

@@ -261,6 +261,38 @@ class TrapperComponent(Generic[TModel]):
         """Hook: put the values of a query in the form the server reads (see ``ResourcesComponent``)."""
         return query
 
+    @staticmethod
+    def _as_list(value: Any) -> list[Any] | None:
+        """The items of a list-like or comma-separated value, ``[value]`` for a single one, ``None`` for ``None``."""
+        if isinstance(value, (list, tuple, set, frozenset)):
+            items = list(value)
+        elif isinstance(value, str):
+            items = value.split(",")
+        elif value is None:
+            return None
+        else:
+            return [value]
+        return [v.strip() if isinstance(v, str) else v for v in items if not (isinstance(v, str) and not v.strip())]
+
+    def _normalize_lists(
+        self, query: Dict[str, Any], repeated: Iterable[str] = (), comma: Iterable[str] = ()
+    ) -> Dict[str, Any]:
+        """Send list filters the way the server reads each one, whichever way the caller gave them.
+
+        ``repeated`` ones go as a list (the HTTP client repeats the parameter: ``a=1&a=2``) and ``comma`` ones as
+        a single comma-separated string. A list, a tuple, a set or a comma-separated string is accepted for both.
+        """
+        query = dict(query)
+        for key in set(repeated) & query.keys():
+            values = self._as_list(query[key])
+            if values is not None:
+                query[key] = values
+        for key in set(comma) & query.keys():
+            values = self._as_list(query[key])
+            if values is not None:
+                query[key] = ",".join(str(v) for v in values)
+        return query
+
     def _warn_unknown_filters(self, query: Dict[str, Any], stacklevel: int = 3) -> None:
         """Warn about the parameters of ``query`` that the server would ignore silently, or fail on."""
         broken = sorted(k for k in query if k in self.broken_filters)

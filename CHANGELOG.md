@@ -99,6 +99,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   or a comma-separated string and are sent the way Trapper reads each one (`deployments="1,2"` used to be ignored
   and return every resource, `collections="2,3"` was a `400`). `UnknownFilterWarning` also on the resource list
   (`locations_map` only on v1), and it names `deployment__isnull`, which Trapper answers with a `500`.
+- Collection list filters (issue #63): `pk`, `owners`, `research_projects` and `locations_map` take a list or a
+  comma-separated string and are sent the way Trapper reads each one (`pk=[2, 1]` kept one pk). New `CollectionStatus`
+  enumeration: `status` is resolved in any case and refused with a `ValueError` if it is none of `Private`, `OnDemand`,
+  `Public`, `Archived`, since Trapper answers a wrong one with an empty result. `UnknownFilterWarning` on the
+  collection list too (`locations_map` only on v1).
 - `client.locations.in_area(bbox=..., center=..., radius=..., **filters)` (issue #34): the locations inside a
   bounding box or a circle (radius in metres). Trapper v1's list ignores `in_bbox` and `radius` silently and
   v2's ignores `radius`, so the SDK filters on the client; on v2 a box is also sent as `in_bbox` (issue #40) so
