@@ -1,7 +1,9 @@
 """Schemas for deployment-related Trapper endpoints."""
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .base import TrapperSchema
 
@@ -59,6 +61,7 @@ class DeploymentExport(BaseModel):
     camera_model: str | None = Field(None, alias="cameraModel")
     camera_interval: int | None = Field(None, alias="cameraDelay")
     camera_height: float | None = Field(None, alias="cameraHeight")
+    camera_depth: float | None = Field(None, alias="cameraDepth")
     camera_tilt: float | None = Field(None, alias="cameraTilt")
     camera_heading: float | None = Field(None, alias="cameraHeading")
     detection_distance: float | None = Field(None, alias="detectionDistance")
@@ -74,6 +77,40 @@ class DeploymentExport(BaseModel):
     comments: str | None = Field(None, alias="deploymentComments")
     tags: list[str] = Field(default_factory=list)
 
+    @model_validator(mode="before")
+    @classmethod
+    def _split_groups_and_tags(cls, data: Any) -> Any:
+        """Read ``session``, ``array``, ``tags`` and ``bait_type`` from the two columns that hold them.
+
+        Trapper's export has no column for any of those four. ``deploymentGroups`` holds the first two
+        (``session:S | array:A``) and ``deploymentTags`` the tags, joined by `` | ``, with
+        ``baitType:<value>`` appended when the deployment has a bait type. A value given by its own name
+        wins, so a row that already has ``session`` or ``tags`` is left as it is.
+        """
+        if not isinstance(data, dict):
+            return data
+        data = dict(data)
+        groups = data.pop("deploymentGroups", None)
+        tags = data.pop("deploymentTags", None)
+        if isinstance(groups, str):
+            for part in groups.split("|"):
+                key, sep, value = part.partition(":")
+                key, value = key.strip(), value.strip()
+                if sep and key in ("session", "array") and value and not data.get(key):
+                    data[key] = value
+        if isinstance(tags, str) and "tags" not in data:
+            plain = []
+            for name in (t.strip() for t in tags.split("|")):
+                if not name:
+                    continue
+                if name.startswith("baitType:"):
+                    if not data.get("bait_type") and not data.get("baitType"):
+                        data["bait_type"] = name[len("baitType:"):].strip()
+                else:
+                    plain.append(name)
+            data["tags"] = plain
+        return data
+
     @field_validator("pk", "camera_interval", mode="before")
     @classmethod
     def _parse_int(cls, v):
@@ -86,7 +123,7 @@ class DeploymentExport(BaseModel):
 
     @field_validator(
         "latitude", "longitude", "coordinate_uncertainty",
-        "camera_height", "camera_tilt", "camera_heading",
+        "camera_height", "camera_depth", "camera_tilt", "camera_heading",
         "detection_distance", mode="before",
     )
     @classmethod

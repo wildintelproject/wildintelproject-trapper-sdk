@@ -101,6 +101,22 @@ for feature in fc["features"]:
 
 Only deployments the current user can access are returned.
 
+## Fields: the list and the export
+
+Like locations, a deployment comes in two shapes, and neither holds every field. `where()`, `get()` and `find()`
+return a `Deployment` (Trapper's JSON): `pk`, `deployment_code`, `deployment_id`, `location` (the location's
+**pk**), `location_id`, `start_date`, `end_date`, `owner`, `research_project` (its **acronym**), `tags`,
+`correct_setup` and `correct_tstamp`. `export(file=None)` returns a `DeploymentExport` for each row of the CSV,
+which has the camera and setup fields instead (`setup_by`, `camera_*`, `detection_distance`, `bait_use`,
+`feature_type`, `habitat`, `session`, `array`, `comments`, `longitude`, `latitude`, `location_name`) but **not**
+the owner, the research project or `correct_setup` and `correct_tstamp`. Both have `pk`, `deployment_id`,
+`location_id`, `start_date`, `end_date` and `tags`. Checked on Trapper v1 and v2.
+
+Trapper's CSV has no column for `session`, `array`, `tags` or `bait_type`: it puts the first two in
+`deploymentGroups` (`session:S | array:A`) and the tags in `deploymentTags`, with `baitType:<value>` added
+when the deployment has a bait type. `DeploymentExport` reads them from there, so `tags` holds only the tags and
+`bait_type` the bait. To get the CSV exactly as Trapper sends it, use `export(file=..., raw=True)`.
+
 ## Importing deployments (write access)
 
 `/geomap/api/deployments` is read-only, so `import_deployments()` works around that by simulating
