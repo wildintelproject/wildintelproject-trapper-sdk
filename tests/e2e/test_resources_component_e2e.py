@@ -369,3 +369,59 @@ class TestResourcesByLocationE2E:
 
         with pytest.raises(Exception):
             component.find_by_location(int(pk), 999999999)
+
+# ── download ──────────────────────────────────────────────────────────────────
+
+class TestResourceDownloadE2E:
+    """``download()`` needs the web session, so it needs ``WILDINTEL_USER_NAME``/``WILDINTEL_USER_PASSWORD``."""
+
+    @pytest.fixture(scope="class")
+    def session_client(self):
+        from trapper_client import TrapperClient
+
+        if os.getenv("WILDINTEL_SMOKE_ENABLED", "").strip() != "1":
+            pytest.skip("Set WILDINTEL_SMOKE_ENABLED=1")
+        user, password = os.getenv("WILDINTEL_USER_NAME", "").strip(), os.getenv("WILDINTEL_USER_PASSWORD", "").strip()
+        if not (user and password):
+            pytest.skip("Set WILDINTEL_USER_NAME and WILDINTEL_USER_PASSWORD (the web session is needed to download)")
+        return TrapperClient(
+            base_url=os.environ["WILDINTEL_BASE_URL"],
+            access_token=os.environ["WILDINTEL_ACCESS_TOKEN"],
+            user_name=user,
+            user_password=password,
+        )
+
+    @pytest.mark.e2e
+    def test_download_the_original(self, session_client, tmp_path):
+        """The original of a resource is saved with the size of the file, or the server says why not."""
+        from trapper_client import err
+
+        page = session_client.resources.get(page_size=1)
+        if not page.results:
+            pytest.skip("No resources on this server")
+        try:
+            path = session_client.resources.download(page.results[0].pk, tmp_path)
+        except err.APIError as exc:
+            if "proxy" in str(exc):
+                pytest.skip("this Trapper is not behind the proxy that serves its files (X-Accel-Redirect)")
+            raise
+        assert path.parent == tmp_path and path.stat().st_size > 0
+        assert [p.name for p in tmp_path.iterdir()] == [path.name]       # no .part left
+        assert path.read_bytes()[:3] in (b"\xff\xd8\xff", b"\x89PN", b"GIF")
+
+    @pytest.mark.e2e
+    def test_a_resource_that_does_not_exist_is_not_found(self, session_client, tmp_path):
+        from trapper_client import err
+
+        with pytest.raises(err.NotFoundError):
+            session_client.resources.download(999999999, tmp_path / "x.jpg")
+        assert list(tmp_path.iterdir()) == []
+
+    @pytest.mark.e2e
+    def test_the_token_alone_cannot_download(self, real_api_base, tmp_path):
+        """Without ``user_name``/``user_password`` it says so before any request for the file."""
+        client = real_api_base
+        if getattr(client, "user_name", None) and getattr(client, "user_password", None):
+            pytest.skip("this client has credentials")
+        with pytest.raises(ValueError, match="user_name"):
+            ResourcesComponent(client).download(1, tmp_path / "x.jpg")

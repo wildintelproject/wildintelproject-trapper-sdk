@@ -92,6 +92,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `client.deployments.in_area(bbox=..., center=..., radius=..., **filters)` (issue #51): the deployments whose
   location is inside a bounding box or a circle. A deployment has no coordinates of its own, so it finds the
   locations in the area (`locations.in_area()`) and asks for their deployments in batches of location pks.
+- `client.resources.download(pk, file, kind="original" | "preview" | "thumbnail")` (issue #56): saves the file of a
+  resource. The API token cannot fetch it (the web view answers `404`), so it logs in with `user_name` and
+  `user_password`, streams to a `.part` file, and retries network failures and `502`/`503`/`504` with tenacity.
 - `client.locations.in_area(bbox=..., center=..., radius=..., **filters)` (issue #34): the locations inside a
   bounding box or a circle (radius in metres). Trapper v1's list ignores `in_bbox` and `radius` silently and
   v2's ignores `radius`, so the SDK filters on the client; on v2 a box is also sent as `in_bbox` (issue #40) so

@@ -4,9 +4,15 @@ Component for the /storage/api/resources/ resource.
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict
+import mimetypes
+from pathlib import Path
+from typing import Any, Callable, Dict, Literal
 
+import httpx
+
+from trapper_client import err
 from trapper_client.components.base import TrapperComponent
+from trapper_client.retry_utils import retrying_for_download
 from trapper_client.schemas import PaginatedResult, Resource
 from trapper_client.api_query import APIQuery
 
@@ -100,6 +106,109 @@ class ResourcesComponent(TrapperComponent[Resource]):
 
     endpoint = "storage/api/resources"
     schema = Resource
+
+    #: The web view that serves the files of a resource (not part of the REST API: it needs a web session).
+    media_endpoint = "storage/resource/media/{pk}/{field}/"
+    #: What each ``kind`` of :meth:`download` is called in that view.
+    media_fields = {"original": "file", "preview": "pfile", "thumbnail": "tfile"}
+
+    def download(
+        self,
+        pk: int,
+        file: str | Path,
+        kind: Literal["original", "preview", "thumbnail"] = "original",
+        retry_attempts: int = 3,
+        retry_min_wait: float = 1.0,
+        retry_max_wait: float = 10.0,
+    ) -> Path:
+        """Save the file of a resource (its image or video) to disk.
+
+        The REST API only lists resources: ``url`` and ``url_original`` are paths of a classic web view that
+        does not accept the API token, and that answers ``404`` both when the file does not exist and when
+        the account has no permission to see it. So this logs in with ``user_name``/``user_password`` (the
+        account's *email* on servers that log in by email) like the imports do, and streams the file to disk.
+        Network failures and ``502``/``503``/``504`` answers are retried with exponential backoff (tenacity);
+        any other answer is an error. The file is written to a temporary ``.part`` file first, so a failed
+        download never leaves a half-written file where ``file`` should be.
+
+        Warning:
+            Not a stable API contract: it depends on an unversioned web view (``storage/resource/media/``).
+
+        Args:
+            pk: Resource primary key.
+            file: Where to save it. If it is an existing directory, the file is saved in it as
+                ``<pk>-<kind>`` plus the extension of its content type.
+            kind: ``"original"`` (the file as it was uploaded), ``"preview"`` or ``"thumbnail"``. Trapper
+                generates the last two, and a resource may not have them.
+            retry_attempts: Attempts in total, the first one included (``1`` disables the retries).
+            retry_min_wait: Minimum backoff in seconds.
+            retry_max_wait: Maximum backoff in seconds.
+
+        Returns:
+            The ``Path`` of the saved file.
+
+        Raises:
+            ValueError: If ``kind`` is not one of the three, or ``user_name``/``user_password`` are missing.
+            err.NotFoundError: The file does not exist, or the account cannot see the resource.
+            err.APIError: Any other failure, including a server that answers ``200`` with an empty body and
+                an ``X-Accel-Redirect`` header, which is a Trapper that is not behind the proxy that serves
+                its files.
+
+        Example::
+
+            path = client.resources.download(29, "images/")                    # the original
+            thumb = client.resources.download(29, "thumb.jpg", kind="thumbnail")
+        """
+        if kind not in self.media_fields:
+            raise ValueError(f"kind must be one of {', '.join(self.media_fields)}, not {kind!r}")
+        self._ensure_supported()
+        self.client.session_login()
+
+        url = f"{self.client.base_url.rstrip('/')}/{self.media_endpoint.format(pk=pk, field=self.media_fields[kind])}"
+        retrying = retrying_for_download(retry_attempts, retry_min_wait, retry_max_wait)
+        return retrying(self._download_once, url, pk, kind, Path(file))
+
+    def _download_once(self, url: str, pk: int, kind: str, target: Path) -> Path:
+        """One attempt at :meth:`download`: stream to ``<target>.part`` and move it into place."""
+        with self.client._web_client.stream("GET", url) as response:
+            status = response.status_code
+            if status != 200:
+                self._raise_download_error(response, pk, kind)
+            if response.headers.get("x-accel-redirect") and response.headers.get("content-length") == "0":
+                raise err.APIError(
+                    f"resource {pk}: the server answered 200 with no body and an X-Accel-Redirect header: "
+                    "it is not behind the proxy that serves Trapper's files, so the file cannot be downloaded"
+                )
+            if target.is_dir():
+                extension = mimetypes.guess_extension((response.headers.get("content-type") or "").split(";")[0].strip()) or ""
+                target = target / f"{pk}-{kind}{'.jpg' if extension == '.jpe' else extension}"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            part = target.with_name(target.name + ".part")
+            try:
+                with part.open("wb") as handle:
+                    for chunk in response.iter_bytes():
+                        handle.write(chunk)
+                part.replace(target)
+            except BaseException:
+                part.unlink(missing_ok=True)
+                raise
+        return target
+
+    @staticmethod
+    def _raise_download_error(response: httpx.Response, pk: int, kind: str) -> None:
+        status = response.status_code
+        if status in (502, 503, 504):
+            raise err.TransientDownloadError(f"resource {pk}: the server answered {status}")
+        if status == 404:
+            raise err.NotFoundError(
+                f"resource {pk} ({kind}): not found. The file does not exist (a preview or thumbnail may not "
+                "have been generated), or the account has no permission to see the resource: Trapper answers "
+                "404 in both cases"
+            )
+        if status in (301, 302, 303, 307, 308):
+            raise err.UnauthorizedError(f"resource {pk}: redirected to {response.headers.get('location')}: the web session is not valid")
+        error = err.HTTP_ERRORS_MAP.get(status, err.APIError)
+        raise error(f"resource {pk} ({kind}): the server answered {status}")
 
     # ── collection sub-endpoint ───────────────────────────────────────────────
 
