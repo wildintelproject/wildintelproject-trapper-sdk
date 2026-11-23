@@ -34,6 +34,11 @@ the SDK does in the meantime.
 | 19 | Expose the valid values of the research project choice fields | research |
 | 20 | Return the primary keys of the owner and the members of a research project | research |
 | 21 | Use one URL convention, and answer API paths with JSON | cross-cutting |
+| 22 | Create, update and delete locations through the API | geomap |
+| 23 | Return every field of a location, and its related objects as keys | geomap |
+| 24 | Return the coordinates of a location as numbers | geomap |
+| 25 | Filter the list of locations by area | geomap |
+| 26 | Reject the filters and the ordering the list does not apply | cross-cutting |
 
 ---
 
@@ -324,6 +329,9 @@ acronym, abstract and owner but is a partial match. Checked against a v1.7.4 ser
 - `keywords` filters by the primary key of the tag, but no endpoint lists the keywords, so a client
   cannot know the key. An unknown key answers `400`, as it should.
 
+The same happens on the other endpoints: `GET geomap/api/locations?unknown_filter=1` returns all 16 locations
+of the test server, as no filter would.
+
 **Proposal.** Add `name` (exact) and `status` filters; accept keywords by name (`?keywords=mammals`) or
 add a keywords endpoint; and answer `400` for a query parameter the endpoint does not know, as it does
 for a bad `keywords` value.
@@ -380,6 +388,114 @@ A client has to know which convention each route uses, and cannot read the error
 with a redirect, and a JSON body for every error under the API, including `404`.
 
 **Workaround in the SDK.** Each component spells its endpoint the way the server expects it.
+
+## 22. Create, update and delete locations through the API
+
+**Labels:** enhancement, api
+
+**Problem.** `LocationViewSet` is a `PaginatedReadOnlyModelViewSet`: `OPTIONS geomap/api/locations` answers
+`Allow: GET, HEAD, OPTIONS`. A location can only be created in bulk, by the CSV import form (#8), and can
+only be edited or deleted in the web map (`update_data` points to `/geomap/map/?locations=16&edit=true`).
+The import creates locations; it does not update the ones that exist: it only reads `locationID`, `longitude`,
+`latitude` and a few optional columns, ignores `_id`, and rejects a `locationID` that exists in the research
+project. The **deployment** import does update, with its `update` option and an `_id` column (*checked in the
+source, v1*), so the two imports behave differently.
+
+**Proposal.** `POST geomap/api/locations`, and `PATCH`/`PUT`/`DELETE geomap/api/locations/<pk>`, with token
+authentication and the permissions the web views already check (owner and managers). Fields: `location_id`,
+`name`, `description`, `coordinates`, `timezone`, `ignore_DST`, `coordinate_uncertainty`, `is_public` and
+`research_project`. Validate the `timezone` (see #11).
+
+**Workaround in the SDK.** `locations.import_locations()` creates locations from a CSV, one row or many. There
+is no way to correct or delete one.
+
+## 23. Return every field of a location, and its related objects as keys
+
+**Labels:** enhancement, api
+
+**Problem.** Checked against a v1.7.4 server, `GET geomap/api/locations` returns `city`, `coordinates`,
+`country`, `county`, `date_created`, `description`, `is_public`, `location_id`, `name`, `owner`,
+`owner_profile`, `pk`, `research_project`, `state`, `timezone` and the `update_data`/`delete_data` URLs. It
+leaves out `ignore_DST`, `coordinate_uncertainty` and `managers`, which the model has and the CSV export
+(`geomap/api/locations/export/`) partly carries (`ignoreDST`). Related objects are display values, not keys:
+
+- `owner` is a user name (`"rp_staff"`);
+- `research_project` is the **acronym** (`"c50e23d"`), while the CSV export gives its primary key (`1`) in
+  `researchProject`: the same field in two shapes.
+
+The same location comes in **three shapes**, and neither the JSON nor the export holds every field. Checked
+on v1.7.4 and on a v2 server: the JSON has the name, the owner, `is_public`, `date_created` and the place names
+that the export does not have; the export has `ignoreDST`, `habitat`, the research project as a key and the
+coordinates as two numbers, which the JSON does not. On v2 the JSON does not even carry `city`, `county`,
+`state` and `country`, while the export carries `country`.
+
+**Cause.** In Trapper's source there is one serializer per shape, each with its own hand-written field list:
+`LocationSerializer` (the JSON list and detail), `LocationGeoSerializer` (the GeoJSON, which only sends `pk`,
+`location_id` and `name`) and `LocationTableSerializer` (the CSV). They are not derived from one another, so
+they drift apart.
+
+**Proposal.** Return the missing fields, and the owner and the research project as primary keys (with the
+name or acronym next to them if it is wanted). Same as #14 and #20 for classification and research projects.
+Make the JSON detail the complete representation of a location, and build the other two from it (or from one
+shared field list) so that the same piece of data cannot change value with the format.
+
+**Workaround in the SDK.** `locations.export(file=None)` returns `ignore_dst`, `habitat` and
+`research_project_id`, so those can be read from there; the SDK does not join the two shapes. `Location`
+gets `longitude` and `latitude` from the coordinates string. `coordinate_uncertainty` and `managers` are in
+neither, and cannot be read.
+
+## 24. Return the coordinates of a location as numbers
+
+**Labels:** enhancement, api
+
+**Problem.** The list returns `"coordinates": "-6.44, 37.05"`, a single string with the longitude first.
+There is no GeoJSON or pair of numbers, and nothing says which is the axis order. The GeoJSON endpoint
+(`geomap/api/locations/geojson/`) returns a proper `Point` (`[-6.44, 37.05]`), but it was removed in Trapper
+v2.
+
+**Proposal.** `longitude` and `latitude` as numbers in the list and the detail (or a GeoJSON `geometry`), in
+Trapper v1 and v2.
+
+**Workaround in the SDK.** `Location.coordinates` is the raw string; the caller splits it. The GeoJSON
+endpoint is wrapped by `client.locations_geojson` (Trapper v1 only).
+
+## 25. Filter the list of locations by area
+
+**Labels:** enhancement, api
+
+**Problem.** `LocationFilter` excludes `coordinates`, so the list has no complete spatial filter. Checked live:
+
+| | `in_bbox` | `radius` |
+|---|---|---|
+| v1, `GET geomap/api/locations` | **ignored silently** (`0,0,1,1` returns 16 of 16) | **ignored silently** |
+| v2, `GET geomap/api/locations` | applied, edges included (`-7,36,-5,38` returns 13 of 15) | **ignored silently** |
+| v1, GeoJSON endpoint | applied | applied |
+
+The only endpoint that applies `radius` is the GeoJSON one, which Trapper v2 removed.
+
+**Proposal.** Apply `in_bbox` and `radius` on the list in every version, and keep them when the GeoJSON endpoint
+goes.
+
+**Workaround in the SDK.** `client.locations.in_area(bbox=..., center=..., radius=...)` filters on the client, in
+both versions (on v2 it also sends the box as `in_bbox`, to read fewer pages), and the SDK warns when a filter
+the list does not apply is passed (see entry 26). `client.locations_geojson.get(in_bbox=..., radius=...)` still works
+on Trapper v1.
+
+## 26. Reject the filters and the ordering the list does not apply
+
+**Labels:** enhancement, api, cross-cutting
+
+**Problem.** The list endpoints answer `200` with **every** item when a query parameter is not a filter they
+know, so a typo or a filter that exists only in the other version looks like a success. Checked live on the
+locations list in v1 and v2: `?foo=bar`, `?ignoreDST=true`, `?radius=0,0,1` and `?country=ZZ` on v2 change
+nothing. `?ordering=-name` and `?ordering=bogus` also change nothing: the list is not orderable, and says
+nothing. (A filter with an invalid value is answered with a `400` and the field, as it should.)
+
+**Proposal.** Answer `400` with the names of the unknown parameters, or at least list the accepted filters in the
+`OPTIONS` response, and either implement `ordering` or reject it.
+
+**Workaround in the SDK.** For locations, `UnknownFilterWarning` names the filters the server would ignore; the
+filters each version applies are listed in the locations guide. Other endpoints are not checked yet.
 
 ---
 
