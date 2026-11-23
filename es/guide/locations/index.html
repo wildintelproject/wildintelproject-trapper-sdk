@@ -3122,9 +3122,10 @@ tabla, la lista aplica <code>pk</code>, <code>location_id</code>, <code>is_publi
 no son campos del modelo, así que <code>model_dump()</code> no cambia. Las filas de <code>export(file=None)</code> ya llevan
 <code>longitude</code> y <code>latitude</code>.</p>
 <h2 id="filtrar-por-area">Filtrar por área</h2>
-<p>La lista de locations de Trapper <strong>no tiene filtro espacial</strong>: <code>in_bbox</code> y <code>radius</code> se ignoran sin error y
-vuelven todas las locations (el endpoint GeoJSON sí los aplica, pero solo en Trapper v1). <code>in_area()</code> filtra
-en el cliente, con las <a href="#coordenadas">coordenadas</a> como números:</p>
+<p>La lista de locations de Trapper no tiene un filtro espacial utilizable. <strong>Trapper v1</strong> ignora <code>in_bbox</code> y
+<code>radius</code> sin error y devuelve todas las locations (el endpoint GeoJSON sí los aplica, pero solo en v1); <strong>v2</strong>
+aplica <code>in_bbox</code> pero ignora <code>radius</code>. <code>in_area()</code> filtra en el cliente, con las
+<a href="#coordenadas">coordenadas</a> como números, así que funciona igual en las dos:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># un rectángulo: (min_lon, min_lat, max_lon, max_lat)</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">in_area</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">36.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">37.5</span><span class="p">)):</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">latitude</span><span class="p">)</span>
@@ -3139,8 +3140,10 @@ envía al servidor y reduce lo que hay que leer. Un área incorrecta (sin nada, 
 rango) lanza <code>ValueError</code> antes de hacer ninguna petición.</p>
 <div class="admonition warning">
 <p class="admonition-title">Lee todas las páginas</p>
-<p>El servidor no puede filtrar, así que <code>in_area()</code> lee todas las locations que cumplen los otros filtros y se
-queda con las del área. En un servidor con muchas locations, pasa <code>research_project</code> u <code>owner</code>. Una location
+<p>El servidor no puede hacer todo el filtrado, así que <code>in_area()</code> lee las locations que cumplen los otros
+filtros y se queda con las del área. En v2 el rectángulo se envía además al servidor (<code>in_bbox</code>) y solo se
+leen las locations que caen dentro, salvo que cruce el antimeridiano; en v1, y con un círculo solo, se leen
+todas las páginas. En un servidor con muchas locations, pasa <code>research_project</code> u <code>owner</code>. Una location
 cuyas coordenadas no se pueden leer queda fuera.</p>
 </div>
 <h2 id="campos-la-lista-y-la-exportacion">Campos: la lista y la exportación</h2>

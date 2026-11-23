@@ -3120,9 +3120,10 @@ and <code>city</code> on v1 only (<code>locations_map</code> also on v1 only). <
 time, not fields of the model, so <code>model_dump()</code> does not change. The rows of <code>export(file=None)</code> carry
 <code>longitude</code> and <code>latitude</code> already.</p>
 <h2 id="filtering-by-area">Filtering by area</h2>
-<p>Trapper's location list has <strong>no spatial filter</strong>: <code>in_bbox</code> and <code>radius</code> are ignored without an error, and every
-location comes back (the GeoJSON endpoint applies them, but only on Trapper v1). <code>in_area()</code> filters on the
-client instead, using the <a href="#coordinates">coordinates</a> as numbers:</p>
+<p>Trapper's location list has no usable spatial filter. <strong>Trapper v1</strong> ignores <code>in_bbox</code> and <code>radius</code> without an
+error and returns every location (the GeoJSON endpoint applies them, but only on v1); <strong>v2</strong> applies <code>in_bbox</code>
+but ignores <code>radius</code>. <code>in_area()</code> filters on the client instead, with the <a href="#coordinates">coordinates</a> as
+numbers, so it works the same on both:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># a bounding box: (min_lon, min_lat, max_lon, max_lat)</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">in_area</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">36.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">37.5</span><span class="p">)):</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">latitude</span><span class="p">)</span>
@@ -3137,8 +3138,9 @@ what has to be read. A wrong area (nothing given, <code>center</code> without <c
 <code>ValueError</code> before any request.</p>
 <div class="admonition warning">
 <p class="admonition-title">It reads every page</p>
-<p>The server cannot do the filtering, so <code>in_area()</code> reads all the locations that match the other filters and
-keeps the ones in the area. On a server with many locations, pass <code>research_project</code> or <code>owner</code>. A location
+<p>The server cannot do all the filtering, so <code>in_area()</code> reads the locations that match the other filters and
+keeps the ones in the area. On v2 a box is also sent to the server (<code>in_bbox</code>), and only the locations in it
+are read, unless it crosses the antimeridian; on v1, and for a circle alone, every page is read. On a server with many locations, pass <code>research_project</code> or <code>owner</code>. A location
 whose coordinates cannot be read is left out.</p>
 </div>
 <h2 id="fields-the-list-and-the-export">Fields: the list and the export</h2>
