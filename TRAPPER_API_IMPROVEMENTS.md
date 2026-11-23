@@ -4,9 +4,12 @@ Draft issues for the Trapper project, found while building `wildintel-trapper-sd
 written to be copied to the tracker as it is: title, what happens today, what is proposed, and what
 the SDK does in the meantime.
 
+- **Tracked in** [#26](https://github.com/wildintelproject/wildintelproject-trapper-sdk/issues/26), an issue
+  that stays open: Trapper's API is not ours, so nothing here is "fixed" by a pull request of this repository.
 - **Checked against:** the Trapper v1 source (`development`, v1.7.3-63) and a live v1.7.4 server.
 - **Trapper v2:** not checked unless an issue says so. Re-check each one before filing it.
-- Add new issues at the end, keep the numbering, and move a closed one to the *Done* list.
+- Add new issues at the end, keep the numbering, and move one to the *Done* list when Trapper fixes it.
+  Mark what was not checked as *(unverified)*, and open the pull request with `Refs #26`, not `Closes`.
 
 | # | Title | Area |
 |---|---|---|
@@ -29,6 +32,8 @@ the SDK does in the meantime.
 | 17 | Approve or reject a pending research project through the API | research |
 | 18 | Filter research projects by name, status and keyword, and reject unknown filters | research |
 | 19 | Expose the valid values of the research project choice fields | research |
+| 20 | Return the primary keys of the owner and the members of a research project | research |
+| 21 | Use one URL convention, and answer API paths with JSON | cross-cutting |
 
 ---
 
@@ -40,14 +45,16 @@ the SDK does in the meantime.
 only be created through the web form `research/project/create/`, so a script or integration cannot
 create one.
 
-**Proposal.** `POST research/api/projects/`, authenticated with a token, answering `201` with the
-project as `GET research/api/projects/<pk>/` shows it. As in the form, the authenticated user
+**Proposal.** `POST research/api/projects`, authenticated with a token, answering `201` with the
+project as `GET research/api/projects/<pk>` shows it. As in the form, the authenticated user
 becomes the owner and a project administrator, and a non-staff user's project stays *not approved*
 until an administrator approves it.
 
 Fields: `name`, `acronym` (3 to 10 characters; both unique), `sampling_design`, `sensor_method`,
 `animal_types`, `bait_use`, `event_interval`, `keywords`, `abstract`, `methods`, `description`, and
-`project_roles`.
+`project_roles`. `keywords` is a **list**: the web form takes a single string, and Trapper parses it
+with django-taggit, which splits on spaces when there is no comma, so one keyword with a space
+(`camera trap`) is saved as two (`camera` and `trap`) unless it is quoted. A list has no such trap.
 
 **Members in the same request.** The web form takes the project's members together with the project
 (a `project_roles` formset). Checked against a v1.7.4 server: it accepts any number of rows, each with
@@ -74,7 +81,7 @@ created: there is no way to change them afterwards (see #6).
 The serializer already tells the client whether the user may use them (`update_data`,
 `delete_data`), but there is no API call to use them with.
 
-**Proposal.** `PATCH`/`PUT`/`DELETE research/api/projects/<pk>/`, honouring the existing role
+**Proposal.** `PATCH`/`PUT`/`DELETE research/api/projects/<pk>`, honouring the existing role
 permissions (administrators only).
 
 **Workaround in the SDK.** None: the SDK cannot update or delete a research project.
@@ -135,7 +142,7 @@ markup. It breaks when the template changes.
 (`project_roles`, `research/api/project/<pk>/collections`) but cannot change them.
 
 **Proposal.** Endpoints to add, change and remove the roles of a project, and to link or unlink a
-collection (`POST`/`DELETE research/api/project/<pk>/collections/`).
+collection (`POST`/`DELETE research/api/project/<pk>/collections`).
 
 **Workaround in the SDK.** None.
 
@@ -148,8 +155,8 @@ collection (`POST`/`DELETE research/api/project/<pk>/collections/`).
 linking a collection to it (`project/collection/add/`) and creating a classificator
 (`classificator/create/`) are web forms.
 
-**Proposal.** `POST media_classification/api/projects/`, `POST .../project/<pk>/collections/` and
-`POST media_classification/api/classificators/`, answering `201`. A classificator is a taxonomy and
+**Proposal.** `POST media_classification/api/projects`, `POST .../project/<pk>/collections` and
+`POST media_classification/api/classificators`, answering `201`. A classificator is a taxonomy and
 attribute schema, so its JSON representation (species, tracked species, the dynamic attributes and
 the form template) needs agreeing first.
 
@@ -298,8 +305,8 @@ administrator approves it, and that is only possible in the Django admin: the fi
 and set nowhere else (the creation view sets it to approved for staff, and nothing else touches it). The
 administrators are notified by e-mail with a link to the admin.
 
-**Proposal.** An action for administrators, for example `POST research/api/projects/<pk>/approve/` and
-`.../reject/`, or `status` as a writable field of the `PATCH` in #2. Approving already sends the
+**Proposal.** An action for administrators, for example `POST research/api/projects/<pk>/approve` and
+`.../reject`, or `status` as a writable field of the `PATCH` in #2. Approving already sends the
 notification to the owner (a signal on the status change), so nothing else has to change.
 
 **Workaround in the SDK.** None: an integration that creates projects for non-staff accounts cannot
@@ -337,6 +344,42 @@ choices, which is what Django REST Framework does by default for a writable seri
 read-only listing would do.
 
 **Workaround in the SDK.** The values are copied into `trapper_client.enums`.
+
+## 20. Return the primary keys of the owner and the members of a research project
+
+**Labels:** enhancement, api
+
+**Problem.** `GET research/api/projects` returns the owner as a display name (`"owner": "rp_staff"`) and a
+profile URL, and each entry of `project_roles` as `user` (a display name), `username`, `profile` (a URL)
+and `roles` (labels, as in `["Admin"]`). Checked against a v1.7.4 server: no primary key of a user, and no
+numeric value of a role. A client cannot tell which user of `accounts/api/users` is the owner or a member
+without matching names, and cannot compare a role with the values the form accepts (`1`, `2`, `3`).
+
+**Proposal.** Return the owner and every member with their primary key (`owner` as an object, or an
+`owner_id` next to the name), and each role as its value and its label, as proposed for the choice fields
+in #3. This is what the create and roles endpoints of #1 and #6 would take.
+
+**Workaround in the SDK.** Members are matched by user name.
+
+## 21. Use one URL convention, and answer API paths with JSON
+
+**Labels:** bug, api
+
+**Problem.** The API mixes two conventions. Checked against a v1.7.4 server:
+
+- `research/api/projects`, `research/api/projects/3`, `media_classification/api/projects` and
+  `media_classification/api/classificators` answer `200`, while the same paths with a trailing slash
+  answer `404`.
+- `geomap/api/locations/geojson/` answers `200` and without the slash it answers `404`.
+- A path that is not found under `/api/` answers an **HTML** page (`404 text/html`) for some routes and JSON
+  for others.
+
+A client has to know which convention each route uses, and cannot read the error of a wrong one.
+
+**Proposal.** One convention for every route (the router's own is no trailing slash), accepting the other
+with a redirect, and a JSON body for every error under the API, including `404`.
+
+**Workaround in the SDK.** Each component spells its endpoint the way the server expects it.
 
 ---
 
