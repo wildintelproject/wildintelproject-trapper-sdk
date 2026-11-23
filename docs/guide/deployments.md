@@ -1,5 +1,8 @@
 # Deployments
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — `import_deployments()` works on both but behaves differently (see below), and `geojson()` is **v2 only**. See [Trapper versions](versions.md).
+
 `client.deployments` — camera deployments at a location, over a time range.
 
 **Endpoints:** `GET /geomap/api/deployments` (list + detail), `GET /geomap/api/deployments/export/` (CSV export).
@@ -74,6 +77,29 @@ client.deployments.export_by_collection(5, research_project=3, file="deps.csv")
 
 `collection_id` is the storage collection's own pk — `collection_pk` in a classification project's
 collection list (`classification_projects.get_all_project_collections()`).
+
+## GeoJSON (Trapper v2 only)
+
+`geojson()` returns the deployments as a GeoJSON `FeatureCollection`. It replaces
+[`client.maps`](maps.md) and [`client.locations_geojson`](locations_geojson.md), which Trapper v2
+removed; on a v1 server it raises `UnsupportedVersionError`.
+
+```python
+fc = client.deployments.geojson(classification_project=2, species=[3, 7])
+for feature in fc["features"]:
+    lon, lat = feature["geometry"]["coordinates"]
+    print(feature["properties"]["deploymentID"], lon, lat)
+```
+
+| Parameter | Description |
+|---|---|
+| `classification_project` | Keep deployments linked to this classification project; scopes `observation_type` and `species` to its classifications |
+| `observation_type` | One value or a list (`"animal"`, `["animal", "human"]`) |
+| `species` | One species pk or a list |
+| `start_date_gte`, `end_date_lte` | Deployments starting on/after, or ending on/before, a date (`YYYY-MM-DD`) |
+| `refresh` | Bypass the server's one-hour cache for this query |
+
+Only deployments the current user can access are returned.
 
 ## Importing deployments (write access)
 

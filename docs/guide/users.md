@@ -1,5 +1,8 @@
 # Users
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.users` — Trapper user accounts. Useful to resolve owner/user PKs (e.g. from `owner`
 filters on other components) to a username or display name.
 

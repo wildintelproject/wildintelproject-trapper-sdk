@@ -7,6 +7,9 @@
 classify camera-trap data: locations, deployments, media resources, storage collections, research
 projects, and both manual and AI-assisted classification results.
 
+It works with **both Trapper v1 and Trapper v2**: the server version is detected automatically, and
+the few differences are documented in [Trapper versions](guide/versions.md).
+
 Every Trapper resource is exposed as a typed Python component sharing the same interface for
 pagination, filtering, and export — plus write access for the two resources (locations,
 deployments) the REST API doesn't expose natively.

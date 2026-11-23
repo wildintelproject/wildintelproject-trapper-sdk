@@ -1,5 +1,8 @@
 # Resources
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.resources` — individual media files (images/videos) recorded at a deployment.
 
 **Endpoints:**

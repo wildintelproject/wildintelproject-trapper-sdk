@@ -1,5 +1,8 @@
 # Classification Package
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.classification_package` — generates (or reuses a cached) Camtrap DP data package for a
 classification project, and returns its download URL.
 

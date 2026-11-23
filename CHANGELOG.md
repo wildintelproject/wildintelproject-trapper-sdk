@@ -56,6 +56,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   query the import task, so it polls for the rows themselves.
 - `deployments.by_collection_with_counts()`: the deployments with at least one resource in a
   collection, each with how many resources it has there.
+- **Documentation in English and Spanish** (`mkdocs-static-i18n`, suffix structure: `page.md` is
+  English, `page.es.md` Spanish; the API reference stays English-only). Every guide now states which
+  Trapper versions it supports, `deployments.geojson()` is documented in the deployments guide, and
+  the home page says the SDK covers Trapper v1 and v2.
 
 ### Fixed
 - A client that had imported locations or deployments (session login) could no longer call any

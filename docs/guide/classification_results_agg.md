@@ -1,5 +1,8 @@
 # Classification Results Agg
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.classification_results_agg` — aggregated classification results per deployment
 (counts, coordinates), for a classification project.
 

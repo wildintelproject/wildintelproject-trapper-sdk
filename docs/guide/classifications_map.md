@@ -1,5 +1,8 @@
 # Classifications Map
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.classifications_map` — resources pending classification for a given project, as used to
 drive the classification UI's map/queue view.
 

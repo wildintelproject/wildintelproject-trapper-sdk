@@ -1,5 +1,8 @@
 # Collections
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — except the `*_ondemand` methods, which are **v1 only** (`UnsupportedVersionError` on v2). See [Trapper versions](versions.md).
+
 `client.collections` — storage collections: groups of resources uploaded together.
 
 **Endpoints:**

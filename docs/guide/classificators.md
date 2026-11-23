@@ -1,5 +1,8 @@
 # Classificators
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.classificators` — classificator configurations (the taxonomy/attribute schema a
 classification project classifies against).
 

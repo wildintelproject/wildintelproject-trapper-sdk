@@ -1,5 +1,8 @@
 # User Classifications
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.user_classifications` — individual (non-final) classifications made by human users, before
 they're approved into a [final classification](classifications.md).
 

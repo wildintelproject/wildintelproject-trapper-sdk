@@ -1,5 +1,8 @@
 # Locations
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — `import_locations()` works on both but behaves differently (see below). See [Trapper versions](versions.md).
+
 `client.locations` — read/write access to camera-trap locations.
 
 **Endpoint:** `GET /geomap/api/locations` (list + detail), `GET /geomap/api/locations/export/` (CSV export).

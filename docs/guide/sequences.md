@@ -1,5 +1,8 @@
 # Sequences
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.sequences` — resource sequences: events grouping resources recorded within a configurable
 time interval of each other.
 

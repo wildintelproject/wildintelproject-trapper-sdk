@@ -1,5 +1,8 @@
 # Classifications
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — except `import_classifications(overwrite_attrs=True)`, which is **v1 only**. See [Trapper versions](versions.md).
+
 `client.classification_results` — final (approved) classification observations.
 
 **Endpoints:**

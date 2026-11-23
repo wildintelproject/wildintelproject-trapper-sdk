@@ -1,5 +1,8 @@
 # Research Projects
 
+!!! info "Trapper compatibility"
+    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+
 `client.research_projects` — top-level research projects; every collection and classification
 project belongs to exactly one.
 
