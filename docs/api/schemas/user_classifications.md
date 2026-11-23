@@ -1,6 +1,6 @@
 # User Classification Schemas
 
-::: trapper_client.schemas.user_classifications.UserClassificationRecord
+::: trapper_client.schemas.user_classifications.UserClassification
 
 ::: trapper_client.schemas.user_classifications.ResourceUser
 

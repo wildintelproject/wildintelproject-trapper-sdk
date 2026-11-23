@@ -12,7 +12,7 @@ import pytest
 from tests.base_component_tests import ComponentUnitTestBase, paginated_response
 from trapper_client.components.user_classifications import UserClassificationsComponent
 from trapper_client.schemas import (
-    UserClassificationRecord,
+    UserClassification,
     UserObservationAttr,
     ResourceUser,
 )
@@ -77,9 +77,9 @@ VALID_RECORD_FULL = {
 
 class TestUserClassificationsComponent(ComponentUnitTestBase):
     component_class = UserClassificationsComponent
-    schema = UserClassificationRecord
+    schema = UserClassification
     # sin export_schema propio: el base usa self.schema como fallback
-    export_schema = UserClassificationRecord
+    export_schema = UserClassification
     find_pk = 1
     valid_item = VALID_RECORD_MINIMAL
     valid_export_item = VALID_RECORD_MINIMAL
@@ -131,13 +131,13 @@ class TestUserObservationAttr:
         assert result.classification_confidence is None
 
 
-# ── UserClassificationRecord ──────────────────────────────────────────────────
+# ── UserClassification ──────────────────────────────────────────────────
 
 class TestUserClassificationRecord:
 
     def test_parses_minimal_response(self):
         """El schema acepta la respuesta mínima sin campos opcionales."""
-        result = UserClassificationRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = UserClassification.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.pk == 1
         assert result.owner == "Iñaki Fernández de Viana y González"
@@ -146,7 +146,7 @@ class TestUserClassificationRecord:
 
     def test_optional_fields_absent_default_to_none(self):
         """Los campos opcionales ausentes dan None, no error."""
-        result = UserClassificationRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = UserClassification.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.collection is None
         assert result.updated_at is None
@@ -157,18 +157,18 @@ class TestUserClassificationRecord:
         assert result.ai_provider is None
 
     def test_static_attrs_defaults_to_empty_dict(self):
-        result = UserClassificationRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = UserClassification.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.static_attrs == {}
 
     def test_dynamic_attrs_defaults_to_empty_list(self):
-        result = UserClassificationRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = UserClassification.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.dynamic_attrs == []
 
     def test_parses_full_response(self):
         """El schema acepta la respuesta completa con todos los campos."""
-        result = UserClassificationRecord.model_validate(VALID_RECORD_FULL)
+        result = UserClassification.model_validate(VALID_RECORD_FULL)
 
         assert result.pk == 2
         assert result.collection == 36
@@ -177,12 +177,12 @@ class TestUserClassificationRecord:
         assert isinstance(result.dynamic_attrs[0], UserObservationAttr)
 
     def test_dynamic_attrs_items_are_typed(self):
-        result = UserClassificationRecord.model_validate(VALID_RECORD_FULL)
+        result = UserClassification.model_validate(VALID_RECORD_FULL)
 
         assert all(isinstance(a, UserObservationAttr) for a in result.dynamic_attrs)
 
     def test_resource_is_typed(self):
-        result = UserClassificationRecord.model_validate(VALID_RECORD_FULL)
+        result = UserClassification.model_validate(VALID_RECORD_FULL)
 
         assert isinstance(result.resource, ResourceUser)
         assert result.resource.pk == 2379965

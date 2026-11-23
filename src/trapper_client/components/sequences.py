@@ -5,10 +5,10 @@ Component for the Sequences data endpoint.
 from __future__ import annotations
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import SequenceRecord
+from trapper_client.schemas import Sequence
 
 
-class SequencesComponent(TrapperComponent[SequenceRecord]):
+class SequencesComponent(TrapperComponent[Sequence]):
     """
     Component for ``/media_classification/api/sequences``.
 
@@ -34,4 +34,4 @@ class SequencesComponent(TrapperComponent[SequenceRecord]):
     """
 
     endpoint = "media_classification/api/sequences"
-    schema = SequenceRecord
+    schema = Sequence

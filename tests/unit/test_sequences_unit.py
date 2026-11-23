@@ -1,5 +1,5 @@
 """
-Unit tests for SequencesComponent and SequenceRecord schema.
+Unit tests for SequencesComponent and Sequence schema.
 
 All API calls are mocked — no real server needed.
 """
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from tests.base_component_tests import ComponentUnitTestBase
 from trapper_client.components.sequences import SequencesComponent
-from trapper_client.schemas import SequenceRecord
+from trapper_client.schemas import Sequence
 
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
@@ -38,19 +38,19 @@ def test_endpoint_matches_server_route():
 
 class TestSequencesComponent(ComponentUnitTestBase):
     component_class = SequencesComponent
-    schema = SequenceRecord
-    export_schema = SequenceRecord
+    schema = Sequence
+    export_schema = Sequence
     find_pk = 12
     valid_item = VALID_RECORD
     valid_export_item = VALID_RECORD
 
 
-# ── SequenceRecord ────────────────────────────────────────────────────────────
+# ── Sequence ────────────────────────────────────────────────────────────
 
 class TestSequenceRecord:
 
     def test_parses_full_record(self):
-        result = SequenceRecord.model_validate(VALID_RECORD)
+        result = Sequence.model_validate(VALID_RECORD)
 
         assert result.pk == 12
         assert result.sequence_id == 4
@@ -58,7 +58,7 @@ class TestSequenceRecord:
 
     def test_parses_minimal_record(self):
         """El schema acepta registros sin sequence_id/resources."""
-        result = SequenceRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = Sequence.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.pk == 1
         assert result.sequence_id is None

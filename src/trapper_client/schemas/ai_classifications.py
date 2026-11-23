@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .base import TrapperSchema
 from .classifications import BBox
+from trapper_client._deprecated import deprecated_getattr
 
 
 class ResourceAI(BaseModel):
@@ -32,7 +33,7 @@ class AIObservationAttr(BaseModel):
     classification_confidence: Optional[str] = None
 
 
-class AIClassificationRecord(BaseModel):
+class AIClassification(BaseModel):
     """Schema for ``/media_classification/api/ai-classifications`` items."""
 
     pk: int
@@ -214,3 +215,6 @@ AIClassificationRecordExport = Union[
     AIClassificationRecordExportCamTrap,
     AIClassificationRecordExportTrapper,
 ]
+
+
+__getattr__ = deprecated_getattr(__name__)

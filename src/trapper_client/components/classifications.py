@@ -18,13 +18,13 @@ from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_si
 from trapper_client.retry_utils import retrying_for_chunk_upload
 from trapper_client.schemas import (
     ClassificationImportResponse,
-    ClassificationRecord,
+    Classification,
     ClassificationRecordExport,
     PaginatedResult,
 )
 
 
-class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
+class ClassificationsComponent(TrapperComponent[Classification]):
     """
     Component for ``/media_classification/api/classifications``.
 
@@ -70,7 +70,7 @@ class ClassificationsComponent(TrapperComponent[ClassificationRecord]):
 
     endpoint = "/media_classification/api/classifications"
     export_endpoint = "/media_classification/api/classifications/results/{project_pk}/"
-    schema = ClassificationRecord
+    schema = Classification
     export_schema = ClassificationRecordExport
 
     def _resolve_export_endpoint(self, project_pk: int) -> str:

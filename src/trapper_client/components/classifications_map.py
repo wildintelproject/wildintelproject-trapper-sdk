@@ -5,10 +5,10 @@ Component for Classification map data endpoint.
 from __future__ import annotations
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import ClassificationMapRecord
+from trapper_client.schemas import ClassificationMap
 
 
-class ClassificationsMapComponent(TrapperComponent[ClassificationMapRecord]):
+class ClassificationsMapComponent(TrapperComponent[ClassificationMap]):
     """
     Component for ``/media_classification/api/classifications_map/``.
 
@@ -41,4 +41,4 @@ class ClassificationsMapComponent(TrapperComponent[ClassificationMapRecord]):
     """
 
     endpoint = "/media_classification/api/classifications_map"
-    schema = ClassificationMapRecord
+    schema = ClassificationMap

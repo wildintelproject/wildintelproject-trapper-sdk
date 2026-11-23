@@ -1,3 +1,3 @@
 # Sequence Schemas
 
-::: trapper_client.schemas.sequences.SequenceRecord
+::: trapper_client.schemas.sequences.Sequence

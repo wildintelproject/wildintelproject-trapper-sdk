@@ -2,6 +2,7 @@
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
+from trapper_client._deprecated import deprecated_getattr
 
 
 class ResourceClassificationMap(BaseModel):
@@ -15,7 +16,7 @@ class ResourceClassificationMap(BaseModel):
     deployment: str
 
 
-class ClassificationMapRecord(BaseModel):
+class ClassificationMap(BaseModel):
     """Schema for ``/media_classification/api/classifications_map/`` items."""
 
     pk: int
@@ -24,3 +25,6 @@ class ClassificationMapRecord(BaseModel):
     dynamic_attrs: List[Dict[str, Any]] = Field(default_factory=list)
     classify_data: Optional[str] = None  # null in Trapper v2
     project: int
+
+
+__getattr__ = deprecated_getattr(__name__)

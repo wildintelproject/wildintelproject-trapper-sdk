@@ -21,7 +21,7 @@ from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.ai_classifications import AIClassificationsComponent
 from trapper_client.schemas import (
-    AIClassificationRecord,
+    AIClassification,
     AIClassificationRecordExport,
     AIClassificationRecordExportTrapper,
     AIClassificationRecordExportCamTrap,
@@ -59,7 +59,7 @@ def _skip_without_ai_data(test):
 
 class TestAIClassificationsComponentE2E(ComponentE2ETestBase):
     component_class = AIClassificationsComponent
-    schema = AIClassificationRecord
+    schema = AIClassification
     export_schema = AIClassificationRecordExport
     env_pk_var = "WILDINTEL_AI_CLASSIFICATION_PK"
 

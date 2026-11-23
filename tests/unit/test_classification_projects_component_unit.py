@@ -19,8 +19,8 @@ from trapper_client.schemas import (
     ClassificationProject,
     ClassificationProjectCollection,
     ClassificationProjectCreate,
-    ClassificationResourceRecord,
-    ClassificatorRecord,
+    ClassifiedResource,
+    Classificator,
     ResearchProject,
     PaginatedResult,
 )
@@ -343,7 +343,7 @@ class TestClassificationProjectCollectionResources:
         result = component.get_collection_resources(collection_pk=LINK_PK)
 
         assert isinstance(result, PaginatedResult)
-        assert isinstance(result.results[0], ClassificationResourceRecord)
+        assert isinstance(result.results[0], ClassifiedResource)
 
     def test_get_collection_resources_uses_correct_endpoint(self, component, client):
         """get_collection_resources() usa el endpoint de resources de la collection."""
@@ -374,9 +374,9 @@ class TestClassificationProjectCollectionResources:
         assert query.endpoint == self._expected_endpoint(component)
 
     def test_where_collection_resources_uses_correct_schema(self, component):
-        """where_collection_resources() usa ClassificationResourceRecord como schema."""
+        """where_collection_resources() usa ClassifiedResource como schema."""
         query = component.where_collection_resources(collection_pk=LINK_PK)
-        assert query.schema is ClassificationResourceRecord
+        assert query.schema is ClassifiedResource
 
     # ── get_all_collection_resources ──────────────────────────────────────────
 
@@ -387,7 +387,7 @@ class TestClassificationProjectCollectionResources:
         result = component.get_all_collection_resources(collection_pk=LINK_PK)
 
         assert isinstance(result, PaginatedResult)
-        assert isinstance(result.results[0], ClassificationResourceRecord)
+        assert isinstance(result.results[0], ClassifiedResource)
 
     def test_get_all_collection_resources_uses_correct_endpoint(self, component, client):
         """get_all_collection_resources() usa el endpoint de resources de la collection."""
@@ -420,13 +420,13 @@ class TestClassificationProjectCollectionResources:
         assert params["size"] == 5
 
     def test_get_collection_resources_around_returns_typed_items(self, component, client):
-        """get_collection_resources_around() devuelve items tipados como ClassificationResourceRecord."""
+        """get_collection_resources_around() devuelve items tipados como ClassifiedResource."""
         client.get.return_value = paginated_response([VALID_RESOURCE])
 
         result = component.get_collection_resources_around(collection_pk=LINK_PK, resource_pk=4831)
 
         assert isinstance(result, PaginatedResult)
-        assert isinstance(result.results[0], ClassificationResourceRecord)
+        assert isinstance(result.results[0], ClassifiedResource)
 
     def test_get_collection_resources_around_exposes_total_and_filtered(self, component, client):
         """get_collection_resources_around() propaga pagination.total/filtered del servidor."""
@@ -624,7 +624,7 @@ class TestClassificationProjectCreateModel:
 
     def test_takes_the_objects_the_sdk_returns_or_their_primary_keys(self):
         rp = ResearchProject(pk=3, name="Host")
-        clf = ClassificatorRecord(pk=2, name="C", owner="o", updated_date="2026-01-01")
+        clf = Classificator(pk=2, name="C", owner="o", updated_date="2026-01-01")
         by_object = ClassificationProjectCreate(name="N", research_project=rp, classificator=clf)
         by_key = ClassificationProjectCreate(name="N", research_project=3, classificator=2)
         assert by_object.research_project == 3 and by_object.classificator == 2

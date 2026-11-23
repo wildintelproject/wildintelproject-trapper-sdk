@@ -11,11 +11,11 @@ from __future__ import annotations
 
 from tests.base_component_tests import ComponentE2ETestBase
 from trapper_client.components.species import SpeciesComponent
-from trapper_client.schemas import SpeciesRecord
+from trapper_client.schemas import Species
 
 
 class TestSpeciesComponentE2E(ComponentE2ETestBase):
     component_class = SpeciesComponent
-    schema = SpeciesRecord
-    export_schema = SpeciesRecord
+    schema = Species
+    export_schema = Species
     env_pk_var = "WILDINTEL_SPECIES_PK"

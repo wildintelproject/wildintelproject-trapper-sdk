@@ -122,7 +122,7 @@ print(project.pk, project.name, project.status)        # 12 Doñana 2026 Ongoing
 
 `create()` takes a `ClassificationProjectCreate`, a Pydantic model. Building it validates the data before
 anything is sent: a name, and the research project and the classificator, each given as the object the
-SDK returns (`ResearchProject`, `ClassificatorRecord`) or as its primary key, so the creations chain:
+SDK returns (`ResearchProject`, `Classificator`) or as its primary key, so the creations chain:
 
 ```python
 rp = client.research_projects.create(ResearchProjectCreate(name="Doñana mammals", acronym="DONMAM"))

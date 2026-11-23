@@ -37,10 +37,10 @@ from trapper_client.schemas import (
     Collection,
     ResearchProject,
     ClassificationProject,
-    MediaRecord,
+    Media,
     ClassificationRecordExport,
-    ClassificationAggRecord,
-    AIClassificationRecord,
+    ClassificationAgg,
+    AIClassification,
     ResultsDataPackageResponse,
 )
 
@@ -77,8 +77,8 @@ __all__ = [
     "Collection",
     "ResearchProject",
     "ClassificationProject",
-    "MediaRecord",
-    "ClassificationAggRecord",
-    "AIClassificationRecord",
+    "Media",
+    "ClassificationAgg",
+    "AIClassification",
     "ResultsDataPackageResponse",
 ]

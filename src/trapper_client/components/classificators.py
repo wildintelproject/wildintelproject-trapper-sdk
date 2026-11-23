@@ -8,10 +8,10 @@ import re
 from typing import Any, Dict
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import ClassificatorCreate, ClassificatorRecord
+from trapper_client.schemas import ClassificatorCreate, Classificator
 
 
-class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
+class ClassificatorsComponent(TrapperComponent[Classificator]):
     """
     Component for ``/media_classification/api/classificators/``.
 
@@ -33,7 +33,7 @@ class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
     """
 
     endpoint = "/media_classification/api/classificators"
-    schema = ClassificatorRecord
+    schema = Classificator
     create_endpoint = "media_classification/classificator/create/"
     _CREATED_RE = re.compile(r"/classificator/update/(\d+)/")
 
@@ -42,7 +42,7 @@ class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
         classificator: ClassificatorCreate,
         *,
         raise_on_error: bool = True,
-    ) -> ClassificatorRecord | None:
+    ) -> Classificator | None:
         """Create a classificator (**Trapper v1 only**).
 
         The REST API is read-only for classificators, so this simulates the classic web form

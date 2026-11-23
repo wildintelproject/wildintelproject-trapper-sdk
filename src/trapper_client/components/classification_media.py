@@ -16,10 +16,10 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
 from trapper_client.components.classification_projects import ClassificationProjectsComponent
-from trapper_client.schemas import MediaRecord, PaginatedResult
+from trapper_client.schemas import Media, PaginatedResult
 
 
-class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
+class ClassificationMediaComponent(TrapperComponent[Media]):
     """
     Component for ``/media_classification/api/media`` resource.
 
@@ -96,7 +96,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
     """
 
     endpoint = "media_classification/api/media/{project_pk}/"
-    schema = MediaRecord
+    schema = Media
 
     # ── internal helpers ──────────────────────────────────────────────────────
 
@@ -307,7 +307,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         page_size: int = 50,
         validate: bool = True,
         **kwargs: Any,
-    ) -> PaginatedResult[MediaRecord]:
+    ) -> PaginatedResult[Media]:
         """Fetch one page of media rows for a classification project.
 
         Args:
@@ -319,7 +319,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            ``PaginatedResult[MediaRecord]`` for the requested page.
+            ``PaginatedResult[Media]`` for the requested page.
         """
         return self.get(
             query=query,
@@ -337,7 +337,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         page_size: int = 50,
         validate: bool = True,
         **kwargs: Any,
-    ) -> APIQuery[MediaRecord]:
+    ) -> APIQuery[Media]:
         """Return a lazy iterator over media rows for a classification project.
 
         Args:
@@ -348,7 +348,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Lazy ``APIQuery[MediaRecord]`` iterator yielding media rows.
+            Lazy ``APIQuery[Media]`` iterator yielding media rows.
         """
         return self.where(
             query=query,
@@ -377,7 +377,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
 
         Returns:
             ``Path`` to the generated CSV when ``file`` is provided,
-            otherwise ``list[MediaRecord]``.
+            otherwise ``list[Media]``.
         """
         return self.export(
             query=query,
@@ -394,7 +394,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         query: Dict[str, Any] | None = None,
         validate: bool = True,
         **kwargs: Any,
-    ) -> MediaRecord | None:
+    ) -> Media | None:
         """Find one media record within a project by its media/resource ID.
 
         Iterates project media lazily and returns the first matching record.
@@ -407,7 +407,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Matching ``MediaRecord`` if found, otherwise ``None``.
+            Matching ``Media`` if found, otherwise ``None``.
         """
         for row in self.where_project_media(
             project_pk=project_pk,
@@ -483,7 +483,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         page_size: int = 50,
         validate: bool = True,
         **kwargs: Any,
-    ) -> PaginatedResult[MediaRecord]:
+    ) -> PaginatedResult[Media]:
         """Fetch one page of media rows for a collection within a project.
 
         Args:
@@ -496,7 +496,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            ``PaginatedResult[MediaRecord]`` for the requested page.
+            ``PaginatedResult[Media]`` for the requested page.
         """
         link_pk = self._resolve_collection_pk(project_pk, collection_pk)
         q = self._merge_query(query, kwargs)
@@ -517,7 +517,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
         page_size: int = 50,
         validate: bool = True,
         **kwargs: Any,
-    ) -> APIQuery[MediaRecord]:
+    ) -> APIQuery[Media]:
         """Return a lazy iterator over media rows for a collection within a project.
 
         Args:
@@ -529,7 +529,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Lazy ``APIQuery[MediaRecord]`` iterator yielding collection media rows.
+            Lazy ``APIQuery[Media]`` iterator yielding collection media rows.
         """
         link_pk = self._resolve_collection_pk(project_pk, collection_pk)
         q = self._merge_query(query, kwargs)
@@ -562,7 +562,7 @@ class ClassificationMediaComponent(TrapperComponent[MediaRecord]):
 
         Returns:
             ``Path`` to the generated CSV when ``file`` is provided,
-            otherwise ``list[MediaRecord]``.
+            otherwise ``list[Media]``.
         """
         link_pk = self._resolve_collection_pk(project_pk, collection_pk)
         q = self._merge_query(query, kwargs)

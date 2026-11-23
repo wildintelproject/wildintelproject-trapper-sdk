@@ -1,3 +1,3 @@
 # Map Schemas
 
-::: trapper_client.schemas.maps.MapRecord
+::: trapper_client.schemas.maps.Map

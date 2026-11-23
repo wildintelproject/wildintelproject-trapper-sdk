@@ -2,9 +2,10 @@
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+from trapper_client._deprecated import deprecated_getattr
 
 
-class SpeciesRecord(BaseModel):
+class Species(BaseModel):
     """Schema for ``/tables/api/species`` items.
 
     The server serializes the model's ``__str__()`` under the literal field
@@ -21,3 +22,6 @@ class SpeciesRecord(BaseModel):
     latin_name: Optional[str] = None
     genus: Optional[str] = None
     family: Optional[str] = None
+
+
+__getattr__ = deprecated_getattr(__name__)

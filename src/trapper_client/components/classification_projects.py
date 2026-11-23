@@ -10,7 +10,7 @@ from trapper_client.schemas import (
     ClassificationProjectCreate,
     PaginatedResult,
     ClassificationProjectCollection,
-    ClassificationResourceRecord,
+    ClassifiedResource,
 )
 
 
@@ -410,7 +410,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         page_size: int = 50,
         validate: bool = True,
         **kwargs: Any,
-    ) -> PaginatedResult[ClassificationResourceRecord]:
+    ) -> PaginatedResult[ClassifiedResource]:
         """Fetch one page of classified resources within a project-collection link.
 
         Args:
@@ -423,7 +423,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            ``PaginatedResult[ClassificationResourceRecord]`` for the requested page.
+            ``PaginatedResult[ClassifiedResource]`` for the requested page.
         """
         return self.get(
             query=query,
@@ -431,7 +431,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             page_size=page_size,
             validate=validate,
             overwrite_endpoint=self._resources_entrypoint(collection_pk),
-            overwrite_schema=ClassificationResourceRecord,
+            overwrite_schema=ClassifiedResource,
             **kwargs,
         )
 
@@ -442,7 +442,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         page_size: int = 50,
         validate: bool = True,
         **kwargs: Any,
-    ) -> APIQuery[ClassificationResourceRecord]:
+    ) -> APIQuery[ClassifiedResource]:
         """Return a lazy iterator over classified resources within a project-collection link.
 
         Args:
@@ -453,14 +453,14 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Lazy ``APIQuery[ClassificationResourceRecord]`` iterator.
+            Lazy ``APIQuery[ClassifiedResource]`` iterator.
         """
         return self.where(
             query=query,
             page_size=page_size,
             validate=validate,
             overwrite_endpoint=self._resources_entrypoint(collection_pk),
-            overwrite_schema=ClassificationResourceRecord,
+            overwrite_schema=ClassifiedResource,
             **kwargs,
         )
 
@@ -471,7 +471,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         page_size: int = 50,
         validate: bool = True,
         **kwargs: Any,
-    ) -> PaginatedResult[ClassificationResourceRecord]:
+    ) -> PaginatedResult[ClassifiedResource]:
         """Fetch all pages of classified resources within a project-collection link.
 
         Args:
@@ -482,14 +482,14 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            ``PaginatedResult[ClassificationResourceRecord]`` with all items merged.
+            ``PaginatedResult[ClassifiedResource]`` with all items merged.
         """
         return self.get_all(
             query=query,
             page_size=page_size,
             validate=validate,
             overwrite_endpoint=self._resources_entrypoint(collection_pk),
-            overwrite_schema=ClassificationResourceRecord,
+            overwrite_schema=ClassifiedResource,
             **kwargs,
         )
 
@@ -501,7 +501,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         query: Dict[str, Any] | None = None,
         validate: bool = True,
         **kwargs: Any,
-    ) -> PaginatedResult[ClassificationResourceRecord]:
+    ) -> PaginatedResult[ClassifiedResource]:
         """Fetch resources surrounding one resource within a project-collection link.
 
         Uses the server's windowed pagination (``current``/``size`` query
@@ -521,7 +521,7 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            ``PaginatedResult[ClassificationResourceRecord]`` with
+            ``PaginatedResult[ClassifiedResource]`` with
             ``pagination.total`` and ``pagination.filtered`` populated.
 
         Example::
@@ -535,4 +535,4 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         q["current"] = resource_pk
         q["size"] = size
         data = self.client.get(self._resources_entrypoint(collection_pk), query=q)
-        return self._to_paginated(data, validate=validate, schema=ClassificationResourceRecord)
+        return self._to_paginated(data, validate=validate, schema=ClassifiedResource)

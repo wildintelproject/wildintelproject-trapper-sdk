@@ -20,7 +20,7 @@ from tests.base_component_tests import assert_page_size_respected
 
 from trapper_client.api_query import APIQuery
 from trapper_client.components.classification_media import ClassificationMediaComponent
-from trapper_client.schemas import MediaRecord, PaginatedResult
+from trapper_client.schemas import Media, PaginatedResult
 
 
 # ── helpers ───────────────────────────────────────────────────────────────────
@@ -66,7 +66,7 @@ class TestProjectMediaE2E:
 
     @pytest.mark.e2e
     def test_get_project_media_returns_media_record_instances(self, component):
-        """get_project_media() devuelve instancias de MediaRecord."""
+        """get_project_media() devuelve instancias de Media."""
         pk = _project_pk()
         if not pk:
             pytest.skip("Set WILDINTEL_CLASSIFICATION_PROJECT_PK to run this test")
@@ -76,7 +76,7 @@ class TestProjectMediaE2E:
         if not result.results:
             pytest.skip("No media available for this project")
 
-        assert all(isinstance(row, MediaRecord) for row in result.results)
+        assert all(isinstance(row, Media) for row in result.results)
 
     @pytest.mark.e2e
     def test_get_project_media_page_size_respected(self, component):
@@ -100,7 +100,7 @@ class TestProjectMediaE2E:
         if not result.results:
             pytest.skip("No media available for this project")
 
-        assert all(isinstance(row, MediaRecord) for row in result.results)
+        assert all(isinstance(row, Media) for row in result.results)
 
     @pytest.mark.e2e
     def test_where_project_media_returns_api_query(self, component):
@@ -113,7 +113,7 @@ class TestProjectMediaE2E:
 
     @pytest.mark.e2e
     def test_where_project_media_iterates_media_records(self, component):
-        """Iterar where_project_media() devuelve instancias de MediaRecord."""
+        """Iterar where_project_media() devuelve instancias de Media."""
         pk = _project_pk()
         if not pk:
             pytest.skip("Set WILDINTEL_CLASSIFICATION_PROJECT_PK to run this test")
@@ -127,7 +127,7 @@ class TestProjectMediaE2E:
         if not items:
             pytest.skip("No media available for this project")
 
-        assert all(isinstance(row, MediaRecord) for row in items)
+        assert all(isinstance(row, Media) for row in items)
 
     @pytest.mark.e2e
     def test_where_project_media_context_manager_exhausts_on_exit(self, component):
@@ -143,7 +143,7 @@ class TestProjectMediaE2E:
 
     @pytest.mark.e2e
     def test_export_project_media_returns_list_when_file_none(self, component):
-        """export_project_media() sin file devuelve lista de MediaRecord."""
+        """export_project_media() sin file devuelve lista de Media."""
         pk = _project_pk()
         if not pk:
             pytest.skip("Set WILDINTEL_CLASSIFICATION_PROJECT_PK to run this test")
@@ -152,7 +152,7 @@ class TestProjectMediaE2E:
 
         assert isinstance(result, list)
         if result:
-            assert isinstance(result[0], MediaRecord)
+            assert isinstance(result[0], Media)
 
     @pytest.mark.e2e
     def test_export_project_media_writes_csv(self, component, tmp_path):
@@ -170,7 +170,7 @@ class TestProjectMediaE2E:
 
     @pytest.mark.e2e
     def test_get_project_media_by_id_returns_record_when_found(self, component):
-        """get_project_media_by_id() devuelve MediaRecord cuando el id existe."""
+        """get_project_media_by_id() devuelve Media cuando el id existe."""
         pk = _project_pk()
         media_id = _media_id()
         if not pk or not media_id:
@@ -182,7 +182,7 @@ class TestProjectMediaE2E:
         result = component.get_project_media_by_id(int(pk), int(media_id))
 
         assert result is not None
-        assert isinstance(result, MediaRecord)
+        assert isinstance(result, Media)
 
     @pytest.mark.e2e
     def test_get_project_media_by_id_returns_none_when_not_found(self, component):
@@ -221,7 +221,7 @@ class TestCollectionMediaE2E:
 
     @pytest.mark.e2e
     def test_get_collection_media_returns_media_record_instances(self, component):
-        """get_collection_media() devuelve instancias de MediaRecord."""
+        """get_collection_media() devuelve instancias de Media."""
         pk = _project_pk()
         col_pk = _collection_pk()
         if not pk or not col_pk:
@@ -235,7 +235,7 @@ class TestCollectionMediaE2E:
         if not result.results:
             pytest.skip("No media available for this collection")
 
-        assert all(isinstance(row, MediaRecord) for row in result.results)
+        assert all(isinstance(row, Media) for row in result.results)
 
     @pytest.mark.e2e
     def test_where_collection_media_returns_api_query(self, component):
@@ -252,7 +252,7 @@ class TestCollectionMediaE2E:
 
     @pytest.mark.e2e
     def test_where_collection_media_iterates_media_records(self, component):
-        """Iterar where_collection_media() devuelve instancias de MediaRecord."""
+        """Iterar where_collection_media() devuelve instancias de Media."""
         pk = _project_pk()
         col_pk = _collection_pk()
         if not pk or not col_pk:
@@ -270,11 +270,11 @@ class TestCollectionMediaE2E:
         if not items:
             pytest.skip("No media available for this collection")
 
-        assert all(isinstance(row, MediaRecord) for row in items)
+        assert all(isinstance(row, Media) for row in items)
 
     @pytest.mark.e2e
     def test_export_collection_media_returns_list_when_file_none(self, component):
-        """export_collection_media() sin file devuelve lista de MediaRecord."""
+        """export_collection_media() sin file devuelve lista de Media."""
         pk = _project_pk()
         col_pk = _collection_pk()
         if not pk or not col_pk:
@@ -287,7 +287,7 @@ class TestCollectionMediaE2E:
 
         assert isinstance(result, list)
         if result:
-            assert isinstance(result[0], MediaRecord)
+            assert isinstance(result[0], Media)
 
     @pytest.mark.e2e
     def test_export_collection_media_writes_csv(self, component, tmp_path):

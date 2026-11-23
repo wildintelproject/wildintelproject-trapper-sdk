@@ -124,7 +124,7 @@ print(project.pk, project.name, project.status)        # 12 Doñana 2026 Ongoing
 
 `create()` recibe un `ClassificationProjectCreate`, un modelo de Pydantic. Construirlo valida los datos
 antes de enviar nada: un nombre, y el research project y el clasificador, cada uno como el objeto que
-devuelve el SDK (`ResearchProject`, `ClassificatorRecord`) o como su clave primaria, de modo que las
+devuelve el SDK (`ResearchProject`, `Classificator`) o como su clave primaria, de modo que las
 creaciones se encadenan:
 
 ```python

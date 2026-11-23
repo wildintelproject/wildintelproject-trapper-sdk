@@ -11,11 +11,11 @@ from __future__ import annotations
 
 from tests.base_component_tests import ComponentE2ETestBase
 from trapper_client.components.users import UsersComponent
-from trapper_client.schemas import UserRecord
+from trapper_client.schemas import User
 
 
 class TestUsersComponentE2E(ComponentE2ETestBase):
     component_class = UsersComponent
-    schema = UserRecord
-    export_schema = UserRecord
+    schema = User
+    export_schema = User
     env_pk_var = "WILDINTEL_USER_PK"

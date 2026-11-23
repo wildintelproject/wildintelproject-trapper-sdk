@@ -5,10 +5,10 @@ Component for the Users data endpoint.
 from __future__ import annotations
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import UserRecord
+from trapper_client.schemas import User
 
 
-class UsersComponent(TrapperComponent[UserRecord]):
+class UsersComponent(TrapperComponent[User]):
     """
     Component for ``/accounts/api/users``.
 
@@ -23,4 +23,4 @@ class UsersComponent(TrapperComponent[UserRecord]):
     """
 
     endpoint = "accounts/api/users"
-    schema = UserRecord
+    schema = User
