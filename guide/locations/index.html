@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Cliente Python para la API de Trapper">
+        <meta name="description" content="Python client for the Trapper API (v1 and v2)">
       
       
       
@@ -16,9 +16,13 @@
         <link rel="prev" href="../../usage/">
       
       
-        <link rel="next" href="../locations_geojson/">
+        <link rel="next" href="../versions/">
       
       
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../es/guide/locations/" hreflang="es">
         
       
       
@@ -154,6 +158,32 @@
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../es/guide/locations/" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
     
       
       
@@ -234,7 +264,7 @@
   
     
   
-  Inicio
+  Home
 
       </a>
     </li>
@@ -253,7 +283,7 @@
   
     
   
-  Instalacion
+  Installation
 
       </a>
     </li>
@@ -272,7 +302,7 @@
   
     
   
-  Uso
+  Usage
 
       </a>
     </li>
@@ -436,7 +466,7 @@
   <span class="md-ellipsis">
     
   
-    Inicio
+    Home
   
 
     
@@ -463,7 +493,7 @@
   <span class="md-ellipsis">
     
   
-    Instalacion
+    Installation
   
 
     
@@ -490,7 +520,7 @@
   <span class="md-ellipsis">
     
   
-    Uso
+    Usage
   
 
     
@@ -663,6 +693,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#waiting-for-the-import-to-land" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Waiting for the import to land
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-you-get-in-the-exception-when-the-csv-itself-is-rejected" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -727,6 +768,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trapper versions (v1 / v2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../locations_geojson/" class="md-nav__link">
         
   
@@ -763,6 +832,34 @@
     
   
     Deployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project_deployments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project deployments (v2)
   
 
     
@@ -1648,6 +1745,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/components/project_deployments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ProjectDeployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/components/resources/" class="md-nav__link">
         
   
@@ -2268,6 +2393,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/schemas/project_deployments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ProjectDeployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/schemas/resources/" class="md-nav__link">
         
   
@@ -2702,6 +2855,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#waiting-for-the-import-to-land" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Waiting for the import to land
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-you-get-in-the-exception-when-the-csv-itself-is-rejected" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2771,6 +2935,10 @@
 
 
 <h1 id="locations">Locations</h1>
+<div class="admonition info">
+<p class="admonition-title">Trapper compatibility</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — <code>import_locations()</code> works on both but behaves differently (see below). See <a href="../versions/">Trapper versions</a>.</p>
+</div>
 <p><code>client.locations</code> — read/write access to camera-trap locations.</p>
 <p><strong>Endpoint:</strong> <code>GET /geomap/api/locations</code> (list + detail), <code>GET /geomap/api/locations/export/</code> (CSV export).</p>
 <p>The REST API is otherwise read-only for this resource; see <a href="#importing-locations-write-access">Importing locations</a>
@@ -2856,6 +3024,10 @@ below for the one write operation this component supports.</p>
 <p><code>/geomap/api/locations</code> is read-only, so <code>import_locations()</code> works around that by simulating the
 classic web UI's <code>geomap/location/import/</code> form via cookie/session auth instead of the API's token
 auth (see <a href="../../api/api_client_base/"><code>APIClientBase.session_login</code></a>).</p>
+<p>On <strong>Trapper v2</strong> the same method posts to the import action of the Django admin
+(<code>admin/geomap/location/import-locations/</code>). The account must be a staff user with the add
+permission, and the server imports asynchronously: <code>True</code> means the table passed validation and was
+queued. Rejected tables raise <code>APIError</code> with the server's message and the per-row errors.</p>
 <div class="admonition warning">
 <p class="admonition-title">Not a stable API contract</p>
 <p>This depends on an unversioned HTML form, not a documented endpoint — a Trapper change to that
@@ -2886,12 +3058,21 @@ authenticate it. See the full caveat in the method's docstring before relying on
   kind of latent, hard-to-diagnose corruption.</li>
 </ul>
 </div>
+<h3 id="waiting-for-the-import-to-land">Waiting for the import to land</h3>
+<p>On Trapper v2 the import runs in the background: <code>import_locations()</code> returning <code>True</code> means the
+table was validated and queued, not that the rows exist yet. Neither version exposes the import
+task through the API, so <code>wait_for_import()</code> checks the outcome instead — it polls until every
+<code>locationID</code> is listed:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;don-01&quot;</span><span class="p">,</span> <span class="s2">&quot;don-02&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># raises TimeoutError if missing</span>
+</code></pre></div>
+<p>Pass <code>raise_on_timeout=False</code> to get <code>False</code> back instead. It works the same on v1.</p>
 <p>There's also a ready-to-run script: <a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_locations.py"><code>examples/import_locations.py</code></a>.</p>
 <h3 id="what-you-get-in-the-exception-when-the-csv-itself-is-rejected">What you get in the exception when the CSV itself is rejected</h3>
 <p>If the CSV fails the server's table validation (wrong/missing columns, a <code>locationID</code> that already
 exists in this research project, ...), the raised <code>err.APIError</code> includes the actual per-row
 messages, not just the generic banner — e.g.:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Location import failed (status 200): locationID &#39;dona-001&#39; already exists; longitude must be a number
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Location import failed (status 200): locationID &#39;dona-001&#39; already exists; longitude must be a number
 </code></pre></div>
 <p>The server renders those details as a JSON blob for a JS widget, not as plain HTML text — see
 <a href="../../api/api_client_base/"><code>APIClientBase._extract_html_error_text</code></a> for how this is parsed out.</p>
@@ -2900,14 +3081,14 @@ messages, not just the generic banner — e.g.:</p>
 (a separate, true chunked uploader for a different endpoint), it's a plain single-request form POST.
 If a large CSV gets rejected or times out, pass <code>split=True</code> to break it into several smaller,
 self-contained CSV chunks (each repeating the header row) and import them one request at a time:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>        <span class="c1"># seconds between chunk uploads — defaults to 1</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes per chunk — this is also the default</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>        <span class="c1"># seconds between chunk uploads — defaults to 1</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes per chunk — this is also the default</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">)</span>
 </code></pre></div>
 <p><code>split</code> is not compatible with <code>gpx_file</code> (raises <code>ValueError</code>) — splitting only makes sense for
 the CSV path, and the server rejects a request carrying both file types anyway. With
@@ -2919,16 +3100,16 @@ uploading the rest; with <code>raise_on_error=False</code> it uploads every chun
 timeout (rather than a normal error response) before the server even gets to respond. That's
 retried automatically — using <a href="https://github.com/jd/tenacity">tenacity</a>, with exponential
 backoff — up to <code>retry_attempts</code> times:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># try smaller chunks if the server keeps timing out</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">retry_attempts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># default is 3</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>    <span class="n">retry_min_wait</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># seconds, default 1</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>    <span class="n">retry_max_wait</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>      <span class="c1"># seconds, default 10</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># try smaller chunks if the server keeps timing out</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>    <span class="n">retry_attempts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># default is 3</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">retry_min_wait</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># seconds, default 1</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    <span class="n">retry_max_wait</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>      <span class="c1"># seconds, default 10</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="p">)</span>
 </code></pre></div>
 <p>Only network-level failures (timeouts, connection resets, ...) are retried — never an HTTP error
 response (a 4xx/5xx from the server is a validation failure, not something a retry fixes). Set
@@ -2972,7 +3153,7 @@ radius, ...).</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../../usage/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Uso">
+          <a href="../../usage/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Usage">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2982,20 +3163,20 @@ radius, ...).</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Uso
+                Usage
               </div>
             </div>
           </a>
         
         
           
-          <a href="../locations_geojson/" class="md-footer__link md-footer__link--next" aria-label="Next: Locations GeoJSON">
+          <a href="../versions/" class="md-footer__link md-footer__link--next" aria-label="Next: Trapper versions (v1 / v2)">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Locations GeoJSON
+                Trapper versions (v1 / v2)
               </div>
             </div>
             <div class="md-footer__button md-icon">

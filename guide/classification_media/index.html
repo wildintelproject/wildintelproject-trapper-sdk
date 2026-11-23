@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Cliente Python para la API de Trapper">
+        <meta name="description" content="Python client for the Trapper API (v1 and v2)">
       
       
       
@@ -19,6 +19,10 @@
         <link rel="next" href="../classification_results_agg/">
       
       
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../es/guide/classification_media/" hreflang="es">
         
       
       
@@ -154,6 +158,32 @@
       <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../es/guide/classification_media/" hreflang="es" class="md-select__link">
+              Español
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
     
       
       
@@ -234,7 +264,7 @@
   
     
   
-  Inicio
+  Home
 
       </a>
     </li>
@@ -253,7 +283,7 @@
   
     
   
-  Instalacion
+  Installation
 
       </a>
     </li>
@@ -272,7 +302,7 @@
   
     
   
-  Uso
+  Usage
 
       </a>
     </li>
@@ -436,7 +466,7 @@
   <span class="md-ellipsis">
     
   
-    Inicio
+    Home
   
 
     
@@ -463,7 +493,7 @@
   <span class="md-ellipsis">
     
   
-    Instalacion
+    Installation
   
 
     
@@ -490,7 +520,7 @@
   <span class="md-ellipsis">
     
   
-    Uso
+    Usage
   
 
     
@@ -595,6 +625,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Trapper versions (v1 / v2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../locations_geojson/" class="md-nav__link">
         
   
@@ -631,6 +689,34 @@
     
   
     Deployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../project_deployments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project deployments (v2)
   
 
     
@@ -1609,6 +1695,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/components/project_deployments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ProjectDeployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/components/resources/" class="md-nav__link">
         
   
@@ -2229,6 +2343,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/schemas/project_deployments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ProjectDeployments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/schemas/resources/" class="md-nav__link">
         
   
@@ -2693,6 +2835,10 @@
 
 
 <h1 id="classification-media">Classification Media</h1>
+<div class="admonition info">
+<p class="admonition-title">Trapper compatibility</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — same code on both. See <a href="../versions/">Trapper versions</a>.</p>
+</div>
 <p><code>client.classification_media</code> — media rows (with download URLs) for a classification project.</p>
 <p><strong>Endpoint:</strong> <code>GET /media_classification/api/media/{project_pk}/</code>.</p>
 <div class="admonition note">
