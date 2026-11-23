@@ -20,6 +20,8 @@ from trapper_client.schemas import (
     ClassificationProjectCollection,
     ClassificationProjectCreate,
     ClassificationResourceRecord,
+    ClassificatorRecord,
+    ResearchProject,
     PaginatedResult,
 )
 
@@ -616,3 +618,18 @@ class TestAddAndRemoveCollections:
         for call in (lambda: component.add_collections(7, [1]), lambda: component.remove_collection(7, 1)):
             with pytest.raises(err.UnsupportedVersionError):
                 call()
+
+
+class TestClassificationProjectCreateModel:
+
+    def test_takes_the_objects_the_sdk_returns_or_their_primary_keys(self):
+        rp = ResearchProject(pk=3, name="Host")
+        clf = ClassificatorRecord(pk=2, name="C", owner="o", updated_date="2026-01-01")
+        by_object = ClassificationProjectCreate(name="N", research_project=rp, classificator=clf)
+        by_key = ClassificationProjectCreate(name="N", research_project=3, classificator=2)
+        assert by_object.research_project == 3 and by_object.classificator == 2
+        assert by_object.to_form() == by_key.to_form()
+
+    def test_an_object_with_a_non_positive_pk_is_rejected(self):
+        with pytest.raises(ValueError, match="positive"):
+            ClassificationProjectCreate(name="N", research_project=ResearchProject(pk=0), classificator=2)

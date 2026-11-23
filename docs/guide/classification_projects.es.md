@@ -123,9 +123,21 @@ print(project.pk, project.name, project.status)        # 12 Doñana 2026 Ongoing
 ```
 
 `create()` recibe un `ClassificationProjectCreate`, un modelo de Pydantic. Construirlo valida los datos
-antes de enviar nada: un nombre y las claves primarias del research project y del clasificador. Para
-construirlo desde un diccionario usa `ClassificationProjectCreate.model_validate(datos)`. El proyecto empieza *en curso* (`Ongoing`), y la cuenta que inicia sesión pasa a ser
-su propietaria y administradora. El research project debe ser uno que la cuenta pueda editar; si no,
+antes de enviar nada: un nombre, y el research project y el clasificador, cada uno como el objeto que
+devuelve el SDK (`ResearchProject`, `ClassificatorRecord`) o como su clave primaria, de modo que las
+creaciones se encadenan:
+
+```python
+rp = client.research_projects.create(ResearchProjectCreate(name="Doñana mammals", acronym="DONMAM"))
+clf = client.classificators.create(ClassificatorCreate(name="Iberian mammals"))
+project = client.classification_projects.create(
+    ClassificationProjectCreate(name="Doñana 2026", research_project=rp, classificator=clf)
+)
+```
+
+Para construir el modelo desde un diccionario usa `ClassificationProjectCreate.model_validate(datos)`. El
+proyecto empieza *en curso* (`Ongoing`), y la cuenta que inicia sesión pasa a ser su propietaria y
+administradora. El research project debe ser uno que la cuenta pueda editar; si no,
 Trapper rechaza el formulario y `create()` lanza `APIError` indicando el campo:
 
 ```
