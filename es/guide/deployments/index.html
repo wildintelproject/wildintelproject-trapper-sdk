@@ -3186,6 +3186,11 @@ en un servidor v1 lanza <code>UnsupportedVersionError</code>.</p>
 <code>comments</code>, <code>longitude</code>, <code>latitude</code>, <code>location_name</code>) pero <strong>no</strong> el propietario, el proyecto de investigación
 ni <code>correct_setup</code> y <code>correct_tstamp</code>. Las dos tienen <code>pk</code>, <code>deployment_id</code>, <code>location_id</code>, <code>start_date</code>,
 <code>end_date</code> y <code>tags</code>. Comprobado en Trapper v1 y v2.</p>
+<p><code>start_date</code> y <code>end_date</code> son objetos <code>datetime</code> con zona horaria en las dos formas, aunque Trapper las escribe
+distinto (<code>2024-01-01T00:00:00+01:00</code> en el JSON, <code>2024-01-01T00:00:00+0100</code> en el CSV), así que se pueden
+comparar y ordenar leas la que leas. Una fecha que no se puede leer se conserva como el texto con el que llegó, y
+una vacía es <code>None</code>. <code>export(file="x.csv")</code> las escribe de vuelta como texto ISO con los dos puntos (<code>+01:00</code>);
+<code>raw=True</code> conserva la escritura de Trapper.</p>
 <p>El CSV de Trapper no tiene columna para <code>session</code>, <code>array</code>, <code>tags</code> ni <code>bait_type</code>: pone las dos primeras en
 <code>deploymentGroups</code> (<code>session:S | array:A</code>) y las etiquetas en <code>deploymentTags</code>, con <code>baitType:&lt;valor&gt;</code> añadido
 cuando el despliegue tiene un tipo de cebo. <code>DeploymentExport</code> las lee de ahí, así que <code>tags</code> solo tiene las
