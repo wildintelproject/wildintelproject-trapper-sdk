@@ -887,6 +887,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#creating-a-collection-from-a-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating a collection from a package
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#triggering-ftp-uploaded-collection-processing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2848,6 +2859,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#creating-a-collection-from-a-package" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating a collection from a package
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#triggering-ftp-uploaded-collection-processing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3042,17 +3064,71 @@ one, just scoped to a different collection subset:</p>
 <p>The SDK wraps a plain list as a single page, so <code>get_map()</code> and <code>get_all_append()</code> work like the others and
 <code>pagination.count</code> is the length of the list. <code>delete_data</code>, <code>update_data</code>, <code>detail_data</code> and <code>owner_profile</code> are web
 page URLs on v1 and <code>None</code> on v2.</p>
+<h2 id="creating-a-collection-from-a-package">Creating a collection from a package</h2>
+<p>A collection with its resources is created from a <strong>package</strong>: a ZIP with the files and a YAML that describes
+them. The SDK has the two steps, and nothing else creates a collection with data: <code>get_uploader()</code> puts the two
+files in the account's <code>collections/</code> folder on the server, and <code>trigger_collection()</code> makes Trapper process them.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">uploader</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_uploader</span><span class="p">()</span>                       <span class="c1"># chunked on v1, resumable (tus) on v2</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">uploader</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;package.yaml&quot;</span><span class="p">),</span> <span class="s2">&quot;collections/package.yaml&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">uploader</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;package.zip&quot;</span><span class="p">),</span> <span class="s2">&quot;collections/package.zip&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">trigger_collection</span><span class="p">({</span><span class="s2">&quot;yaml_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;zip_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package.zip&quot;</span><span class="p">})</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;task_id&quot;</span><span class="p">])</span>              <span class="c1"># the task has started: the collection is not there yet</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># wait for it: the collection and its resources appear a few seconds later</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">found</span> <span class="o">:=</span> <span class="nb">list</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="s2">&quot;My collection&quot;</span><span class="p">))):</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div>
+<p>The YAML (Trapper validates it against <code>collection_schema.yaml</code>; a problem is a <code>BadRequestError</code> with the details in
+<code>data.errors</code>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">collections</span><span class="p">:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My collection</span><span class="w">              </span><span class="c1"># reused if the account already has one with this name (in Trapper&#39;s code)</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">resources_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">res</span><span class="w">               </span><span class="c1"># the folder of the ZIP that holds one folder per deployment</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">project_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w">                    </span><span class="c1"># a CLASSIFICATION project (the research project comes from it)</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nt">timezone</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Europe/Madrid</span><span class="w">          </span><span class="c1"># must be the one of the deployments&#39; locations</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">timezone_ignore_dst</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w">       </span><span class="c1"># and so must this</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="nt">managers</span><span class="p">:</span><span class="w">                        </span><span class="c1"># optional</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ana</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="nt">deployments</span><span class="p">:</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">deployment_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">don01-2024a</span><span class="w">   </span><span class="c1"># an existing deployment of the project&#39;s research project</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">        </span><span class="nt">resources</span><span class="p">:</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">don01-2024a_0001</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">            </span><span class="nt">file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IMG_0001.JPG</span><span class="w">       </span><span class="c1"># res/don01-2024a/IMG_0001.JPG in the ZIP</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">            </span><span class="nt">date_recorded</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2024-03-01T10:00:00+01:00&#39;</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">            </span><span class="nt">mime_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">image/jpeg</span><span class="w">    </span><span class="c1"># optional, like file_width, file_height, file_size, file_fps, file_duration</span>
+</code></pre></div>
+<p>and the ZIP has <code>res/don01-2024a/IMG_0001.JPG</code>, that is <code>&lt;resources_dir&gt;/&lt;deployment_id&gt;/&lt;file&gt;</code>.</p>
+<p>What it needs (checked on Trapper v1 and v2, except what says <em>in Trapper's code</em>):</p>
+<ul>
+<li>The <strong>classification project</strong> and the <strong>deployments</strong> must exist and the account must be able to upload to the
+  project. The SDK creates deployments by <a href="../deployments/#importing-deployments-write-access">import</a>, and
+  classification projects on v1 only (<code>client.classification_projects.create()</code>).</li>
+<li>The <code>timezone</code> and <code>timezone_ignore_dst</code> of the YAML must match the deployments' locations, or Trapper refuses it.</li>
+<li>The account needs <strong>uploader access</strong> (on v2 an <em>HTTP uploader account</em>, see <a href="../versions/">versions</a>), and on <strong>v1
+  the uploader is served by Trapper's nginx</strong>: a development server on its own port answers <code>404</code> to the login.</li>
+<li><em>In Trapper's code:</em> a file that is identical (same content) to one already in the deployment, or that has an
+  extension Trapper does not accept, is <strong>skipped</strong> and written to a <code>.log</code> file next to the ZIP, without failing the rest.</li>
+<li>On <strong>v2 the uploaded files can take a moment to be in place</strong>: if <code>trigger_collection()</code> answers <code>NotFoundError</code>
+  ("not found in your upload directory") right after the upload, wait a couple of seconds and call it again.</li>
+<li><code>trigger_ai_pipeline</code> is <code>True</code> by default, and starts the AI detection on the new resources; pass <code>False</code> to skip it.</li>
+<li><em>In Trapper's code:</em> the thumbnails and previews are built after the resources exist, so
+  <code>resources.download(pk, ..., kind="thumbnail")</code> may answer <code>NotFoundError</code> for a moment. Once built, they download
+  (checked on v1).</li>
+</ul>
 <h2 id="triggering-ftp-uploaded-collection-processing">Triggering FTP-uploaded collection processing</h2>
 <p><code>trigger_collection()</code> starts the processing of a data package (a YAML definition and a ZIP) that is <strong>already in
 the account's own folder on the server</strong>: it does not upload anything (see the uploader for that).</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">trigger_collection</span><span class="p">(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">payload</span><span class="o">=</span><span class="p">{</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        <span class="s2">&quot;yaml_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.yaml&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="s2">&quot;zip_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.zip&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="s2">&quot;remove_zip&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="p">},</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="p">)</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;task_id&quot;</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">trigger_collection</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">payload</span><span class="o">=</span><span class="p">{</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>        <span class="s2">&quot;yaml_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.yaml&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>        <span class="s2">&quot;zip_file&quot;</span><span class="p">:</span> <span class="s2">&quot;package_123.zip&quot;</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="s2">&quot;remove_zip&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="p">},</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="p">)</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="s2">&quot;task_id&quot;</span><span class="p">])</span>
 </code></pre></div>
 <p><code>yaml_file</code> and <code>zip_file</code> are required; <code>remove_zip</code> (default <code>False</code>), <code>extract_metadata</code> (default <code>False</code>) and
 <code>trigger_ai_pipeline</code> (default <code>True</code>) are optional. Trapper checks the YAML definition and starts a background
