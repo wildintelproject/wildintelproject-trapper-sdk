@@ -2905,23 +2905,18 @@
 </tr>
 <tr>
 <td><code>locations_map</code></td>
-<td>PK separadas por comas</td>
-<td>Filtra mediante <code>deployment__location</code></td>
+<td>lista de PK</td>
+<td>Filtra mediante <code>deployment__location</code> (<strong>solo v1</strong>: Trapper v2 lo ignora)</td>
 </tr>
 <tr>
 <td><code>collections</code></td>
 <td>lista de PK</td>
-<td>Filtra por una o más PK de colección</td>
+<td>Filtra por una o más PK de colección (cualquiera de ellas)</td>
 </tr>
 <tr>
 <td><code>deployments</code></td>
-<td>PK repetibles</td>
-<td>Filtra por PK de despliegue</td>
-</tr>
-<tr>
-<td><code>deployment__isnull</code></td>
-<td>booleano</td>
-<td><code>true</code> = recursos sin despliegue</td>
+<td>lista de PK</td>
+<td>Filtra por PK de despliegue (cualquiera de ellas)</td>
 </tr>
 <tr>
 <td><code>tags</code></td>
@@ -2935,7 +2930,7 @@
 </tr>
 <tr>
 <td><code>species</code></td>
-<td>repetible</td>
+<td>lista de PK</td>
 <td>Búsqueda de texto completo de <code>species_id:&lt;valor&gt;</code></td>
 </tr>
 <tr>
@@ -2950,6 +2945,21 @@
 </tr>
 </tbody>
 </table>
+<p>Las listas (<code>pk</code>, <code>locations_map</code>, <code>collections</code>, <code>deployments</code>, <code>tags</code>, <code>species</code>) se pueden dar como lista o como
+cadena separada por comas: <code>collections=[2, 3]</code> y <code>collections="2,3"</code> son lo mismo. Trapper lee cada una de forma
+distinta (<code>deployments</code> y <code>collections</code> como parámetros repetidos, <code>pk</code> y <code>locations_map</code> como una cadena con comas)
+y se equivoca sin avisar si recibe la otra: <code>deployments="1,2"</code> se ignora y devuelve todos los recursos,
+<code>collections="2,3"</code> da un <code>400</code>, <code>pk=[1, 2]</code> se queda con un solo pk y <code>locations_map=[1, 2]</code> no encuentra nada. El
+SDK envía cada una como Trapper la lee.</p>
+<div class="admonition warning">
+<p class="admonition-title">Un filtro que Trapper no aplica</p>
+<p>Trapper ignora un parámetro que no es uno de sus filtros <strong>sin dar error</strong>, y la lista vuelve sin filtrar; el SDK
+emite un <code>UnknownFilterWarning</code> que lo nombra (la petición se envía igualmente). Además de los de la tabla, la
+lista aplica <code>name</code>, <code>deployment</code>, <code>mime_type</code>, <code>file_size</code>, <code>token</code> y <code>file_checksum_hash</code>. <code>locations_map</code> lo
+ignora v2, y <code>ordering</code> e <code>in_bbox</code> las dos. <code>deployment__isnull</code>, que una versión anterior de esta guía
+listaba, hace que Trapper conteste <strong><code>500</code></strong> en v1 y v2, valga lo que valga: el SDK avisa y no hay filtro para
+los recursos sin despliegue. Para silenciar el aviso: <code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code>.</p>
+</div>
 <h2 id="los-seis-patrones-de-acceso">Los seis patrones de acceso</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Iteración perezosa con filtros (all() es lo mismo)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">&quot;Public&quot;</span><span class="p">,</span> <span class="n">deployments</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>

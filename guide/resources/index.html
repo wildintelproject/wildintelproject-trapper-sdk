@@ -2903,23 +2903,18 @@
 </tr>
 <tr>
 <td><code>locations_map</code></td>
-<td>comma-separated PKs</td>
-<td>Filter via <code>deployment__location</code></td>
+<td>list of PKs</td>
+<td>Filter via <code>deployment__location</code> (<strong>v1 only</strong>: Trapper v2 ignores it)</td>
 </tr>
 <tr>
 <td><code>collections</code></td>
 <td>list of PKs</td>
-<td>Filter by one or more collection PKs</td>
+<td>Filter by one or more collection PKs (any of them)</td>
 </tr>
 <tr>
 <td><code>deployments</code></td>
-<td>repeatable PKs</td>
-<td>Filter by deployment PKs</td>
-</tr>
-<tr>
-<td><code>deployment__isnull</code></td>
-<td>boolean</td>
-<td><code>true</code> = resources with no deployment</td>
+<td>list of PKs</td>
+<td>Filter by deployment PKs (any of them)</td>
 </tr>
 <tr>
 <td><code>tags</code></td>
@@ -2933,7 +2928,7 @@
 </tr>
 <tr>
 <td><code>species</code></td>
-<td>repeatable</td>
+<td>list of PKs</td>
 <td>Full-text search for <code>species_id:&lt;value&gt;</code></td>
 </tr>
 <tr>
@@ -2948,6 +2943,22 @@
 </tr>
 </tbody>
 </table>
+<p>Lists (<code>pk</code>, <code>locations_map</code>, <code>collections</code>, <code>deployments</code>, <code>tags</code>, <code>species</code>) can be given as a list or as a
+comma-separated string: <code>collections=[2, 3]</code> and <code>collections="2,3"</code> are the same. Trapper reads each one in a
+different form (<code>deployments</code> and <code>collections</code> as repeated parameters, <code>pk</code> and <code>locations_map</code> as one string with
+commas), and gets it wrong without telling you when given the other: <code>deployments="1,2"</code> is ignored and returns
+every resource, <code>collections="2,3"</code> is a <code>400</code>, <code>pk=[1, 2]</code> keeps one pk and <code>locations_map=[1, 2]</code> finds nothing.
+The SDK sends each one the way Trapper reads it.</p>
+<div class="admonition warning">
+<p class="admonition-title">A filter that Trapper does not apply</p>
+<p>Trapper ignores a parameter that is not one of its filters <strong>without an error</strong>, and the list comes back
+unfiltered; the SDK emits an <code>UnknownFilterWarning</code> that names it (the request is still sent). Besides those in
+the table, the list applies <code>name</code>, <code>deployment</code>, <code>mime_type</code>, <code>file_size</code>, <code>token</code> and <code>file_checksum_hash</code>.
+<code>locations_map</code> is ignored by v2, and <code>ordering</code> and <code>in_bbox</code> by both. <code>deployment__isnull</code>, which an older
+version of this guide listed, makes Trapper answer <strong><code>500</code></strong> on v1 and v2, whatever the value: the SDK warns about
+it and there is no filter for the resources without a deployment. To silence the warning:
+<code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code>.</p>
+</div>
 <h2 id="the-six-access-patterns">The six access patterns</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Lazy iteration with filters (all() is the same thing)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">&quot;Public&quot;</span><span class="p">,</span> <span class="n">deployments</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
