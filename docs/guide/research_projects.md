@@ -137,7 +137,7 @@ field that is wrong. To build it from a dict (a JSON or YAML file, say), use
 | `animal_types` | `AnimalTypes`: `unmarked` (1), `marked` (2), `both` (3) | `1` |
 | `bait_use` | `BaitUse`: `none` (1), `scent` (2), `food` (3), `visual` (4), `acoustic` (5), `other` (6) | `1` |
 | `event_interval` | seconds, `0` or more | `0` |
-| `keywords` | list of strings; they cannot contain commas | empty |
+| `keywords` | list of strings; a keyword can hold spaces and commas, but not a double quote | empty |
 | `abstract`, `methods`, `description` | free text, up to 2000 characters each | none |
 
 The four choice fields have an enumeration in `trapper_client`. Its members are the integers Trapper

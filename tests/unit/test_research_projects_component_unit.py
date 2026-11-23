@@ -261,7 +261,7 @@ class TestCreate:
         assert data["name"] == "My project" and data["acronym"] == "MYP"
         assert (data["sampling_design"], data["sensor_method"]) == (5, 2)
         assert (data["animal_types"], data["bait_use"], data["event_interval"]) == (2, 3, 30)
-        assert data["keywords"] == "a, b"
+        assert data["keywords"] == '"a", "b"'
         assert data["abstract"] == "abs" and data["methods"] == "" and data["description"] == ""
         assert data["project_roles-TOTAL_FORMS"] == 1
         assert data["project_roles-INITIAL_FORMS"] == 0
@@ -342,7 +342,7 @@ class TestResearchProjectCreate:
         {"name": "N", "acronym": "ABC", "bait_use": SamplingDesign.TARGETED},
         {"name": "N", "acronym": "ABC", "event_interval": -1},
         {"name": "N", "acronym": "ABC", "abstract": "x" * 2001},
-        {"name": "N", "acronym": "ABC", "keywords": ["a,b"]},
+        {"name": "N", "acronym": "ABC", "keywords": ['say "hi"']},
         {"name": "N", "acronym": "ABC", "unknown_field": 1},
     ])
     def test_invalid_values_are_rejected(self, kwargs):
@@ -356,7 +356,18 @@ class TestResearchProjectCreate:
         ).to_form()
         assert form["sampling_design"] == 6 and form["bait_use"] == 5
         assert type(form["sampling_design"]) is int
-        assert form["keywords"] == "x, y" and form["description"] == "d" and form["abstract"] == ""
+        assert form["keywords"] == '"x", "y"' and form["description"] == "d" and form["abstract"] == ""
+
+    def test_keywords_travel_quoted_so_that_spaces_and_commas_stay_inside(self):
+        form = ResearchProjectCreate(name="N", acronym="ABC", keywords=["camera trap", "a, b"]).to_form()
+        assert form["keywords"] == '"camera trap", "a, b"'
+
+    def test_a_single_keyword_with_a_space_is_still_one_keyword(self):
+        # unquoted, Trapper splits "camera trap" into two keywords when it is the only one
+        assert ResearchProjectCreate(name="N", acronym="ABC", keywords=["camera trap"]).to_form()["keywords"] == '"camera trap"'
+
+    def test_no_keywords_sends_nothing(self):
+        assert ResearchProjectCreate(name="N", acronym="ABC").to_form()["keywords"] == ""
 
 
 class TestMembers:
