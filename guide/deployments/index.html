@@ -797,6 +797,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fields-the-list-and-the-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields: the list and the export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importing-deployments-write-access" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2886,6 +2897,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fields-the-list-and-the-export" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fields: the list and the export
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importing-deployments-write-access" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3120,6 +3142,19 @@ removed; on a v1 server it raises <code>UnsupportedVersionError</code>.</p>
 </tbody>
 </table>
 <p>Only deployments the current user can access are returned.</p>
+<h2 id="fields-the-list-and-the-export">Fields: the list and the export</h2>
+<p>Like locations, a deployment comes in two shapes, and neither holds every field. <code>where()</code>, <code>get()</code> and <code>find()</code>
+return a <code>Deployment</code> (Trapper's JSON): <code>pk</code>, <code>deployment_code</code>, <code>deployment_id</code>, <code>location</code> (the location's
+<strong>pk</strong>), <code>location_id</code>, <code>start_date</code>, <code>end_date</code>, <code>owner</code>, <code>research_project</code> (its <strong>acronym</strong>), <code>tags</code>,
+<code>correct_setup</code> and <code>correct_tstamp</code>. <code>export(file=None)</code> returns a <code>DeploymentExport</code> for each row of the CSV,
+which has the camera and setup fields instead (<code>setup_by</code>, <code>camera_*</code>, <code>detection_distance</code>, <code>bait_use</code>,
+<code>feature_type</code>, <code>habitat</code>, <code>session</code>, <code>array</code>, <code>comments</code>, <code>longitude</code>, <code>latitude</code>, <code>location_name</code>) but <strong>not</strong>
+the owner, the research project or <code>correct_setup</code> and <code>correct_tstamp</code>. Both have <code>pk</code>, <code>deployment_id</code>,
+<code>location_id</code>, <code>start_date</code>, <code>end_date</code> and <code>tags</code>. Checked on Trapper v1 and v2.</p>
+<p>Trapper's CSV has no column for <code>session</code>, <code>array</code>, <code>tags</code> or <code>bait_type</code>: it puts the first two in
+<code>deploymentGroups</code> (<code>session:S | array:A</code>) and the tags in <code>deploymentTags</code>, with <code>baitType:&lt;value&gt;</code> added
+when the deployment has a bait type. <code>DeploymentExport</code> reads them from there, so <code>tags</code> holds only the tags and
+<code>bait_type</code> the bait. To get the CSV exactly as Trapper sends it, use <code>export(file=..., raw=True)</code>.</p>
 <h2 id="importing-deployments-write-access">Importing deployments (write access)</h2>
 <p><code>/geomap/api/deployments</code> is read-only, so <code>import_deployments()</code> works around that by simulating
 the classic web UI's <code>geomap/deployment/import/</code> form via cookie/session auth instead of the API's

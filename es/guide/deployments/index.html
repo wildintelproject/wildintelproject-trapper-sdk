@@ -799,6 +799,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#campos-la-lista-y-la-exportacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Campos: la lista y la exportación
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importar-despliegues-acceso-de-escritura" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2888,6 +2899,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#campos-la-lista-y-la-exportacion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Campos: la lista y la exportación
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#importar-despliegues-acceso-de-escritura" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3122,6 +3144,21 @@ en un servidor v1 lanza <code>UnsupportedVersionError</code>.</p>
 </tbody>
 </table>
 <p>Solo se devuelven los despliegues a los que puede acceder el usuario actual.</p>
+<h2 id="campos-la-lista-y-la-exportacion">Campos: la lista y la exportación</h2>
+<p>Igual que las locations, un despliegue viene en dos formas y ninguna tiene todos los campos. <code>where()</code>,
+<code>get()</code> y <code>find()</code> devuelven un <code>Deployment</code> (el JSON de Trapper): <code>pk</code>, <code>deployment_code</code>, <code>deployment_id</code>,
+<code>location</code> (el <strong>pk</strong> de la location), <code>location_id</code>, <code>start_date</code>, <code>end_date</code>, <code>owner</code>, <code>research_project</code>
+(su <strong>acrónimo</strong>), <code>tags</code>, <code>correct_setup</code> y <code>correct_tstamp</code>. <code>export(file=None)</code> devuelve un
+<code>DeploymentExport</code> por cada fila del CSV, que tiene en cambio los campos de la cámara y la instalación
+(<code>setup_by</code>, <code>camera_*</code>, <code>detection_distance</code>, <code>bait_use</code>, <code>feature_type</code>, <code>habitat</code>, <code>session</code>, <code>array</code>,
+<code>comments</code>, <code>longitude</code>, <code>latitude</code>, <code>location_name</code>) pero <strong>no</strong> el propietario, el proyecto de investigación
+ni <code>correct_setup</code> y <code>correct_tstamp</code>. Las dos tienen <code>pk</code>, <code>deployment_id</code>, <code>location_id</code>, <code>start_date</code>,
+<code>end_date</code> y <code>tags</code>. Comprobado en Trapper v1 y v2.</p>
+<p>El CSV de Trapper no tiene columna para <code>session</code>, <code>array</code>, <code>tags</code> ni <code>bait_type</code>: pone las dos primeras en
+<code>deploymentGroups</code> (<code>session:S | array:A</code>) y las etiquetas en <code>deploymentTags</code>, con <code>baitType:&lt;valor&gt;</code> añadido
+cuando el despliegue tiene un tipo de cebo. <code>DeploymentExport</code> las lee de ahí, así que <code>tags</code> solo tiene las
+etiquetas y <code>bait_type</code> el cebo. Para obtener el CSV tal como lo envía Trapper, usa
+<code>export(file=..., raw=True)</code>.</p>
 <h2 id="importar-despliegues-acceso-de-escritura">Importar despliegues (acceso de escritura)</h2>
 <p><code>/geomap/api/deployments</code> es de solo lectura, así que <code>import_deployments()</code> lo resuelve simulando el
 formulario <code>geomap/deployment/import/</code> de la interfaz web clásica, con autenticación por cookie/sesión
