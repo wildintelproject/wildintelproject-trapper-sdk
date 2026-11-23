@@ -766,6 +766,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#filtrar-por-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtrar por área
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#los-seis-patrones-de-acceso" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2877,6 +2888,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#filtrar-por-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtrar por área
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#los-seis-patrones-de-acceso" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3093,24 +3115,40 @@ lista aplica <code>pk</code>, <code>deployment_code</code>, <code>deployment_id<
 <code>is_incomplete</code>, <code>view_quality</code>, <code>capture_method</code> y <code>status</code>, y v2 aplica también <code>in_bbox</code>. Para silenciarlo:
 <code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code>.</p>
 </div>
+<h2 id="filtrar-por-area">Filtrar por área</h2>
+<p>Un despliegue no tiene coordenadas propias: son las de su location, y la lista de despliegues da solo el pk de la
+location, así que <code>where()</code> no tiene filtro espacial. <code>in_area()</code> recibe la misma área que
+<a href="../locations/#filtrar-por-area"><code>client.locations.in_area()</code></a> y devuelve los despliegues cuya location está dentro:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># un rectángulo: (min_lon, min_lat, max_lon, max_lat)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">in_area</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">36.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">37.5</span><span class="p">)):</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="o">.</span><span class="n">deployment_id</span><span class="p">,</span> <span class="n">dep</span><span class="o">.</span><span class="n">location_id</span><span class="p">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="c1"># un círculo: el centro como (longitud, latitud), el radio en metros, y los filtros de siempre</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">cerca</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">in_area</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">6.44</span><span class="p">,</span> <span class="mf">37.05</span><span class="p">),</span> <span class="n">radius</span><span class="o">=</span><span class="mi">5_000</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sdate_from</span><span class="o">=</span><span class="s2">&quot;2024-01-01&quot;</span><span class="p">))</span>
+</code></pre></div>
+<p>Primero busca las locations del área (se leen todas las que la cuenta puede ver y se filtran en el cliente) y
+después pide los despliegues de esas locations, 50 pks de location por petición. Los demás argumentos son filtros
+de los <strong>despliegues</strong>, no de las locations, y <code>location</code> no se puede combinar con el área. Un despliegue cuya
+location no tiene coordenadas legibles queda fuera, y un área incorrecta lanza <code>ValueError</code> antes de pedir
+despliegues.</p>
 <h2 id="los-seis-patrones-de-acceso">Los seis patrones de acceso</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Una página</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Todas las páginas unidas</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">get_all</span><span class="p">(</span><span class="n">page_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Iteración perezosa (all() es lo mismo)</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">sdate_from</span><span class="o">=</span><span class="s2">&quot;2024-01-01&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># Un solo elemento</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="n">dep</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">99</span><span class="p">)</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Exportación a CSV</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Una página</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Todas las páginas unidas</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">get_all</span><span class="p">(</span><span class="n">page_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="c1"># Iteración perezosa (all() es lo mismo)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">sdate_from</span><span class="o">=</span><span class="s2">&quot;2024-01-01&quot;</span><span class="p">):</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="c1"># Un solo elemento</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="n">dep</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">99</span><span class="p">)</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="c1"># Exportación a CSV</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Consulta <a href="../../usage/">Uso</a> si algo de esto te resulta desconocido: es la misma interfaz en todos los componentes.</p>
 <p>No hay filtro por colección: la API de despliegues de Trapper no lo tiene, e ignora en silencio
@@ -3123,16 +3161,16 @@ despliegue a la vez: cada despliegue candidato (lo que devuelva <code>where()</c
 comprueba con una única petición de recursos, con <code>max_workers</code> (8 por defecto) en paralelo. Acota los
 candidatos, normalmente con <code>research_project</code>: sin ningún filtro se comprueban todos los despliegues
 del servidor.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Despliegues del proyecto de investigación 3 con imágenes en la colección 5</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">by_collection</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="c1"># ...con cuántas imágenes tiene cada uno allí</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">for</span> <span class="n">dep</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">by_collection_with_counts</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="o">.</span><span class="n">deployment_id</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Exportarlos a CSV</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export_by_collection</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;deps.csv&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Despliegues del proyecto de investigación 3 con imágenes en la colección 5</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">dep</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">by_collection</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># ...con cuántas imágenes tiene cada uno allí</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="k">for</span> <span class="n">dep</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">by_collection_with_counts</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">dep</span><span class="o">.</span><span class="n">deployment_id</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="c1"># Exportarlos a CSV</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export_by_collection</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;deps.csv&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p><code>collection_id</code> es la pk propia de la colección de almacenamiento: <code>collection_pk</code> en la lista de
 colecciones de un proyecto de clasificación (<code>classification_projects.get_all_project_collections()</code>).</p>
@@ -3140,10 +3178,10 @@ colecciones de un proyecto de clasificación (<code>classification_projects.get_
 <p><code>geojson()</code> devuelve los despliegues como un <code>FeatureCollection</code> GeoJSON. Sustituye a
 <a href="../maps/"><code>client.maps</code></a> y <a href="../locations_geojson/"><code>client.locations_geojson</code></a>, que Trapper v2 eliminó;
 en un servidor v1 lanza <code>UnsupportedVersionError</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">fc</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">geojson</span><span class="p">(</span><span class="n">classification_project</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">fc</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]:</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">feature</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">]</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;deploymentID&quot;</span><span class="p">],</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">fc</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">geojson</span><span class="p">(</span><span class="n">classification_project</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">fc</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="n">feature</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">]</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;deploymentID&quot;</span><span class="p">],</span> <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">)</span>
 </code></pre></div>
 <table>
 <thead>
@@ -3215,14 +3253,14 @@ la cuenta). Consulta el docstring del método para la advertencia completa.</p>
 tiene valor por defecto. <code>research_project</code> también es obligatorio (por la misma razón que en las
 <a href="../locations/#importar-localizaciones-acceso-de-escritura">localizaciones</a>: el campo se declara
 <code>required=False</code>, pero su <code>clean_research_project()</code> rechaza un valor ausente):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>           <span class="c1"># obligatorio</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>                 <span class="c1"># obligatorio</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">classification_project</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>           <span class="c1"># opcional, vincula todos los despliegues importados a él</span>
-<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">create_locations</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>              <span class="c1"># requiere columnas locationID/longitude/latitude en el CSV</span>
-<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>                       <span class="c1"># True actualiza despliegues existentes (requiere una columna _id)</span>
-<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>           <span class="c1"># obligatorio</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>                 <span class="c1"># obligatorio</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">classification_project</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>           <span class="c1"># opcional, vincula todos los despliegues importados a él</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">create_locations</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>              <span class="c1"># requiere columnas locationID/longitude/latitude en el CSV</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>                       <span class="c1"># True actualiza despliegues existentes (requiere una columna _id)</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">)</span>
 </code></pre></div>
 <p>También hay un script listo para ejecutar: <a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_deployments.py"><code>examples/import_deployments.py</code></a>.</p>
 <h3 id="esperar-a-que-la-importacion-termine">Esperar a que la importación termine</h3>
@@ -3230,36 +3268,36 @@ tiene valor por defecto. <code>research_project</code> también es obligatorio (
 significa que la tabla se validó y se puso en cola, no que las filas ya existan. Ninguna de las dos
 versiones expone la tarea de importación a través de la API, así que <code>wait_for_import()</code> comprueba el
 resultado: consulta periódicamente hasta que todos los <code>deploymentID</code> aparecen en el listado:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">)</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;DON01-2024A&quot;</span><span class="p">,</span> <span class="s2">&quot;DON01-2024B&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># lanza TimeoutError si faltan</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;DON01-2024A&quot;</span><span class="p">,</span> <span class="s2">&quot;DON01-2024B&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># lanza TimeoutError si faltan</span>
 </code></pre></div>
 <p>Pasa <code>raise_on_timeout=False</code> para recibir <code>False</code> en su lugar. Funciona igual en v1.</p>
 <h3 id="actualizar-despliegues">Actualizar despliegues</h3>
 <p>Trapper no tiene un endpoint para editar un despliegue, pero la importación actualiza los que ya existen cuando
 recibe <code>update=True</code> y una columna <code>_id</code> con sus claves primarias. El CSV que exporta Trapper tiene esa columna,
 así que la forma de corregir despliegues es <strong>exportar, editar, importar</strong>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># 1. Exporta los despliegues tal como los envía Trapper (raw=True conserva la columna _id y la cabecera)</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">path</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># 2. Edita el CSV: cambia las celdas que quieras, conserva la cabecera y el _id</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;deploymentID&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;don01-2024a&quot;</span><span class="p">:</span>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>        <span class="n">row</span><span class="p">[</span><span class="s2">&quot;cameraHeight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1.25&quot;</span>
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        <span class="n">row</span><span class="p">[</span><span class="s2">&quot;habitat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;dehesa&quot;</span>
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;edited.csv&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
-<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">writerows</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
-<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
-<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="c1"># 3. Impórtalo con update=True y espera a que estén los valores nuevos</span>
-<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span>
-<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;edited.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="p">)</span>
-<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">wait_for_update</span><span class="p">({</span><span class="s2">&quot;don01-2024a&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;camera_height&quot;</span><span class="p">:</span> <span class="mf">1.25</span><span class="p">,</span> <span class="s2">&quot;habitat&quot;</span><span class="p">:</span> <span class="s2">&quot;dehesa&quot;</span><span class="p">}})</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="c1"># 1. Exporta los despliegues tal como los envía Trapper (raw=True conserva la columna _id y la cabecera)</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="n">path</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1"># 2. Edita el CSV: cambia las celdas que quieras, conserva la cabecera y el _id</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>    <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;deploymentID&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;don01-2024a&quot;</span><span class="p">:</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>        <span class="n">row</span><span class="p">[</span><span class="s2">&quot;cameraHeight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1.25&quot;</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>        <span class="n">row</span><span class="p">[</span><span class="s2">&quot;habitat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;dehesa&quot;</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;edited.csv&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">writerows</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a><span class="c1"># 3. Impórtalo con update=True y espera a que estén los valores nuevos</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;edited.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a><span class="p">)</span>
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">wait_for_update</span><span class="p">({</span><span class="s2">&quot;don01-2024a&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;camera_height&quot;</span><span class="p">:</span> <span class="mf">1.25</span><span class="p">,</span> <span class="s2">&quot;habitat&quot;</span><span class="p">:</span> <span class="s2">&quot;dehesa&quot;</span><span class="p">}})</span>
 </code></pre></div>
 <p><code>import_deployments()</code> devuelve <code>True</code> cuando la tabla se valida y queda en cola, en v1 y en v2: los cambios se
 aplican un momento después. <code>wait_for_import()</code> no puede saberlo, porque los IDs ya existen, así que
@@ -3272,21 +3310,21 @@ en <em>slug</em> el <code>deploymentID</code> de una importación (<code>"Don 01
 si el CSV falla la validación de tabla del servidor (columnas incorrectas o ausentes, un
 <code>deploymentID</code>/<code>locationID</code> que ya existe, ...), el <code>err.APIError</code> lanzado incluye los mensajes reales
 por fila, extraídos del informe de validación incrustado del servidor. Por ejemplo:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Deployment import failed (status 200): locationID &#39;dona-001&#39; already exists
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Deployment import failed (status 200): locationID &#39;dona-001&#39; already exists
 </code></pre></div>
 <h3 id="subir-un-csv-muy-grande-split">Subir un CSV muy grande: <code>split</code></h3>
 <p>Mismo mecanismo que en las <a href="../locations/#subir-un-csv-muy-grande-split">localizaciones</a>: este endpoint
 no tiene protocolo de subida por fragmentos o reanudable, así que <code>split=True</code> divide el CSV en varios
 fragmentos más pequeños y autocontenidos (cada uno repite la fila de cabecera) y los importa de uno en
 uno, esperando <code>delay</code> segundos (por defecto <code>1</code>) entre subidas:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_deployments.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes por fragmento; también es el valor por defecto</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_deployments.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes por fragmento; también es el valor por defecto</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="p">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title"><code>split</code> + <code>create_locations=True</code></p>
