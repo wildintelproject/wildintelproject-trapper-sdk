@@ -3061,6 +3061,16 @@ más abajo para la única operación de escritura que admite este componente.</p
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">Trapper ignora un filtro que no conoce</p>
+<p>Un parámetro que no es un filtro de Trapper (una errata, <code>colls</code>, <code>ordering</code>, <code>radius</code>...) se <strong>ignora sin
+error</strong> y la lista vuelve sin filtrar. El SDK conoce los filtros de cada versión de Trapper y, si pasas otro,
+emite un <code>UnknownFilterWarning</code> que lo nombra (la petición se envía igualmente). Además de los de la tabla, la
+lista aplica <code>pk</code>, <code>deployment_code</code>, <code>deployment_id</code>, <code>setup_by</code>, <code>camera_*</code>, <code>detection_distance</code>, <code>bait_type</code>,
+<code>feature_type</code>, <code>habitat</code>, <code>session</code>, <code>array</code>, <code>comments</code>, <code>date_created</code>, <code>managers</code>, <code>start_date</code>, <code>end_date</code>,
+<code>is_incomplete</code>, <code>view_quality</code>, <code>capture_method</code> y <code>status</code>, y v2 aplica también <code>in_bbox</code>. Para silenciarlo:
+<code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code>.</p>
+</div>
 <h2 id="los-seis-patrones-de-acceso">Los seis patrones de acceso</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Una página</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
