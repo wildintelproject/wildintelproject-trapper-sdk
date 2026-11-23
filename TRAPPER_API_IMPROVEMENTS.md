@@ -581,8 +581,9 @@ derived from the bait type.
 **Labels:** enhancement, api
 
 **Problem.** The same instant is written in two ways. Checked on v1 and v2: the JSON list gives
-`2024-01-01T00:00:00+01:00` and the export `2024-01-01T00:00:00+0100`, without the colon in the offset. Both
-carry the deployment's own timezone offset, not a fixed one, and the timezone name is in neither.
+`2024-01-01T00:00:00+01:00` and the export `2024-01-01T00:00:00+0100`, without the colon in the offset. The
+timezone name is in neither shape (the offset comes from the deployment's own timezone, `start_date_tz`, in the
+source *(not checked with a deployment in another timezone)*).
 
 **Proposal.** ISO 8601 with the colon in the offset in both, and the timezone name as a field.
 
