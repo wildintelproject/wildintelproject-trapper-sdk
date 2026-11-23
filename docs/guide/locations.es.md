@@ -70,6 +70,42 @@ Valen `None` cuando las coordenadas faltan, no se pueden leer o están fuera de 
 no son campos del modelo, así que `model_dump()` no cambia. Las filas de `export(file=None)` ya llevan
 `longitude` y `latitude`.
 
+## Campos: la lista y la exportación
+
+Trapper da una location en dos formas, y **ninguna tiene todos los campos**. `where()`, `get()` y `find()`
+devuelven una `Location`, construida con el JSON de Trapper; `export(file=None)` devuelve un
+`LocationExport` por cada fila de su CSV. Comprobado en Trapper v1 y v2:
+
+| Campo | `Location` (`find()`, `get()`, `where()`) | `LocationExport` (`export(file=None)`) |
+|---|---|---|
+| `pk`, `location_id`, `description`, `timezone` | sí | sí |
+| `name`, `owner`, `owner_profile`, `is_public`, `date_created` | **sí** | no |
+| `city`, `county`, `state` | **sí** (no en v2) | no |
+| `country` | sí (no en v2) | **sí** |
+| Coordenadas | `coordinates`, una cadena, y `longitude` y `latitude` leídas de ella | `longitude` y `latitude` |
+| Research project | `research_project`, su **acrónimo** | `research_project_id`, su **clave primaria** |
+| `ignore_dst` | no | **sí** |
+| `habitat` | no | **sí** |
+| `coordinate_uncertainty`, `managers` | no | no |
+
+Así que para leer el `ignore_dst` de una location, o la clave primaria de su research project, usa la
+exportación; para leer su nombre o su propietario, usa la lista. `coordinate_uncertainty` y `managers`
+existen en Trapper pero no están en ninguna de las dos, y no se pueden leer. Cuando necesites las dos
+cosas, únelas por `pk`; dale a la exportación los mismos filtros que a la lista para que devuelvan las
+mismas locations:
+
+```python
+filters = {"research_project": 3}
+by_pk = {row.pk: row for row in client.locations.export(query=filters, file=None)}
+
+for loc in client.locations.where(**filters):
+    row = by_pk.get(loc.pk)
+    print(loc.name, loc.longitude, row.ignore_dst, row.research_project_id)
+```
+
+Trapper construye cada forma con su propio serializador y su propia lista de campos, y por eso difieren
+(entrada 23 de `TRAPPER_API_IMPROVEMENTS.md`).
+
 ## Importar localizaciones (acceso de escritura)
 
 `/geomap/api/locations` es de solo lectura, así que `import_locations()` lo resuelve simulando el

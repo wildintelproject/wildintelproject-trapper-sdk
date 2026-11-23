@@ -70,6 +70,41 @@ They are `None` when the coordinates are missing, cannot be read or are out of r
 time, not fields of the model, so `model_dump()` does not change. The rows of `export(file=None)` carry
 `longitude` and `latitude` already.
 
+## Fields: the list and the export
+
+Trapper gives a location in two shapes, and **neither holds every field**. `where()`, `get()` and `find()`
+return a `Location`, built from Trapper's JSON; `export(file=None)` returns a `LocationExport` for each row of
+its CSV. Checked on Trapper v1 and v2:
+
+| Field | `Location` (`find()`, `get()`, `where()`) | `LocationExport` (`export(file=None)`) |
+|---|---|---|
+| `pk`, `location_id`, `description`, `timezone` | yes | yes |
+| `name`, `owner`, `owner_profile`, `is_public`, `date_created` | **yes** | no |
+| `city`, `county`, `state` | **yes** (not on v2) | no |
+| `country` | yes (not on v2) | **yes** |
+| Coordinates | `coordinates`, a string, and `longitude` and `latitude` read from it | `longitude` and `latitude` |
+| Research project | `research_project`, its **acronym** | `research_project_id`, its **primary key** |
+| `ignore_dst` | no | **yes** |
+| `habitat` | no | **yes** |
+| `coordinate_uncertainty`, `managers` | no | no |
+
+So to read the `ignore_dst` of a location, or the primary key of its research project, use the export; to
+read its name or its owner, use the list. `coordinate_uncertainty` and `managers` exist in Trapper but are
+in neither, and cannot be read. When you need both, join them by `pk`; give the export the same filters as
+the list so that both return the same locations:
+
+```python
+filters = {"research_project": 3}
+by_pk = {row.pk: row for row in client.locations.export(query=filters, file=None)}
+
+for loc in client.locations.where(**filters):
+    row = by_pk.get(loc.pk)
+    print(loc.name, loc.longitude, row.ignore_dst, row.research_project_id)
+```
+
+Trapper builds each shape from its own serializer, with its own list of fields, which is why they differ
+(entry 23 of `TRAPPER_API_IMPROVEMENTS.md`).
+
 ## Importing locations (write access)
 
 `/geomap/api/locations` is read-only, so `import_locations()` works around that by simulating the
