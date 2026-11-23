@@ -3028,9 +3028,10 @@ la cuenta en servidores que inician sesión por correo): un token por sí solo n
 <a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="nb">print</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div>
 <p><code>create()</code> recibe un <code>ResearchProjectCreate</code>, un modelo de Pydantic con todos los campos del
-formulario de creación (también vale un diccionario con esos campos, que se valida igual). Valida antes
-de enviar nada: recorta los textos, rechaza los campos desconocidos (una errata falla en lugar de
-ignorarse) y lanza <code>pydantic.ValidationError</code>, que es un <code>ValueError</code>, indicando el campo incorrecto.</p>
+formulario de creación. Construirlo valida los datos antes de enviar nada: recorta los textos, rechaza
+los campos desconocidos (una errata falla en lugar de ignorarse) y lanza <code>pydantic.ValidationError</code>,
+que es un <code>ValueError</code>, indicando el campo incorrecto. Para construirlo desde un diccionario (un JSON o
+un YAML, por ejemplo) usa <code>ResearchProjectCreate.model_validate(datos)</code>.</p>
 <table>
 <thead>
 <tr>

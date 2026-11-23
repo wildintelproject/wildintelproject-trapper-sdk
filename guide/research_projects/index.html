@@ -3024,10 +3024,11 @@ becomes the project's owner and administrator. On Trapper v2 it raises <code>Uns
 <a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="p">)</span>
 <a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="nb">print</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div>
-<p><code>create()</code> takes a <code>ResearchProjectCreate</code>, a Pydantic model with every field of the creation form
-(a dict with those fields works too, and is validated the same way). It validates before anything is
-sent: it trims the text, rejects unknown fields (a typo fails instead of being ignored) and raises
-<code>pydantic.ValidationError</code>, a <code>ValueError</code>, naming the field that is wrong.</p>
+<p><code>create()</code> takes a <code>ResearchProjectCreate</code>, a Pydantic model with every field of the creation form.
+Building it validates the data before anything is sent: it trims the text, rejects unknown fields (a
+typo fails instead of being ignored) and raises <code>pydantic.ValidationError</code>, a <code>ValueError</code>, naming the
+field that is wrong. To build it from a dict (a JSON or YAML file, say), use
+<code>ResearchProjectCreate.model_validate(data)</code>.</p>
 <table>
 <thead>
 <tr>

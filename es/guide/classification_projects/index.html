@@ -945,6 +945,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#crear-un-proyecto-de-clasificacion-trapper-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crear un proyecto de clasificación (Trapper v1)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Crear un proyecto de clasificación (Trapper v1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#anadir-colecciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Añadir colecciones
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quitar-una-coleccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quitar una colección
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2850,6 +2889,45 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#crear-un-proyecto-de-clasificacion-trapper-v1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crear un proyecto de clasificación (Trapper v1)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Crear un proyecto de clasificación (Trapper v1)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#anadir-colecciones" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Añadir colecciones
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quitar-una-coleccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quitar una colección
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2873,7 +2951,7 @@
 <h1 id="proyectos-de-clasificacion">Proyectos de clasificación</h1>
 <div class="admonition info">
 <p class="admonition-title">Compatibilidad con Trapper</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — el mismo código en ambas. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — salvo <code>create()</code>, <code>add_collections()</code> y <code>remove_collection()</code>, que son <strong>solo v1</strong>. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
 </div>
 <p><code>client.classification_projects</code> — proyectos de clasificación: el espacio de trabajo donde los recursos
 de una o más colecciones se clasifican con un clasificador.</p>
@@ -2978,6 +3056,66 @@ cada lado de un recurso dado, ordenados por <code>date_recorded</code>:</p>
 <a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">page</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="crear-un-proyecto-de-clasificacion-trapper-v1">Crear un proyecto de clasificación (Trapper v1)</h2>
+<p>La API REST es de solo lectura para los proyectos de clasificación, así que <code>create()</code>,
+<code>add_collections()</code> y <code>remove_collection()</code> lo resuelven simulando los formularios web clásicos de
+Trapper con autenticación por cookie/sesión, igual que
+<a href="../locations/#importar-localizaciones-acceso-de-escritura"><code>import_locations()</code></a>. En Trapper v2 lanzan
+<code>UnsupportedVersionError</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">No es un contrato estable de la API</p>
+<p>Dependen de formularios HTML sin versionar y requieren <code>user_name</code>/<code>user_password</code> (el <em>correo</em> de
+la cuenta en servidores que inician sesión por correo): un token por sí solo no puede
+autenticarlos.</p>
+</div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">trapper_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassificationProjectCreate</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">project</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">ClassificationProjectCreate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Doñana 2026&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">classificator</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">)</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>        <span class="c1"># 12 Doñana 2026 Ongoing</span>
+</code></pre></div>
+<p><code>create()</code> recibe un <code>ClassificationProjectCreate</code>, un modelo de Pydantic. Construirlo valida los datos
+antes de enviar nada: un nombre, y el research project y el clasificador, cada uno como el objeto que
+devuelve el SDK (<code>ResearchProject</code>, <code>ClassificatorRecord</code>) o como su clave primaria, de modo que las
+creaciones se encadenan:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">rp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">research_projects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ResearchProjectCreate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Doñana mammals&quot;</span><span class="p">,</span> <span class="n">acronym</span><span class="o">=</span><span class="s2">&quot;DONMAM&quot;</span><span class="p">))</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">clf</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classificators</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">ClassificatorCreate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Iberian mammals&quot;</span><span class="p">))</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">project</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">ClassificationProjectCreate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Doñana 2026&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="n">rp</span><span class="p">,</span> <span class="n">classificator</span><span class="o">=</span><span class="n">clf</span><span class="p">)</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">)</span>
+</code></pre></div>
+<p>Para construir el modelo desde un diccionario usa <code>ClassificationProjectCreate.model_validate(datos)</code>. El
+proyecto empieza <em>en curso</em> (<code>Ongoing</code>), y la cuenta que inicia sesión pasa a ser su propietaria y
+administradora. El research project debe ser uno que la cuenta pueda editar; si no,
+Trapper rechaza el formulario y <code>create()</code> lanza <code>APIError</code> indicando el campo:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Classification project creation failed (status 200): research_project: Select a valid choice. That choice is not one of the available choices.
+</code></pre></div>
+<p>Devuelve el proyecto creado, o <code>None</code> si no se puede leer de vuelta (o si se rechazó el formulario con
+<code>raise_on_error=False</code>).</p>
+<h3 id="anadir-colecciones">Añadir colecciones</h3>
+<p>Un proyecto nuevo está vacío. <code>add_collections()</code> le vincula <em>colecciones de almacenamiento</em>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">links</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">add_collections</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">print</span><span class="p">([(</span><span class="n">link</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">collection_pk</span><span class="p">)</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">])</span>
+</code></pre></div>
+<ul>
+<li>Los números que pasas son las claves primarias de las colecciones de almacenamiento
+  (<code>Collection.pk</code>), como en el resto del SDK. El SDK calcula por sí solo los registros de vínculo que
+  necesita Trapper.</li>
+<li><strong>Un proyecto de clasificación solo puede usar las colecciones de su research project</strong>, y la cuenta
+  debe administrar ese research project. Una colección que no esté ahí lanza <code>ValueError</code> antes de
+  enviar nada. Vincular una colección a un research project es una acción web que el SDK no cubre.</li>
+<li>Una colección que ya está en el proyecto se deja como está, así que la llamada se puede repetir.</li>
+<li>Devuelve el vínculo del proyecto para cada colección.</li>
+</ul>
+<h3 id="quitar-una-coleccion">Quitar una colección</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">remove_collection</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>    <span class="c1"># True; False si no estaba vinculada</span>
+</code></pre></div>
+<div class="admonition danger">
+<p class="admonition-title">Borra clasificaciones</p>
+<p>Desvincular es irreversible, y las clasificaciones hechas sobre esa colección <strong>en este proyecto se
+borran junto con el vínculo</strong>. La colección y sus recursos no se tocan.</p>
+</div>
 
 
 
