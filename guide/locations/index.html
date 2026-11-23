@@ -702,6 +702,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#filtering-by-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering by area
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fields-the-list-and-the-export" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2886,6 +2897,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#filtering-by-area" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Filtering by area
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#fields-the-list-and-the-export" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3087,6 +3109,28 @@ below for the one write operation this component supports.</p>
 ±180, latitude beyond ±90): one odd location does not break a listing. They are read from <code>coordinates</code> each
 time, not fields of the model, so <code>model_dump()</code> does not change. The rows of <code>export(file=None)</code> carry
 <code>longitude</code> and <code>latitude</code> already.</p>
+<h2 id="filtering-by-area">Filtering by area</h2>
+<p>Trapper's location list has <strong>no spatial filter</strong>: <code>in_bbox</code> and <code>radius</code> are ignored without an error, and every
+location comes back (the GeoJSON endpoint applies them, but only on Trapper v1). <code>in_area()</code> filters on the
+client instead, using the <a href="#coordinates">coordinates</a> as numbers:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># a bounding box: (min_lon, min_lat, max_lon, max_lat)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">in_area</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">7.0</span><span class="p">,</span> <span class="mf">36.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.5</span><span class="p">,</span> <span class="mf">37.5</span><span class="p">)):</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">latitude</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1"># a circle: the centre as (longitude, latitude), the radius in metres, plus the usual filters</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">near</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">in_area</span><span class="p">(</span><span class="n">center</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">6.44</span><span class="p">,</span> <span class="mf">37.05</span><span class="p">),</span> <span class="n">radius</span><span class="o">=</span><span class="mi">5_000</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</code></pre></div>
+<p>Give a box, a circle or both (a location must then be inside both). The edges of the box are inside, a box
+with <code>min_lon</code> greater than <code>max_lon</code> crosses the antimeridian (±180°), and the distances are great-circle
+(haversine) ones. Any other keyword is an ordinary filter of the list, sent to the server, so it narrows down
+what has to be read. A wrong area (nothing given, <code>center</code> without <code>radius</code>, out of range) raises
+<code>ValueError</code> before any request.</p>
+<div class="admonition warning">
+<p class="admonition-title">It reads every page</p>
+<p>The server cannot do the filtering, so <code>in_area()</code> reads all the locations that match the other filters and
+keeps the ones in the area. On a server with many locations, pass <code>research_project</code> or <code>owner</code>. A location
+whose coordinates cannot be read is left out.</p>
+</div>
 <h2 id="fields-the-list-and-the-export">Fields: the list and the export</h2>
 <p>Trapper gives a location in two shapes, and <strong>neither holds every field</strong>. <code>where()</code>, <code>get()</code> and <code>find()</code>
 return a <code>Location</code>, built from Trapper's JSON; <code>export(file=None)</code> returns a <code>LocationExport</code> for each row of
@@ -3151,12 +3195,12 @@ its CSV. Checked on Trapper v1 and v2:</p>
 read its name or its owner, use the list. <code>coordinate_uncertainty</code> and <code>managers</code> exist in Trapper but are
 in neither, and cannot be read. When you need both, join them by <code>pk</code>; give the export the same filters as
 the list so that both return the same locations:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;research_project&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">by_pk</span> <span class="o">=</span> <span class="p">{</span><span class="n">row</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span> <span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">)}</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">**</span><span class="n">filters</span><span class="p">):</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>    <span class="n">row</span> <span class="o">=</span> <span class="n">by_pk</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">ignore_dst</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">research_project_id</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;research_project&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">by_pk</span> <span class="o">=</span> <span class="p">{</span><span class="n">row</span><span class="o">.</span><span class="n">pk</span><span class="p">:</span> <span class="n">row</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">)}</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">**</span><span class="n">filters</span><span class="p">):</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">row</span> <span class="o">=</span> <span class="n">by_pk</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="o">.</span><span class="n">longitude</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">ignore_dst</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">research_project_id</span><span class="p">)</span>
 </code></pre></div>
 <p>Trapper builds each shape from its own serializer, with its own list of fields, which is why they differ
 (entry 23 of <code>TRAPPER_API_IMPROVEMENTS.md</code>).</p>
@@ -3175,11 +3219,11 @@ page can break it silently. It requires <code>user_name</code>/<code>user_passwo
 address on servers with <code>ACCOUNT_LOGIN_METHODS = {"email"}</code>) — a token alone cannot
 authenticate it. See the full caveat in the method's docstring before relying on it.</p>
 </div>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>       <span class="c1"># required — see note below</span>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span> <span class="c1"># required — see note below</span>
-<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>       <span class="c1"># required — see note below</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span> <span class="c1"># required — see note below</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="p">)</span>
 </code></pre></div>
 <div class="admonition note">
 <p class="admonition-title"><code>research_project</code> and <code>timezone</code> are required, despite the server's fields saying otherwise</p>
@@ -3203,8 +3247,8 @@ authenticate it. See the full caveat in the method's docstring before relying on
 table was validated and queued, not that the rows exist yet. Neither version exposes the import
 task through the API, so <code>wait_for_import()</code> checks the outcome instead — it polls until every
 <code>locationID</code> is listed:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">)</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;don-01&quot;</span><span class="p">,</span> <span class="s2">&quot;don-02&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># raises TimeoutError if missing</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;locations.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;don-01&quot;</span><span class="p">,</span> <span class="s2">&quot;don-02&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># raises TimeoutError if missing</span>
 </code></pre></div>
 <p>Pass <code>raise_on_timeout=False</code> to get <code>False</code> back instead. It works the same on v1.</p>
 <p>There's also a ready-to-run script: <a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/import_locations.py"><code>examples/import_locations.py</code></a>.</p>
@@ -3212,7 +3256,7 @@ task through the API, so <code>wait_for_import()</code> checks the outcome inste
 <p>If the CSV fails the server's table validation (wrong/missing columns, a <code>locationID</code> that already
 exists in this research project, ...), the raised <code>err.APIError</code> includes the actual per-row
 messages, not just the generic banner — e.g.:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Location import failed (status 200): locationID &#39;dona-001&#39; already exists; longitude must be a number
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Location import failed (status 200): locationID &#39;dona-001&#39; already exists; longitude must be a number
 </code></pre></div>
 <p>The server renders those details as a JSON blob for a JS widget, not as plain HTML text — see
 <a href="../../api/api_client_base/"><code>APIClientBase._extract_html_error_text</code></a> for how this is parsed out.</p>
@@ -3221,14 +3265,14 @@ messages, not just the generic banner — e.g.:</p>
 (a separate, true chunked uploader for a different endpoint), it's a plain single-request form POST.
 If a large CSV gets rejected or times out, pass <code>split=True</code> to break it into several smaller,
 self-contained CSV chunks (each repeating the header row) and import them one request at a time:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>        <span class="c1"># seconds between chunk uploads — defaults to 1</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes per chunk — this is also the default</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>        <span class="c1"># seconds between chunk uploads — defaults to 1</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes per chunk — this is also the default</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">)</span>
 </code></pre></div>
 <p><code>split</code> is not compatible with <code>gpx_file</code> (raises <code>ValueError</code>) — splitting only makes sense for
 the CSV path, and the server rejects a request carrying both file types anyway. With
@@ -3240,16 +3284,16 @@ uploading the rest; with <code>raise_on_error=False</code> it uploads every chun
 timeout (rather than a normal error response) before the server even gets to respond. That's
 retried automatically — using <a href="https://github.com/jd/tenacity">tenacity</a>, with exponential
 backoff — up to <code>retry_attempts</code> times:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># try smaller chunks if the server keeps timing out</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">retry_attempts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># default is 3</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">retry_min_wait</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># seconds, default 1</span>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="n">retry_max_wait</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>      <span class="c1"># seconds, default 10</span>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">import_locations</span><span class="p">(</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_locations.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">128</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># try smaller chunks if the server keeps timing out</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="n">retry_attempts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>       <span class="c1"># default is 3</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="n">retry_min_wait</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># seconds, default 1</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>    <span class="n">retry_max_wait</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>      <span class="c1"># seconds, default 10</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="p">)</span>
 </code></pre></div>
 <p>Only network-level failures (timeouts, connection resets, ...) are retried — never an HTTP error
 response (a 4xx/5xx from the server is a validation failure, not something a retry fixes). Set
