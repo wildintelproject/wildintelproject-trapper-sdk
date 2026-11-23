@@ -5,14 +5,18 @@
 - Python **3.10** or newer
 - A running Trapper instance with API access
 
+!!! note "Not published on PyPI"
+    The package is installed from its GitHub repository: `pip install wildintel-trapper-sdk` and
+    `uv add wildintel-trapper-sdk` find nothing, because there is no such package on PyPI.
+
 ## Install with pip
 
 <div class="termy">
 
 ```console
-$ pip install wildintel-trapper-sdk
+$ pip install git+https://github.com/wildintelproject/wildintelproject-trapper-sdk
 ---> 100%
-Successfully installed wildintel-trapper-sdk
+Successfully installed wildintel-trapper-sdk-0.1.0
 ```
 
 </div>
@@ -22,13 +26,40 @@ Successfully installed wildintel-trapper-sdk
 <div class="termy">
 
 ```console
-$ uv add wildintel-trapper-sdk
+$ uv add git+https://github.com/wildintelproject/wildintelproject-trapper-sdk
 Resolved 1 package in 340ms
 Installed 1 package in 12ms
- + wildintel-trapper-sdk==0.1.0
+ + wildintel-trapper-sdk==0.1.0 (from git+https://github.com/wildintelproject/wildintelproject-trapper-sdk)
 ```
 
 </div>
+
+## Install a release
+
+By default you get the latest code of the repository. To install a
+[release](https://github.com/wildintelproject/wildintelproject-trapper-sdk/releases), name its tag (`vX.Y.Z`):
+
+```bash
+pip install git+https://github.com/wildintelproject/wildintelproject-trapper-sdk@vX.Y.Z
+uv add git+https://github.com/wildintelproject/wildintelproject-trapper-sdk --tag vX.Y.Z
+```
+
+Or install the wheel that each release carries, from its URL on the releases page:
+
+```bash
+pip install https://github.com/wildintelproject/wildintelproject-trapper-sdk/releases/download/vX.Y.Z/wildintel_trapper_sdk-X.Y.Z-py3-none-any.whl
+```
+
+## Install the `upload` extra
+
+Uploading packages to a Trapper v1 server needs [aiofiles](https://github.com/Tinche/aiofiles) and
+[BLAKE3](https://github.com/oconnor663/blake3-py), which the `upload` extra brings. (Trapper v2 uploads do not
+need it.)
+
+```bash
+pip install "wildintel-trapper-sdk[upload] @ git+https://github.com/wildintelproject/wildintelproject-trapper-sdk"
+uv add "wildintel-trapper-sdk[upload] @ git+https://github.com/wildintelproject/wildintelproject-trapper-sdk"
+```
 
 ## Install for development
 
