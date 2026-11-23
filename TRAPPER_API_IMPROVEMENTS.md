@@ -38,6 +38,7 @@ the SDK does in the meantime.
 | 23 | Return every field of a location, and its related objects as keys | geomap |
 | 24 | Return the coordinates of a location as numbers | geomap |
 | 25 | Filter the list of locations by area | geomap |
+| 26 | Reject the filters and the ordering the list does not apply | cross-cutting |
 
 ---
 
@@ -395,7 +396,10 @@ with a redirect, and a JSON body for every error under the API, including `404`.
 **Problem.** `LocationViewSet` is a `PaginatedReadOnlyModelViewSet`: `OPTIONS geomap/api/locations` answers
 `Allow: GET, HEAD, OPTIONS`. A location can only be created in bulk, by the CSV import form (#8), and can
 only be edited or deleted in the web map (`update_data` points to `/geomap/map/?locations=16&edit=true`).
-The import creates locations; it does not update the ones that exist.
+The import creates locations; it does not update the ones that exist: it only reads `locationID`, `longitude`,
+`latitude` and a few optional columns, ignores `_id`, and rejects a `locationID` that exists in the research
+project. The **deployment** import does update, with its `update` option and an `_id` column (*checked in the
+source, v1*), so the two imports behave differently.
 
 **Proposal.** `POST geomap/api/locations`, and `PATCH`/`PUT`/`DELETE geomap/api/locations/<pk>`, with token
 authentication and the permissions the web views already check (owner and managers). Fields: `location_id`,
@@ -459,14 +463,39 @@ endpoint is wrapped by `client.locations_geojson` (Trapper v1 only).
 
 **Labels:** enhancement, api
 
-**Problem.** `LocationFilter` excludes `coordinates`, so the list has no spatial filter: `?in_bbox=0,0,1,1` and
-`?radius=0,0,1` are **ignored silently** and return every location (16 of 16), while the GeoJSON endpoint
-applies them and returns none. The spatial filters exist only on the endpoint that Trapper v2 removed.
+**Problem.** `LocationFilter` excludes `coordinates`, so the list has no complete spatial filter. Checked live:
 
-**Proposal.** Accept `in_bbox` and `radius` on the list, and keep them when the GeoJSON endpoint goes.
+| | `in_bbox` | `radius` |
+|---|---|---|
+| v1, `GET geomap/api/locations` | **ignored silently** (`0,0,1,1` returns 16 of 16) | **ignored silently** |
+| v2, `GET geomap/api/locations` | applied, edges included (`-7,36,-5,38` returns 13 of 15) | **ignored silently** |
+| v1, GeoJSON endpoint | applied | applied |
 
-**Workaround in the SDK.** `client.locations_geojson.get(in_bbox=..., radius=...)` on Trapper v1. On v2 there is
-no spatial filter.
+The only endpoint that applies `radius` is the GeoJSON one, which Trapper v2 removed.
+
+**Proposal.** Apply `in_bbox` and `radius` on the list in every version, and keep them when the GeoJSON endpoint
+goes.
+
+**Workaround in the SDK.** `client.locations.in_area(bbox=..., center=..., radius=...)` filters on the client, in
+both versions (on v2 it also sends the box as `in_bbox`, to read fewer pages), and the SDK warns when a filter
+the list does not apply is passed (see #26). `client.locations_geojson.get(in_bbox=..., radius=...)` still works
+on Trapper v1.
+
+## 26. Reject the filters and the ordering the list does not apply
+
+**Labels:** enhancement, api, cross-cutting
+
+**Problem.** The list endpoints answer `200` with **every** item when a query parameter is not a filter they
+know, so a typo or a filter that exists only in the other version looks like a success. Checked live on the
+locations list in v1 and v2: `?foo=bar`, `?ignoreDST=true`, `?radius=0,0,1` and `?country=ZZ` on v2 change
+nothing. `?ordering=-name` and `?ordering=bogus` also change nothing: the list is not orderable, and says
+nothing. (A filter with an invalid value is answered with a `400` and the field, as it should.)
+
+**Proposal.** Answer `400` with the names of the unknown parameters, or at least list the accepted filters in the
+`OPTIONS` response, and either implement `ordering` or reject it.
+
+**Workaround in the SDK.** For locations, `UnknownFilterWarning` names the filters the server would ignore; the
+filters each version applies are listed in the locations guide. Other endpoints are not checked yet.
 
 ---
 
