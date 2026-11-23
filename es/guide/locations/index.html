@@ -3073,6 +3073,16 @@ más abajo para la única operación de escritura que admite este componente.</p
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">Trapper ignora un filtro que no conoce</p>
+<p>Un parámetro que no está en esta tabla, o que una errata convirtió en otro nombre, se <strong>ignora sin
+error</strong> y la lista vuelve sin filtrar. El SDK conoce los filtros de cada versión de Trapper y, si pasas
+otro, emite un <code>UnknownFilterWarning</code> que lo nombra (la petición se envía igualmente). Además de los de la
+tabla, la lista aplica <code>pk</code>, <code>location_id</code>, <code>is_public</code>, <code>ignore_DST</code>, <code>coordinate_uncertainty</code>,
+<code>date_created</code>, <code>managers</code> y <code>research_projects_member</code> en las dos versiones, y <code>country</code>, <code>state</code>,
+<code>county</code> y <code>city</code> solo en v1 (<code>locations_map</code> también solo en v1). <code>in_bbox</code> solo lo aplica v2; <code>radius</code> y
+<code>ordering</code> ninguna. Para silenciarlo: <code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code>.</p>
+</div>
 <h2 id="los-seis-patrones-de-acceso">Los seis patrones de acceso</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Una página</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>

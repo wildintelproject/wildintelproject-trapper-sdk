@@ -3071,6 +3071,16 @@ below for the one write operation this component supports.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">Trapper ignores a filter it does not know</p>
+<p>A parameter that is not in this table, or that a typo turned into another name, is <strong>ignored without an
+error</strong>, and the list comes back unfiltered. The SDK knows the filters of each Trapper version and, when
+you pass another one, emits an <code>UnknownFilterWarning</code> that names it (the request is still sent). Besides
+those in the table, the list applies <code>pk</code>, <code>location_id</code>, <code>is_public</code>, <code>ignore_DST</code>, <code>coordinate_uncertainty</code>,
+<code>date_created</code>, <code>managers</code> and <code>research_projects_member</code> on both versions, and <code>country</code>, <code>state</code>, <code>county</code>
+and <code>city</code> on v1 only (<code>locations_map</code> also on v1 only). <code>in_bbox</code> is applied by v2 only; <code>radius</code> and
+<code>ordering</code> by neither. To silence it: <code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code>.</p>
+</div>
 <h2 id="the-six-access-patterns">The six access patterns</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># One page</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
