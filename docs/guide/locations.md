@@ -81,9 +81,10 @@ time, not fields of the model, so `model_dump()` does not change. The rows of `e
 
 ## Filtering by area
 
-Trapper's location list has **no spatial filter**: `in_bbox` and `radius` are ignored without an error, and every
-location comes back (the GeoJSON endpoint applies them, but only on Trapper v1). `in_area()` filters on the
-client instead, using the [coordinates](#coordinates) as numbers:
+Trapper's location list has no usable spatial filter. **Trapper v1** ignores `in_bbox` and `radius` without an
+error and returns every location (the GeoJSON endpoint applies them, but only on v1); **v2** applies `in_bbox`
+but ignores `radius`. `in_area()` filters on the client instead, with the [coordinates](#coordinates) as
+numbers, so it works the same on both:
 
 ```python
 # a bounding box: (min_lon, min_lat, max_lon, max_lat)
@@ -101,8 +102,9 @@ what has to be read. A wrong area (nothing given, `center` without `radius`, out
 `ValueError` before any request.
 
 !!! warning "It reads every page"
-    The server cannot do the filtering, so `in_area()` reads all the locations that match the other filters and
-    keeps the ones in the area. On a server with many locations, pass `research_project` or `owner`. A location
+    The server cannot do all the filtering, so `in_area()` reads the locations that match the other filters and
+    keeps the ones in the area. On v2 a box is also sent to the server (`in_bbox`), and only the locations in it
+    are read, unless it crosses the antimeridian; on v1, and for a circle alone, every page is read. On a server with many locations, pass `research_project` or `owner`. A location
     whose coordinates cannot be read is left out.
 
 ## Fields: the list and the export

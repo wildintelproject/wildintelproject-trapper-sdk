@@ -81,9 +81,10 @@ no son campos del modelo, así que `model_dump()` no cambia. Las filas de `expor
 
 ## Filtrar por área
 
-La lista de locations de Trapper **no tiene filtro espacial**: `in_bbox` y `radius` se ignoran sin error y
-vuelven todas las locations (el endpoint GeoJSON sí los aplica, pero solo en Trapper v1). `in_area()` filtra
-en el cliente, con las [coordenadas](#coordenadas) como números:
+La lista de locations de Trapper no tiene un filtro espacial utilizable. **Trapper v1** ignora `in_bbox` y
+`radius` sin error y devuelve todas las locations (el endpoint GeoJSON sí los aplica, pero solo en v1); **v2**
+aplica `in_bbox` pero ignora `radius`. `in_area()` filtra en el cliente, con las
+[coordenadas](#coordenadas) como números, así que funciona igual en las dos:
 
 ```python
 # un rectángulo: (min_lon, min_lat, max_lon, max_lat)
@@ -101,8 +102,10 @@ envía al servidor y reduce lo que hay que leer. Un área incorrecta (sin nada, 
 rango) lanza `ValueError` antes de hacer ninguna petición.
 
 !!! warning "Lee todas las páginas"
-    El servidor no puede filtrar, así que `in_area()` lee todas las locations que cumplen los otros filtros y se
-    queda con las del área. En un servidor con muchas locations, pasa `research_project` u `owner`. Una location
+    El servidor no puede hacer todo el filtrado, así que `in_area()` lee las locations que cumplen los otros
+    filtros y se queda con las del área. En v2 el rectángulo se envía además al servidor (`in_bbox`) y solo se
+    leen las locations que caen dentro, salvo que cruce el antimeridiano; en v1, y con un círculo solo, se leen
+    todas las páginas. En un servidor con muchas locations, pasa `research_project` u `owner`. Una location
     cuyas coordenadas no se pueden leer queda fuera.
 
 ## Campos: la lista y la exportación
