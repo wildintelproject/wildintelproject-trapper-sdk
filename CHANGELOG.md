@@ -85,6 +85,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `Location.longitude` and `Location.latitude`: the coordinates of a location as numbers. Trapper returns them as
   one string (`"-6.44, 37.05"`, longitude first, in v1 and v2); `coordinates` keeps it as it comes. They are
   `None` when the string is missing, cannot be read or is out of range.
+- `deployments.wait_for_update({deployment_id: {field: value}})` (issue #47): waits until an update import
+  (`import_deployments(update=True)`) has been applied. The import returns `True` when the table is queued and
+  `wait_for_import()` cannot tell an update, because the IDs exist already. The guide now describes the round trip
+  export (`raw=True`), edit, import with `update=True`, checked on v1 and v2.
 - `client.locations.in_area(bbox=..., center=..., radius=..., **filters)` (issue #34): the locations inside a
   bounding box or a circle (radius in metres). Trapper v1's list ignores `in_bbox` and `radius` silently and
   v2's ignores `radius`, so the SDK filters on the client; on v2 a box is also sent as `in_bbox` (issue #40) so

@@ -177,6 +177,44 @@ client.deployments.wait_for_import(["DON01-2024A", "DON01-2024B"], timeout=60)  
 
 Pasa `raise_on_timeout=False` para recibir `False` en su lugar. Funciona igual en v1.
 
+### Actualizar despliegues
+
+Trapper no tiene un endpoint para editar un despliegue, pero la importación actualiza los que ya existen cuando
+recibe `update=True` y una columna `_id` con sus claves primarias. El CSV que exporta Trapper tiene esa columna,
+así que la forma de corregir despliegues es **exportar, editar, importar**:
+
+```python
+import csv
+
+# 1. Exporta los despliegues tal como los envía Trapper (raw=True conserva la columna _id y la cabecera)
+path = client.deployments.export(file="deployments.csv", raw=True, research_project=7)
+
+# 2. Edita el CSV: cambia las celdas que quieras, conserva la cabecera y el _id
+with open(path, newline="", encoding="utf-8") as f:
+    rows = list(csv.DictReader(f))
+for row in rows:
+    if row["deploymentID"] == "don01-2024a":
+        row["cameraHeight"] = "1.25"
+        row["habitat"] = "dehesa"
+with open("edited.csv", "w", newline="", encoding="utf-8") as f:
+    writer = csv.DictWriter(f, fieldnames=list(rows[0]))
+    writer.writeheader()
+    writer.writerows(rows)
+
+# 3. Impórtalo con update=True y espera a que estén los valores nuevos
+client.deployments.import_deployments(
+    file="edited.csv", research_project=7, timezone="Europe/Madrid", update=True,
+)
+client.deployments.wait_for_update({"don01-2024a": {"camera_height": 1.25, "habitat": "dehesa"}})
+```
+
+`import_deployments()` devuelve `True` cuando la tabla se valida y queda en cola, en v1 y en v2: los cambios se
+aplican un momento después. `wait_for_import()` no puede saberlo, porque los IDs ya existen, así que
+`wait_for_update()` consulta la exportación hasta que cada despliegue tiene los valores que le das, con los
+nombres de campo de `DeploymentExport` (los números se comparan con tolerancia). Lanza `TimeoutError`, o devuelve
+`False` con `raise_on_timeout=False`, si no llegan en `timeout` segundos. Dale el ID guardado: Trapper convierte
+en *slug* el `deploymentID` de una importación (`"Don 01"` se guarda como `"don-01"`). Comprobado en Trapper v1 y v2. Como en el resto de las importaciones, la cuenta debe ser staff en v2.
+
 ### Qué obtienes en la excepción cuando se rechaza el CSV
 
 Igual que en las [localizaciones](locations.md#que-obtienes-en-la-excepcion-cuando-se-rechaza-el-csv):
