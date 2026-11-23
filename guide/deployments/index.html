@@ -831,6 +831,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#updating-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating deployments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-you-get-in-the-exception-when-the-csv-itself-is-rejected" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2931,6 +2942,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#updating-deployments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Updating deployments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-you-get-in-the-exception-when-the-csv-itself-is-rejected" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3202,26 +3224,60 @@ task through the API, so <code>wait_for_import()</code> checks the outcome inste
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">wait_for_import</span><span class="p">([</span><span class="s2">&quot;DON01-2024A&quot;</span><span class="p">,</span> <span class="s2">&quot;DON01-2024B&quot;</span><span class="p">],</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>   <span class="c1"># raises TimeoutError if missing</span>
 </code></pre></div>
 <p>Pass <code>raise_on_timeout=False</code> to get <code>False</code> back instead. It works the same on v1.</p>
+<h3 id="updating-deployments">Updating deployments</h3>
+<p>Trapper has no endpoint to edit a deployment, but the import updates the ones that exist when it gets
+<code>update=True</code> and an <code>_id</code> column with their primary keys. The CSV that Trapper exports has that column, so the
+way to correct deployments is <strong>export, edit, import</strong>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># 1. Export the deployments exactly as Trapper sends them (raw=True keeps the _id column and the header)</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">path</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;deployments.csv&quot;</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># 2. Edit the CSV: change the cells you want, keep the header and the _id</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;deploymentID&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;don01-2024a&quot;</span><span class="p">:</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>        <span class="n">row</span><span class="p">[</span><span class="s2">&quot;cameraHeight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1.25&quot;</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        <span class="n">row</span><span class="p">[</span><span class="s2">&quot;habitat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;dehesa&quot;</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;edited.csv&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">writerows</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a><span class="c1"># 3. Import it with update=True, and wait until the new values are there</span>
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span>
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;edited.csv&quot;</span><span class="p">,</span> <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span> <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a><span class="p">)</span>
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">wait_for_update</span><span class="p">({</span><span class="s2">&quot;don01-2024a&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;camera_height&quot;</span><span class="p">:</span> <span class="mf">1.25</span><span class="p">,</span> <span class="s2">&quot;habitat&quot;</span><span class="p">:</span> <span class="s2">&quot;dehesa&quot;</span><span class="p">}})</span>
+</code></pre></div>
+<p><code>import_deployments()</code> returns <code>True</code> when the table is validated and queued, on v1 and v2: the changes are
+applied a moment later. <code>wait_for_import()</code> cannot tell, because the IDs exist already, so
+<code>wait_for_update()</code> polls the export until each deployment has the values you give, with the field names of
+<code>DeploymentExport</code> (numbers are compared with a tolerance). It raises <code>TimeoutError</code>, or returns <code>False</code> with
+<code>raise_on_timeout=False</code>, if they do not arrive in <code>timeout</code> seconds. Give it the stored ID: Trapper slugifies
+the <code>deploymentID</code> of an import (<code>"Don 01"</code> is stored as <code>"don-01"</code>). Checked on Trapper v1 and v2. As on the rest of the
+imports, the account must be staff on v2.</p>
 <h3 id="what-you-get-in-the-exception-when-the-csv-itself-is-rejected">What you get in the exception when the CSV itself is rejected</h3>
 <p>Same as <a href="../locations/#what-you-get-in-the-exception-when-the-csv-itself-is-rejected">locations</a>:
 if the CSV fails the server's table validation (wrong/missing columns, a <code>deploymentID</code>/<code>locationID</code>
 that already exists, ...), the raised <code>err.APIError</code> includes the actual per-row messages parsed out
 of the server's embedded validation report, e.g.:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Deployment import failed (status 200): locationID &#39;dona-001&#39; already exists
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Deployment import failed (status 200): locationID &#39;dona-001&#39; already exists
 </code></pre></div>
 <h3 id="uploading-a-very-large-csv-split">Uploading a very large CSV: <code>split</code></h3>
 <p>Same mechanism as <a href="../locations/#uploading-a-very-large-csv-split">locations</a>: there's no
 chunked/resumable upload protocol on this endpoint, so <code>split=True</code> breaks the CSV into several
 smaller, self-contained chunks (each repeating the header row) and imports them one request at a
 time, sleeping <code>delay</code> seconds (default <code>1</code>) between uploads:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_deployments.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes per chunk — this is also the default</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">client</span><span class="o">.</span><span class="n">deployments</span><span class="o">.</span><span class="n">import_deployments</span><span class="p">(</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">file</span><span class="o">=</span><span class="s2">&quot;huge_deployments.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">timezone</span><span class="o">=</span><span class="s2">&quot;Europe/Madrid&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">research_project</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">delay</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">512</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">,</span>  <span class="c1"># bytes per chunk — this is also the default</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="p">)</span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title"><code>split</code> + <code>create_locations=True</code></p>
