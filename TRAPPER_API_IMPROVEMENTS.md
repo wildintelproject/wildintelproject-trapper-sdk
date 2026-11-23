@@ -763,15 +763,16 @@ view that does not take the token (entry 36), so the files of a deployment, of a
 take one request each, with a web session. Trapper v1 does have a way, only in its web page: marking resources in
 the list and choosing *Generate data package* (`POST storage/resource/data-package/`, with `resources_pks`,
 `package_name` and `metadata`). Checked on v1 with two resources: it answers `{"success": true, "msg": "...your data
-package is being generated now."}`, a celery task builds a ZIP (`<pk>_<name>.<ext>` for each file, and a
-`00_METADATA.csv` with `metadata`), and the ZIP is served at `/accounts/data-package/<pk>/` with a web session. But:
+package is being generated now."}`, a celery task builds a ZIP, and the ZIP is served at
+`/accounts/data-package/<pk>/` with a web session (its files are `<pk>_<name>.<ext>`, plus a `00_METADATA.csv` with
+`metadata`, *from the source*). But:
 
 - It takes a **list of primary keys**, not filters: the resources of a deployment, a collection or a date range have to
   be listed first.
 - The whole package is **refused above `DATA_PACKAGE_MAX_SIZE`**, 10 MB by default (*from the source*): about two
   hundred camera-trap photos.
 - The answer **does not say which package it is**: no id, no task id. The packages of an account are listed only on its
-  profile page, so there is nothing to poll and nothing to download from a script.
+  profile page *(from the source)*, so there is nothing to poll and nothing to download from a script.
 - It is a web page: no token, and **on v2 it does not exist** (`404`).
 
 **Proposal.** An API endpoint, in v1 and v2, that takes the filters of the resource list (`deployments`,
@@ -826,8 +827,7 @@ the other fields cannot be read.
 **Problem.** Three endpoints list collections and answer in three forms (checked on v1 and v2).
 `storage/api/collections` and `collections_ondemand` are paginated with the nine fields; `collections_map` has the
 same fields but is **one plain list** and ignores `page_size`; `collections_append` is a plain list of only `pk` and
-`name`. `collections_ondemand` answers `404` on v2. The detail view takes `collections_map/<pk>` and
-`collections_append/<pk>`, and `collections/<pk>/` with a trailing slash is a `404` (see #21).
+`name`. `collections_ondemand` answers `404` on v2. `collections_map/<pk>` answers the detail too, and `collections/<pk>/` with a trailing slash is a `404` (see #21).
 
 **Proposal.** One shape (the paginated one) for all, `fields` to choose what a caller needs, and the same endpoints in
 v1 and v2.
@@ -862,11 +862,11 @@ the way Trapper reads each one; `UnknownFilterWarning` names what the list ignor
 - **Nothing says when the task ends or how**: no endpoint for its state (#9). A file that is skipped (an identical one,
   or an extension Trapper does not accept) goes only to a `.log` next to the ZIP *(from the source)*.
 - On v2 the **first call can answer `404`** ("The requested files were not found in your upload directory") because
-  the uploaded files are moved into place a moment after the upload ends (seen once in six runs). v1 answers the same
+  the uploaded files are moved into place a moment after the upload ends (seen once in a handful of runs). v1 answers the same
   with another message.
-- The request names the files by their names in a folder of the account: no way to say which upload they are, and the
-  YAML needs a **classification** project (`project_id`) and deployments that exist, with the same timezone, which the
-  answer only checks when the task has started. The format is in `collection_schema.yaml`, not in the API.
+- The request names the files by their names in a folder of the account: no way to say which upload they are. The YAML
+  needs a **classification** project (`project_id`) and deployments that exist, with the same timezone; a problem is a
+  `400` with the details in `data.errors`, but the format itself is in `collection_schema.yaml`, not in the API.
 
 **Proposal.** `GET .../tasks/<id>/` with the state and the per-file errors, an upload that is complete (and visible)
 when its last request answers, and the schema of the YAML served by the API.
