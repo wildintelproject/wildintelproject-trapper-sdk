@@ -900,6 +900,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#members" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Members
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-it-returns" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2844,6 +2855,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#members" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Members
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#what-it-returns" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3092,6 +3114,36 @@ member, its number or its label, and anything else is rejected with the list of 
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">BaitUse</span><span class="o">.</span><span class="n">SCENT</span><span class="o">.</span><span class="n">label</span>      <span class="c1"># &quot;scent&quot;</span>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">ResearchProjectCreate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="n">acronym</span><span class="o">=</span><span class="s2">&quot;ABC&quot;</span><span class="p">,</span> <span class="n">bait_use</span><span class="o">=</span><span class="s2">&quot;scent&quot;</span><span class="p">)</span>    <span class="c1"># same as BaitUse.SCENT or 2</span>
 </code></pre></div>
+<h3 id="members">Members</h3>
+<p>The creator becomes the project's administrator. <code>members</code> adds the other users that join it, each
+with a role:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">trapper_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResearchProjectCreate</span><span class="p">,</span> <span class="n">ResearchProjectMember</span><span class="p">,</span> <span class="n">ResearchProjectRoleType</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">ana</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">users</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="s2">&quot;ana&quot;</span><span class="p">)))</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="n">project</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">research_projects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">ResearchProjectCreate</span><span class="p">(</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Doñana mammals&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>        <span class="n">acronym</span><span class="o">=</span><span class="s2">&quot;DONMAM&quot;</span><span class="p">,</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>        <span class="n">members</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>            <span class="n">ResearchProjectMember</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">ana</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">ResearchProjectRoleType</span><span class="o">.</span><span class="n">EXPERT</span><span class="p">),</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>            <span class="n">ResearchProjectMember</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">&quot;collaborator&quot;</span><span class="p">),</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>        <span class="p">],</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>    <span class="p">)</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a><span class="p">)</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a><span class="nb">print</span><span class="p">([(</span><span class="n">r</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">roles</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">project_roles</span><span class="p">])</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a><span class="c1"># [(&#39;ana&#39;, [&#39;Expert&#39;]), (&#39;rp_staff&#39;, [&#39;Admin&#39;]), (&#39;user7&#39;, [&#39;Collaborator&#39;])]</span>
+</code></pre></div>
+<ul>
+<li><code>user</code> is the <code>User</code> that <code>client.users</code> returns, or its primary key.</li>
+<li><code>role</code> is a <code>ResearchProjectRoleType</code> (<code>ADMIN</code>, <code>EXPERT</code> or <code>COLLABORATOR</code>), its number or its label,
+  in any case.</li>
+<li>A user cannot appear twice (the model refuses it), and the account that creates the project cannot
+  be listed: it is already the administrator. Both fail before anything is sent. A user that does not
+  exist is rejected by Trapper, naming the row (<code>project_roles-1-user: Select a valid choice.</code>).</li>
+<li>The members can only be given <strong>when the project is created</strong>: changing the roles of an existing
+  project is a web action the SDK does not cover.</li>
+</ul>
 <h3 id="what-it-returns">What it returns</h3>
 <ul>
 <li><strong>A staff account:</strong> the project is active at once and <code>create()</code> returns it.</li>
@@ -3102,7 +3154,7 @@ member, its number or its label, and anything else is rejected with the list of 
 <h3 id="when-the-server-rejects-the-form">When the server rejects the form</h3>
 <p>A name or acronym already in use, or an acronym of the wrong length, makes Trapper re-render the
 form (status <code>200</code>). <code>create()</code> raises <code>APIError</code> naming the field:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Research project creation failed (status 200): name: Research project with this Name already exists.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Research project creation failed (status 200): name: Research project with this Name already exists.
 </code></pre></div>
 <p>Pass <code>raise_on_error=False</code> to get <code>None</code> instead. What the model can check locally (empty name,
 acronym length, an unknown choice, ...) raises <code>ValidationError</code> before anything is sent.</p>
