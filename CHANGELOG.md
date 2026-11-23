@@ -88,6 +88,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `client.locations.in_area(bbox=..., center=..., radius=..., **filters)` (issue #34): the locations inside a
   bounding box or a circle (radius in metres). Trapper's list ignores `in_bbox` and `radius` silently, so the
   SDK filters on the client, reading every page that matches the other filters.
+- `export(file=..., raw=True)` (issue #36): saves the CSV exactly as Trapper sends it, with its own header,
+  column order and values, instead of the SDK's column names sorted alphabetically. `False` by default, so
+  nothing changes; it needs `file`.
 
 ### Changed
 - **The schemas the API returns are named after the resource.** The `Record` suffix is gone:

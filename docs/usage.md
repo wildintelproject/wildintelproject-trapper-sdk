@@ -127,6 +127,14 @@ path = client.locations.export(file="locations.csv")
 print(f"Saved to {path}")
 ```
 
+The CSV is written with the SDK's column names (`pk`, `location_id`, ...), sorted alphabetically. To
+save the file **exactly as Trapper sends it**, with its own header, column order and values
+(`locationID`, `_id`, `ignoreDST`, ...), pass `raw=True` (it needs `file`, and `validate` does not apply):
+
+```python
+client.locations.export(file="locations.csv", raw=True)
+```
+
 Pass `file=None` to get a list of model instances instead — no CSV involved, just every item
 fetched and parsed:
 

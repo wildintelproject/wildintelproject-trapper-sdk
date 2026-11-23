@@ -51,3 +51,16 @@ class TestLocationsComponentE2E(ComponentE2ETestBase):
         # a box on the other side of the Earth is empty, whereas the server's own list ignores `in_bbox`
         far = (lon + 90 if lon <= 0 else lon - 90, -1.0, lon + 91 if lon <= 0 else lon - 89, 1.0)
         assert [loc for loc in component.in_area(bbox=far, page_size=100) if loc.pk == target.pk] == []
+
+    @pytest.mark.e2e
+    def test_export_raw_keeps_trappers_header(self, component, tmp_path):
+        """``raw=True`` saves Trapper's CSV with its own header, not the SDK's column names."""
+        raw = component.export(file=tmp_path / "raw.csv", raw=True)
+        parsed = component.export(file=tmp_path / "parsed.csv")
+        raw_header = raw.read_text(encoding="utf-8").splitlines()[0].split(",")
+        assert {"locationID", "longitude", "latitude", "_id"} <= set(raw_header)
+        assert "pk" not in raw_header and "location_id" not in raw_header
+        parsed_header = parsed.read_text(encoding="utf-8").splitlines()[0].split(",")
+        assert "pk" in parsed_header and "_id" not in parsed_header
+        # same rows in both
+        assert len(raw.read_text(encoding="utf-8").splitlines()) == len(parsed.read_text(encoding="utf-8").splitlines())
