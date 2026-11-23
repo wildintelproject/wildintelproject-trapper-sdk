@@ -39,7 +39,7 @@ class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
 
     def create(
         self,
-        classificator: ClassificatorCreate | Dict[str, Any],
+        classificator: ClassificatorCreate,
         *,
         raise_on_error: bool = True,
     ) -> ClassificatorRecord | None:
@@ -62,8 +62,8 @@ class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
             *email* on servers that log in by email): a token alone cannot authenticate it.
 
         Args:
-            classificator: A :class:`~trapper_client.schemas.classificators.ClassificatorCreate`
-                (or a dict with its fields).
+            classificator: A :class:`~trapper_client.schemas.classificators.ClassificatorCreate`,
+                which validates it before anything is sent.
             raise_on_error: Raise ``APIError`` when the server rejects the form (the default);
                 with ``False`` return ``None`` instead.
 
@@ -72,8 +72,7 @@ class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
             ``raise_on_error=False``.
 
         Raises:
-            pydantic.ValidationError: ``classificator`` is not valid (a ``ValueError``): nothing
-                is sent.
+            TypeError: ``classificator`` is not a ``ClassificatorCreate``.
             err.UnsupportedVersionError: On Trapper v2.
             err.APIError: The server rejected the form (a name already in use, unknown species,
                 ...) or redirected to its login page.
@@ -92,7 +91,10 @@ class ClassificatorsComponent(TrapperComponent[ClassificatorRecord]):
         """
         self._require_version("v1", feature="classificators.create()")
         if not isinstance(classificator, ClassificatorCreate):
-            classificator = ClassificatorCreate.model_validate(classificator)
+            raise TypeError(
+                f"create() takes a ClassificatorCreate, not {type(classificator).__name__}; "
+                "build one with ClassificatorCreate(...) or ClassificatorCreate.model_validate(data)"
+            )
 
         response = self._submit_create_form(
             self.create_endpoint, classificator.to_form(), "Classificator", raise_on_error,

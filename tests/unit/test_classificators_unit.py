@@ -154,8 +154,13 @@ class TestCreate:
             "classificator-age": "on",
         }
 
-    def test_accepts_a_dict(self, component, client):
-        component.create({"name": " Mammals ", "template": "Tabbed"})
+    def test_only_takes_the_model(self, component, client):
+        with pytest.raises(TypeError, match="takes a ClassificatorCreate, not dict"):
+            component.create({"name": "Mammals"})
+        client.session_post_multipart.assert_not_called()
+
+    def test_a_dict_is_turned_into_the_model_by_the_caller(self, component, client):
+        component.create(ClassificatorCreate.model_validate({"name": " Mammals ", "template": "Tabbed"}))
         data = client.session_post_multipart.call_args.kwargs["data"]
         assert (data["classificator-name"], data["classificator-template"]) == ("Mammals", "tab")
 

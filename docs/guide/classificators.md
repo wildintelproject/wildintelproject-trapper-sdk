@@ -56,8 +56,9 @@ classificator = client.classificators.create(
 print(classificator.pk, classificator.name)
 ```
 
-`create()` takes a `ClassificatorCreate`, a Pydantic model (a dict with its fields works too) that is
-validated before anything is sent, and returns the created classificator.
+`create()` takes a `ClassificatorCreate`, a Pydantic model, and returns the created classificator.
+Building the model validates the data before anything is sent. To build it from a dict, use
+`ClassificatorCreate.model_validate(data)`.
 
 | Field | Meaning | Default |
 |---|---|---|
