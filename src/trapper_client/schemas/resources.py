@@ -1,7 +1,9 @@
 """Schemas for resource-related Trapper endpoints."""
-from pydantic import Field
+from datetime import datetime
 
-from .base import TrapperSchema
+from pydantic import Field, field_validator
+
+from .base import TrapperSchema, read_datetime
 
 
 class Resource(TrapperSchema):
@@ -12,7 +14,7 @@ class Resource(TrapperSchema):
     owner: str | None = None
     owner_profile: str | None = None
     resource_type: str | None = None
-    date_recorded: str | None = None
+    date_recorded: datetime | str | None = None
 
     observation_type: list[str] = Field(default_factory=list)
     species: list[str] = Field(default_factory=list)
@@ -29,3 +31,8 @@ class Resource(TrapperSchema):
     delete_data: str | None = None
 
     date_recorded_correct: bool | None = None
+
+    @field_validator("date_recorded", mode="before")
+    @classmethod
+    def _date_as_datetime(cls, v):
+        return read_datetime(v)

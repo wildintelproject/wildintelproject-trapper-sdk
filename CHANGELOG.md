@@ -113,6 +113,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- **`Resource.date_recorded` is a `datetime`** (issue #60), like the dates of a deployment: timezone-aware, `None` when
+  empty, the original text when it cannot be read. Code that used it as a string has to format it. The reader moved to
+  `schemas/base.py` (`read_datetime`) and both schemas use it.
 - **`deployment__isnull` is no longer documented as a resource filter** (issue #58): Trapper answers `500` to it on v1
   and v2. The SDK warns when it is passed.
 - **The dates of a deployment are `datetime`** (issue #49): `Deployment.start_date`/`end_date` and
