@@ -4,9 +4,12 @@ Draft issues for the Trapper project, found while building `wildintel-trapper-sd
 written to be copied to the tracker as it is: title, what happens today, what is proposed, and what
 the SDK does in the meantime.
 
+- **Tracked in** [#26](https://github.com/wildintelproject/wildintelproject-trapper-sdk/issues/26), an issue
+  that stays open: Trapper's API is not ours, so nothing here is "fixed" by a pull request of this repository.
 - **Checked against:** the Trapper v1 source (`development`, v1.7.3-63) and a live v1.7.4 server.
 - **Trapper v2:** not checked unless an issue says so. Re-check each one before filing it.
-- Add new issues at the end, keep the numbering, and move a closed one to the *Done* list.
+- Add new issues at the end, keep the numbering, and move one to the *Done* list when Trapper fixes it.
+  Mark what was not checked as *(unverified)*, and open the pull request with `Refs #26`, not `Closes`.
 
 | # | Title | Area |
 |---|---|---|
