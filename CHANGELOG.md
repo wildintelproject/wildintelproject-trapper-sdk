@@ -85,6 +85,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `Location.longitude` and `Location.latitude`: the coordinates of a location as numbers. Trapper returns them as
   one string (`"-6.44, 37.05"`, longitude first, in v1 and v2); `coordinates` keeps it as it comes. They are
   `None` when the string is missing, cannot be read or is out of range.
+- `client.locations.in_area(bbox=..., center=..., radius=..., **filters)` (issue #34): the locations inside a
+  bounding box or a circle (radius in metres). Trapper's list ignores `in_bbox` and `radius` silently, so the
+  SDK filters on the client, reading every page that matches the other filters.
 
 ### Changed
 - **The schemas the API returns are named after the resource.** The `Record` suffix is gone:
