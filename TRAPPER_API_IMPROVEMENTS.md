@@ -26,6 +26,9 @@ the SDK does in the meantime.
 | 14 | Return primary keys, not names, for the related objects of a classification project | media_classification |
 | 15 | Return the species and standard attributes of a classificator | media_classification |
 | 16 | Reject unknown species when saving a classificator | media_classification |
+| 17 | Approve or reject a pending research project through the API | research |
+| 18 | Filter research projects by name, status and keyword, and reject unknown filters | research |
+| 19 | Expose the valid values of the research project choice fields | research |
 
 ---
 
@@ -43,11 +46,25 @@ becomes the owner and a project administrator, and a non-staff user's project st
 until an administrator approves it.
 
 Fields: `name`, `acronym` (3 to 10 characters; both unique), `sampling_design`, `sensor_method`,
-`animal_types`, `bait_use`, `event_interval`, `keywords`, `abstract`, `methods`, `description`.
+`animal_types`, `bait_use`, `event_interval`, `keywords`, `abstract`, `methods`, `description`, and
+`project_roles`.
+
+**Members in the same request.** The web form takes the project's members together with the project
+(a `project_roles` formset). Checked against a v1.7.4 server: it accepts any number of rows, each with
+a user and a role (`1` admin, `2` expert, `3` collaborator); it refuses the same user twice with
+`This user already has a role in this project.`; and it does not require the creator to be one of the
+members, nor any member at all. The endpoint should take the same list, so that a project and its team
+are created in one call, and answer `400` for a repeated user:
+
+```json
+{"name": "Doñana mammals", "acronym": "DONMAM",
+ "project_roles": [{"user": 7, "name": "expert"}, {"user": 9, "name": "collaborator"}]}
+```
 
 **Workaround in the SDK.** `research_projects.create()` simulates the form with a cookie session and
 a CSRF token. It needs `user_name`/`user_password` (the *email* on servers that log in by email), so
-a token alone cannot create a project.
+a token alone cannot create a project. Members can be sent with it, but only when the project is
+created: there is no way to change them afterwards (see #6).
 
 ## 2. Add update and delete endpoints for research projects
 
@@ -271,6 +288,55 @@ is valid*.
 unknown keys. Same for `tracked_species`.
 
 **Workaround in the SDK.** None: the docs ask the user to check the keys with `client.species`.
+
+## 17. Approve or reject a pending research project through the API
+
+**Labels:** enhancement, api
+
+**Problem.** A project created by a non-staff account stays *not approved* (`status=None`) until an
+administrator approves it, and that is only possible in the Django admin: the field is read by the API
+and set nowhere else (the creation view sets it to approved for staff, and nothing else touches it). The
+administrators are notified by e-mail with a link to the admin.
+
+**Proposal.** An action for administrators, for example `POST research/api/projects/<pk>/approve/` and
+`.../reject/`, or `status` as a writable field of the `PATCH` in #2. Approving already sends the
+notification to the owner (a signal on the status change), so nothing else has to change.
+
+**Workaround in the SDK.** None: an integration that creates projects for non-staff accounts cannot
+finish the job.
+
+## 18. Filter research projects by name, status and keyword, and reject unknown filters
+
+**Labels:** enhancement, api
+
+**Problem.** `ResearchProjectFilter` accepts `owner`, `keywords` and `acronym`; search covers name,
+acronym, abstract and owner but is a partial match. Checked against a v1.7.4 server:
+
+- `name` and `status` are **not** filters, and are **ignored silently**: `?name=zzz` and `?status=false`
+  return the same 20 projects as no filter at all. A client that mistypes a filter name gets everything.
+- `keywords` filters by the primary key of the tag, but no endpoint lists the keywords, so a client
+  cannot know the key. An unknown key answers `400`, as it should.
+
+**Proposal.** Add `name` (exact) and `status` filters; accept keywords by name (`?keywords=mammals`) or
+add a keywords endpoint; and answer `400` for a query parameter the endpoint does not know, as it does
+for a bad `keywords` value.
+
+**Workaround in the SDK.** `search=` and a comparison of the name in the client.
+
+## 19. Expose the valid values of the research project choice fields
+
+**Labels:** enhancement, api
+
+**Problem.** `sampling_design`, `sensor_method`, `animal_types` and `bait_use` accept a closed list of
+values, but nothing in the API lists them: there is no endpoint, and `OPTIONS research/api/projects`
+returns only the name, description and parsers (the viewset is read-only, so it has no field
+metadata). Clients copy the lists from Trapper's source code and can fall behind.
+
+**Proposal.** Once the endpoint of #1 exists, `OPTIONS` on it would describe the fields with their
+choices, which is what Django REST Framework does by default for a writable serializer. Until then, a
+read-only listing would do.
+
+**Workaround in the SDK.** The values are copied into `trapper_client.enums`.
 
 ---
 
