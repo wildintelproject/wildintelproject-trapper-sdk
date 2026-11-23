@@ -51,6 +51,40 @@ client.resources.export(file="resources.csv", status="Public")
 
 Consulta [Uso](../usage.md) si algo de esto te resulta desconocido: es la misma interfaz en todos los componentes.
 
+## Descargar el fichero
+
+La API REST lista los resources pero no sirve sus ficheros: `url` y `url_original` son rutas de una vista web
+clásica (`/storage/resource/media/<pk>/file/`) que **no acepta el token de la API**. Con un token, o sin sesión,
+contesta `404`, y lo hace tanto cuando el fichero no existe como cuando la cuenta no puede verlo. `download()`
+inicia sesión con `user_name` y `user_password` (el *email* de la cuenta en servidores que entran por email), como
+hacen las importaciones, y guarda el fichero:
+
+```python
+client = TrapperClient(base_url=..., access_token=..., user_name="yo@example.org", user_password="...")
+
+path = client.resources.download(29, "images/")                          # un directorio: se guarda como 29-original.jpg
+path = client.resources.download(29, "photo.jpg")                        # o un nombre de fichero
+thumb = client.resources.download(29, "thumb.jpg", kind="thumbnail")     # "original", "preview" o "thumbnail"
+
+for res in client.resources.where_by_collection(5):
+    client.resources.download(res.pk, "collection-5/")
+```
+
+- El fichero se escribe a disco por partes, en un `.part` temporal que se mueve a su sitio cuando está completo, así
+  que un fallo nunca deja un fichero a medias.
+- Los fallos de red y las respuestas `502`/`503`/`504` se reintentan con espera exponencial (tenacity):
+  `retry_attempts` (3, contando el primer intento; `1` lo desactiva), `retry_min_wait` y `retry_max_wait`. Una
+  descarga cortada empieza otra vez desde el principio. Un `404` y cualquier otra respuesta no se reintentan.
+- Un `404` lanza `NotFoundError` diciendo que puede ser el fichero o el permiso. La vista previa y la miniatura
+  pueden no existir si Trapper no las generó.
+- `download()` lanza `ValueError` si el cliente no tiene `user_name`/`user_password`.
+- Un Trapper que no está detrás del proxy que sirve sus ficheros (un servidor de desarrollo en su propio puerto)
+  contesta `200` con el cuerpo vacío y una cabecera `X-Accel-Redirect`; `download()` lanza `APIError` diciéndolo
+  en vez de guardar un fichero vacío. Comprobado en Trapper v2 (el JPEG original); en v1, solo contra uno así.
+
+!!! warning "No es un contrato estable de la API"
+    Depende de una vista web sin versionar, como las importaciones.
+
 ## Limitado a una colección o a una localización
 
 Cada patrón de acceso tiene una variante `_by_collection`/`_by_location`, que usa

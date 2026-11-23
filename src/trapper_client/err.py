@@ -20,6 +20,10 @@ class UnknownFilterWarning(UserWarning):
     """
 
 
+class TransientDownloadError(APIError):
+    """A file download was answered with a ``502``, ``503`` or ``504``: worth another attempt."""
+
+
 class NotFoundError(APIError):
     """HTTP 404 Not Found."""
     pass

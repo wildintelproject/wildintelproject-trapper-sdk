@@ -10,6 +10,8 @@ since the import methods return the raw response instead of raising for it.
 from __future__ import annotations
 
 import httpx
+
+from trapper_client import err
 from tenacity import Retrying, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 
@@ -33,4 +35,19 @@ def retrying_for_chunk_upload(attempts: int, min_wait: float, max_wait: float) -
         stop=stop_after_attempt(max(1, attempts)),
         wait=wait_exponential(multiplier=1, min=min_wait, max=max_wait),
         retry=retry_if_exception_type(httpx.TransportError),
+    )
+
+
+def retrying_for_download(attempts: int, min_wait: float, max_wait: float) -> Retrying:
+    """Build a tenacity ``Retrying`` instance for one file download.
+
+    Retries on network-level transport errors and on ``502``/``503``/``504`` answers
+    (:class:`~trapper_client.err.TransientDownloadError`): a proxy or a server that is busy. A ``404``, a
+    permission error or any other answer is not retried, since another attempt cannot fix it.
+    """
+    return Retrying(
+        reraise=True,
+        stop=stop_after_attempt(max(1, attempts)),
+        wait=wait_exponential(multiplier=1, min=min_wait, max=max_wait),
+        retry=retry_if_exception_type((httpx.TransportError, err.TransientDownloadError)),
     )

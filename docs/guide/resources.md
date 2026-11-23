@@ -51,6 +51,40 @@ client.resources.export(file="resources.csv", status="Public")
 
 See [Usage](../usage.md) if any of this looks unfamiliar — it's the same interface on every component.
 
+## Downloading the file
+
+The REST API lists resources but does not serve their files: `url` and `url_original` are paths of a classic web
+view (`/storage/resource/media/<pk>/file/`) that **does not accept the API token**. With a token, or with no
+login, it answers `404`, and it does so both when the file does not exist and when the account may not see it.
+`download()` logs in with `user_name` and `user_password` (the account's *email* on servers that log in by email),
+like the imports do, and saves the file:
+
+```python
+client = TrapperClient(base_url=..., access_token=..., user_name="me@example.org", user_password="...")
+
+path = client.resources.download(29, "images/")                          # a directory: saved as 29-original.jpg
+path = client.resources.download(29, "photo.jpg")                        # or a file name
+thumb = client.resources.download(29, "thumb.jpg", kind="thumbnail")     # "original", "preview" or "thumbnail"
+
+for res in client.resources.where_by_collection(5):
+    client.resources.download(res.pk, "collection-5/")
+```
+
+- The file is streamed to disk, into a temporary `.part` file that is moved into place when it is complete, so a
+  failure never leaves a half-written file.
+- Network failures and `502`/`503`/`504` answers are retried with exponential backoff (tenacity): `retry_attempts`
+  (3, the first try included; `1` disables it), `retry_min_wait` and `retry_max_wait`. A download that was cut is
+  started again from the beginning. A `404` and any other answer are not retried.
+- A `404` raises `NotFoundError` saying it can be the file or the permission. A preview or a thumbnail may not exist
+  if Trapper did not generate them.
+- `download()` raises `ValueError` if the client has no `user_name`/`user_password`.
+- A Trapper that is not behind the proxy that serves its files (a development server on its own port) answers `200`
+  with an empty body and an `X-Accel-Redirect` header; `download()` raises `APIError` saying so instead of saving
+  an empty file. Checked on Trapper v2 (the original JPEG); on v1 only against such a server.
+
+!!! warning "Not a stable API contract"
+    It depends on an unversioned web view, like the imports.
+
 ## Scoped to a collection or a location
 
 Every access pattern has a `_by_collection`/`_by_location` counterpart, hitting
