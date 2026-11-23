@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 import re
 import time
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, Iterable, TypeVar, Union
 
@@ -244,6 +245,36 @@ class TrapperComponent(Generic[TModel]):
                 return False
             time.sleep(interval)
 
+    #: Query parameters that are never filters.
+    _PAGING_PARAMS = frozenset({"page", "page_size"})
+
+    #: The filters the list endpoint applies, by server version (``{"v1": {...}, "v2": {...}}``).
+    #: Trapper ignores any other parameter without an error, so the SDK warns about it
+    #: (:class:`~trapper_client.err.UnknownFilterWarning`). ``None`` means "not known": no check.
+    known_filters: Dict[str, frozenset[str]] | None = None
+
+    def _warn_unknown_filters(self, query: Dict[str, Any], stacklevel: int = 3) -> None:
+        """Warn about the parameters of ``query`` that the server would ignore silently."""
+        if not self.known_filters:
+            return
+        # Not every call has to learn the server version (that is a request): only a parameter that some
+        # version does not apply needs it.
+        common = frozenset.intersection(*self.known_filters.values()) | self._PAGING_PARAMS
+        if all(k in common for k in query):
+            return
+        known = self.known_filters.get(self.client.server_version)
+        if known is None:
+            return
+        unknown = sorted(k for k in query if k not in known and k not in self._PAGING_PARAMS)
+        if unknown:
+            warnings.warn(
+                f"{self.endpoint}: Trapper {self.client.server_version} ignores "
+                f"{', '.join(repr(k) for k in unknown)} and returns every item; "
+                f"the filters it applies are {', '.join(sorted(known))}",
+                err.UnknownFilterWarning,
+                stacklevel=stacklevel,
+            )
+
     def _merge_query(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> Dict[str, Any]:
         """Merge ``query`` and ``kwargs`` into one query-params dictionary.
 
@@ -256,6 +287,7 @@ class TrapperComponent(Generic[TModel]):
         """
         q = dict(query or {})
         q.update(kwargs)
+        self._warn_unknown_filters(q, stacklevel=4)
         return q
 
     def _to_model(self, row: Any, validate: bool, schema: type[TModel] | None = None) -> TModel:
@@ -356,6 +388,7 @@ class TrapperComponent(Generic[TModel]):
         self._ensure_supported()
         q = dict(query or {})
         q.update(kwargs)
+        self._warn_unknown_filters(q)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema
 

@@ -51,3 +51,20 @@ class TestLocationsComponentE2E(ComponentE2ETestBase):
         # a box on the other side of the Earth is empty, whereas the server's own list ignores `in_bbox`
         far = (lon + 90 if lon <= 0 else lon - 90, -1.0, lon + 91 if lon <= 0 else lon - 89, 1.0)
         assert [loc for loc in component.in_area(bbox=far, page_size=100) if loc.pk == target.pk] == []
+
+    @pytest.mark.e2e
+    def test_unknown_filter_warns_and_a_known_one_does_not(self, component):
+        """The filters the warning knows are the ones this server applies (checked on v1 and v2)."""
+        import warnings
+
+        from trapper_client import err
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", err.UnknownFilterWarning)
+            total = component.get(page_size=1).pagination.count
+            # each filter the SDK says is applied changes the result for a value that matches nothing
+            assert component.get(page_size=1, name="zzz-no-such-location").pagination.count == 0
+            assert component.get(page_size=1, location_id="zzz-no-such-location").pagination.count == 0
+        with pytest.warns(err.UnknownFilterWarning):
+            ignored = component.get(page_size=1, ordering="-name", radius="0,0,1")
+        assert ignored.pagination.count == total      # and it really is ignored

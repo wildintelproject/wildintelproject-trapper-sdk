@@ -23,6 +23,15 @@ más abajo para la única operación de escritura que admite este componente.
 | `deployments` | lista de PK | Filtra las localizaciones que tienen esos despliegues |
 | `search` | cadena | Búsqueda de texto global en `location_id`, `name`, `description`, `county`, `city` y el nombre de usuario del propietario |
 
+!!! warning "Trapper ignora un filtro que no conoce"
+    Un parámetro que no está en esta tabla, o que una errata convirtió en otro nombre, se **ignora sin
+    error** y la lista vuelve sin filtrar. El SDK conoce los filtros de cada versión de Trapper y, si pasas
+    otro, emite un `UnknownFilterWarning` que lo nombra (la petición se envía igualmente). Además de los de la
+    tabla, la lista aplica `pk`, `location_id`, `is_public`, `ignore_DST`, `coordinate_uncertainty`,
+    `date_created`, `managers` y `research_projects_member` en las dos versiones, y `country`, `state`,
+    `county` y `city` solo en v1 (`locations_map` también solo en v1). `in_bbox` solo lo aplica v2; `radius` y
+    `ordering` ninguna. Para silenciarlo: `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
+
 ## Los seis patrones de acceso
 
 ```python
