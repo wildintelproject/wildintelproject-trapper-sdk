@@ -958,6 +958,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#miembros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Miembros
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#anadir-colecciones" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2902,6 +2913,17 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#miembros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Miembros
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#anadir-colecciones" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3093,10 +3115,34 @@ Trapper rechaza el formulario y <code>create()</code> lanza <code>APIError</code
 </code></pre></div>
 <p>Devuelve el proyecto creado, o <code>None</code> si no se puede leer de vuelta (o si se rechazó el formulario con
 <code>raise_on_error=False</code>).</p>
+<h3 id="miembros">Miembros</h3>
+<p>Igual que en los <a href="../research_projects/#miembros">research projects</a>, quien crea el proyecto pasa a ser
+su administrador y <code>members</code> añade a los demás usuarios, cada uno con un rol:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">trapper_client</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassificationProjectCreate</span><span class="p">,</span> <span class="n">ClassificationProjectMember</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">project</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">ClassificationProjectCreate</span><span class="p">(</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Doñana 2026&quot;</span><span class="p">,</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>        <span class="n">research_project</span><span class="o">=</span><span class="n">rp</span><span class="p">,</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>        <span class="n">classificator</span><span class="o">=</span><span class="n">clf</span><span class="p">,</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>        <span class="n">members</span><span class="o">=</span><span class="p">[</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>            <span class="n">ClassificationProjectMember</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">ana</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">&quot;expert&quot;</span><span class="p">),</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>            <span class="n">ClassificationProjectMember</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s2">&quot;collaborator&quot;</span><span class="p">),</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>        <span class="p">],</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>    <span class="p">)</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="p">)</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="nb">print</span><span class="p">([(</span><span class="n">r</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">roles</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">project_roles</span><span class="p">])</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="c1"># [(&#39;Ana Romero&#39;, [&#39;Expert&#39;]), (&#39;rp_staff&#39;, [&#39;Admin&#39;]), (&#39;user7&#39;, [&#39;Collaborator&#39;])]</span>
+</code></pre></div>
+<p><code>role</code> es un <code>ClassificationProjectRoleType</code>, su número o su etiqueta (en cualquier caso): <code>ADMIN</code>,
+<code>EXPERT</code>, <code>COLLABORATOR</code>, y <code>ERROR_PROOF</code> y <code>CITIZEN</code>, que pertenecen a las funciones de ciencia
+ciudadana de Trapper. <code>user</code> es un <code>User</code> de <code>client.users</code> o su clave primaria. Un usuario no puede
+aparecer dos veces y el creador no puede figurar; las dos cosas fallan antes de enviar nada. Los
+miembros solo se pueden dar al crear el proyecto.</p>
 <h3 id="anadir-colecciones">Añadir colecciones</h3>
 <p>Un proyecto nuevo está vacío. <code>add_collections()</code> le vincula <em>colecciones de almacenamiento</em>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">links</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">add_collections</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nb">print</span><span class="p">([(</span><span class="n">link</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">collection_pk</span><span class="p">)</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">])</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">links</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">add_collections</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nb">print</span><span class="p">([(</span><span class="n">link</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">link</span><span class="o">.</span><span class="n">collection_pk</span><span class="p">)</span> <span class="k">for</span> <span class="n">link</span> <span class="ow">in</span> <span class="n">links</span><span class="p">])</span>
 </code></pre></div>
 <ul>
 <li>Los números que pasas son las claves primarias de las colecciones de almacenamiento
@@ -3109,7 +3155,7 @@ Trapper rechaza el formulario y <code>create()</code> lanza <code>APIError</code
 <li>Devuelve el vínculo del proyecto para cada colección.</li>
 </ul>
 <h3 id="quitar-una-coleccion">Quitar una colección</h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">remove_collection</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>    <span class="c1"># True; False si no estaba vinculada</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">remove_collection</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>    <span class="c1"># True; False si no estaba vinculada</span>
 </code></pre></div>
 <div class="admonition danger">
 <p class="admonition-title">Borra clasificaciones</p>
