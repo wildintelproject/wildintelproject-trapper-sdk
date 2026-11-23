@@ -26,32 +26,34 @@ from .research_projects import (
     ResearchProject,
     ResearchProjectCollection,
     ResearchProjectCreate,
+    ResearchProjectMember,
     ResearchProjectRole,
 )
 from .classifications import (
     BBox,
-    ClassificationAggRecord,
+    ClassificationAgg,
     ClassificationImportData,
     ClassificationImportResponse,
     ClassificationProject,
     ClassificationProjectCollection,
     ClassificationProjectCreate,
-    ClassificationRecord,
+    ClassificationProjectMember,
+    Classification,
     ClassificationRecordExport,
     ClassificationResource,
     ClassificationResourceClassificationData,
-    ClassificationResourceRecord,
+    ClassifiedResource,
     ClassificationResultRecordCamtrapDP,
     ClassificationResultRecordTrapper,
     DynamicAttr,
     DynamicAttrValue,
-    MediaRecord,
+    Media,
     ResultsDataPackageData,
     ResultsDataPackageResponse,
     TrapperClassificationProjectRole,
 )
 from .ai_classifications import (
-    AIClassificationRecord,
+    AIClassification,
     AIClassificationRecordExport,
     AIClassificationRecordExportCamTrap,
     AIClassificationRecordExportTrapper,
@@ -60,18 +62,19 @@ from .ai_classifications import (
 )
 from .user_classifications import (
     ResourceUser,
-    UserClassificationRecord,
+    UserClassification,
     UserObservationAttr,
 )
 from .classifications_map import (
     ResourceClassificationMap,
-    ClassificationMapRecord,
+    ClassificationMap,
 )
-from .classificators import ClassificatorCreate, ClassificatorRecord
-from .species import SpeciesRecord
-from .maps import MapRecord
-from .sequences import SequenceRecord
-from .users import UserRecord
+from .classificators import ClassificatorCreate, Classificator
+from .species import Species
+from .maps import Map
+from .sequences import Sequence
+from .users import User
+from trapper_client._deprecated import deprecated_getattr
 
 __all__ = [
     # base
@@ -101,51 +104,56 @@ __all__ = [
     "ResearchProject",
     "ResearchProjectCollection",
     "ResearchProjectCreate",
+    "ResearchProjectMember",
     "ResearchProjectRole",
     # classifications
     "BBox",
-    "ClassificationAggRecord",
+    "ClassificationAgg",
     "ClassificationImportData",
     "ClassificationImportResponse",
     "ClassificationProject",
     "ClassificationProjectCollection",
     "ClassificationProjectCreate",
-    "ClassificationRecord",
+    "ClassificationProjectMember",
+    "Classification",
     "ClassificationRecordExport",
     "ClassificationResource",
     "ClassificationResourceClassificationData",
-    "ClassificationResourceRecord",
+    "ClassifiedResource",
     "ClassificationResultRecordCamtrapDP",
     "ClassificationResultRecordTrapper",
     "DynamicAttr",
     "DynamicAttrValue",
-    "MediaRecord",
+    "Media",
     "ResultsDataPackageData",
     "ResultsDataPackageResponse",
     "TrapperClassificationProjectRole",
     # ai classifications
-    "AIClassificationRecord",
+    "AIClassification",
     "AIClassificationRecordExport",
     "AIClassificationRecordExportCamTrap",
     "AIClassificationRecordExportTrapper",
     "AIObservationAttr",
     "ResourceAI",
     # user classifications
-    "UserClassificationRecord",
+    "UserClassification",
     "UserObservationAttr",
     "ResourceUser",
     # classifications map
-    "ClassificationMapRecord",
+    "ClassificationMap",
     "ResourceClassificationMap",
     # classificators
     "ClassificatorCreate",
-    "ClassificatorRecord",
+    "Classificator",
     # species
-    "SpeciesRecord",
+    "Species",
     # maps
-    "MapRecord",
+    "Map",
     # sequences
-    "SequenceRecord",
+    "Sequence",
     # users
-    "UserRecord",
+    "User",
 ]
+
+
+__getattr__ = deprecated_getattr(__name__)

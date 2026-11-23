@@ -1,5 +1,5 @@
 """
-Unit tests for ClassificatorsComponent and ClassificatorRecord schema.
+Unit tests for ClassificatorsComponent and Classificator schema.
 
 All API calls are mocked — no real server needed.
 """
@@ -12,7 +12,7 @@ import pytest
 from tests.base_component_tests import ComponentUnitTestBase
 from trapper_client import ClassificatorTemplate, err
 from trapper_client.components.classificators import ClassificatorsComponent
-from trapper_client.schemas import ClassificatorCreate, ClassificatorRecord, SpeciesRecord
+from trapper_client.schemas import ClassificatorCreate, Classificator, Species
 
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
@@ -56,19 +56,19 @@ def test_endpoint_matches_server_route():
 
 class TestClassificatorsComponent(ComponentUnitTestBase):
     component_class = ClassificatorsComponent
-    schema = ClassificatorRecord
-    export_schema = ClassificatorRecord
+    schema = Classificator
+    export_schema = Classificator
     find_pk = 39
     valid_item = VALID_RECORD
     valid_export_item = VALID_RECORD
 
 
-# ── ClassificatorRecord ───────────────────────────────────────────────────────
+# ── Classificator ───────────────────────────────────────────────────────
 
 class TestClassificatorRecord:
 
     def test_parses_full_record(self):
-        result = ClassificatorRecord.model_validate(VALID_RECORD)
+        result = Classificator.model_validate(VALID_RECORD)
 
         assert result.pk == 39
         assert result.owner == "wildintel@uhu.es"
@@ -77,7 +77,7 @@ class TestClassificatorRecord:
 
     def test_parses_minimal_record(self):
         """El schema acepta registros sin los campos opcionales."""
-        result = ClassificatorRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = Classificator.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.pk == 1
         assert result.static_attrs_order is None
@@ -85,17 +85,17 @@ class TestClassificatorRecord:
         assert result.description is None
 
     def test_predefined_attrs_defaults_to_empty_dict(self):
-        result = ClassificatorRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = Classificator.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.predefined_attrs == {}
 
     def test_custom_attrs_defaults_to_empty_dict(self):
-        result = ClassificatorRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = Classificator.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.custom_attrs == {}
 
     def test_action_urls_are_strings(self):
-        result = ClassificatorRecord.model_validate(VALID_RECORD)
+        result = Classificator.model_validate(VALID_RECORD)
 
         assert result.update_data == "/media_classification/classificator/update/39/"
         assert result.detail_data == "/media_classification/classificator/detail/39/"
@@ -103,13 +103,13 @@ class TestClassificatorRecord:
 
     def test_predefined_attrs_with_data(self):
         record = {**VALID_RECORD, "predefined_attrs": {"threshold": 0.5}}
-        result = ClassificatorRecord.model_validate(record)
+        result = Classificator.model_validate(record)
 
         assert result.predefined_attrs == {"threshold": 0.5}
 
     def test_custom_attrs_with_data(self):
         record = {**VALID_RECORD, "custom_attrs": {"region": "doñana"}}
-        result = ClassificatorRecord.model_validate(record)
+        result = Classificator.model_validate(record)
 
         assert result.custom_attrs == {"region": "doñana"}
 
@@ -130,7 +130,7 @@ class TestCreate:
     @pytest.fixture
     def component(self, client):
         comp = ClassificatorsComponent(client)
-        comp.find = MagicMock(return_value=ClassificatorRecord(**{**VALID_RECORD, "pk": 41}))
+        comp.find = MagicMock(return_value=Classificator(**{**VALID_RECORD, "pk": 41}))
         return comp
 
     def test_returns_the_classificator_named_in_the_redirect(self, component):
@@ -215,14 +215,14 @@ class TestClassificatorCreate:
         assert ClassificatorCreate(name="N", species=[3, 1, 3, 2]).species == [3, 1, 2]
 
     def test_species_can_be_given_as_objects_or_primary_keys(self):
-        lynx, fox = SpeciesRecord(pk=1, english_name="Iberian lynx"), SpeciesRecord(pk=4)
+        lynx, fox = Species(pk=1, english_name="Iberian lynx"), Species(pk=4)
         c = ClassificatorCreate(name="N", species=[lynx, 5, fox], tracked_species=[lynx, 5])
         assert c.species == [1, 5, 4] and c.tracked_species == [1, 5]
         assert c.to_form()["classificator-species"] == "1,5,4"
 
     def test_a_tracked_species_object_must_be_among_the_species(self):
         with pytest.raises(ValueError, match=r"tracked_species \[2\]"):
-            ClassificatorCreate(name="N", species=[1], tracked_species=[SpeciesRecord(pk=2)])
+            ClassificatorCreate(name="N", species=[1], tracked_species=[Species(pk=2)])
 
     def test_tracked_species_can_be_anything_when_every_species_is_allowed(self):
         assert ClassificatorCreate(name="N", tracked_species=[9]).tracked_species == [9]

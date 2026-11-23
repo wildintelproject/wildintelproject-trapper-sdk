@@ -46,18 +46,45 @@ Referencia completa de la API pública de `trapper_client`.
 | [Resources](schemas/resources.md) | `Resource` |
 | [Collections](schemas/collections.md) | `Collection` |
 | [Research Projects](schemas/research_projects.md) | `ResearchProject`, `ResearchProjectCollection` |
-| [Classifications](schemas/classifications.md) | `ClassificationRecord`, `ClassificationProject`, etc. |
-| [AI Classifications](schemas/ai_classifications.md) | `AIClassificationRecord`, `AIClassificationRecordExport*` |
-| [User Classifications](schemas/user_classifications.md) | `UserClassificationRecord`, `ResourceUser`, `UserObservationAttr` |
-| [Classifications Map](schemas/classifications_map.md) | `ClassificationMapRecord`, `ResourceClassificationMap` |
-| [Classificators](schemas/classificators.md) | `ClassificatorRecord` |
-| [Species](schemas/species.md) | `SpeciesRecord` |
-| [Maps](schemas/maps.md) | `MapRecord` |
-| [Sequences](schemas/sequences.md) | `SequenceRecord` |
-| [Users](schemas/users.md) | `UserRecord` |
+| [Classifications](schemas/classifications.md) | `Classification`, `ClassificationProject`, etc. |
+| [AI Classifications](schemas/ai_classifications.md) | `AIClassification`, `AIClassificationRecordExport*` |
+| [User Classifications](schemas/user_classifications.md) | `UserClassification`, `ResourceUser`, `UserObservationAttr` |
+| [Classifications Map](schemas/classifications_map.md) | `ClassificationMap`, `ResourceClassificationMap` |
+| [Classificators](schemas/classificators.md) | `Classificator` |
+| [Species](schemas/species.md) | `Species` |
+| [Maps](schemas/maps.md) | `Map` |
+| [Sequences](schemas/sequences.md) | `Sequence` |
+| [Users](schemas/users.md) | `User` |
 
 ## Errores
 
 | Clase | Descripción |
 |-------|-------------|
 | [`APIError` y subclases](errors.md) | Excepciones de la API |
+
+## Renamed schemas
+
+The schemas that Trapper's API returns are named after the resource, without the `Record` suffix some
+of them used to carry. The old names still import, give the same class and warn with a
+`DeprecationWarning`; they will be removed in a future release.
+
+| Old name | New name |
+|----------|----------|
+| `UserRecord` | `User` |
+| `SpeciesRecord` | `Species` |
+| `SequenceRecord` | `Sequence` |
+| `MapRecord` | `Map` |
+| `ClassificatorRecord` | `Classificator` |
+| `ClassificationRecord` | `Classification` |
+| `UserClassificationRecord` | `UserClassification` |
+| `AIClassificationRecord` | `AIClassification` |
+| `ClassificationMapRecord` | `ClassificationMap` |
+| `ClassificationAggRecord` | `ClassificationAgg` |
+| `ClassificationResourceRecord` | `ClassifiedResource` (`ClassificationResource` is already the resource embedded in a classification) |
+| `MediaRecord` | `Media` |
+
+The export row schemas (`ClassificationRecordExport`, `ClassificationResultRecordCamtrapDP`, ...) keep
+their names: they describe a row of an exported file.
+
+`Sequence` has the same name as `typing.Sequence`; if a module uses both, import one under another
+name (`from trapper_client import Sequence as TrapperSequence`).

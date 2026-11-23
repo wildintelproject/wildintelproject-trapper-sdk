@@ -2,9 +2,10 @@
 from typing import Any, Optional
 
 from pydantic import BaseModel
+from trapper_client._deprecated import deprecated_getattr
 
 
-class MapRecord(BaseModel):
+class Map(BaseModel):
     """Schema for ``/geomap/api/maps`` items.
 
     ``center``, ``locate``, and ``tilelayer`` come from the third-party
@@ -29,3 +30,6 @@ class MapRecord(BaseModel):
     settings: Any = None
     delete_data: Optional[str] = None
     detail_data: Optional[str] = None
+
+
+__getattr__ = deprecated_getattr(__name__)

@@ -10,7 +10,7 @@ import pytest
 from tests.base_component_tests import ComponentUnitTestBase
 from trapper_client.components.classifications_map import ClassificationsMapComponent
 from trapper_client.schemas import (
-    ClassificationMapRecord,
+    ClassificationMap,
     ResourceClassificationMap,
 )
 
@@ -56,8 +56,8 @@ VALID_RECORD_WITH_ATTRS = {
 
 class TestClassificationsMapComponent(ComponentUnitTestBase):
     component_class = ClassificationsMapComponent
-    schema = ClassificationMapRecord
-    export_schema = ClassificationMapRecord
+    schema = ClassificationMap
+    export_schema = ClassificationMap
     find_pk = 23
     valid_item = VALID_RECORD
     valid_export_item = VALID_RECORD
@@ -90,12 +90,12 @@ class TestResourceClassificationMap:
         assert not hasattr(result, "mime")
 
 
-# ── ClassificationMapRecord ───────────────────────────────────────────────────
+# ── ClassificationMap ───────────────────────────────────────────────────
 
 class TestClassificationMapRecord:
 
     def test_parses_minimal_response(self):
-        result = ClassificationMapRecord.model_validate(VALID_RECORD)
+        result = ClassificationMap.model_validate(VALID_RECORD)
 
         assert result.pk == 23
         assert result.project == 1
@@ -103,17 +103,17 @@ class TestClassificationMapRecord:
         assert isinstance(result.resource, ResourceClassificationMap)
 
     def test_static_attrs_defaults_to_empty_dict(self):
-        result = ClassificationMapRecord.model_validate(VALID_RECORD)
+        result = ClassificationMap.model_validate(VALID_RECORD)
 
         assert result.static_attrs == {}
 
     def test_dynamic_attrs_defaults_to_empty_list(self):
-        result = ClassificationMapRecord.model_validate(VALID_RECORD)
+        result = ClassificationMap.model_validate(VALID_RECORD)
 
         assert result.dynamic_attrs == []
 
     def test_parses_record_with_attrs(self):
-        result = ClassificationMapRecord.model_validate(VALID_RECORD_WITH_ATTRS)
+        result = ClassificationMap.model_validate(VALID_RECORD_WITH_ATTRS)
 
         assert result.pk == 42
         assert result.static_attrs == {"camera_model": "Bushnell"}
@@ -121,7 +121,7 @@ class TestClassificationMapRecord:
         assert result.dynamic_attrs[0]["observation_type"] == "animal"
 
     def test_resource_is_typed(self):
-        result = ClassificationMapRecord.model_validate(VALID_RECORD_WITH_ATTRS)
+        result = ClassificationMap.model_validate(VALID_RECORD_WITH_ATTRS)
 
         assert isinstance(result.resource, ResourceClassificationMap)
         assert result.resource.deployment == "r0001-wicp_0001"

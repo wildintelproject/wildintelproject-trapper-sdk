@@ -2,9 +2,10 @@
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
+from trapper_client._deprecated import deprecated_getattr
 
 
-class SequenceRecord(BaseModel):
+class Sequence(BaseModel):
     """Schema for ``/media_classification/api/sequences`` items.
 
     A sequence groups resources recorded within a configurable time interval
@@ -16,3 +17,6 @@ class SequenceRecord(BaseModel):
     sequence_uuid: str
     resources: List[int] = Field(default_factory=list)
     created_at: str
+
+
+__getattr__ = deprecated_getattr(__name__)

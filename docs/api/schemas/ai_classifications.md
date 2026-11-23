@@ -1,6 +1,6 @@
 # AI Classification Schemas
 
-::: trapper_client.schemas.ai_classifications.AIClassificationRecord
+::: trapper_client.schemas.ai_classifications.AIClassification
 
 ::: trapper_client.schemas.ai_classifications.AIClassificationRecordExportCamTrap
 

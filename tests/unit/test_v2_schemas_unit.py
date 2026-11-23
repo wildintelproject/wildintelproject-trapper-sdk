@@ -11,19 +11,19 @@ from pathlib import Path
 
 import pytest
 
-from trapper_client.schemas.classifications import ClassificationProject, ClassificationRecord
-from trapper_client.schemas.classifications_map import ClassificationMapRecord
-from trapper_client.schemas.classificators import ClassificatorRecord
-from trapper_client.schemas.user_classifications import UserClassificationRecord, UserObservationAttr
+from trapper_client.schemas.classifications import ClassificationProject, Classification
+from trapper_client.schemas.classifications_map import ClassificationMap
+from trapper_client.schemas.classificators import Classificator
+from trapper_client.schemas.user_classifications import UserClassification, UserObservationAttr
 
 PAYLOADS = json.loads((Path(__file__).parent / "data" / "trapper_v2_payloads.json").read_text(encoding="utf-8"))
 
 SCHEMAS = {
     "classification_projects": ClassificationProject,
-    "classification_results": ClassificationRecord,
-    "classifications_map": ClassificationMapRecord,
-    "classificators": ClassificatorRecord,
-    "user_classifications": UserClassificationRecord,
+    "classification_results": Classification,
+    "classifications_map": ClassificationMap,
+    "classificators": Classificator,
+    "user_classifications": UserClassification,
 }
 
 
@@ -34,7 +34,7 @@ def test_real_v2_rows_validate(name):
 
 
 def test_v2_user_classification_attrs_are_unwrapped():
-    record = UserClassificationRecord.model_validate(PAYLOADS["user_classifications"][0])
+    record = UserClassification.model_validate(PAYLOADS["user_classifications"][0])
     attr = record.dynamic_attrs[0]
     assert isinstance(attr.observation_type, str)
     assert isinstance(attr.count, str)
@@ -55,7 +55,7 @@ def test_attrs_accept_v1_and_v2_shapes(raw, expected):
 def test_v1_only_fields_are_optional():
     row = dict(PAYLOADS["classification_results"][0])
     row.pop("approved", None)
-    record = ClassificationRecord.model_validate(row)
+    record = Classification.model_validate(row)
     assert record.status is None and record.status_ai is None
 
 

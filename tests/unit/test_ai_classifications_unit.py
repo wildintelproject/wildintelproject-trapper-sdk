@@ -13,7 +13,7 @@ import pytest
 from tests.base_component_tests import ComponentUnitTestBase, paginated_response
 from trapper_client.components.ai_classifications import AIClassificationsComponent
 from trapper_client.schemas import (
-    AIClassificationRecord,
+    AIClassification,
     AIClassificationRecordExport,
     AIClassificationRecordExportTrapper,
     AIClassificationRecordExportCamTrap,
@@ -129,7 +129,7 @@ PROJECT_PK = 7
 
 class TestAIClassificationsComponent(ComponentUnitTestBase):
     component_class = AIClassificationsComponent
-    schema = AIClassificationRecord
+    schema = AIClassification
     export_schema = AIClassificationRecordExportTrapper
     find_pk = 1
     valid_item = VALID_RECORD

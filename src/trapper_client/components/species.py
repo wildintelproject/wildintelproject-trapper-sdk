@@ -5,10 +5,10 @@ Component for the Species taxonomy data endpoint.
 from __future__ import annotations
 
 from trapper_client.components.base import TrapperComponent
-from trapper_client.schemas import SpeciesRecord
+from trapper_client.schemas import Species
 
 
-class SpeciesComponent(TrapperComponent[SpeciesRecord]):
+class SpeciesComponent(TrapperComponent[Species]):
     """
     Component for ``/tables/api/species``.
 
@@ -31,4 +31,4 @@ class SpeciesComponent(TrapperComponent[SpeciesRecord]):
     """
 
     endpoint = "tables/api/species"
-    schema = SpeciesRecord
+    schema = Species

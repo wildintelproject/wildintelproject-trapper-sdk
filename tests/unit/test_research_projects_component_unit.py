@@ -14,12 +14,14 @@ from tests.base_component_tests import ComponentUnitTestBase, paginated_response
 from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.research_projects import ResearchProjectsComponent
-from trapper_client.enums import BaitUse, SamplingDesign
+from trapper_client.enums import BaitUse, ResearchProjectRoleType, SamplingDesign
 from trapper_client.schemas import (
     PaginatedResult,
     ResearchProject,
     ResearchProjectCollection,
     ResearchProjectCreate,
+    ResearchProjectMember,
+    User,
 )
 
 
@@ -366,3 +368,89 @@ class TestResearchProjectCreate:
 
     def test_no_keywords_sends_nothing(self):
         assert ResearchProjectCreate(name="N", acronym="ABC").to_form()["keywords"] == ""
+
+
+class TestMembers:
+    """Members and roles: the role rows after the creator's in the form."""
+
+    @pytest.fixture
+    def client(self):
+        c = MagicMock()
+        c.server_version = "v1"
+        c.base_url = "https://trapper.example"
+        c._web_client.get.return_value = MagicMock(status_code=200, text=FORM_PAGE)
+        c.session_post_multipart.return_value = MagicMock(status_code=302, headers={"location": "/research/project/list/"})
+        return c
+
+    @pytest.fixture
+    def component(self, client):
+        comp = ResearchProjectsComponent(client)
+        comp.where = MagicMock(return_value=iter([ResearchProject(pk=9, name="N", acronym="ABC")]))
+        return comp
+
+    def test_the_members_are_posted_after_the_creator(self, component, client):
+        ana = User(pk=7, username="ana")
+        component.create(ResearchProjectCreate(name="N", acronym="ABC", members=[
+            ResearchProjectMember(user=ana, role="expert"),
+            ResearchProjectMember(user=9, role=ResearchProjectRoleType.COLLABORATOR),
+        ]))
+        data = client.session_post_multipart.call_args.kwargs["data"]
+        assert data["project_roles-TOTAL_FORMS"] == 3
+        assert (data["project_roles-0-user"], data["project_roles-0-name"]) == ("4", "1")     # the creator
+        assert (data["project_roles-1-user"], data["project_roles-1-name"]) == (7, 2)
+        assert (data["project_roles-2-user"], data["project_roles-2-name"]) == (9, 3)
+        assert data["project_roles-2-id"] == "" and data["project_roles-INITIAL_FORMS"] == 0
+
+    def test_without_members_only_the_creator_is_posted(self, component, client):
+        component.create(ResearchProjectCreate(name="N", acronym="ABC"))
+        data = client.session_post_multipart.call_args.kwargs["data"]
+        assert data["project_roles-TOTAL_FORMS"] == 1 and "project_roles-1-user" not in data
+
+    def test_the_creator_cannot_be_listed_as_a_member(self, component, client):
+        with pytest.raises(ValueError, match="already its administrator"):
+            component.create(ResearchProjectCreate(
+                name="N", acronym="ABC", members=[ResearchProjectMember(user=4, role="expert")]
+            ))
+        client.session_post_multipart.assert_not_called()
+
+    def test_the_server_rejecting_a_member_names_the_row(self, component, client):
+        client.session_post_multipart.return_value = MagicMock(status_code=200, text="<html/>")
+        client._extract_html_error_text.return_value = "project_roles-1-user: Select a valid choice."
+        with pytest.raises(err.APIError, match="project_roles-1-user"):
+            component.create(ResearchProjectCreate(
+                name="N", acronym="ABC", members=[ResearchProjectMember(user=999, role="expert")]
+            ))
+
+
+class TestResearchProjectMember:
+
+    def test_takes_a_user_object_or_a_primary_key(self):
+        by_object = ResearchProjectMember(user=User(pk=7, username="ana"), role="expert")
+        by_key = ResearchProjectMember(user=7, role=2)
+        assert by_object.user == by_key.user == 7
+        assert by_object.role is by_key.role is ResearchProjectRoleType.EXPERT
+
+    @pytest.mark.parametrize("kwargs", [
+        {"user": 0, "role": "expert"},
+        {"user": User(pk=-1, username="x"), "role": "expert"},
+        {"user": 7, "role": "boss"},
+        {"user": 7, "role": 4},
+        {"user": 7},
+        {"role": "expert"},
+        {"user": 7, "role": "expert", "note": "x"},
+    ])
+    def test_invalid_members_are_rejected(self, kwargs):
+        with pytest.raises(ValueError):
+            ResearchProjectMember(**kwargs)
+
+    def test_a_user_cannot_appear_twice(self):
+        with pytest.raises(ValueError, match=r"users \[7\] appear more than once"):
+            ResearchProjectCreate(name="N", acronym="ABC", members=[
+                ResearchProjectMember(user=7, role="expert"),
+                ResearchProjectMember(user=User(pk=7, username="ana"), role="collaborator"),
+            ])
+
+    def test_role_rows_are_user_and_role_numbers(self):
+        c = ResearchProjectCreate(name="N", acronym="ABC", members=[ResearchProjectMember(user=7, role="admin")])
+        assert c.role_rows() == [(7, 1)]
+        assert ResearchProjectCreate(name="N", acronym="ABC").role_rows() == []

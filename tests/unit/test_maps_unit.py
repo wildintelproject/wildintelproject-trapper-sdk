@@ -1,5 +1,5 @@
 """
-Unit tests for MapsComponent and MapRecord schema.
+Unit tests for MapsComponent and Map schema.
 
 All API calls are mocked — no real server needed.
 """
@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from tests.base_component_tests import ComponentUnitTestBase
 from trapper_client.components.maps import MapsComponent
-from trapper_client.schemas import MapRecord
+from trapper_client.schemas import Map
 
 
 # ── datos de prueba ───────────────────────────────────────────────────────────
@@ -44,19 +44,19 @@ def test_endpoint_matches_server_route():
 
 class TestMapsComponent(ComponentUnitTestBase):
     component_class = MapsComponent
-    schema = MapRecord
-    export_schema = MapRecord
+    schema = Map
+    export_schema = Map
     find_pk = 3
     valid_item = VALID_RECORD
     valid_export_item = VALID_RECORD
 
 
-# ── MapRecord ─────────────────────────────────────────────────────────────────
+# ── Map ─────────────────────────────────────────────────────────────────
 
 class TestMapRecord:
 
     def test_parses_full_record(self):
-        result = MapRecord.model_validate(VALID_RECORD)
+        result = Map.model_validate(VALID_RECORD)
 
         assert result.pk == 3
         assert result.slug == "donana-camera-traps"
@@ -66,7 +66,7 @@ class TestMapRecord:
 
     def test_parses_minimal_record(self):
         """El schema acepta registros sin ningún campo opcional."""
-        result = MapRecord.model_validate(VALID_RECORD_MINIMAL)
+        result = Map.model_validate(VALID_RECORD_MINIMAL)
 
         assert result.pk == 1
         assert result.slug is None

@@ -2,9 +2,10 @@
 from typing import Optional
 
 from pydantic import BaseModel
+from trapper_client._deprecated import deprecated_getattr
 
 
-class UserRecord(BaseModel):
+class User(BaseModel):
     """Schema for ``/accounts/api/users`` items."""
 
     pk: int
@@ -13,3 +14,6 @@ class UserRecord(BaseModel):
     last_name: Optional[str] = None
     email: Optional[str] = None
     name: Optional[str] = None
+
+
+__getattr__ = deprecated_getattr(__name__)

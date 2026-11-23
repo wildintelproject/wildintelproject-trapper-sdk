@@ -14,15 +14,18 @@ import pytest
 from tests.base_component_tests import ComponentUnitTestBase, paginated_response
 from trapper_client import err
 from trapper_client.api_query import APIQuery
+from trapper_client.enums import ClassificationProjectRoleType
 from trapper_client.components.classification_projects import ClassificationProjectsComponent
 from trapper_client.schemas import (
     ClassificationProject,
     ClassificationProjectCollection,
     ClassificationProjectCreate,
-    ClassificationResourceRecord,
-    ClassificatorRecord,
+    ClassificationProjectMember,
+    ClassifiedResource,
+    Classificator,
     ResearchProject,
     PaginatedResult,
+    User,
 )
 
 
@@ -343,7 +346,7 @@ class TestClassificationProjectCollectionResources:
         result = component.get_collection_resources(collection_pk=LINK_PK)
 
         assert isinstance(result, PaginatedResult)
-        assert isinstance(result.results[0], ClassificationResourceRecord)
+        assert isinstance(result.results[0], ClassifiedResource)
 
     def test_get_collection_resources_uses_correct_endpoint(self, component, client):
         """get_collection_resources() usa el endpoint de resources de la collection."""
@@ -374,9 +377,9 @@ class TestClassificationProjectCollectionResources:
         assert query.endpoint == self._expected_endpoint(component)
 
     def test_where_collection_resources_uses_correct_schema(self, component):
-        """where_collection_resources() usa ClassificationResourceRecord como schema."""
+        """where_collection_resources() usa ClassifiedResource como schema."""
         query = component.where_collection_resources(collection_pk=LINK_PK)
-        assert query.schema is ClassificationResourceRecord
+        assert query.schema is ClassifiedResource
 
     # ── get_all_collection_resources ──────────────────────────────────────────
 
@@ -387,7 +390,7 @@ class TestClassificationProjectCollectionResources:
         result = component.get_all_collection_resources(collection_pk=LINK_PK)
 
         assert isinstance(result, PaginatedResult)
-        assert isinstance(result.results[0], ClassificationResourceRecord)
+        assert isinstance(result.results[0], ClassifiedResource)
 
     def test_get_all_collection_resources_uses_correct_endpoint(self, component, client):
         """get_all_collection_resources() usa el endpoint de resources de la collection."""
@@ -420,13 +423,13 @@ class TestClassificationProjectCollectionResources:
         assert params["size"] == 5
 
     def test_get_collection_resources_around_returns_typed_items(self, component, client):
-        """get_collection_resources_around() devuelve items tipados como ClassificationResourceRecord."""
+        """get_collection_resources_around() devuelve items tipados como ClassifiedResource."""
         client.get.return_value = paginated_response([VALID_RESOURCE])
 
         result = component.get_collection_resources_around(collection_pk=LINK_PK, resource_pk=4831)
 
         assert isinstance(result, PaginatedResult)
-        assert isinstance(result.results[0], ClassificationResourceRecord)
+        assert isinstance(result.results[0], ClassifiedResource)
 
     def test_get_collection_resources_around_exposes_total_and_filtered(self, component, client):
         """get_collection_resources_around() propaga pagination.total/filtered del servidor."""
@@ -624,7 +627,7 @@ class TestClassificationProjectCreateModel:
 
     def test_takes_the_objects_the_sdk_returns_or_their_primary_keys(self):
         rp = ResearchProject(pk=3, name="Host")
-        clf = ClassificatorRecord(pk=2, name="C", owner="o", updated_date="2026-01-01")
+        clf = Classificator(pk=2, name="C", owner="o", updated_date="2026-01-01")
         by_object = ClassificationProjectCreate(name="N", research_project=rp, classificator=clf)
         by_key = ClassificationProjectCreate(name="N", research_project=3, classificator=2)
         assert by_object.research_project == 3 and by_object.classificator == 2
@@ -633,3 +636,79 @@ class TestClassificationProjectCreateModel:
     def test_an_object_with_a_non_positive_pk_is_rejected(self):
         with pytest.raises(ValueError, match="positive"):
             ClassificationProjectCreate(name="N", research_project=ResearchProject(pk=0), classificator=2)
+
+
+class TestMembers:
+    """Members and roles: the role rows after the creator's in the form."""
+
+    @pytest.fixture
+    def client(self):
+        c = MagicMock()
+        c.server_version = "v1"
+        c.base_url = "https://trapper.example"
+        c._web_client.get.return_value = MagicMock(status_code=200, text=FORM_PAGE)
+        c.session_post_multipart.return_value = MagicMock(
+            status_code=302, headers={"location": "/media_classification/project/list/"}
+        )
+        return c
+
+    @pytest.fixture
+    def component(self, client):
+        comp = ClassificationProjectsComponent(client)
+        comp.where = MagicMock(side_effect=[iter([]), iter([_project(7)])])
+        return comp
+
+    def test_the_members_are_posted_after_the_creator(self, component, client):
+        component.create(ClassificationProjectCreate(name="Doñana", research_project=1, classificator=2, members=[
+            ClassificationProjectMember(user=User(pk=7, username="ana"), role="expert"),
+            ClassificationProjectMember(user=9, role=ClassificationProjectRoleType.CITIZEN),
+        ]))
+        data = client.session_post_multipart.call_args.kwargs["data"]
+        assert data["classification_project_roles-TOTAL_FORMS"] == 3
+        assert (data["classification_project_roles-0-user"], data["classification_project_roles-0-name"]) == ("4", "1")
+        assert (data["classification_project_roles-1-user"], data["classification_project_roles-1-name"]) == (7, 2)
+        assert (data["classification_project_roles-2-user"], data["classification_project_roles-2-name"]) == (9, 5)
+
+    def test_without_members_only_the_creator_is_posted(self, component, client):
+        component.create(ClassificationProjectCreate(name="Doñana", research_project=1, classificator=2))
+        data = client.session_post_multipart.call_args.kwargs["data"]
+        assert data["classification_project_roles-TOTAL_FORMS"] == 1
+
+    def test_the_creator_cannot_be_listed_as_a_member(self, component, client):
+        with pytest.raises(ValueError, match="already its administrator"):
+            component.create(ClassificationProjectCreate(
+                name="Doñana", research_project=1, classificator=2,
+                members=[ClassificationProjectMember(user=4, role="expert")],
+            ))
+        client.session_post_multipart.assert_not_called()
+
+
+class TestClassificationProjectMember:
+
+    def test_takes_a_user_object_or_a_primary_key_and_the_five_roles(self):
+        assert ClassificationProjectMember(user=User(pk=7, username="ana"), role="Error proof").role is \
+            ClassificationProjectRoleType.ERROR_PROOF
+        assert ClassificationProjectMember(user=7, role=5).role is ClassificationProjectRoleType.CITIZEN
+
+    @pytest.mark.parametrize("kwargs", [
+        {"user": 0, "role": "expert"},
+        {"user": 7, "role": "boss"},
+        {"user": 7, "role": 6},
+        {"user": 7},
+        {"user": 7, "role": "expert", "extra": 1},
+    ])
+    def test_invalid_members_are_rejected(self, kwargs):
+        with pytest.raises(ValueError):
+            ClassificationProjectMember(**kwargs)
+
+    def test_a_user_cannot_appear_twice(self):
+        with pytest.raises(ValueError, match=r"users \[7\] appear more than once"):
+            ClassificationProjectCreate(name="N", research_project=1, classificator=2, members=[
+                ClassificationProjectMember(user=7, role="expert"),
+                ClassificationProjectMember(user=7, role="collaborator"),
+            ])
+
+    def test_role_rows(self):
+        c = ClassificationProjectCreate(name="N", research_project=1, classificator=2,
+                                        members=[ClassificationProjectMember(user=7, role="collaborator")])
+        assert c.role_rows() == [(7, 3)]

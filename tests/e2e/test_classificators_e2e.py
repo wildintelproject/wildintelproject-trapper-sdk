@@ -11,11 +11,11 @@ from __future__ import annotations
 
 from tests.base_component_tests import ComponentE2ETestBase
 from trapper_client.components.classificators import ClassificatorsComponent
-from trapper_client.schemas import ClassificatorRecord
+from trapper_client.schemas import Classificator
 
 
 class TestClassificatorsComponentE2E(ComponentE2ETestBase):
     component_class = ClassificatorsComponent
-    schema = ClassificatorRecord
-    export_schema = ClassificatorRecord
+    schema = Classificator
+    export_schema = Classificator
     env_pk_var = "WILDINTEL_CLASSIFICATOR_PK"

@@ -2,6 +2,7 @@
 from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, field_validator
+from trapper_client._deprecated import deprecated_getattr
 
 
 class ResourceUser(BaseModel):
@@ -35,7 +36,7 @@ class UserObservationAttr(BaseModel):
         return v
 
 
-class UserClassificationRecord(BaseModel):
+class UserClassification(BaseModel):
     """Schema for ``/media_classification/api/user-classifications`` items."""
 
     pk: int
@@ -55,3 +56,6 @@ class UserClassificationRecord(BaseModel):
     detail_data: Optional[str] = None
     delete_data: Optional[str] = None
     ai_provider: Optional[str] = None
+
+
+__getattr__ = deprecated_getattr(__name__)

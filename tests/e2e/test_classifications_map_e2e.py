@@ -11,11 +11,11 @@ from __future__ import annotations
 
 from tests.base_component_tests import ComponentE2ETestBase
 from trapper_client.components.classifications_map import ClassificationsMapComponent
-from trapper_client.schemas import ClassificationMapRecord
+from trapper_client.schemas import ClassificationMap
 
 
 class TestClassificationsMapComponentE2E(ComponentE2ETestBase):
     component_class = ClassificationsMapComponent
-    schema = ClassificationMapRecord
-    export_schema = ClassificationMapRecord
+    schema = ClassificationMap
+    export_schema = ClassificationMap
     env_pk_var = "WILDINTEL_CLASSIFICATIONS_MAP_PK"
