@@ -25,6 +25,15 @@ más abajo para la única operación de escritura que admite este componente.
 | `correct_tstamp` | bool | Filtra por corrección de las marcas de tiempo |
 | `search` | str | Busca en `deployment_id` o en el nombre de usuario del propietario |
 
+!!! warning "Trapper ignora un filtro que no conoce"
+    Un parámetro que no es un filtro de Trapper (una errata, `colls`, `ordering`, `radius`...) se **ignora sin
+    error** y la lista vuelve sin filtrar. El SDK conoce los filtros de cada versión de Trapper y, si pasas otro,
+    emite un `UnknownFilterWarning` que lo nombra (la petición se envía igualmente). Además de los de la tabla, la
+    lista aplica `pk`, `deployment_code`, `deployment_id`, `setup_by`, `camera_*`, `detection_distance`, `bait_type`,
+    `feature_type`, `habitat`, `session`, `array`, `comments`, `date_created`, `managers`, `start_date`, `end_date`,
+    `is_incomplete`, `view_quality`, `capture_method` y `status`, y v2 aplica también `in_bbox`. Para silenciarlo:
+    `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
+
 ## Los seis patrones de acceso
 
 ```python

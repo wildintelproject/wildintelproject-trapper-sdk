@@ -25,6 +25,15 @@ below for the one write operation this component supports.
 | `correct_tstamp` | bool | Filter by timestamp correctness |
 | `search` | str | Search in `deployment_id` or owner username |
 
+!!! warning "Trapper ignores a filter it does not know"
+    A parameter that is not a filter of Trapper (a typo, `colls`, `ordering`, `radius`...) is **ignored without an
+    error**, and the list comes back unfiltered. The SDK knows the filters of each Trapper version and, when you
+    pass another one, emits an `UnknownFilterWarning` that names it (the request is still sent). Besides those in
+    the table, the list applies `pk`, `deployment_code`, `deployment_id`, `setup_by`, `camera_*`, `detection_distance`,
+    `bait_type`, `feature_type`, `habitat`, `session`, `array`, `comments`, `date_created`, `managers`, `start_date`,
+    `end_date`, `is_incomplete`, `view_quality`, `capture_method` and `status`, and v2 also applies `in_bbox`. To
+    silence it: `warnings.simplefilter("ignore", err.UnknownFilterWarning)`.
+
 ## The six access patterns
 
 ```python
