@@ -114,9 +114,9 @@ told apart.
 | `rdate_from` / `rdate_to` | date | `date_recorded` range |
 | `rtime_from` / `rtime_to` | HH:MM | Time-of-day range on `date_recorded` |
 | `ftype` | choice | Filter by resource type (IMAGE, VIDEO, ...) |
-| `classified` | boolean | Classified by user |
-| `classified_ai` | boolean | Classified by AI |
-| `approved` | boolean | Classification approved |
+| `classified` | boolean | Classified by user (**`500` on Trapper v2** for this table) |
+| `classified_ai` | boolean | Classified by AI (**`500` on Trapper v2** for this table) |
+| `approved` | boolean | Classification approved. Works on both: Trapper v1 calls it `status`, and the SDK sends it as such there |
 | `bboxes` | boolean | Has bounding boxes |
 | `species` | list of PKs | Filter by species PKs |
 | `observation_type` | choice | Filter by observation type |

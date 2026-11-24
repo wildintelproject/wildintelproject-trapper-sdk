@@ -13,6 +13,7 @@ from tenacity import Retrying
 
 from trapper_client import err
 from trapper_client.api_query import APIQuery
+from trapper_client.components._classification_filters import ClassificationFiltersMixin
 from trapper_client.components.base import TrapperComponent
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
 from trapper_client.retry_utils import retrying_for_chunk_upload
@@ -24,7 +25,7 @@ from trapper_client.schemas import (
 )
 
 
-class ClassificationsComponent(TrapperComponent[Classification]):
+class ClassificationsComponent(ClassificationFiltersMixin, TrapperComponent[Classification]):
     """
     Component for ``/media_classification/api/classifications``.
 
@@ -67,6 +68,9 @@ class ClassificationsComponent(TrapperComponent[Classification]):
     This endpoint returns observations as CSV (gzip) and supports filters from
     ``ClassificationFilter``.
     """
+
+    #: ``camtrapdp`` is a parameter of the results table, not a filter.
+    known_filters = ClassificationFiltersMixin._filters_for(frozenset({"camtrapdp"}))
 
     endpoint = "/media_classification/api/classifications"
     export_endpoint = "/media_classification/api/classifications/results/{project_pk}/"

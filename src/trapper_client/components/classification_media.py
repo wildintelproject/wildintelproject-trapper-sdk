@@ -14,13 +14,14 @@ from pydantic import BaseModel
 
 from trapper_client import err
 from trapper_client.api_query import APIQuery
+from trapper_client.components._classification_filters import ClassificationFiltersMixin
 from trapper_client.components.base import TrapperComponent
 from trapper_client.components.classification_projects import ClassificationProjectsComponent
 from trapper_client.retry_utils import retrying_for_download
 from trapper_client.schemas import Media, PaginatedResult
 
 
-class ClassificationMediaComponent(TrapperComponent[Media]):
+class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[Media]):
     """
     Component for ``/media_classification/api/media`` resource.
 
@@ -98,6 +99,12 @@ class ClassificationMediaComponent(TrapperComponent[Media]):
 
     endpoint = "media_classification/api/media/{project_pk}/"
     schema = Media
+
+    #: The parameters of the table that are not filters (they decide which files are private).
+    known_filters = ClassificationFiltersMixin._filters_for(
+        frozenset({"trapper_url", "trapper_url_token", "private_human", "private_vehicle"})
+    )
+    broken_filters = {"private_species": "answers 500 with any value, an empty one included"}
 
     # ── internal helpers ──────────────────────────────────────────────────────
 
