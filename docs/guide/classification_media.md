@@ -196,3 +196,21 @@ streamed to a temporary `.part` file that is moved into place when complete, so 
 a half-written file. Network failures and `502`/`503`/`504` answers are retried with exponential backoff
 (`retry_attempts`, `retry_min_wait`, `retry_max_wait`); a `404` (a missing file or a token that is no longer
 valid) is a `NotFoundError` and is not retried.
+
+### What the downloads of a project or a collection return
+
+`download_project_media_files()` and `download_collection_media_files()` return the **list of the paths that were
+downloaded** (a `DownloadedFiles`, which is a `list`) and carry what happened to the rest:
+
+```python
+files = client.classification_media.download_project_media_files(7, "media/")
+print(len(files), "downloaded")
+print(files.failed)        # {7: 'download of http://.../media/7/file/: the server answered 404', ...}
+print(files.ok)            # False when something failed
+```
+
+- A file that fails (after its retries) is in `.failed` (`{media id: message}`) and is logged; the rest go on. With
+  `on_error="raise"` the first failure stops it. Before, a failure disappeared: with the default `private_human` the
+  files of the humans (a row with no token) were left out and nothing said so.
+- `skip_existing=True` leaves a file that is already in the folder, so an interrupted run is repeated with the same call;
+  those are in `.skipped`. Files are named `media_<id>`, with no extension.

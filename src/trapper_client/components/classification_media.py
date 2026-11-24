@@ -5,6 +5,7 @@ Component for media exports in classification projects.
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import logging
 import tempfile
 import zipfile
 from pathlib import Path
@@ -19,6 +20,27 @@ from trapper_client.components.base import TrapperComponent
 from trapper_client.components.classification_projects import ClassificationProjectsComponent
 from trapper_client.retry_utils import retrying_for_download
 from trapper_client.schemas import Media, PaginatedResult
+
+logger = logging.getLogger(__name__)
+
+
+class DownloadedFiles(list):
+    """The paths of the files that were downloaded (it is a ``list``), and what happened to the rest.
+
+    Attributes:
+        failed: ``{media id: message}`` of the files that could not be downloaded, once their retries ran out.
+        skipped: Paths that were already there (``skip_existing=True``).
+    """
+
+    def __init__(self, downloaded=(), failed=None, skipped=None):
+        super().__init__(downloaded)
+        self.failed: Dict[int, str] = dict(failed or {})
+        self.skipped: List[Path] = list(skipped or [])
+
+    @property
+    def ok(self) -> bool:
+        """``True`` when nothing failed."""
+        return not self.failed
 
 
 class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[Media]):
@@ -178,7 +200,7 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
         if isinstance(media, dict):
             values = media
         elif hasattr(media, "model_dump"):
-            values = media.model_dump(mode="python")
+            values = media.model_dump(mode="python", warnings=False)
         else:
             return None
 
@@ -214,7 +236,7 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
         if isinstance(media, dict):
             values = media
         elif hasattr(media, "model_dump"):
-            values = media.model_dump(mode="python")
+            values = media.model_dump(mode="python", warnings=False)
         else:
             return None
 
@@ -277,7 +299,9 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
         retry_attempts: int = 3,
         retry_min_wait: float = 0.5,
         retry_max_wait: float = 8.0,
-    ) -> list[Path]:
+        on_error: str = "continue",
+        skip_existing: bool = False,
+    ) -> "DownloadedFiles":
         """Download a list of media files, with optional parallelism and compression.
 
         Args:
@@ -292,11 +316,16 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             retry_attempts: Maximum number of attempts per file.
             retry_min_wait: Minimum exponential backoff delay in seconds.
             retry_max_wait: Maximum exponential backoff delay in seconds.
+            on_error: ``"continue"`` (default) records a failure in ``.failed`` and goes on; ``"raise"`` stops at the
+                first one.
+            skip_existing: Leave alone a file that is already there, so that an interrupted run can be repeated.
 
         Returns:
-            List of paths to successfully downloaded files.
+            A :class:`DownloadedFiles` (a list of the downloaded paths, with ``.failed`` and ``.skipped``).
         """
         output_path.mkdir(parents=True, exist_ok=True)
+        if on_error not in ("continue", "raise"):
+            raise ValueError("on_error must be 'continue' or 'raise'")
 
         def _download_one(media_id: int, file_url: str) -> Path:
             return self.download_media_file(
@@ -308,27 +337,49 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             )
 
         downloaded: list[Path] = []
+        failed: Dict[int, str] = {}
+        skipped: list[Path] = []
 
-        if parallel and len(media_rows) > 1:
-            workers = max(1, min(max_workers, len(media_rows)))
+        pending: list[tuple[int, str]] = []
+        for media_id, file_url in media_rows:
+            target = output_path / f"media_{media_id}"
+            if skip_existing and target.exists():
+                skipped.append(target)
+            else:
+                pending.append((media_id, file_url))
+
+        if parallel and len(pending) > 1:
+            workers = max(1, min(max_workers, len(pending)))
             with ThreadPoolExecutor(max_workers=workers) as executor:
-                futures = [executor.submit(_download_one, mid, url) for mid, url in media_rows]
+                futures = {executor.submit(_download_one, mid, url): mid for mid, url in pending}
                 for future in as_completed(futures):
                     try:
                         downloaded.append(future.result())
-                    except Exception:
-                        continue
+                    except Exception as exc:
+                        if on_error == "raise":
+                            for other in futures:
+                                other.cancel()
+                            raise
+                        failed[futures[future]] = str(exc)
         else:
-            for media_id, file_url in media_rows:
+            for media_id, file_url in pending:
                 try:
                     downloaded.append(_download_one(media_id, file_url))
-                except Exception:
-                    continue
+                except Exception as exc:
+                    if on_error == "raise":
+                        raise
+                    failed[media_id] = str(exc)
+
+        if failed:
+            logger.warning(
+                "%d of %d media files were not downloaded (media ids: %s): see .failed",
+                len(failed), len(pending), ", ".join(str(k) for k in sorted(failed)[:10]),
+            )
 
         if compress and downloaded:
             self._compress_files(downloaded, archive_file=archive_file)
 
-        return downloaded
+        return DownloadedFiles(downloaded, failed, skipped)
 
     # ── project media ─────────────────────────────────────────────────────────
 
@@ -465,8 +516,10 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
         retry_attempts: int = 3,
         retry_min_wait: float = 0.5,
         retry_max_wait: float = 8.0,
+        on_error: str = "continue",
+        skip_existing: bool = False,
         **kwargs: Any,
-    ) -> list[Path]:
+    ) -> "DownloadedFiles":
         """Download all media files for one classification project.
 
         Args:
@@ -480,10 +533,15 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             retry_attempts: Maximum number of attempts per file download.
             retry_min_wait: Minimum exponential backoff delay in seconds.
             retry_max_wait: Maximum exponential backoff delay in seconds.
+            on_error: ``"continue"`` (default) records a failure in ``.failed`` and goes on; ``"raise"`` stops at the
+                first one.
+            skip_existing: Leave alone a file that is already there (a download is written to a ``.part`` file and only
+                gets its name when it is complete, so an interrupted run can be repeated).
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            List of paths to successfully downloaded files.
+            A :class:`DownloadedFiles`: the list of the downloaded paths, with ``.failed`` (``{media id: message}``),
+            ``.skipped`` and ``.ok``.
         """
         q = self._merge_query(query, kwargs)
         data = self._get_all_or_empty(self._resolve_endpoint(project_pk), q)
@@ -503,6 +561,8 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             retry_attempts=retry_attempts,
             retry_min_wait=retry_min_wait,
             retry_max_wait=retry_max_wait,
+            on_error=on_error,
+            skip_existing=skip_existing,
         )
 
     # ── collection media ──────────────────────────────────────────────────────
@@ -620,8 +680,10 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
         retry_attempts: int = 3,
         retry_min_wait: float = 0.5,
         retry_max_wait: float = 8.0,
+        on_error: str = "continue",
+        skip_existing: bool = False,
         **kwargs: Any,
-    ) -> list[Path]:
+    ) -> "DownloadedFiles":
         """Download all media files for one collection within a project.
 
         Args:
@@ -636,10 +698,15 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             retry_attempts: Maximum number of attempts per file download.
             retry_min_wait: Minimum exponential backoff delay in seconds.
             retry_max_wait: Maximum exponential backoff delay in seconds.
+            on_error: ``"continue"`` (default) records a failure in ``.failed`` and goes on; ``"raise"`` stops at the
+                first one.
+            skip_existing: Leave alone a file that is already there (a download is written to a ``.part`` file and only
+                gets its name when it is complete, so an interrupted run can be repeated).
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            List of paths to successfully downloaded files.
+            A :class:`DownloadedFiles`: the list of the downloaded paths, with ``.failed`` (``{media id: message}``),
+            ``.skipped`` and ``.ok``.
         """
         link_pk = self._resolve_collection_pk(project_pk, collection_pk)
         q = self._merge_query(query, kwargs)
@@ -665,6 +732,8 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             retry_attempts=retry_attempts,
             retry_min_wait=retry_min_wait,
             retry_max_wait=retry_max_wait,
+            on_error=on_error,
+            skip_existing=skip_existing,
         )
 
     # ── file download ─────────────────────────────────────────────────────────
