@@ -23,7 +23,7 @@ Referencia completa de la API pública de `trapper_client`.
 | [`ResearchProjectsComponent`](components/research_projects.md) | `/research/api/projects` |
 | [`ResearchProjectsCollectionsComponent`](components/research_project_collections.md) | `/research/api/project/{pk}/collections` |
 | [`ClassificationProjectsComponent`](components/classification_projects.md) | `/media_classification/api/projects` (incluye `/project/{pk}/collections`) |
-| [`ClassificationsComponent`](components/classifications.md) | `/media_classification/api/classifications` |
+| [`ClassificationResultsComponent`](components/classifications.md) (also `ClassificationsComponent`) | `/media_classification/api/classifications` |
 | [`AIClassificationsComponent`](components/ai_classifications.md) | `/media_classification/api/ai-classifications` |
 | [`UserClassificationsComponent`](components/user_classifications.md) | `/media_classification/api/user-classifications` |
 | [`ClassificationsMapComponent`](components/classifications_map.md) | `/media_classification/api/classifications_map` |
