@@ -1321,6 +1321,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#desplegar-trapper-v1-y-v2-para-probar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Desplegar Trapper v1 y v2 para probar
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filtrar-por-palabra-clave-u-obtener-una-salida-detallada" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2822,6 +2833,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#desplegar-trapper-v1-y-v2-para-probar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Desplegar Trapper v1 y v2 para probar
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filtrar-por-palabra-clave-u-obtener-una-salida-detallada" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2948,10 +2970,45 @@ antes de ejecutarlas:</p>
 
 <p>También puedes copiar <code>tests/env.example</code> a <code>tests/.env</code> y rellenar los valores: pytest lo cargará
 automáticamente.</p>
+<h2 id="desplegar-trapper-v1-y-v2-para-probar">Desplegar Trapper v1 y v2 para probar</h2>
+<p><code>uv run cli trapper</code> despliega con Docker Compose un Trapper v1 y un Trapper v2, siempre con las mismas cuentas, para que
+las pruebas de extremo a extremo tengan contra qué ejecutarse. Necesita Docker y (la primera vez) red hacia el registro.
+<strong>No</strong> despliega Trapper AI ni el frontend de ciencia ciudadana: son otros contenedores.</p>
+<div class="termy">
+
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>up<span class="w">                            </span>//<span class="w"> </span>v1<span class="w"> </span>y<span class="w"> </span>v2<span class="w"> </span><span class="o">(</span>v1:<span class="w"> </span>latest,<span class="w"> </span>v2:<span class="w"> </span><span class="m">2</span>.0.0a2<span class="o">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>up<span class="w"> </span>v2<span class="w"> </span>--branch<span class="w"> </span>development<span class="w">     </span>//<span class="w"> </span>otra<span class="w"> </span>rama<span class="w"> </span>de<span class="w"> </span>Trapper
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>up<span class="w"> </span>--port-offset<span class="w"> </span><span class="m">1000</span><span class="w">          </span>//<span class="w"> </span>otra<span class="w"> </span>instancia:<span class="w"> </span>puertos<span class="w"> </span>+<span class="w"> </span><span class="m">1000</span>,<span class="w"> </span>con<span class="w"> </span>sus<span class="w"> </span>propios<span class="w"> </span>contenedores<span class="w"> </span>y<span class="w"> </span>datos
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="gp">$ </span><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>env<span class="w"> </span>v2<span class="k">)</span><span class="s2">&quot;</span><span class="w">               </span>//<span class="w"> </span>WILDINTEL_*<span class="w"> </span>para<span class="w"> </span>los<span class="w"> </span>tests<span class="w"> </span>e2e
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>status<span class="w"> </span><span class="p">|</span><span class="w"> </span>logs<span class="w"> </span>v2<span class="w"> </span>trapper-celery<span class="w"> </span><span class="p">|</span><span class="w"> </span>down<span class="w"> </span><span class="p">|</span><span class="w"> </span>destroy
+</code></pre></div>
+
+</div>
+
+<ul>
+<li><strong>La rama</strong> es la etiqueta de la imagen <code>registry.gitlab.com/trapper-project/trapper:&lt;rama&gt;</code>: el nombre tal como lo das
+  (<code>2.0.0a2</code>, <code>latest</code>) o el que el CI de Trapper da a una rama (<code>refactor/api-ninja</code> es <code>refactor-api-ninja</code>). El comando
+  comprueba que la imagen existe. No construye Trapper desde el código.</li>
+<li><strong>Varias instancias</strong>: <code>--port-offset N</code> suma <code>N</code> a todos los puertos y crea <strong>otra instancia</strong> (sus contenedores, volúmenes,
+  subred y cuentas), que vive junto a las demás. Los otros comandos necesitan el mismo <code>--port-offset</code> para encontrarla
+  (<code>uv run cli trapper env v2 --port-offset 1000</code>).</li>
+<li><strong>Puertos</strong> (suma <code>--port-offset</code>): v1 en <code>8080</code> (nginx, el que hay que usar: sin él una descarga de fichero contesta
+  <code>200</code> sin cuerpo), <code>8010</code> (la app) y <code>8088</code> (uploader); v2 en <code>8180</code>, <code>8100</code> y <code>8188</code>.</li>
+<li><strong>Cuentas</strong> (contraseña <code>wildintel-sdk-test</code>; Trapper v1 entra con el correo, <code>&lt;usuario&gt;@example.org</code>): <code>sdktest</code>
+  (superusuario, el del token de la API), <code>rp_staff</code> (staff y superusuario), <code>rp_user</code>, <code>ana</code>, <code>luis</code> y <code>plainuser</code>, cada
+  una con su token, y el proyecto de investigación <code>SDKT</code> con <code>sdktest</code> y <code>rp_staff</code> como administradores, <code>ana</code> como
+  experta y <code>luis</code> y <code>rp_user</code> como colaboradores. Ejecutar <code>up</code> otra vez las deja como están.</li>
+<li><code>down</code> para la instancia y conserva sus datos; <code>destroy</code> borra también los datos. Los secretos y los tokens están en
+  <code>dev/trapper/.state/</code>, que git no versiona.</li>
+<li><strong>Lo que una instancia aún no tiene</strong>: localizaciones, deployments, imágenes y clasificaciones. Los tests que las
+  necesitan se saltan o fallan en un servidor vacío (por ejemplo, una exportación de localizaciones contesta <code>400</code> si no
+  hay ninguna, como hace Trapper).</li>
+</ul>
 <h2 id="filtrar-por-palabra-clave-u-obtener-una-salida-detallada">Filtrar por palabra clave u obtener una salida detallada</h2>
 <div class="termy">
 
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span><span class="nb">test</span><span class="w"> </span>unit<span class="w"> </span>-k<span class="w"> </span>import_locations<span class="w"> </span>-v
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span><span class="nb">test</span><span class="w"> </span>unit<span class="w"> </span>-k<span class="w"> </span>import_locations<span class="w"> </span>-v
 </code></pre></div>
 
 </div>
@@ -2959,7 +3016,7 @@ automáticamente.</p>
 <h2 id="cobertura">Cobertura</h2>
 <div class="termy">
 
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;unit or integration&quot;</span><span class="w"> </span>--cov<span class="o">=</span>src/trapper_client<span class="w"> </span>--cov-report<span class="o">=</span>term-missing
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>tests<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;unit or integration&quot;</span><span class="w"> </span>--cov<span class="o">=</span>src/trapper_client<span class="w"> </span>--cov-report<span class="o">=</span>term-missing
 </code></pre></div>
 
 </div>
