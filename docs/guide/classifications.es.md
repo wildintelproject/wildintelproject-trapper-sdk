@@ -47,10 +47,17 @@ clasificados y aprobados, y nada más. Sus `dynamic_attrs` solo llevan `observat
 !!! note "Dos personas, una imagen"
     La tabla de resultados tiene solo la clasificación **final**, así que nunca contiene las observaciones de dos
     usuarios sobre la misma imagen. Para leer lo que dijo cada usuario, usa
-    [`user_classifications`](user_classifications.md). Trapper no enlaza una observación de una clasificación con una de
-    otra (según su código: son registros independientes y no compara cajas): para saber si dos observaciones son el
-    mismo animal, compara tú las cajas cuando ambas las tienen, y la especie y el conteo cuando no. *No comprobado con
-    dos usuarios sobre una imagen: los servidores de prueba tienen uno.*
+    [`user_classifications`](user_classifications.md).
+
+    Trapper enlaza las clasificaciones por **linaje**, no por la posición de una observación (según su código): la
+    clasificación de un usuario puede hacerse a partir de otra (la de la IA, o la de otro usuario), y la final apunta a la
+    que se aprobó. Las cajas tienen un uso ahí: la tarea `CopyBboxesFromAI` copia las cajas de una clasificación de la IA
+    a la del experto aprobada **cuando las dos tienen el mismo conteo total y el mismo tipo de observación y los objetos
+    del experto son indistinguibles** (los mismos valores en los campos que se comparan); las cajas se reparten entonces
+    entre los objetos al azar, como dice su docstring. No compara dónde están las cajas de las clasificaciones de dos
+    usuarios. Para saber si dos observaciones son el mismo animal, compara tú las cajas cuando ambas las tienen (su
+    solapamiento), y la especie y el conteo cuando no. *No comprobado con dos usuarios sobre una imagen: los servidores de
+    prueba tienen uno, y ninguna de sus observaciones tiene cajas.*
 
 !!! note "No confundir con la tabla de media"
     [`client.classification_media`](classification_media.md) es la tabla de los *ficheros* del proyecto; esto es *lo que

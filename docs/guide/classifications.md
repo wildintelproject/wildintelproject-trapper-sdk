@@ -46,11 +46,17 @@ approved, and nothing more. Its `dynamic_attrs` carry only `observation_type`, `
 
 !!! note "Two people, one image"
     The results table has the **final** classification only, so it never holds two users' observations of the same
-    image. To read what each user said, use [`user_classifications`](user_classifications.md). Trapper does not
-    link an observation of one classification with one of another (from its source: they are independent records, and
-    it has no matching of boxes): to tell whether two observations are the same animal, compare the boxes yourself
-    when both have them, and the species and the count when they do not. *Not checked with two users on one image: the
-    test servers have one.*
+    image. To read what each user said, use [`user_classifications`](user_classifications.md).
+
+    Trapper links classifications by **lineage**, not by the position of an observation (from its source): a user's
+    classification can be made from another one (the AI's, or another user's), and the final one points to the
+    classification that was approved. Boxes have one use there: the task `CopyBboxesFromAI` copies the boxes of an AI
+    classification to the approved expert one **when both have the same total count and the same observation type and
+    the expert's objects are indistinguishable** (the same values in the fields compared); the boxes are then given to the
+    objects at random, as its docstring says. It does not compare where the boxes of two users' classifications are. To
+    tell whether two observations are the same animal, compare the boxes yourself when both have them (their overlap),
+    and the species and the count when they do not. *Not checked with two users on one image: the test servers have
+    one, and none of their observations has boxes.*
 
 !!! note "Not to be confused with the media table"
     [`client.classification_media`](classification_media.md) is the table of the project's *files*; this is *what
