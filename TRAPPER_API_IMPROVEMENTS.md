@@ -53,6 +53,12 @@ the SDK does in the meantime.
 | 38 | Read every list filter of a resource the same way | storage |
 | 39 | Do not turn every model field of a resource into a filter | storage |
 | 40 | Add an export endpoint for resources | storage |
+| 41 | Download a set of resources through the API, asynchronously and by filters | storage |
+| 42 | Create, update and delete collections, and add or remove their resources, through the API | storage |
+| 43 | Return every field of a collection, and how many resources it has | storage |
+| 44 | Give the collection endpoints one shape | storage |
+| 45 | Reject a collection `status` that does not exist | storage |
+| 46 | Create a collection from a package through the API, and follow the task | storage |
 
 ---
 
@@ -511,7 +517,8 @@ nothing. (A filter with an invalid value is answered with a `400` and the field,
 **Workaround in the SDK.** For locations and deployments, `UnknownFilterWarning` names the filters the server would
 ignore; the filters each version applies are listed in their guides (checked live on v1 and v2: `colls`,
 `collections`, `ordering`, `radius`, `bait_use` and a typo are ignored on the deployment list too), and for
-resources (`ordering`, `in_bbox`, `radius` and a typo; `locations_map` on v2). Other endpoints are not checked yet.
+resources (`ordering`, `in_bbox`, `radius` and a typo; `locations_map` on v2) and collections (`ordering`, `description`,
+`date_created`, a typo; `locations_map` on v2). Other endpoints are not checked yet.
 
 ## 27. Create, update and delete deployments through the API
 
@@ -746,6 +753,127 @@ the rest of the parameters (see entry 26).
 list, plus the ones entry 35 asks for.
 
 **Workaround in the SDK.** `resources.export()` builds the CSV from the JSON list, so it reads every page.
+
+## 41. Download a set of resources through the API, asynchronously and by filters
+
+**Labels:** enhancement, api
+
+**Problem.** The API lists resources but gives no way to get their files together: each one is a request to a web
+view that does not take the token (entry 36), so the files of a deployment, of a collection or of a filtered search
+take one request each, with a web session. Trapper v1 does have a way, only in its web page: marking resources in
+the list and choosing *Generate data package* (`POST storage/resource/data-package/`, with `resources_pks`,
+`package_name` and `metadata`). Checked on v1 with two resources: it answers `{"success": true, "msg": "...your data
+package is being generated now."}`, a celery task builds a ZIP, and the ZIP is served at
+`/accounts/data-package/<pk>/` with a web session (its files are `<pk>_<name>.<ext>`, plus a `00_METADATA.csv` with
+`metadata`, *from the source*). But:
+
+- It takes a **list of primary keys**, not filters: the resources of a deployment, a collection or a date range have to
+  be listed first.
+- The whole package is **refused above `DATA_PACKAGE_MAX_SIZE`**, 10 MB by default (*from the source*): about two
+  hundred camera-trap photos.
+- The answer **does not say which package it is**: no id, no task id. The packages of an account are listed only on its
+  profile page *(from the source)*, so there is nothing to poll and nothing to download from a script.
+- It is a web page: no token, and **on v2 it does not exist** (`404`).
+
+**Proposal.** An API endpoint, in v1 and v2, that takes the filters of the resource list (`deployments`,
+`collections`, `rdate_from`, `tags`, ... or a list of pks), starts the packaging as a background task and answers with
+a task id; `GET .../tasks/<id>/` with its state (see #9), and a download link that takes the token once it is ready.
+No fixed small cap (or one the answer states), and a `404` that tells a missing file from a permission (entry 36).
+
+**Workaround in the SDK.** `deployments.download_resources()` and `collections.download_resources()` (and
+`resources.download_many()`) download the resources one by one with a web session, choosing them with the filters of
+the list or a `filter_fn`, skipping what is already on disk, and report what failed. It is sequential and slow for
+thousands of files; the SDK would use the server's own package when this exists.
+
+## 42. Create, update and delete collections, and add or remove their resources, through the API
+
+**Labels:** enhancement, api
+
+**Problem.** `CollectionViewSet` is read-only: `OPTIONS storage/api/collections` answers `Allow: GET, HEAD, OPTIONS`
+on v1 and v2. Creating an empty collection, editing it, deleting it, and adding or removing resources are web views:
+`collection/create/`, `collection/update/<pk>/`, `collection/delete/<pk>`, `collection/append/` and
+`collection/resource-delete/<pk>/` *(from the source, not tried on a server)*. The delete is a `BaseDeleteView`, which
+deletes on a `GET` (see #13). The only way to create a collection **with** data is a package (entry 46).
+
+**Proposal.** `POST storage/api/collections`, `PATCH`/`PUT`/`DELETE storage/api/collections/<pk>`, and
+`POST`/`DELETE storage/api/collections/<pk>/resources`, with token authentication and the permissions the web views
+check. Fields: `name`, `description`, `status`, `managers`.
+
+**Workaround in the SDK.** None for these. A collection with resources can be created from a package
+(`get_uploader()` and `collections.trigger_collection()`, see entry 46).
+
+## 43. Return every field of a collection, and how many resources it has
+
+**Labels:** enhancement, api
+
+**Problem.** `GET storage/api/collections` gives nine keys (checked on v1 and v2): `pk`, `name`, `owner`,
+`owner_profile`, `status`, `description`, `update_data`, `detail_data` and `delete_data`. The model has more, and the list
+filters on some of them (`period_begin`, `period_end`, `cs_deployment`, `is_complete_cs_collection`, `managers`,
+`members`, all applied on v1 and v2), but none is returned: not `date_created`, `period_begin`, `period_end`, `bbox`,
+`managers`, `members` or the **number of resources**, which takes a request to
+`storage/api/resources/collection/<pk>` to know. The last four keys are for the web page: URLs on v1 and `null` on v2,
+and on v1 `delete_data` has no trailing slash (`/storage/collection/delete/2`) unlike the others.
+
+**Proposal.** Return the fields of the model, the related objects as primary keys, and a `resources_count`, and leave
+the web-page fields out.
+
+**Workaround in the SDK.** The number of resources is `resources.get_by_collection(pk, page_size=1).pagination.count`;
+the other fields cannot be read.
+
+## 44. Give the collection endpoints one shape
+
+**Labels:** enhancement, api
+
+**Problem.** Three endpoints list collections and answer in three forms (checked on v1 and v2).
+`storage/api/collections` and `collections_ondemand` are paginated with the nine fields; `collections_map` has the
+same fields but is **one plain list** and ignores `page_size`; `collections_append` is a plain list of only `pk` and
+`name`. `collections_ondemand` answers `404` on v2. `collections_map/<pk>` answers the detail too, and `collections/<pk>/` with a trailing slash is a `404` (see #21).
+
+**Proposal.** One shape (the paginated one) for all, `fields` to choose what a caller needs, and the same endpoints in
+v1 and v2.
+
+**Workaround in the SDK.** `where_map()`, `get_append()` and the others wrap the plain list as one page, and
+`where_ondemand()` raises `UnsupportedVersionError` on v2.
+
+## 45. Reject a collection `status` that does not exist
+
+**Labels:** bug, api
+
+**Problem.** `status` is a plain `django_filters.Filter()` on the collection list: it compares the text as it is, in
+upper and lower case, and a value that does not exist is an **empty result with a `200`**, not an error (checked on v1
+and v2: `?status=private` and `?status=Bogus` give 0 collections, `?status=Private` gives them). The valid values
+(`Private`, `OnDemand`, `Public`, `Archived`) are listed nowhere in the API. And `pk` reads a list as one string with
+commas (`?pk=2,1`) and keeps one pk when it is repeated (`?pk=2&pk=1`), unlike `owners` and `research_projects`; see #38.
+
+**Proposal.** A `ChoiceFilter` for `status` (a `400` with the valid ones), and one convention for the lists.
+
+**Workaround in the SDK.** `CollectionStatus` resolves `status` in any case and raises `ValueError` listing the valid
+values; `pk`, `owners`, `research_projects` and `locations_map` accept a list or a comma-separated string and are sent
+the way Trapper reads each one; `UnknownFilterWarning` names what the list ignores (`locations_map` is ignored on v2).
+
+## 46. Create a collection from a package through the API, and follow the task
+
+**Labels:** enhancement, api
+
+**Problem.** A collection with its resources is created from a package: a YAML and a ZIP uploaded to the account's
+`collections/` folder, and `POST storage/api/collection/process/` to process them (checked on v1 and v2). The answer is
+`200` with a `task_id` and the collection appears seconds later, but:
+
+- **Nothing says when the task ends or how**: no endpoint for its state (#9). A file that is skipped (an identical one,
+  or an extension Trapper does not accept) goes only to a `.log` next to the ZIP *(from the source)*.
+- On v2 the **first call can answer `404`** ("The requested files were not found in your upload directory") because
+  the uploaded files are moved into place a moment after the upload ends (seen once in a handful of runs). v1 answers the same
+  with another message.
+- The request names the files by their names in a folder of the account: no way to say which upload they are. The YAML
+  needs a **classification** project (`project_id`) and deployments that exist, with the same timezone; a problem is a
+  `400` with the details in `data.errors`, but the format itself is in `collection_schema.yaml`, not in the API.
+
+**Proposal.** `GET .../tasks/<id>/` with the state and the per-file errors, an upload that is complete (and visible)
+when its last request answers, and the schema of the YAML served by the API.
+
+**Workaround in the SDK.** The guide describes the YAML and the requirements; `get_uploader()` and
+`collections.trigger_collection()` do the two steps, and an e2e test tries again for a few seconds on v2. The task cannot
+be followed: the SDK waits until the collection is listed.
 
 ---
 
