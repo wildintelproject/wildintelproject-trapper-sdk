@@ -127,6 +127,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- The classifications guide (issue #81) says what `classification_results` represents (the final classification of each
+  resource and its three views: list, results table and import), corrects the filter table (`user`, `feedback`,
+  `confidence` and `ai_provider` are ignored; `approved` is v2 only and v1 uses `status`; `deployment` and `collection`
+  need `project`) and explains that editing goes through the export with `camtrapdp=False` and the import.
 - The classification media guide (issue #76) says what the component represents (the media table of a
   classification project: its eleven columns, how it arrives, public and private files) and describes the
   `private_*` parameters as they work: `True` hides the files of humans and vehicles, and Trapper reads only the

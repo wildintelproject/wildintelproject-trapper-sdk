@@ -3,7 +3,70 @@
 !!! info "Trapper compatibility"
     **v1** ✔ · **v2** ✔ — except `import_classifications(overwrite_attrs=True)`, which is **v1 only**. See [Trapper versions](versions.md).
 
-`client.classification_results` — final (approved) classification observations.
+`client.classification_results` — the **final classifications** of a classification project.
+
+## What it represents
+
+In a classification project every resource has one **final classification**: the record that holds the result for
+that resource (what it shows), taken from the classification someone made or imported and then approved (from
+Trapper's source). `approved` says whether that has happened; the resources nobody has classified have a final
+classification too, with the observation type `unclassified`. This component reads those records in three ways, each
+with its own shape (checked on Trapper v1 and v2):
+
+| | List (`where()`, `find()`) | Results table (`where_project_results()`, `export_project_results()`) | Import |
+|---|---|---|---|
+| One row per | **resource** | **observation** (a resource with two species has two rows) | the `_id` of a final classification |
+| Species | text (`"European Rabbit (Oryctolagus cuniculus)"`), no pk | `scientificName` | `scientificName` |
+| `sex`, `lifeStage`, `behavior`, `bboxes` | **not there** | yes | yes |
+| Identifier | `pk`, the primary key of the classification | `_id` (only with `camtrapdp=False`); `observationID` is only the **row number** in the table you asked for (it changes with the filters) and is not in the list | `_id` |
+| Needs a project | for `deployment` and `collection` | yes, in the URL | yes |
+
+So **to know what each image shows, use the results table**; the list tells you which resources are classified and
+approved, and nothing more. Its `dynamic_attrs` carry only `observation_type`, `species` and `count`.
+
+### What each thing is
+
+- **Classification:** what one person (or the AI) decided about one resource. Each user's classification of a resource
+  is its own record (`user_classifications`, see [User classifications](user_classifications.md)); the **final**
+  classification is the one record per resource that this component reads. When someone's classification is approved,
+  the final one points to it and takes its values (from Trapper's source): it is **one** classification chosen, not a
+  merge of several.
+- **Observation:** one thing seen in the resource, with its type (`animal`, `human`, `blank`, ...), species, `count`,
+  `sex`, `lifeStage` and `behavior`. It is a row of the results table. Two species in one image are two observations;
+  an image with nothing in it is one (`blank` or `unclassified`).
+- **Bounding box:** an optional position of the observation in the image (`bboxX`, `bboxY`, `bboxWidth`, `bboxHeight`,
+  and the `bboxes` list with `camtrapdp=False`). It says *where*, not *what*: what is there is said by the observation,
+  and who said it by `classificationMethod` (`human` or `machine`) and `classifiedBy`. An observation can have several
+  boxes (a count of three) or none.
+- **`_id`:** the primary key of the final classification of the resource, the same as the `pk` of the list. It is the
+  stable identifier, and the one the import needs.
+- **`observationID`:** only the **number of the row** in the table you asked for. It changes with the filters (the
+  same observation is 4 in the whole table and 1 with `sex=male`), so it does not identify an observation and cannot
+  be compared between two requests.
+
+!!! note "Two people, one image"
+    The results table has the **final** classification only, so it never holds two users' observations of the same
+    image. To read what each user said, use [`user_classifications`](user_classifications.md).
+
+    Trapper links classifications by **lineage**, not by the position of an observation (from its source): a user's
+    classification can be made from another one (the AI's, or another user's), and the final one points to the
+    classification that was approved. Boxes have one use there: the task `CopyBboxesFromAI` copies the boxes of an AI
+    classification to the approved expert one **when both have the same total count and the same observation type and
+    the expert's objects are indistinguishable** (the same values in the fields compared); the boxes are then given to the
+    objects at random, as its docstring says. It does not compare where the boxes of two users' classifications are. To
+    tell whether two observations are the same animal, compare the boxes yourself when both have them (their overlap),
+    and the species and the count when they do not. *Not checked with two users on one image: the test servers have
+    one, and none of their observations has boxes.*
+
+!!! note "Not to be confused with the media table"
+    [`client.classification_media`](classification_media.md) is the table of the project's *files*; this is *what
+    they show*. Join them by `mediaID`: there is an example there.
+
+!!! note "Reading, then editing"
+    The API cannot create, edit or approve a classification: the list is read-only (`Allow: GET, HEAD, OPTIONS`
+    on v1 and v2) and the only write is the [import](#importing-observations-from-a-csv). To correct classifications
+    by script: export the results table with **`camtrapdp=False`** (the format that carries `_id`, which the import
+    requires; the default `camtrapdp=True` does not), edit it and import it.
 
 **Endpoints:**
 
@@ -15,24 +78,29 @@
 
 | Parameter | Type | Description |
 |---|---|---|
-| `project` | PK | Auto-filtered by URL when using the project-scoped export methods below — not needed there |
+| `project` | PK | The project of the list. **Required for `deployment` and `collection`**: Trapper checks them against the project's own and, without it, answers `400 "Select a valid choice"`. The project-scoped methods below take it from the URL |
 | `owner` | boolean | `true` = resources where user is owner/manager |
-| `deployment` | list of PKs | Filter by deployment PKs |
-| `collection` | list of PKs | Filter by collection PKs |
+| `deployment` | list of PKs | Deployment PKs (needs `project`) |
+| `collection` | list of PKs | The pk of the **link between the project and the collection**, not the collection's pk (needs `project`; see entry 51 of `TRAPPER_API_IMPROVEMENTS.md`) |
 | `locations_map` | comma-separated PKs | Filter by location PKs |
 | `rdate_from` / `rdate_to` | date | `date_recorded` range |
 | `rtime_from` / `rtime_to` | HH:MM | Time-of-day range |
 | `ftype` | choice | Resource type (IMAGE, VIDEO, ...) |
 | `bboxes` | boolean | Has bounding boxes |
-| `user` | list of PKs | Filter by owner user PKs |
-| `approved` | boolean | Has a FINAL approved classification |
-| `feedback` | boolean | Is a feedback classification |
+| `classified`, `classified_ai` | boolean | Has a classification by a user / by AI |
+| `approved` | boolean | Approved. **v2 only**: v1 ignores it and calls the same filter `status` |
+| `status` | boolean | Approved, on **v1 only** (v2 ignores it) |
 | `species` | list of PKs | Filter by species PKs |
 | `observation_type` | choice | Filter by observation type |
 | `sex` | choice | Filter by sex |
 | `age` | choice | Filter by age |
-| `confidence` | number | `dynamic_attrs.classification_confidence >= value` |
-| `ai_provider` | list of PKs | Filter by AI provider PKs |
+
+!!! warning "Filters that this endpoint ignores"
+    Trapper ignores a parameter it does not know **without an error**, and the list comes back unfiltered. Besides
+    the ones above, `user`, `feedback`, `confidence` and `ai_provider`, which a previous version of this guide listed,
+    do nothing here (checked on v1 and v2: `user=1` and `ai_provider=1` return every row; they belong to the lists of
+    user and AI classifications). A filter that leaves no row answers `200` with an empty list, but the results table
+    and the media table answer `400 "Empty queryset..."`.
 
 ## The six access patterns
 

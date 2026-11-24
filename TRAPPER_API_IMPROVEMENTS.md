@@ -65,6 +65,9 @@ the SDK does in the meantime.
 | 50 | Say in the media table what each image shows, and fill `exifData` | media_classification |
 | 51 | Filter by the collection's own pk, not by its link to the classification project | media_classification |
 | 52 | Make `private_species` of the media table work | media_classification |
+| 53 | Create, update and approve classifications through the API | media_classification |
+| 54 | Return in the classification list the fields the results table has | media_classification |
+| 55 | Document the format of the results table that can be imported, and what `observationID` is | media_classification |
 
 ---
 
@@ -940,7 +943,8 @@ would hide a missing permission too.)*
 
 **Problem.** The media table is built in memory and sent as **one gzip CSV with every row**: `page` and `page_size` are
 ignored, and `page=2` answers the same rows as `page=1` (checked on v2, project 2: 28 rows with `page_size=5`, and
-`pages=1`). The request for a project with many resources takes as long as the whole table, with no way to ask for a
+`pages=1`). **The results table does the same** (`classifications/results/<project_pk>/`, checked on v2: 28 rows with or
+without `page_size=5`; see #55). The request for a project with many resources takes as long as the whole table, with no way to ask for a
 part of it, and the client cannot tell how big the answer will be beforehand. The list of classifications, which has
 the same filters, is paginated. `wildintel-zooniverse` says in its code that for a very large collection (R0038, about
 876,000 images) one request takes longer than the client's timeout, so it asks one deployment at a time *(its own
@@ -1004,6 +1008,61 @@ answer the table.
 
 **Workaround in the SDK.** The guide says not to use it. To hide a species, filter the rows on the client with the
 results table (the observation type and the species of each `mediaID`) and leave those files out of the download.
+
+## 53. Create, update and approve classifications through the API
+
+**Labels:** enhancement, api
+
+**Problem.** The classification list and the user classification list answer `Allow: GET, HEAD, OPTIONS` on v1 and v2,
+and the only write in all of `media_classification/api` is `POST classifications/import/`. To classify a resource, correct a
+species or approve a result there are the web views (`classify/<pk>/`) and nothing else. The one script-friendly way
+to change what exists is the import: export the results table with `camtrapdp=False`, edit it and import it with its
+`_id` column. That has limits: it only **updates** classifications that already exist (an `_id` that is not one of the
+project's is rejected), it runs in the background with no way to follow it (#9), and an invalid table is a bare `500`
+(#10). A script that classifies, for example a model that proposes a species, has to build a CSV for it.
+
+**Proposal.** `POST`/`PATCH` on a classification (its observations and its approval), with the permissions of the web
+view, and a `400` with the errors in JSON.
+
+**Workaround in the SDK.** `classification_results.import_classifications()`: the guide describes the export, edit and
+import cycle. It cannot create a classification for a resource that has none.
+
+## 54. Return in the classification list the fields the results table has
+
+**Labels:** enhancement, api
+
+**Problem.** A row of the list has `dynamic_attrs` with only `observation_type`, `species` and `count` (plus
+`confidence`) (checked on v1 and v2), and the species is a text (`"European Rabbit (Oryctolagus cuniculus)"`), not a
+primary key. `sex`, `lifeStage`, `behavior`, `individualID` and the bounding boxes, which the results table carries, are
+missing, although the list filters by `sex` and `age`. The row has no primary key of the project either, only its name in
+`classification_project`, and its `collection` is the pk of the link with the project (#51). A client that wants to show
+or edit a classification has to ask the results table and join it with the list by `_id` (which is the `pk` of the list
+row, checked) or by `mediaID`.
+
+**Proposal.** The same attributes in both, the species with its pk, and the pk of the project.
+
+**Workaround in the SDK.** The guide says which one to use for what: the results table to know what an image shows.
+
+## 55. Document the format of the results table that can be imported, and what `observationID` is
+
+**Labels:** bug, api
+
+**Problem.** `GET classifications/results/<project_pk>/` answers two formats (checked on v1 and v2: the same columns on
+both). With `camtrapdp=True`, **the default**, there are 28 columns and no `_id`; with `camtrapdp=False` there are 32:
+`_id`, `countNew`, `englishName` and `bboxes` are added. The import requires `_id`, so the table you get by default cannot
+be imported again, and nothing in the API says that the other format is the one for that. The table has two
+identifiers and they are not explained: `_id` is the pk of the final classification (it equals the `pk` of the list row,
+checked: 5 and 5 on v1, 6 and 6 on v2), and `observationID` is **only the position of the row in the table that was
+asked** (in the source it is a counter from 1 that is reset after the rows are sorted; checked on v2: the same
+observation is 4 in the whole table and 1 with `sex=male`, while its `_id` stays 6). It is not a key, it changes with
+every filter, and the list does not have it. The table also ignores `page` and `page_size`, like the media table (#49):
+`page_size=5` and `page=2` return the same 28 rows.
+
+**Proposal.** Say which format is the one to import (or give a single format that serves to read and to import), explain
+the two identifiers (or do not put a row counter in a column called `observationID`), and paginate it.
+
+**Workaround in the SDK.** `ClassificationResultRecordCamtrapDP` and `ClassificationResultRecordTrapper` are the two
+formats, and the guide says to use `camtrapdp=False` for the cycle of exporting, editing and importing.
 
 ---
 
