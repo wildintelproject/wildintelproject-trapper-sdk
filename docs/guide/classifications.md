@@ -63,6 +63,8 @@ by the two Trapper versions:
 So on v1 an observation of `count=2` with two boxes is **two rows** in the default format, and one in the other. Both
 are relative coordinates (0 to 1). A box is optional: `[]` when there is none.
 
+With `camtrapdp=False` the SDK reads both shapes into `row.bboxes`, a list of `BBox` (a v2 observation has one).
+
 !!! warning "A box in the other version's shape breaks the whole results table"
     The default format (`camtrapdp=True`) answers **`500` for the entire project** if one row has its boxes in the
     other version's shape (a flat box on v1, a list of boxes on v2). I met it writing test data by hand; whether the tools

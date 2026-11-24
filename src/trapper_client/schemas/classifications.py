@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from typing import Annotated, Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
+from pydantic import BaseModel, ConfigDict, Discriminator, Field, HttpUrl, Tag, field_validator
 
 from trapper_client.enums import ClassificationProjectRoleType
 
@@ -285,8 +285,11 @@ class ClassificationResultRecordTrapper(TrapperSchema):
                 parsed = [b for b in parsed if b is not None]
             if not parsed:
                 return None
+            if all(isinstance(n, (int, float)) and not isinstance(n, bool) for n in parsed) and len(parsed) == 4:
+                # Trapper v2 stores one box per observation, flat: [x, y, w, h].
+                return [BBox(x=parsed[0], y=parsed[1], width=parsed[2], height=parsed[3])]
             if isinstance(parsed[0], (list, type(None))):
-                # Trapper sometimes sends a null (or short) entry among the boxes.
+                # Trapper v1 stores a list of boxes. It sometimes sends a null (or short) entry among them.
                 boxes = [BBox(x=b[0], y=b[1], width=b[2], height=b[3])
                          for b in parsed if isinstance(b, (list, tuple)) and len(b) >= 4]
                 return boxes or None
@@ -294,9 +297,24 @@ class ClassificationResultRecordTrapper(TrapperSchema):
         return v
 
 
-ClassificationRecordExport = Union[
-    ClassificationResultRecordCamtrapDP,
-    ClassificationResultRecordTrapper,
+def _record_kind(row: Any) -> str:
+    """Pick the row class by what the row is, not by which one happens to validate.
+
+    Only the Trapper format (``camtrapdp=False``) has an ``_id`` column. Without this, a Trapper row
+    that failed its own validation (a box in a shape that was not read) was accepted as the CamtrapDP
+    class, which allows extra fields, and came back mistyped with no error.
+    """
+    if isinstance(row, dict):
+        return "trapper" if "_id" in row else "camtrapdp"
+    return "trapper" if isinstance(row, ClassificationResultRecordTrapper) else "camtrapdp"
+
+
+ClassificationRecordExport = Annotated[
+    Union[
+        Annotated[ClassificationResultRecordCamtrapDP, Tag("camtrapdp")],
+        Annotated[ClassificationResultRecordTrapper, Tag("trapper")],
+    ],
+    Discriminator(_record_kind),
 ]
 
 

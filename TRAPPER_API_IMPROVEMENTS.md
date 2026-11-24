@@ -1085,9 +1085,9 @@ two rows), and v2 one row per observation: the same data, a different table.
 **Proposal.** One shape, documented, in both versions; reject a wrong one when it is saved; and give the row with a
 bad value as an error of its own instead of a `500` for every other row of the project.
 
-**Workaround in the SDK.** The guide has the table of boxes per version. `ClassificationResultRecordTrapper` reads the
-v1 list; a v2 box (`[x, y, w, h]`) is not read and the row falls back to the CamtrapDP class with `bboxes` as text *(a
-bug of the SDK, pending)*.
+**Workaround in the SDK.** The guide has the table of boxes per version. `ClassificationResultRecordTrapper` reads both
+shapes (the v1 list and the v2 box) as a list of `BBox`, and the row class is picked by the `_id` column, so a row it cannot
+read is an error and not a row of the wrong class.
 
 ## 57. Do not fetch the Camtrap DP schema from the internet in every classification import
 
