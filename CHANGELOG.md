@@ -135,6 +135,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- The docstring of `ClassificationsComponent` (issue #97) no longer says AI classifications: it says what the component returns
+  (the final classifications, in three shapes) and lists the filters that apply.
 - The classification media guide and docstring say that `collection` is the pk of the link between the project and the collection, not
   the collection's (issue #93). It is not translated, because `wildintel-zooniverse` passes the link's pk to `where_project_media()`:
   use `where_collection_media()` to give the collection's.
