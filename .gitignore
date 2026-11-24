@@ -93,3 +93,6 @@ __pycache__/
 .pytest_cache/
 build/
 dist/
+
+# Trapper test instances (uv run cli trapper up): secrets, ports and credentials
+/dev/trapper/.state/
