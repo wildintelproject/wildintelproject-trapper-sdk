@@ -26,37 +26,63 @@ approved, and nothing more. Its `dynamic_attrs` carry only `observation_type`, `
 
 ### What each thing is
 
-- **Classification:** what one person (or the AI) decided about one resource. Each user's classification of a resource
-  is its own record (`user_classifications`, see [User classifications](user_classifications.md)); the **final**
-  classification is the one record per resource that this component reads. When someone's classification is approved,
-  the final one points to it and takes its values (from Trapper's source): it is **one** classification chosen, not a
-  merge of several.
+- **Classification:** what one person (or the AI) decided about one resource, and it is a **set of observations**: zero
+  (nothing classified yet), one, or several. Each user's classification of a resource is its own record
+  (`user_classifications`, see [User classifications](user_classifications.md)); the **final** classification is the one
+  record per resource that this component reads. When someone's classification is approved, the final one is taken from it
+  (from Trapper's source and checked on v1 and v2): it is **one** classification chosen, copied, not a merge of several.
 - **Observation:** one thing seen in the resource, with its type (`animal`, `human`, `blank`, ...), species, `count`,
-  `sex`, `lifeStage` and `behavior`. It is a row of the results table. Two species in one image are two observations;
-  an image with nothing in it is one (`blank` or `unclassified`).
-- **Bounding box:** an optional position of the observation in the image (`bboxX`, `bboxY`, `bboxWidth`, `bboxHeight`,
-  and the `bboxes` list with `camtrapdp=False`). It says *where*, not *what*: what is there is said by the observation,
-  and who said it by `classificationMethod` (`human` or `machine`) and `classifiedBy`. An observation can have several
-  boxes (a count of three) or none.
-- **`_id`:** the primary key of the final classification of the resource, the same as the `pk` of the list. It is the
-  stable identifier, and the one the import needs.
+  `sex`, `lifeStage` and `behavior`. It is a row of the results table. An image with nothing in it has one (`blank`, or
+  `unclassified` when nobody has looked).
+- **Bounding box:** an optional position of the observation in the image. It says *where*, not *what*: what is there is
+  said by the observation, and who said it by `classificationMethod` (`human` or `machine`) and `classifiedBy`. The
+  server versions store it differently, see [Boxes](#boxes) below.
+- **`_id`:** the primary key of the final **classification**, the same as the `pk` of the list. It is the identifier of
+  the classification, not of an observation: the rows of the same image share it (checked: a rabbit and a lynx in one
+  image are two rows with the same `_id`). It is what the import needs.
 - **`observationID`:** only the **number of the row** in the table you asked for. It changes with the filters (the
-  same observation is 4 in the whole table and 1 with `sex=male`), so it does not identify an observation and cannot
-  be compared between two requests.
+  same observation is 4 in the whole table and 1 with `sex=male`) and with the format (on v1 the same observation is 4
+  with `camtrapdp=False` and 28 with `camtrapdp=True`), so it identifies nothing and cannot be compared between two
+  requests. An observation has no identifier of its own: to find it again, use `_id` and the species.
+
+#### Several things in one image
+
+They are several observations of **one** classification, one row each, with the same `_id` and different `observationID`
+(checked on v1 and v2: a rabbit and a lynx in one image give two rows). Several animals of the **same** species are one
+observation with a `count` (a rabbit twice is `count=2`, one row). The boxes, which are optional, are stored differently
+by the two Trapper versions:
+
+#### Boxes
+
+| | Trapper v1 | Trapper v2 |
+|---|---|---|
+| Stored per observation | a **list of boxes**: `[[x, y, w, h], [x, y, w, h]]` | **one** box: `[x, y, w, h]`, that of the first occurrence (from Trapper's model) |
+| `camtrapdp=False` | one row per observation, `bboxes` is the list | one row per observation, `bboxes` is `[x, y, w, h]` |
+| `camtrapdp=True` (default) | **one row per box**, each with `count` 1 | one row per observation, with `bboxX`, `bboxY`, `bboxWidth`, `bboxHeight` |
+
+So on v1 an observation of `count=2` with two boxes is **two rows** in the default format, and one in the other. Both
+are relative coordinates (0 to 1). A box is optional: `[]` when there is none.
+
+!!! warning "A box in the other version's shape breaks the whole results table"
+    The default format (`camtrapdp=True`) answers **`500` for the entire project** if one row has its boxes in the
+    other version's shape (a flat box on v1, a list of boxes on v2). I met it writing test data by hand; whether the tools
+    of each version can produce it was not checked. The `camtrapdp=False` format keeps working.
 
 !!! note "Two people, one image"
     The results table has the **final** classification only, so it never holds two users' observations of the same
-    image. To read what each user said, use [`user_classifications`](user_classifications.md).
+    image. `user_classifications` lists **all** of them, each its own record (checked with three users on one image:
+    three records, with their own `pk` and owner), and `approved` marks the one the final classification is taken from.
+    When another is approved, the final one **copies** it (on v1 it replaces the observations, boxes included; the
+    others are left as they were), and the `approved` mark moves.
 
-    Trapper links classifications by **lineage**, not by the position of an observation (from its source): a user's
-    classification can be made from another one (the AI's, or another user's), and the final one points to the
-    classification that was approved. Boxes have one use there: the task `CopyBboxesFromAI` copies the boxes of an AI
-    classification to the approved expert one **when both have the same total count and the same observation type and
-    the expert's objects are indistinguishable** (the same values in the fields compared); the boxes are then given to the
-    objects at random, as its docstring says. It does not compare where the boxes of two users' classifications are. To
-    tell whether two observations are the same animal, compare the boxes yourself when both have them (their overlap),
-    and the species and the count when they do not. *Not checked with two users on one image: the test servers have
-    one, and none of their observations has boxes.*
+    Trapper does not match the observations of two classifications (from its source and checked on v1 and v2): there is
+    no link between "the rabbit of ana" and "the rabbit of luis", and the user classification list **does not carry the
+    boxes** (only `bboxes: true`; the species, type and count are there), so through the API the boxes of a user's
+    classification cannot be read until it is approved, and then they are in the results table. Its only use of boxes
+    is the task `CopyBboxesFromAI`, which copies the boxes of an AI classification to the approved expert one **when
+    both have the same total count and observation type and the expert's objects are indistinguishable**, giving them
+    to the objects at random (its docstring). To tell whether two observations are the same animal, compare their species
+    and count, and, for the approved classification only, its boxes (their overlap).
 
 !!! note "Not to be confused with the media table"
     [`client.classification_media`](classification_media.md) is the table of the project's *files*; this is *what

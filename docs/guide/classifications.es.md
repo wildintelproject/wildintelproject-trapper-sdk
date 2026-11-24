@@ -26,38 +26,64 @@ clasificados y aprobados, y nada más. Sus `dynamic_attrs` solo llevan `observat
 
 ### Qué es cada cosa
 
-- **Clasificación:** lo que una persona (o la IA) decidió sobre un resource. La clasificación de cada usuario sobre un
-  resource es un registro propio (`user_classifications`, véase [Clasificaciones de usuario](user_classifications.md));
-  la clasificación **final** es el único registro por resource que lee este componente. Cuando se aprueba la
-  clasificación de alguien, la final apunta a ella y toma sus valores (según el código de Trapper): es **una**
-  clasificación elegida, no una mezcla de varias.
+- **Clasificación:** lo que una persona (o la IA) decidió sobre un resource, y es un **conjunto de observaciones**: cero
+  (aún sin clasificar), una o varias. La clasificación de cada usuario sobre un resource es un registro propio
+  (`user_classifications`, véase [Clasificaciones de usuario](user_classifications.md)); la **final** es el único
+  registro por resource que lee este componente. Cuando se aprueba la clasificación de alguien, la final se toma de ella
+  (según el código de Trapper y comprobado en v1 y v2): es **una** clasificación elegida y copiada, no una mezcla.
 - **Observación:** una cosa vista en el resource, con su tipo (`animal`, `human`, `blank`, ...), especie, `count`,
-  `sex`, `lifeStage` y `behavior`. Es una fila de la tabla de resultados. Dos especies en una imagen son dos
-  observaciones; una imagen sin nada es una (`blank` o `unclassified`).
-- **Caja (bounding box):** una posición opcional de la observación en la imagen (`bboxX`, `bboxY`, `bboxWidth`,
-  `bboxHeight`, y la lista `bboxes` con `camtrapdp=False`). Dice *dónde*, no *qué*: lo que hay lo dice la observación,
-  y quién lo dijo, `classificationMethod` (`human` o `machine`) y `classifiedBy`. Una observación puede tener varias
-  cajas (un conteo de tres) o ninguna.
-- **`_id`:** la clave primaria de la clasificación final del resource, igual que el `pk` de la lista. Es el
-  identificador estable, y el que necesita la importación.
+  `sex`, `lifeStage` y `behavior`. Es una fila de la tabla de resultados. Una imagen sin nada tiene una (`blank`, o
+  `unclassified` si nadie la ha mirado).
+- **Caja (bounding box):** una posición opcional de la observación en la imagen. Dice *dónde*, no *qué*: lo que hay lo
+  dice la observación, y quién lo dijo, `classificationMethod` (`human` o `machine`) y `classifiedBy`. Las dos versiones
+  de Trapper la guardan de forma distinta, véase [Cajas](#cajas) más abajo.
+- **`_id`:** la clave primaria de la **clasificación** final, igual que el `pk` de la lista. Es el identificador de la
+  clasificación, no de una observación: las filas de una misma imagen lo comparten (comprobado: un conejo y un lince en
+  una imagen son dos filas con el mismo `_id`). Es lo que necesita la importación.
 - **`observationID`:** solo el **número de fila** de la tabla que pediste. Cambia con los filtros (la misma observación
-  es 4 en la tabla entera y 1 con `sex=male`), así que no identifica una observación y no se puede comparar entre dos
-  peticiones.
+  es 4 en la tabla entera y 1 con `sex=male`) y con el formato (en v1 la misma observación es 4 con `camtrapdp=False` y
+  28 con `camtrapdp=True`), así que no identifica nada y no se puede comparar entre dos peticiones. Una observación no
+  tiene identificador propio: para volver a encontrarla, usa `_id` y la especie.
+
+#### Varias cosas en una imagen
+
+Son varias observaciones de **una** clasificación, una fila cada una, con el mismo `_id` y distinto `observationID`
+(comprobado en v1 y v2: un conejo y un lince en una imagen dan dos filas). Varios animales de la **misma** especie son
+una observación con un `count` (un conejo dos veces es `count=2`, una fila). Las cajas, que son opcionales, las guardan
+de forma distinta las dos versiones de Trapper:
+
+#### Cajas
+
+| | Trapper v1 | Trapper v2 |
+|---|---|---|
+| Guardado por observación | una **lista de cajas**: `[[x, y, w, h], [x, y, w, h]]` | **una** caja: `[x, y, w, h]`, la de la primera aparición (según el modelo de Trapper) |
+| `camtrapdp=False` | una fila por observación, `bboxes` es la lista | una fila por observación, `bboxes` es `[x, y, w, h]` |
+| `camtrapdp=True` (por defecto) | **una fila por caja**, cada una con `count` 1 | una fila por observación, con `bboxX`, `bboxY`, `bboxWidth`, `bboxHeight` |
+
+Así que en v1 una observación de `count=2` con dos cajas son **dos filas** en el formato por defecto, y una en el otro.
+Son coordenadas relativas (de 0 a 1). Una caja es opcional: `[]` cuando no hay.
+
+!!! warning "Una caja con la forma de la otra versión rompe toda la tabla de resultados"
+    El formato por defecto (`camtrapdp=True`) contesta **`500` para todo el proyecto** si una fila tiene sus cajas con la
+    forma de la otra versión (una caja plana en v1, una lista de cajas en v2). Me lo encontré al escribir datos de prueba
+    a mano; no se comprobó si las herramientas de cada versión pueden producirlo. El formato `camtrapdp=False` sigue
+    funcionando.
 
 !!! note "Dos personas, una imagen"
     La tabla de resultados tiene solo la clasificación **final**, así que nunca contiene las observaciones de dos
-    usuarios sobre la misma imagen. Para leer lo que dijo cada usuario, usa
-    [`user_classifications`](user_classifications.md).
+    usuarios sobre la misma imagen. `user_classifications` lista **todas**, cada una un registro propio (comprobado con
+    tres usuarios sobre una imagen: tres registros, con su `pk` y su propietario), y `approved` marca aquella de la que se
+    toma la clasificación final. Al aprobar otra, la final la **copia** (en v1 sustituye las observaciones, cajas
+    incluidas; las demás quedan como estaban), y la marca `approved` se mueve.
 
-    Trapper enlaza las clasificaciones por **linaje**, no por la posición de una observación (según su código): la
-    clasificación de un usuario puede hacerse a partir de otra (la de la IA, o la de otro usuario), y la final apunta a la
-    que se aprobó. Las cajas tienen un uso ahí: la tarea `CopyBboxesFromAI` copia las cajas de una clasificación de la IA
-    a la del experto aprobada **cuando las dos tienen el mismo conteo total y el mismo tipo de observación y los objetos
-    del experto son indistinguibles** (los mismos valores en los campos que se comparan); las cajas se reparten entonces
-    entre los objetos al azar, como dice su docstring. No compara dónde están las cajas de las clasificaciones de dos
-    usuarios. Para saber si dos observaciones son el mismo animal, compara tú las cajas cuando ambas las tienen (su
-    solapamiento), y la especie y el conteo cuando no. *No comprobado con dos usuarios sobre una imagen: los servidores de
-    prueba tienen uno, y ninguna de sus observaciones tiene cajas.*
+    Trapper no empareja las observaciones de dos clasificaciones (según su código y comprobado en v1 y v2): no hay enlace
+    entre "el conejo de ana" y "el conejo de luis", y la lista de clasificaciones de usuario **no trae las cajas** (solo
+    `bboxes: true`; sí la especie, el tipo y el conteo), así que por la API las cajas de la clasificación de un usuario no
+    se pueden leer hasta que se aprueba, y entonces están en la tabla de resultados. Su único uso de las cajas es la
+    tarea `CopyBboxesFromAI`, que copia las cajas de una clasificación de la IA a la del experto aprobada **cuando las dos
+    tienen el mismo conteo total y tipo de observación y los objetos del experto son indistinguibles**, repartiéndolas al
+    azar (su docstring). Para saber si dos observaciones son el mismo animal, compara su especie y su conteo y, solo en la
+    clasificación aprobada, sus cajas (su solapamiento).
 
 !!! note "No confundir con la tabla de media"
     [`client.classification_media`](classification_media.md) es la tabla de los *ficheros* del proyecto; esto es *lo que
