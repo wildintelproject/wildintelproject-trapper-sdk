@@ -3125,6 +3125,7 @@ de forma distinta las dos versiones de Trapper:</p>
 </table>
 <p>Así que en v1 una observación de <code>count=2</code> con dos cajas son <strong>dos filas</strong> en el formato por defecto, y una en el otro.
 Son coordenadas relativas (de 0 a 1). Una caja es opcional: <code>[]</code> cuando no hay.</p>
+<p>Con <code>camtrapdp=False</code> el SDK lee las dos formas en <code>row.bboxes</code>, una lista de <code>BBox</code> (una observación de v2 tiene una).</p>
 <div class="admonition warning">
 <p class="admonition-title">Una caja con la forma de la otra versión rompe toda la tabla de resultados</p>
 <p>El formato por defecto (<code>camtrapdp=True</code>) contesta <strong><code>500</code> para todo el proyecto</strong> si una fila tiene sus cajas con la

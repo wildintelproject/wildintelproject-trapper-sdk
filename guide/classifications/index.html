@@ -3123,6 +3123,7 @@ by the two Trapper versions:</p>
 </table>
 <p>So on v1 an observation of <code>count=2</code> with two boxes is <strong>two rows</strong> in the default format, and one in the other. Both
 are relative coordinates (0 to 1). A box is optional: <code>[]</code> when there is none.</p>
+<p>With <code>camtrapdp=False</code> the SDK reads both shapes into <code>row.bboxes</code>, a list of <code>BBox</code> (a v2 observation has one).</p>
 <div class="admonition warning">
 <p class="admonition-title">A box in the other version's shape breaks the whole results table</p>
 <p>The default format (<code>camtrapdp=True</code>) answers <strong><code>500</code> for the entire project</strong> if one row has its boxes in the
