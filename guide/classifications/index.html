@@ -3177,7 +3177,7 @@ requires; the default <code>camtrapdp=True</code> does not), edit it and import 
 <tr>
 <td><code>project</code></td>
 <td>PK</td>
-<td>The project of the list. <strong>Required for <code>deployment</code> and <code>collection</code></strong>: Trapper checks them against the project's own and, without it, answers <code>400 "Select a valid choice"</code>. The project-scoped methods below take it from the URL</td>
+<td>The project of the list. <strong>Required for <code>deployment</code> and <code>collection</code></strong>: Trapper checks them against the project's own and, without it, answers <code>400 "Select a valid choice"</code> (which reads as if the deployment did not exist), so the SDK raises a <code>ValueError</code> before the request. The project-scoped methods below take it from the URL</td>
 </tr>
 <tr>
 <td><code>owner</code></td>

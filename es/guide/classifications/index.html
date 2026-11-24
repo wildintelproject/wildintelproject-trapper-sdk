@@ -3180,7 +3180,7 @@ que la importación exige; el <code>camtrapdp=True</code> por defecto no lo llev
 <tr>
 <td><code>project</code></td>
 <td>PK</td>
-<td>El proyecto de la lista. <strong>Obligatorio para <code>deployment</code> y <code>collection</code></strong>: Trapper los comprueba contra los del proyecto y, sin él, contesta <code>400 "Select a valid choice"</code>. Los métodos por proyecto de más abajo lo toman de la URL</td>
+<td>El proyecto de la lista. <strong>Obligatorio para <code>deployment</code> y <code>collection</code></strong>: Trapper los comprueba contra los del proyecto y, sin él, contesta <code>400 "Select a valid choice"</code> (que parece decir que el deployment no existe), así que el SDK lanza un <code>ValueError</code> antes de la petición. Los métodos por proyecto de más abajo lo toman de la URL</td>
 </tr>
 <tr>
 <td><code>owner</code></td>
