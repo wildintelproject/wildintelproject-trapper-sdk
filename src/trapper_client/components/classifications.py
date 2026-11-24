@@ -27,46 +27,51 @@ from trapper_client.schemas import (
 
 class ClassificationsComponent(ClassificationFiltersMixin, TrapperComponent[Classification]):
     """
-    Component for ``/media_classification/api/classifications``.
+    The **final classifications** of a classification project (``client.classification_results``).
 
-    Main endpoints:
-    - ``GET /media_classification/api/classifications``: List of AI classifications (paginated)
-    - ``GET /media_classification/api/classifications/{pk}	``: Single AI classification detail
-    - ``GET /media_classification/api/classifications/results/{project_pk}/	``: CSV con resultados AI de un proyecto
-    - ``POST /media_classification/api/classifications/import/``: importa observaciones expertas/AI desde un CSV
+    In a classification project every resource has one final classification: the record that holds its result,
+    taken from the classification someone made or imported and then approved. It is a set of observations
+    (zero, one or several). It is read in three ways, each with its own shape:
 
-    **Available filter fields:**
+    - ``GET /media_classification/api/classifications`` (and ``/{pk}``): the **list**, one row per resource.
+      Its ``dynamic_attrs`` only have the observation type, the species (as text) and the count.
+    - ``GET /media_classification/api/classifications/results/{project_pk}/``: the **results table**, a gzip CSV with
+      one row per observation (``get_project_results``, ``where_project_results``, ``export_project_results``).
+      Use it to know what each image shows. ``camtrapdp=False`` is the format with ``_id``, the one that can be imported.
+    - ``POST /media_classification/api/classifications/import/``: **import** observations from a CSV, by ``_id``
+      (``import_classifications``). It updates final classifications that exist; it does not create them.
 
-    | Parameter          | Type                | Description |
-    |--------------------|---------------------|-------------|
-    | project            | PK                  | Auto-filtrado por URL (no necesario) |
-    | owner              | boolean             | true = resources where user is owner/manager |
-    | deployment         | list of PKs         | Filter by deployment PKs |
-    | collection         | list of PKs         | Filter by collection PKs |
-    | locations_map      | comma-separated PKs | Filter by location PKs |
-    | rdate_from / rdate_to | date            | date_recorded range |
-    | rtime_from / rtime_to | HH:MM           | Time-of-day range |
-    | ftype              | choice              | Resource type (IMAGE, VIDEO, etc.) |
-    | bboxes             | boolean             | Has bounding boxes |
-    | user               | list of PKs         | Filter by owner user PKs |
-    | approved           | boolean             | Has FINAL approved classification |
-    | feedback           | boolean             | Is feedback classification |
-    | species            | list of PKs         | Filter by species PKs |
-    | observation_type   | choice              | Filter by observation type |
-    | sex                | choice              | Filter by sex |
-    | age                | choice              | Filter by age |
-    | confidence         | number              | dynamic_attrs.classification_confidence >= value |
-    | ai_provider        | list of PKs         | Filter by AI provider PKs (choices from AIProvider) |
+    The API cannot create, edit or approve a classification otherwise. Not to be confused with
+    ``client.classification_media`` (the table of the project's files) or the user and AI classification lists.
+    See the classifications guide for the details, including boxes and what ``_id`` and ``observationID`` are.
 
-    **Additional fields:**
+    **Filters** of the list and the results table (Trapper ignores any other without an error; the SDK emits an
+    ``UnknownFilterWarning``):
 
-    | Parameter        | Type                     | Description                                                                 |
-    |----------------|--------------------------|-----------------------------------------------------------------------------|
-    | camtrapdp      | boolean                  | Format of output: True = Camtrap DP standard, False = Trapper internal format (default: True) |
+    | Parameter | Type | Description |
+    |---|---|---|
+    | project | PK | The project of the list. **Needed for deployment and collection** (``ValueError`` without it) |
+    | owner | boolean | true = resources where the user is owner/manager |
+    | deployment | list of PKs | Deployment PKs of the project |
+    | collection | list of PKs | PK of the **link** between the project and the collection, not the collection's PK |
+    | locations_map | comma-separated PKs | Location PKs |
+    | rdate_from / rdate_to | date | ``date_recorded`` range |
+    | rtime_from / rtime_to | HH:MM | Time-of-day range |
+    | ftype | choice | Resource type (IMAGE, VIDEO, ...) |
+    | classified / classified_ai | boolean | Has a classification by a user / by AI (``500`` on v2 in the results table) |
+    | approved | boolean | Approved. Works on both versions: v1 calls it ``status`` and the SDK sends it as such |
+    | bboxes | boolean | Has bounding boxes |
+    | species | list of PKs | Species PKs |
+    | observation_type, sex, age | choice | Observation type, sex, age |
 
+    ``user``, ``feedback``, ``confidence`` and ``ai_provider`` are filters of the user and AI classification lists:
+    they do nothing here.
 
-    This endpoint returns observations as CSV (gzip) and supports filters from
-    ``ClassificationFilter``.
+    **Extra parameter of the results table:**
+
+    | Parameter | Type | Default | Description |
+    |---|---|---|---|
+    | camtrapdp | boolean | ``True`` | ``True`` = Camtrap DP rows, ``False`` = Trapper's own format (with ``_id``) |
     """
 
     #: ``camtrapdp`` is a parameter of the results table, not a filter.
