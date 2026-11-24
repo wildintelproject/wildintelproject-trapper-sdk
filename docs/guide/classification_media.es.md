@@ -197,3 +197,21 @@ por partes en un `.part` temporal que se mueve a su sitio cuando está completo,
 nunca deja un fichero a medias. Los fallos de red y las respuestas `502`/`503`/`504` se reintentan con espera
 exponencial (`retry_attempts`, `retry_min_wait`, `retry_max_wait`); un `404` (fichero que no existe o token que
 ya no vale) es un `NotFoundError` y no se reintenta.
+
+### Qué devuelven las descargas de un proyecto o de una colección
+
+`download_project_media_files()` y `download_collection_media_files()` devuelven la **lista de rutas que se
+descargaron** (un `DownloadedFiles`, que es una `list`) y llevan lo que pasó con el resto:
+
+```python
+files = client.classification_media.download_project_media_files(7, "media/")
+print(len(files), "descargados")
+print(files.failed)        # {7: 'download of http://.../media/7/file/: the server answered 404', ...}
+print(files.ok)            # False si algo falló
+```
+
+- Un fichero que falla (tras sus reintentos) está en `.failed` (`{id de media: mensaje}`) y se registra en el log; los demás
+  siguen. Con `on_error="raise"` el primer fallo lo detiene. Antes un fallo desaparecía: con el `private_human` por
+  defecto los ficheros de personas (una fila sin token) se quedaban fuera y nada lo decía.
+- `skip_existing=True` deja un fichero que ya está en la carpeta, así que una ejecución interrumpida se repite con la
+  misma llamada; esos están en `.skipped`. Los ficheros se llaman `media_<id>`, sin extensión.
