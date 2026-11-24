@@ -59,6 +59,11 @@ the SDK does in the meantime.
 | 44 | Give the collection endpoints one shape | storage |
 | 45 | Reject a collection `status` that does not exist | storage |
 | 46 | Create a collection from a package through the API, and follow the task | storage |
+| 47 | Read the boolean parameters of the media table as booleans | media_classification |
+| 48 | Answer an empty media or results table with an empty list, not a `400` | media_classification |
+| 49 | Let the media table be read in pages | media_classification |
+| 50 | Say in the media table what each image shows, and fill `exifData` | media_classification |
+| 51 | Filter by the collection's own pk, not by its link to the classification project | media_classification |
 
 ---
 
@@ -518,7 +523,7 @@ nothing. (A filter with an invalid value is answered with a `400` and the field,
 ignore; the filters each version applies are listed in their guides (checked live on v1 and v2: `colls`,
 `collections`, `ordering`, `radius`, `bait_use` and a typo are ignored on the deployment list too), and for
 resources (`ordering`, `in_bbox`, `radius` and a typo; `locations_map` on v2) and collections (`ordering`, `description`,
-`date_created`, a typo; `locations_map` on v2). Other endpoints are not checked yet.
+`date_created`, a typo; `locations_map` on v2). The media table of a classification project (and the classification list and results) are described in #47 to #51; the other endpoints are not checked yet.
 
 ## 27. Create, update and delete deployments through the API
 
@@ -892,6 +897,95 @@ when its last request answers, and the schema of the YAML served by the API.
 **Workaround in the SDK.** The guide describes the YAML and the requirements; `get_uploader()` and
 `collections.trigger_collection()` do the two steps, and an e2e test tries again for a few seconds on v2. The task cannot
 be followed: the SDK waits until the collection is listed.
+
+## 47. Read the boolean parameters of the media table as booleans
+
+**Labels:** bug, api
+
+**Problem.** `GET media_classification/api/media/<project_pk>/` reads `trapper_url`, `trapper_url_token`,
+`private_human` and `private_vehicle` with `query_params.get(name, "True") == "True"`: only the exact text `True`
+is true, and `true`, `1` or any other text is **false, with no error** (checked on v1 and v2, project 2, which has two
+images of humans: by default 26 files are public and 2 private, with `private_human=True` the same, and with
+`private_human=true` or `False` all 28 are public; `trapper_url_token=false` takes the token out of every URL). Every
+other boolean filter of the API accepts `true`/`false`, and a client that sends a boolean the usual way (Python's
+`True` is sent as `true`) gets the **opposite** of what it asked: `private_human=True` shows the files of the humans.
+Also `trapper_url` is read and does nothing: `trapper_url=False` still gives absolute URLs (v2; in the source it is
+parsed and never passed on).
+
+**Proposal.** Read them like the filters of the same endpoint (`true`/`false`, any case), answer `400` for a value that
+is neither, and drop `trapper_url` or make it work.
+
+**Workaround in the SDK.** The guide explains it and says to pass the text `"True"`/`"False"` *(sending a boolean as that
+text is not done yet)*.
+
+## 48. Answer an empty media or results table with an empty list, not a `400`
+
+**Labels:** bug, api, cross-cutting
+
+**Problem.** `media_classification/api/media/<project_pk>/` and `media_classification/api/classifications/results/<project_pk>/`
+answer `400 ["Empty queryset or you have no permission to access the requested objects."]` when the filters leave no
+row (checked on v1 and v2: `?rdate_from=2030-01-01`), while the list of classifications with the same filter answers
+`200` with `count: 0`. It is the same problem as #31, in two more endpoints: a filter that matches nothing and a
+missing permission look alike.
+
+**Proposal.** As in #31: `200` with the header row only, and `403` for a missing permission.
+
+**Workaround in the SDK.** The guide describes the `BadRequestError`. *(Not done yet: reading it as an empty list, which
+would hide a missing permission too.)*
+
+## 49. Let the media table be read in pages
+
+**Labels:** enhancement, api
+
+**Problem.** The media table is built in memory and sent as **one gzip CSV with every row**: `page` and `page_size` are
+ignored, and `page=2` answers the same rows as `page=1` (checked on v2, project 2: 28 rows with `page_size=5`, and
+`pages=1`). The request for a project with many resources takes as long as the whole table, with no way to ask for a
+part of it, and the client cannot tell how big the answer will be beforehand. The list of classifications, which has
+the same filters, is paginated. `wildintel-zooniverse` says in its code that for a very large collection (R0038, about
+876,000 images) one request takes longer than the client's timeout, so it asks one deployment at a time *(its own
+comment, not checked here)*.
+
+**Proposal.** Paginate it like the other lists (with `count`), or document a limit and give a `Link`/`next` header.
+
+**Workaround in the SDK.** Filtering by `deployment` and by `collection` makes the answer smaller, one deployment at a
+time. The guide says that paging is ignored. *(Not checked: how long a table of tens of thousands of rows takes.)*
+
+## 50. Say in the media table what each image shows, and fill `exifData`
+
+**Labels:** enhancement, api
+
+**Problem.** A row of the media table has eleven columns (`mediaID`, `deploymentID`, `captureMethod`, `timestamp`,
+`filePath`, `filePublic`, `fileName`, `fileMediatype`, `exifData`, `favorite`, `mediaComments`; the same on v1 and v2)
+and nothing about what is in the file: not the observation type, the species, the count or a bounding box. Yet the
+table is filtered by them (`species`, `observation_type`, `sex`, `age`) and `private_human` uses the observation type
+to hide a file. To know what an image shows, a client asks the results table (`classifications/results/<pk>/`) and joins
+the two by `mediaID`. And `exifData` is always empty: in the source the column is created with `None` for every row.
+
+**Proposal.** An option to add `observationType` and `scientificName` to the media rows, or one table with the media
+and its observations, and either fill `exifData` or drop the column.
+
+**Workaround in the SDK.** The guide has the join by `mediaID` (the media table with `where_project_media()`, and the
+results with `where_project_results()`).
+
+## 51. Filter by the collection's own pk, not by its link to the classification project
+
+**Labels:** bug, api
+
+**Problem.** The `collection` filter of the classification endpoints (the list, the results table and the media table)
+takes the pk of the **link between the project and the collection** (`ClassificationProjectCollection`), not the pk of
+the storage collection that a user knows, and no endpoint says so. Checked on v1: a project with links 3 and 4, to the
+collections 2 and 3: `?collection=2` is a `400` ("Select a valid choice. 2 is not one of the available choices"), and
+`?collection=3`, which a user takes for collection 3, answers the files of **link 3, that is of collection 2** (20 rows
+instead of 8), with no error. On the v2 test data both pks are equal, so the mistake does not show there. Without `project` in the query,
+the list answers the same `400` for `deployment` and `collection` (the choices are those of the project), which reads as
+if the pk did not exist.
+
+**Proposal.** Accept the collection's pk, which is what the rest of the API calls `collection`, and put the project in
+the message of the `400`.
+
+**Workaround in the SDK.** `where_collection_media()` and `get_collection_media()` translate the collection's pk into
+its link; `where_project_media(collection=...)` and `where_project_results(collection=...)` take the link's pk as they
+are given.
 
 ---
 
