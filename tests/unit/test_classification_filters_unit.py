@@ -58,7 +58,7 @@ def test_a_filter_trapper_ignores_is_warned_about(cls, call, name, version):
 @pytest.mark.parametrize("version", ["v1", "v2"])
 def test_the_filters_it_applies_are_not_warned_about(cls, call, version):
     comp, _ = make(cls, version)
-    assert not caught(call, comp, deployment=1, collection=2, species=3, observation_type="animal", sex="male",
+    assert not caught(call, comp, project=7, deployment=1, collection=2, species=3, observation_type="animal", sex="male",
                       age="adult", rdate_from="2024-01-01", classified=True, bboxes=True, pk=5)
 
 
@@ -107,3 +107,43 @@ def test_the_media_parameters_are_known_and_private_species_is_warned_about():
     assert not caught(MEDIA, comp, private_human="False", private_vehicle="False", trapper_url_token="True")
     warned = caught(MEDIA, comp, private_species=[1])
     assert len(warned) == 1 and "500" in str(warned[0].message)
+
+
+class TestDeploymentNeedsProject:
+    """Without ``project`` Trapper answers 400 "Select a valid choice" to ``deployment`` and ``collection``."""
+
+    @pytest.mark.parametrize("name", ["deployment", "collection"])
+    @pytest.mark.parametrize("method", ["get", "get_all", "where", "all"])
+    def test_it_is_refused_before_the_request(self, name, method):
+        comp, client = make(ClassificationsComponent)
+        with pytest.raises(ValueError, match=f"{name}.*project"):
+            getattr(comp, method)(**{name: 19})
+        client.get.assert_not_called()
+        client.get_all.assert_not_called()
+
+    def test_the_query_dictionary_counts_too(self):
+        comp, _ = make(ClassificationsComponent)
+        with pytest.raises(ValueError, match="deployment"):
+            comp.get(query={"deployment": 19})
+
+    def test_both_are_named(self):
+        comp, _ = make(ClassificationsComponent)
+        with pytest.raises(ValueError, match="deployment and collection"):
+            comp.get(deployment=1, collection=2)
+
+    @pytest.mark.parametrize("method", ["get", "get_all", "where"])
+    def test_with_project_it_goes_on(self, method):
+        comp, client = make(ClassificationsComponent)
+        getattr(comp, method)(project=2, deployment=19, collection=3)
+        assert client.get.called or client.get_all.called or method == "where"
+
+    def test_the_project_scoped_methods_do_not_need_it(self):
+        """The project is in the URL of the results table."""
+        comp, client = make(ClassificationsComponent)
+        comp.get_project_results(7, deployment=19, collection=3)
+        assert client.get.called
+
+    def test_other_filters_do_not_need_a_project(self):
+        comp, client = make(ClassificationsComponent)
+        comp.get(species=3, approved=True)
+        assert client.get.called

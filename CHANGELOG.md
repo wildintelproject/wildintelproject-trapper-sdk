@@ -131,6 +131,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- `classification_results.get()`, `get_all()`, `where()` and `all()` raise a `ValueError` when `deployment` or `collection` is given
+  without `project` (issue #89): Trapper answers `400 "Select a valid choice"`, which reads as if the deployment did not exist.
 - The classifications guide (issue #83) says that a classification is a set of observations, how several things in one image
   are handled (several observations sharing the `_id`), that `observationID` is only a row number, how boxes are stored in
   v1 (a list) and v2 (one box), and what happens when several users classify one image (checked with three users).

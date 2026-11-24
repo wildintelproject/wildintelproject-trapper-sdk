@@ -106,7 +106,7 @@ With `camtrapdp=False` the SDK reads both shapes into `row.bboxes`, a list of `B
 
 | Parameter | Type | Description |
 |---|---|---|
-| `project` | PK | The project of the list. **Required for `deployment` and `collection`**: Trapper checks them against the project's own and, without it, answers `400 "Select a valid choice"`. The project-scoped methods below take it from the URL |
+| `project` | PK | The project of the list. **Required for `deployment` and `collection`**: Trapper checks them against the project's own and, without it, answers `400 "Select a valid choice"` (which reads as if the deployment did not exist), so the SDK raises a `ValueError` before the request. The project-scoped methods below take it from the URL |
 | `owner` | boolean | `true` = resources where user is owner/manager |
 | `deployment` | list of PKs | Deployment PKs (needs `project`) |
 | `collection` | list of PKs | The pk of the **link between the project and the collection**, not the collection's pk (needs `project`; see entry 51 of `TRAPPER_API_IMPROVEMENTS.md`) |

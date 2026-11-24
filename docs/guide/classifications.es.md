@@ -107,7 +107,7 @@ Con `camtrapdp=False` el SDK lee las dos formas en `row.bboxes`, una lista de `B
 
 | Parámetro | Tipo | Descripción |
 |---|---|---|
-| `project` | PK | El proyecto de la lista. **Obligatorio para `deployment` y `collection`**: Trapper los comprueba contra los del proyecto y, sin él, contesta `400 "Select a valid choice"`. Los métodos por proyecto de más abajo lo toman de la URL |
+| `project` | PK | El proyecto de la lista. **Obligatorio para `deployment` y `collection`**: Trapper los comprueba contra los del proyecto y, sin él, contesta `400 "Select a valid choice"` (que parece decir que el deployment no existe), así que el SDK lanza un `ValueError` antes de la petición. Los métodos por proyecto de más abajo lo toman de la URL |
 | `owner` | booleano | `true` = recursos donde el usuario es propietario/gestor |
 | `deployment` | lista de PK | PK de despliegue (necesita `project`) |
 | `collection` | lista de PK | La pk del **vínculo entre el proyecto y la colección**, no la de la colección (necesita `project`; véase la entrada 51 de `TRAPPER_API_IMPROVEMENTS.md`) |
