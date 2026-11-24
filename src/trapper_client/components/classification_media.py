@@ -486,7 +486,7 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             List of paths to successfully downloaded files.
         """
         q = self._merge_query(query, kwargs)
-        data = self.client.get_all(self._resolve_endpoint(project_pk), query=q)
+        data = self._get_all_or_empty(self._resolve_endpoint(project_pk), q)
         result = self._to_paginated(data, validate=False)
         media_rows = self._media_rows(result.results)
 
@@ -645,7 +645,7 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
         q = self._merge_query(query, kwargs)
         q["collection"] = link_pk
 
-        data = self.client.get_all(self._resolve_endpoint(project_pk), query=q)
+        data = self._get_all_or_empty(self._resolve_endpoint(project_pk), q)
         result = self._to_paginated(data, validate=False)
         media_rows = self._media_rows(result.results)
 

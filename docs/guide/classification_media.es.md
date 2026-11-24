@@ -102,8 +102,11 @@ Deja `private_human` como está si vas a compartir las filas o los ficheros: por
 lleva token, así que su imagen no se puede descargar con ella.
 
 Una tabla de proyecto sin nada que mostrar (un filtro que no deja filas, o un proyecto que la cuenta no puede ver)
-es un `BadRequestError` («Empty queryset or you have no permission...») y no una lista vacía; los dos casos no se
-pueden distinguir.
+la contesta Trapper con un `400` («Empty queryset or you have no permission...»), no con una lista vacía. El SDK lo lee
+como **un resultado vacío** en `get_*`, `where_*`, `export_*` y las descargas (`count` 0, nada que iterar, `[]`, un
+fichero vacío), como hace la lista de clasificaciones. El `400` es también la respuesta a un permiso que falta, así que
+un proyecto que la cuenta no puede ver parece vacío; cualquier otro `400` (un valor de filtro erróneo) sigue siendo un
+`BadRequestError`.
 
 ## Filtros
 

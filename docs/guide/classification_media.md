@@ -101,9 +101,11 @@ cm.download_project_media_files(7, "out/", private_human=False, private_vehicle=
 Leave `private_human` as it is if you are going to share the rows or the files: by default the URL of a human
 carries no token, so the image cannot be downloaded with it.
 
-A project table with nothing to show (a filter that leaves no rows, or a project the account cannot see) is a
-`BadRequestError` ("Empty queryset or you have no permission...") and not an empty list; the two cases cannot be
-told apart.
+A project table with nothing to show (a filter that leaves no rows, or a project the account cannot see) is answered by
+Trapper with a `400` ("Empty queryset or you have no permission..."), not an empty list. The SDK reads it as **an empty
+result** in `get_*`, `where_*`, `export_*` and the downloads (`count` 0, nothing to iterate, `[]`, an empty file), as
+the classification list does. The `400` is also the answer to a missing permission, so a project that the account
+cannot see looks empty too; any other `400` (a wrong filter value) is still a `BadRequestError`.
 
 ## Filters
 
