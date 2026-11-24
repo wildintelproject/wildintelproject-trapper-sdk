@@ -115,9 +115,9 @@ With `camtrapdp=False` the SDK reads both shapes into `row.bboxes`, a list of `B
 | `rtime_from` / `rtime_to` | HH:MM | Time-of-day range |
 | `ftype` | choice | Resource type (IMAGE, VIDEO, ...) |
 | `bboxes` | boolean | Has bounding boxes |
-| `classified`, `classified_ai` | boolean | Has a classification by a user / by AI |
-| `approved` | boolean | Approved. **v2 only**: v1 ignores it and calls the same filter `status` |
-| `status` | boolean | Approved, on **v1 only** (v2 ignores it) |
+| `classified`, `classified_ai` | boolean | Has a classification by a user / by AI (on **v2** the results and media tables answer `500` to these two; the list works) |
+| `approved` | boolean | Approved. It works on **both**: Trapper v1 ignores `approved` and calls the same filter `status`, so the SDK sends it as `status` there |
+| `status` | boolean | Approved, Trapper v1's own name for it (Trapper v2 ignores it, and the SDK warns) |
 | `species` | list of PKs | Filter by species PKs |
 | `observation_type` | choice | Filter by observation type |
 | `sex` | choice | Filter by sex |
@@ -129,6 +129,10 @@ With `camtrapdp=False` the SDK reads both shapes into `row.bboxes`, a list of `B
     do nothing here (checked on v1 and v2: `user=1` and `ai_provider=1` return every row; they belong to the lists of
     user and AI classifications). A filter that leaves no row answers `200` with an empty list, but the results table
     and the media table answer `400 "Empty queryset..."`.
+
+    The SDK emits an `UnknownFilterWarning` that names a parameter the server version does not apply (the request is
+    still sent). Trapper also makes a filter of each custom attribute of the project's classificator, which the SDK
+    cannot know: the warning says so, and `warnings.simplefilter("ignore", err.UnknownFilterWarning)` silences it.
 
 ## The six access patterns
 

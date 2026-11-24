@@ -257,6 +257,10 @@ class TrapperComponent(Generic[TModel]):
     #: ``{"name": "answers 500"}``. They get an :class:`~trapper_client.err.UnknownFilterWarning` too.
     broken_filters: Dict[str, str] = {}
 
+    #: Text added to the warning about an unknown filter, for a name the SDK cannot know in advance
+    #: (``"or an attribute of the project's classificator"``).
+    unknown_filter_hint: str = ""
+
     def _normalize_query(self, query: Dict[str, Any]) -> Dict[str, Any]:
         """Hook: put the values of a query in the form the server reads (see ``ResourcesComponent``)."""
         return query
@@ -319,7 +323,7 @@ class TrapperComponent(Generic[TModel]):
             warnings.warn(
                 f"{self.endpoint}: Trapper {self.client.server_version} ignores "
                 f"{', '.join(repr(k) for k in unknown)} and returns every item; "
-                f"the filters it applies are {', '.join(sorted(known))}",
+                f"the filters it applies are {', '.join(sorted(known))}{self.unknown_filter_hint}",
                 err.UnknownFilterWarning,
                 stacklevel=stacklevel,
             )

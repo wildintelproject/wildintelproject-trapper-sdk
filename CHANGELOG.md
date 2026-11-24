@@ -16,6 +16,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Upcoming release
 
 ### Added
+- `UnknownFilterWarning` for `client.classification_results` and `client.classification_media` (issue #85): they name a filter
+  that the server version ignores (`user`, `feedback`, `confidence` and `ai_provider` are not filters of these lists) and
+  `private_species`, which makes Trapper answer `500`; and `approved=True` works on Trapper v1, where the filter is called
+  `status`, so one name serves both versions.
 - **Trapper v2 support** (issue #1). `TrapperClient(trapper_version="auto" | "v1" | "v2")`: with
   `"auto"` (default) the version is detected once, on first use, from
   the public `GET api/cs/version/` (major number of the release), falling back to probing

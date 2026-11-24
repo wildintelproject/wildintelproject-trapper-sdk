@@ -115,9 +115,9 @@ pueden distinguir.
 | `rdate_from` / `rdate_to` | fecha | Rango de `date_recorded` |
 | `rtime_from` / `rtime_to` | HH:MM | Rango de hora del día sobre `date_recorded` |
 | `ftype` | opción | Filtra por tipo de recurso (IMAGE, VIDEO, ...) |
-| `classified` | booleano | Clasificado por un usuario |
-| `classified_ai` | booleano | Clasificado por IA |
-| `approved` | booleano | Clasificación aprobada |
+| `classified` | booleano | Clasificado por un usuario (**`500` en Trapper v2** para esta tabla) |
+| `classified_ai` | booleano | Clasificado por IA (**`500` en Trapper v2** para esta tabla) |
+| `approved` | booleano | Clasificación aprobada. Funciona en las dos: Trapper v1 lo llama `status`, y el SDK lo envía así allí |
 | `bboxes` | booleano | Tiene cajas delimitadoras |
 | `species` | lista de PK | Filtra por PK de especie |
 | `observation_type` | opción | Filtra por tipo de observación |

@@ -70,6 +70,8 @@ the SDK does in the meantime.
 | 55 | Document the format of the results table that can be imported, and what `observationID` is | media_classification |
 | 56 | Use one shape for `bboxes` in both versions, and do not fail the whole results table for one row | media_classification |
 | 57 | Do not fetch the Camtrap DP schema from the internet in every classification import | media_classification |
+| 58 | Answer `classified` and `classified_ai` in the results and media tables | media_classification |
+| 59 | Call the filter for an approved classification the same in v1 and v2 | media_classification |
 
 ---
 
@@ -1104,6 +1106,35 @@ not checked.
 
 **Workaround in the SDK.** None: the import returns the message and the `task_id`, and the failure can only be seen in
 the task result, or because the classifications did not change.
+
+## 58. Answer `classified` and `classified_ai` in the results and media tables
+
+**Labels:** bug, api
+
+**Problem.** `ClassificationFilter` has `classified` and `classified_ai`, which filter on `classified_user` and
+`classified_ai`, two annotations that only the list view (`ClassificationViewSet.get_queryset`) adds to the queryset. The
+results table (`classifications/results/<project_pk>/`) and the media table (`media/<project_pk>/`) use the same
+filter without them, and on **v2 answer `500`** to `?classified=true`, `?classified=false` and `?classified_ai=true`
+(checked; the list answers, `27` and `1` of the `28`). v1 answers them in the three.
+
+**Proposal.** Add the annotations to the two views, or take the filters out of those endpoints.
+
+**Workaround in the SDK.** The guides say it. *(No workaround: filter on the client with the list, which has them.)*
+
+## 59. Call the filter for an approved classification the same in v1 and v2
+
+**Labels:** bug, api, cross-cutting
+
+**Problem.** The filter for "approved" is `approved` on v2 and `status` on v1, in the list, the results table and the media
+table (checked in the three, on both versions: `approved=true` gives 24 of 28 on v2 and the 28 on v1, `status=true` the
+reverse). The version that does not know a name ignores it **without an error** and returns everything (#38), and the
+field of the row is `approved` in v2 and `status` in v1 too. A script written for one version silently stops filtering on the
+other.
+
+**Proposal.** The same name in both, and the old one kept as an alias for a while.
+
+**Workaround in the SDK.** `approved=True` is sent as `status` on v1, so the one name works on both; `status` on v2 and any
+other name the server version ignores are warned about (`UnknownFilterWarning`).
 
 ---
 
