@@ -70,11 +70,12 @@ a falso y una URL sin token, que contesta `404`. Los parámetros extra lo decide
   con cualquier valor, también con uno vacío (comprobado en v1 y v2). No lo uses.
 - `trapper_url_token`: `False` deja el token fuera de todas las URLs, así que todas las filas son privadas.
 
-!!! warning "Trapper solo lee el texto exacto `True`"
-    Cualquier otra cosa, `true` incluido, es `False` para el servidor. El SDK envía un `True` de Python como
-    `true`, así que `private_human=True` **muestra** a las personas, lo contrario de lo que dice, mientras que el
-    valor por defecto las oculta. Pasa el texto: `private_human="True"` o `private_human="False"` (hay un issue
-    para arreglarlo).
+!!! note "Booleanos: `True`, `False` o el texto"
+    Trapper solo lee el texto exacto `True` como verdadero, y cualquier otro, `true` incluido, como falso (así que un
+    cliente que envía un booleano de la forma habitual obtiene lo contrario). El SDK envía `private_human`,
+    `private_vehicle`, `trapper_url` y `trapper_url_token` como el texto `True`/`False` por sí mismo: da un booleano de
+    Python, o el texto `true`/`false` en cualquier caso. Cualquier otra cosa (`1`, `"yes"`, `None`) es un `ValueError`
+    antes de la petición. *Antes de esto (issue #85), `private_human=True` mostraba a las personas.*
 
 Por ejemplo, con un proyecto que tiene dos imágenes de personas (comprobado en Trapper v2, 28 filas):
 
@@ -86,15 +87,15 @@ rows = list(cm.where_project_media(7))
 print(sum(r.filePublic for r in rows))                       # 26
 print([r.fileName for r in rows if not r.filePublic])        # las dos privadas: su URL no lleva token
 
-# Tratar personas y vehículos como públicos: todas las URL llevan el token (el texto "False", no el booleano)
-rows = list(cm.where_project_media(7, private_human="False", private_vehicle="False"))
+# Tratar personas y vehículos como públicos: todas las URL llevan el token
+rows = list(cm.where_project_media(7, private_human=False, private_vehicle=False))
 print(sum(r.filePublic for r in rows))                       # 28
 
 # Las personas siguen siendo privadas, los vehículos no
-rows = list(cm.where_project_media(7, private_human="True", private_vehicle="False"))
+rows = list(cm.where_project_media(7, private_human=True, private_vehicle=False))
 
 # Los mismos parámetros valen para las descargas: con el valor por defecto, los ficheros privados no se descargan
-cm.download_project_media_files(7, "out/", private_human="False", private_vehicle="False")
+cm.download_project_media_files(7, "out/", private_human=False, private_vehicle=False)
 ```
 
 Deja `private_human` como está si vas a compartir las filas o los ficheros: por defecto la URL de una persona no
