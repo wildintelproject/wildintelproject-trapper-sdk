@@ -1052,12 +1052,14 @@ both). With `camtrapdp=True`, **the default**, there are 28 columns and no `_id`
 `_id`, `countNew`, `englishName` and `bboxes` are added. The import requires `_id`, so the table you get by default cannot
 be imported again, and nothing in the API says that the other format is the one for that. The table has two
 identifiers and they are not explained: `_id` is the pk of the final classification (it equals the `pk` of the list row,
-checked: 5 and 5 on v1, 6 and 6 on v2), and `observationID` matches no pk that was found (it is 4 for the same resource on
-both servers) *(what it is was not checked)*. The table also ignores `page` and `page_size`, like the media table (#49):
+checked: 5 and 5 on v1, 6 and 6 on v2), and `observationID` is **only the position of the row in the table that was
+asked** (in the source it is a counter from 1 that is reset after the rows are sorted; checked on v2: the same
+observation is 4 in the whole table and 1 with `sex=male`, while its `_id` stays 6). It is not a key, it changes with
+every filter, and the list does not have it. The table also ignores `page` and `page_size`, like the media table (#49):
 `page_size=5` and `page=2` return the same 28 rows.
 
 **Proposal.** Say which format is the one to import (or give a single format that serves to read and to import), explain
-the two identifiers, and paginate it.
+the two identifiers (or do not put a row counter in a column called `observationID`), and paginate it.
 
 **Workaround in the SDK.** `ClassificationResultRecordCamtrapDP` and `ClassificationResultRecordTrapper` are the two
 formats, and the guide says to use `camtrapdp=False` for the cycle of exporting, editing and importing.

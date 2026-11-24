@@ -18,7 +18,7 @@ with its own shape (checked on Trapper v1 and v2):
 | One row per | **resource** | **observation** (a resource with two species has two rows) | the `_id` of a final classification |
 | Species | text (`"European Rabbit (Oryctolagus cuniculus)"`), no pk | `scientificName` | `scientificName` |
 | `sex`, `lifeStage`, `behavior`, `bboxes` | **not there** | yes | yes |
-| Identifier | `pk`, the primary key of the classification | `_id` (only with `camtrapdp=False`) | `_id` |
+| Identifier | `pk`, the primary key of the classification | `_id` (only with `camtrapdp=False`); `observationID` is only the **row number** in the table you asked for (it changes with the filters) and is not in the list | `_id` |
 | Needs a project | for `deployment` and `collection` | yes, in the URL | yes |
 
 So **to know what each image shows, use the results table**; the list tells you which resources are classified and

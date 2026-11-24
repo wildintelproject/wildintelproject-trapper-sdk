@@ -18,7 +18,7 @@ cada una con su propia forma (comprobado en Trapper v1 y v2):
 | Una fila por | **resource** | **observación** (un resource con dos especies tiene dos filas) | el `_id` de una clasificación final |
 | Especie | texto (`"European Rabbit (Oryctolagus cuniculus)"`), sin pk | `scientificName` | `scientificName` |
 | `sex`, `lifeStage`, `behavior`, `bboxes` | **no están** | sí | sí |
-| Identificador | `pk`, la clave primaria de la clasificación | `_id` (solo con `camtrapdp=False`) | `_id` |
+| Identificador | `pk`, la clave primaria de la clasificación | `_id` (solo con `camtrapdp=False`); `observationID` es solo el **número de fila** de la tabla que pediste (cambia con los filtros) y no está en la lista | `_id` |
 | Necesita proyecto | para `deployment` y `collection` | sí, en la URL | sí |
 
 Así que **para saber qué muestra cada imagen, usa la tabla de resultados**; la lista dice qué resources están
