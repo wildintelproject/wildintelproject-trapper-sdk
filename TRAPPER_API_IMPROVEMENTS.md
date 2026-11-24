@@ -923,8 +923,8 @@ parsed and never passed on).
 **Proposal.** Read them like the filters of the same endpoint (`true`/`false`, any case), answer `400` for a value that
 is neither, and drop `trapper_url` or make it work.
 
-**Workaround in the SDK.** The guide explains it and says to pass the text `"True"`/`"False"` *(sending a boolean as that
-text is not done yet)*.
+**Workaround in the SDK.** `private_human`, `private_vehicle`, `trapper_url` and `trapper_url_token` are sent as the text
+`True`/`False` whatever boolean (or `true`/`false` text) the caller gives, and anything else is a `ValueError`.
 
 ## 48. Answer an empty media or results table with an empty list, not a `400`
 

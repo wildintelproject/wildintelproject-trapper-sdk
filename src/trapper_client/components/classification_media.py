@@ -106,6 +106,31 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
     )
     broken_filters = {"private_species": "answers 500 with any value, an empty one included"}
 
+    #: The parameters Trapper reads with ``== "True"``: any other text, ``true`` included, is false.
+    _TRUE_FALSE_PARAMS = ("trapper_url", "trapper_url_token", "private_human", "private_vehicle")
+
+    def _normalize_query(self, query: Dict[str, Any]) -> Dict[str, Any]:
+        """Send the booleans of the table as the text ``True``/``False``, the only one Trapper reads as true.
+
+        A Python ``True`` goes over HTTP as ``true``, and the server compares it with ``"True"``: it took it as
+        false, so ``private_human=True`` showed the files of the humans. A boolean, or the text ``true``/``false``
+        in any case, is accepted; anything else is a ``ValueError`` before the request.
+        """
+        query = super()._normalize_query(query)
+        for name in self._TRUE_FALSE_PARAMS:
+            if name in query:
+                query = dict(query)
+                query[name] = self._true_false(name, query[name])
+        return query
+
+    @staticmethod
+    def _true_false(name: str, value: Any) -> str:
+        if isinstance(value, bool):
+            return "True" if value else "False"
+        if isinstance(value, str) and value.strip().lower() in ("true", "false"):
+            return "True" if value.strip().lower() == "true" else "False"
+        raise ValueError(f"{name} must be True or False, not {value!r}")
+
     # ── internal helpers ──────────────────────────────────────────────────────
 
     def _resolve_endpoint(self, project_pk: int) -> str:

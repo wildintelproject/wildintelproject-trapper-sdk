@@ -165,6 +165,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- **Behaviour change:** `private_human`, `private_vehicle`, `trapper_url` and `trapper_url_token` of the media table
+  (issue #85). Trapper reads only the text `True` as true, and a Python `True` is sent as `true`, so `private_human=True`
+  used to show the files of the humans (the opposite of what it says). They are now sent as `True`/`False`, so a boolean
+  does what it says; a boolean or the text `true`/`false` is accepted, and anything else is a `ValueError`. Code that
+  passed `True` expecting the humans to be shown now needs `False`.
 - A results row of Trapper v2 with a bounding box (`[x, y, w, h]`) was read as the CamtrapDP class, with `bboxes` as text and no
   error (issue #85). `ClassificationResultRecordTrapper` reads the box of v2 as well as the list of boxes of v1, and the row
   class is chosen by the `_id` column (only the Trapper format has it), so a row it cannot read is a `ValidationError`.
