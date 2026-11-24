@@ -6,10 +6,19 @@ Uso:
     uv run cli test [unit|integration|e2e|all] [-k keyword] [-v]
     uv run cli docs serve [--port 8000]
     uv run cli docs build
+    uv run cli trapper up [v1|v2|all] [--branch RAMA] [--port-offset N]
+    uv run cli trapper status|logs|env|down|destroy [v1|v2|all]
 """
+import json
 import os
+import re
+import secrets
+import socket
 import subprocess
 import sys
+import time
+import zlib
+from dataclasses import dataclass, replace
 from enum import Enum
 from pathlib import Path
 
@@ -118,6 +127,303 @@ def docs_build() -> None:
     console.print("[green]Generando documentación...[/green]")
     _run("mkdocs", "build", "--config-file", str(MKDOCS_CFG))
     console.print(f"[green]✔  Sitio generado en {ROOT_DIR / 'site'}[/green]")
+
+
+# ── trapper (despliega Trapper v1 y v2 para las pruebas) ─────────────────────
+
+#: Compose y semillas de las instancias de prueba (sin los contenedores de IA ni de ciencia ciudadana).
+STACK_DIR = ROOT_DIR / "dev" / "trapper"
+#: Secretos, puertos y credenciales de cada instancia; git no los versiona.
+STATE_DIR = STACK_DIR / ".state"
+TRAPPER_IMAGE_REPO = "registry.gitlab.com/trapper-project/trapper"
+
+
+@dataclass(frozen=True)
+class Stack:
+    """Una versión de Trapper y los puertos en los que se publica (sin desplazamiento)."""
+
+    version: str
+    default_branch: str
+    nginx_image: str
+    postgres_image: str
+    app_port: int
+    nginx_port: int
+    uploader_port: int
+    rabbitmq_port: int
+    tusd_image: str = ""
+    #: Se suma a todos los puertos. Con un desplazamiento es **otra instancia**: otro proyecto de compose, otros
+    #: volúmenes y otra carpeta de estado, así que convive con la de desplazamiento 0.
+    offset: int = 0
+
+    @property
+    def name(self) -> str:
+        return self.version if not self.offset else f"{self.version}-p{self.offset}"
+
+    @property
+    def subnet(self) -> str:
+        """Una subred /24 de 10.77.x.0 para esta instancia (Docker se queda sin las suyas si hay muchas redes de otros proyectos)."""
+        return f"10.77.{20 + zlib.crc32(self.name.encode()) % 200}.0/24"
+
+    @property
+    def project(self) -> str:
+        return f"wildintel-trapper-{self.name}"
+
+    @property
+    def compose_file(self) -> Path:
+        return STACK_DIR / f"docker-compose.{self.version}.yml"
+
+    @property
+    def state(self) -> Path:
+        return STATE_DIR / self.name
+
+
+STACKS = {
+    "v1": Stack(
+        version="v1", default_branch="latest",
+        nginx_image="registry.gitlab.com/trapper-project/trapper-nginx/no-ssl:latest",
+        postgres_image="registry.gitlab.com/trapper-project/trapper-postgresql:latest",
+        app_port=8010, nginx_port=8080, uploader_port=8088, rabbitmq_port=15672,
+    ),
+    "v2": Stack(
+        version="v2", default_branch="2.0.0a2",
+        nginx_image="registry.gitlab.com/trapper-project/trapper-nginx/no-ssl:video-streaming",
+        postgres_image="registry.gitlab.com/trapper-project/trapper-postgresql:timescaledb",
+        app_port=8100, nginx_port=8180, uploader_port=8188, rabbitmq_port=15772,
+        tusd_image="tusproject/tusd:v2.10.1",
+    ),
+}
+
+
+class StackChoice(str, Enum):
+    v1  = "v1"
+    v2  = "v2"
+    all = "all"
+
+
+trapper_app = typer.Typer(help="Despliega instancias de Trapper v1 y v2 para probar el SDK (sin IA ni ciencia ciudadana).")
+app.add_typer(trapper_app, name="trapper")
+
+
+def _stacks(choice: StackChoice, offset: int = 0) -> list[Stack]:
+    stacks = list(STACKS.values()) if choice == StackChoice.all else [STACKS[choice.value]]
+    return [replace(stack, offset=offset) for stack in stacks]
+
+
+def _slug(branch: str) -> str:
+    """El nombre que da el CI de GitLab a la etiqueta de una rama: minúsculas, lo demás a ``-``, 63 como mucho."""
+    return re.sub(r"[^a-z0-9]+", "-", branch.lower()).strip("-")[:63]
+
+
+def _tag_candidates(branch: str) -> list[str]:
+    """La rama tal cual (una etiqueta como ``2.0.0a2``) y su nombre en el CI (``refactor/api-ninja`` -> ``refactor-api-ninja``)."""
+    return list(dict.fromkeys([branch, _slug(branch)]))
+
+
+def _image_exists(image: str) -> bool:
+    """¿Está la imagen en local o en el registro? (``docker manifest inspect`` mira el registro, sin descargarla)."""
+    for cmd in (["docker", "image", "inspect", image], ["docker", "manifest", "inspect", image]):
+        if subprocess.run(cmd, capture_output=True).returncode == 0:
+            return True
+    return False
+
+
+def _resolve_image(branch: str) -> str:
+    """La imagen de Trapper de una rama (o etiqueta). Termina con un error claro si no existe."""
+    tried = []
+    for tag in _tag_candidates(branch):
+        image = f"{TRAPPER_IMAGE_REPO}:{tag}"
+        tried.append(image)
+        if _image_exists(image):
+            return image
+    console.print(f"[red]No hay imagen para «{branch}»[/red] (probé {', '.join(tried)}), o no hay red hacia el registro.")
+    raise typer.Exit(1)
+
+
+def _branch_for(stack: Stack, branch: str | None, v1_branch: str | None, v2_branch: str | None) -> str:
+    """La rama de una instancia: la de su versión, si no ``--branch``, si no la de por defecto."""
+    return {"v1": v1_branch, "v2": v2_branch}[stack.version] or branch or stack.default_branch
+
+
+def _read_env(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    pairs = (line.split("=", 1) for line in path.read_text().splitlines() if "=" in line and not line.startswith("#"))
+    return {k.strip(): v.strip() for k, v in pairs}
+
+
+def _write_env(stack: Stack, image: str) -> Path:
+    """Escribe el ``.env`` de la instancia. Los secretos se crean una vez y se conservan: la base de datos nace con ellos."""
+    stack.state.mkdir(parents=True, exist_ok=True)
+    path = stack.state / ".env"
+    old = _read_env(path)
+    env = {
+        "COMPOSE_PROJECT_NAME": stack.project,
+        "TRAPPER_IMAGE": image,
+        "NGINX_IMAGE": stack.nginx_image,
+        "POSTGRES_IMAGE": stack.postgres_image,
+        "TUSD_IMAGE": stack.tusd_image,
+        "APP_PORT": str(stack.app_port + stack.offset),
+        "NGINX_PORT": str(stack.nginx_port + stack.offset),
+        "UPLOADER_PORT": str(stack.uploader_port + stack.offset),
+        "RABBITMQ_MGMT_PORT": str(stack.rabbitmq_port + stack.offset),
+        "NETWORK_SUBNET": stack.subnet,
+        **{k: old.get(k) or secrets.token_urlsafe(24)
+           for k in ("POSTGRES_PASSWORD", "RABBITMQ_PASSWORD", "TRAPPER_SECRET_KEY", "TUS_HOOK_SECRET")},
+    }
+    path.write_text("# Generado por `uv run cli trapper up`; no lo edites (los secretos se conservan).\n"
+                    + "".join(f"{k}={v}\n" for k, v in env.items()))
+    return path
+
+
+def _compose(stack: Stack, *args: str, capture: bool = False, stdin: str | None = None) -> subprocess.CompletedProcess:
+    cmd = ["docker", "compose", "-f", str(stack.compose_file), "--env-file", str(stack.state / ".env"), *args]
+    return subprocess.run(cmd, cwd=ROOT_DIR, capture_output=capture, text=True, input=stdin)
+
+
+def _busy(port: int) -> bool:
+    with socket.socket() as sock:
+        sock.settimeout(0.3)
+        return sock.connect_ex(("127.0.0.1", port)) == 0
+
+
+def _wait_for(url: str, timeout: int) -> bool:
+    """Espera a que la instancia conteste algo que no sea un error del servidor (nginx da 502 hasta que la app arranca)."""
+    import httpx
+
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            if httpx.get(url, timeout=5, follow_redirects=True).status_code < 500:
+                return True
+        except httpx.HTTPError:
+            pass
+        time.sleep(3)
+    return False
+
+
+def _seed_accounts(stack: Stack) -> dict:
+    """Crea (o actualiza) las cuentas y el proyecto de investigación, y guarda los tokens en el estado."""
+    script = (STACK_DIR / "seed" / "accounts.py").read_text()
+    result = _compose(stack, "exec", "-T", "-u", "trapper", "trapper", "python", "manage.py", "shell",
+                      capture=True, stdin=script)
+    line = next((l for l in result.stdout.splitlines() if l.startswith("SEED_JSON:")), None)
+    if result.returncode != 0 or line is None:
+        console.print(f"[red]No se pudieron crear las cuentas en {stack.version}:[/red]\n{result.stdout[-800:]}{result.stderr[-800:]}")
+        raise typer.Exit(1)
+    data = json.loads(line[len("SEED_JSON:"):])
+    (stack.state / "seed.json").write_text(json.dumps(data, indent=2))
+    return data
+
+
+def _ports(stack: Stack) -> dict[str, int]:
+    env = _read_env(stack.state / ".env")
+    return {k: int(env[k]) for k in ("APP_PORT", "NGINX_PORT", "UPLOADER_PORT", "RABBITMQ_MGMT_PORT") if k in env}
+
+
+@trapper_app.command("up")
+def trapper_up(
+    which: StackChoice = typer.Argument(StackChoice.all, help="Qué instancia desplegar."),
+    branch: str | None = typer.Option(None, "--branch", "-b", help="Rama (o etiqueta) de la imagen de Trapper, para las instancias elegidas; por defecto latest (v1) y 2.0.0a2 (v2)."),
+    v1_branch: str | None = typer.Option(None, "--v1-branch", help="Rama solo para v1 (gana a --branch)."),
+    v2_branch: str | None = typer.Option(None, "--v2-branch", help="Rama solo para v2 (gana a --branch)."),
+    port_offset: int = typer.Option(0, "--port-offset", help="Se suma a todos los puertos (para tener otra instancia a la vez)."),
+    seed: bool = typer.Option(True, "--seed/--no-seed", help="Crear las cuentas y el proyecto de investigación."),
+    timeout: int = typer.Option(600, "--timeout", help="Segundos de espera a que la app responda (el primer arranque migra la base de datos)."),
+) -> None:
+    """Despliega Trapper v1 y/o v2 con las mismas cuentas de prueba; ``--branch`` elige la imagen."""
+    for stack in _stacks(which, port_offset):
+        image = _resolve_image(_branch_for(stack, branch, v1_branch, v2_branch))
+        env_path = _write_env(stack, image)
+        console.print(Panel(f"[bold]{stack.version}[/bold]  imagen {image}", title="trapper up"))
+
+        running = _compose(stack, "ps", "-q", capture=True).stdout.strip()
+        busy = [p for p in _ports(stack).values() if _busy(p)] if not running else []
+        if busy:
+            console.print(f"[red]Puertos ocupados: {busy}.[/red] Para o borra la otra instancia, o usa [bold]--port-offset[/bold].")
+            raise typer.Exit(1)
+
+        result = _compose(stack, "up", "-d")
+        if result.returncode != 0:
+            raise typer.Exit(result.returncode)
+        url = f"http://localhost:{_ports(stack)['NGINX_PORT']}/"
+        console.print(f"Esperando a {url} (hasta {timeout} s)...")
+        if not _wait_for(url, timeout):
+            console.print(f"[red]La app no contestó en {timeout} s.[/red] Mira: uv run cli trapper logs {stack.version}")
+            raise typer.Exit(1)
+        if seed:
+            data = _seed_accounts(stack)
+            console.print(f"[green]✔  {stack.version}: cuentas y proyecto SDKT (pk {data['research_project']}) listos[/green]")
+        console.print(f"[green]✔  {stack.version} en {url}[/green]  (estado: {env_path.parent})\n")
+    console.print("Variables para los tests e2e:  [bold]uv run cli trapper env v1|v2[/bold]")
+
+
+@trapper_app.command("down")
+def trapper_down(which: StackChoice = typer.Argument(StackChoice.all), port_offset: int = typer.Option(0, "--port-offset", help="El de la instancia (el mismo que le diste en up)."))  -> None:
+    """Para las instancias y conserva sus datos."""
+    for stack in _stacks(which, port_offset):
+        if (stack.state / ".env").exists():
+            _compose(stack, "down")
+
+
+@trapper_app.command("destroy")
+def trapper_destroy(
+    which: StackChoice = typer.Argument(StackChoice.all),
+    yes: bool = typer.Option(False, "--yes", "-y", help="No pedir confirmación."),
+    port_offset: int = typer.Option(0, "--port-offset", help="El de la instancia (el mismo que le diste en up)."),
+) -> None:
+    """Borra las instancias **y sus datos** (volúmenes). Los secretos y puertos del estado se conservan."""
+    stacks = _stacks(which, port_offset)
+    if not yes and not typer.confirm(f"Borrar {', '.join(s.version for s in stacks)} y todos sus datos?"):
+        raise typer.Exit(1)
+    for stack in stacks:
+        if (stack.state / ".env").exists():
+            _compose(stack, "down", "-v")
+            (stack.state / "seed.json").unlink(missing_ok=True)
+
+
+@trapper_app.command("status")
+def trapper_status(which: StackChoice = typer.Argument(StackChoice.all), port_offset: int = typer.Option(0, "--port-offset", help="El de la instancia (el mismo que le diste en up)."))  -> None:
+    """Contenedores de cada instancia."""
+    for stack in _stacks(which, port_offset):
+        console.print(f"[bold]{stack.name}[/bold]")
+        if (stack.state / ".env").exists():
+            _compose(stack, "ps")
+        else:
+            console.print("  sin desplegar (uv run cli trapper up)")
+
+
+@trapper_app.command("logs")
+def trapper_logs(
+    which: StackChoice = typer.Argument(StackChoice.v2),
+    service: str | None = typer.Argument(None, help="trapper, trapper-celery, trapper-nginx, postgres, ..."),
+    follow: bool = typer.Option(False, "--follow", "-f"),
+    tail: int = typer.Option(100, "--tail"),
+    port_offset: int = typer.Option(0, "--port-offset", help="El de la instancia (el mismo que le diste en up)."),
+) -> None:
+    """Registro de una instancia (de un servicio si das su nombre)."""
+    for stack in _stacks(which, port_offset):
+        args = ["logs", "--tail", str(tail), *(["-f"] if follow else []), *([service] if service else [])]
+        _compose(stack, *args)
+
+
+@trapper_app.command("env")
+def trapper_env(which: StackChoice = typer.Argument(StackChoice.v2), port_offset: int = typer.Option(0, "--port-offset", help="El de la instancia (el mismo que le diste en up)."))  -> None:
+    """Imprime las variables WILDINTEL_* para los tests e2e (``eval "$(uv run cli trapper env v2)"``)."""
+    for stack in _stacks(which, port_offset):
+        seed_file = stack.state / "seed.json"
+        if not seed_file.exists():
+            console.print(f"[red]{stack.version}: sin cuentas; ejecuta uv run cli trapper up {stack.version}[/red]")
+            raise typer.Exit(1)
+        data = json.loads(seed_file.read_text())
+        typer.echo(f"# {stack.version}")
+        typer.echo(f"export WILDINTEL_BASE_URL=http://localhost:{_ports(stack)['NGINX_PORT']}")
+        typer.echo(f"export WILDINTEL_ACCESS_TOKEN={data['tokens']['sdktest']}")
+        typer.echo("export WILDINTEL_USER_NAME=sdktest@example.org   # el email: v1 entra por email")
+        typer.echo(f"export WILDINTEL_USER_PASSWORD={data['password']}")
+        typer.echo("export WILDINTEL_SMOKE_ENABLED=1")
+        typer.echo("export WILDINTEL_ALLOW_WRITE=1")
+        typer.echo(f"export WILDINTEL_RPROJECT_PK={data['research_project']}")
+
 
 
 # ── entry point ───────────────────────────────────────────────────────────────

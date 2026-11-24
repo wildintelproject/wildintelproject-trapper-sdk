@@ -1,0 +1,165 @@
+# Trapper v1 for the SDK tests: the app, its workers and the services it needs.
+# Without Trapper AI and the citizen science frontend (other containers).
+# Used by `uv run cli trapper up v1`, which writes the .env this file reads.
+
+name: ${COMPOSE_PROJECT_NAME}
+
+x-trapper-env: &trapper-env
+  DOMAIN_NAME: localhost
+  FRONTEND_DOMAIN_NAME: localhost
+  SECRET_KEY: ${TRAPPER_SECRET_KEY}
+  DB_NAME: trapper
+  DB_USER: trapper
+  DB_PASS: ${POSTGRES_PASSWORD}
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  MEMCACHED_LOCATION: memcached:11211
+  CELERY_BROKER_URL: amqp://trapper:${RABBITMQ_PASSWORD}@rabbitmq:5672/trapper
+  PROJECT_TITLE: Trapper (SDK tests)
+  HTTPS: "off"
+  REQUESTS_VERIFY_SSL: "true"
+  EMAIL_NOTIFICATIONS: "False"
+  EMAIL_NOTIFICATIONS_RESEARCH_PROJECT: "False"
+  EMAIL_HOST: smtp.example.com
+  EMAIL_PORT: "587"
+  EMAIL_USE_TLS: "True"
+  ADMIN1: admin,admin@example.org
+  USER_REGISTRATION_OPEN: "True"
+  USE_RECAPTCHA: "False"
+  JUPYTER_HUB_ENABLED: "false"
+  USE_DEBUG_TOOLBAR: "False"
+  USE_SILK: "False"
+  USE_SENTRY: "False"
+  MAX_UPLOAD_SIZE: "104857600"
+  MAX_UPLOAD_COLLECTION_SIZE: "1048576000"
+  DATA_PACKAGE_MAX_SIZE: "524288000"
+  LDAP_AUTHENTICATION: "False"
+  FTP_AUTH_METHOD: pgsql
+  CELERYD_CONCURRENCY: "4"
+  BROKER_POOL_LIMIT: "10"
+  TRAPPER_USER_UID: "1000"
+  TRAPPER_USER_GID: "1000"
+
+x-trapper-volumes: &trapper-volumes
+  - trapper_static:/app/static
+  - trapper_media:/app/media
+  - trapper_external_media:/app/external_media
+
+x-trapper: &trapper
+  image: ${TRAPPER_IMAGE}
+  restart: unless-stopped
+  working_dir: /app/trapper-project
+  environment: *trapper-env
+  volumes: *trapper-volumes
+  networks: [trapper_network]
+  tty: true
+
+services:
+  memcached:
+    image: memcached:alpine
+    entrypoint: ["memcached", "-m", "256"]
+    restart: unless-stopped
+    networks: [trapper_network]
+    healthcheck:
+      test: ["CMD-SHELL", "echo stats | nc localhost 11211 | grep -q pid"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: ${POSTGRES_IMAGE}
+    restart: unless-stopped
+    shm_size: 2gb
+    environment:
+      POSTGRES_DB: trapper
+      POSTGRES_USER: trapper
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [trapper_network]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trapper -d trapper"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: trapper
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: trapper
+      RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS: -rabbit consumer_timeout 36000000
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "${RABBITMQ_MGMT_PORT}:15672"
+    networks: [trapper_network]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  trapper:
+    <<: *trapper
+    ports:
+      - "${APP_PORT}:8000"
+    depends_on:
+      memcached: {condition: service_healthy}
+      postgres: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+
+  trapper-celery:
+    <<: *trapper
+    command: ["celery", "-A", "trapper", "worker", "-l", "INFO", "--logfile=logs/celery_main", "--concurrency=4"]
+    depends_on:
+      trapper: {condition: service_started}
+
+  trapper-celery-beat:
+    <<: *trapper
+    command: ["celery", "-A", "trapper", "beat", "-l", "INFO", "--logfile=logs/celery_beat"]
+    depends_on:
+      trapper: {condition: service_started}
+
+  # v1 uploads through the app's own chunked uploader, behind nginx
+  trapper_uploader:
+    <<: *trapper
+    command: ["python", "manage.py", "start_uploader_server"]
+    ports:
+      - "${UPLOADER_PORT}:8088"
+    depends_on:
+      trapper: {condition: service_started}
+
+  # nginx serves the files (X-Accel-Redirect): without it a download answers 200 with no body
+  trapper-nginx:
+    image: ${NGINX_IMAGE}
+    restart: unless-stopped
+    environment:
+      DOMAIN_NAME: localhost
+      NGINX_DISABLE_IPV6: "false"
+    volumes:
+      - trapper_static:/app/static:ro
+      - trapper_media:/app/media:ro
+      - trapper_external_media:/app/external_media:ro
+    ports:
+      - "${NGINX_PORT}:80"
+    networks: [trapper_network]
+    depends_on:
+      trapper: {condition: service_started}
+      trapper_uploader: {condition: service_started}
+
+volumes:
+  pgdata:
+  rabbitmq_data:
+  trapper_static:
+  trapper_media:
+  trapper_external_media:
+
+networks:
+  trapper_network:
+    # its own subnet: Docker runs out of the ones it hands out by default when many projects have left networks behind
+    ipam:
+      config:
+        - subnet: ${NETWORK_SUBNET}
