@@ -941,6 +941,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What each thing is">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#several-things-in-one-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Several things in one image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boxes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boxes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -2857,6 +2885,34 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="What each thing is">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#several-things-in-one-image" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Several things in one image
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boxes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Boxes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -3014,37 +3070,80 @@ with its own shape (checked on Trapper v1 and v2):</p>
 approved, and nothing more. Its <code>dynamic_attrs</code> carry only <code>observation_type</code>, <code>species</code> and <code>count</code>.</p>
 <h3 id="what-each-thing-is">What each thing is</h3>
 <ul>
-<li><strong>Classification:</strong> what one person (or the AI) decided about one resource. Each user's classification of a resource
-  is its own record (<code>user_classifications</code>, see <a href="../user_classifications/">User classifications</a>); the <strong>final</strong>
-  classification is the one record per resource that this component reads. When someone's classification is approved,
-  the final one points to it and takes its values (from Trapper's source): it is <strong>one</strong> classification chosen, not a
-  merge of several.</li>
+<li><strong>Classification:</strong> what one person (or the AI) decided about one resource, and it is a <strong>set of observations</strong>: zero
+  (nothing classified yet), one, or several. Each user's classification of a resource is its own record
+  (<code>user_classifications</code>, see <a href="../user_classifications/">User classifications</a>); the <strong>final</strong> classification is the one
+  record per resource that this component reads. When someone's classification is approved, the final one is taken from it
+  (from Trapper's source and checked on v1 and v2): it is <strong>one</strong> classification chosen, copied, not a merge of several.</li>
 <li><strong>Observation:</strong> one thing seen in the resource, with its type (<code>animal</code>, <code>human</code>, <code>blank</code>, ...), species, <code>count</code>,
-  <code>sex</code>, <code>lifeStage</code> and <code>behavior</code>. It is a row of the results table. Two species in one image are two observations;
-  an image with nothing in it is one (<code>blank</code> or <code>unclassified</code>).</li>
-<li><strong>Bounding box:</strong> an optional position of the observation in the image (<code>bboxX</code>, <code>bboxY</code>, <code>bboxWidth</code>, <code>bboxHeight</code>,
-  and the <code>bboxes</code> list with <code>camtrapdp=False</code>). It says <em>where</em>, not <em>what</em>: what is there is said by the observation,
-  and who said it by <code>classificationMethod</code> (<code>human</code> or <code>machine</code>) and <code>classifiedBy</code>. An observation can have several
-  boxes (a count of three) or none.</li>
-<li><strong><code>_id</code>:</strong> the primary key of the final classification of the resource, the same as the <code>pk</code> of the list. It is the
-  stable identifier, and the one the import needs.</li>
+  <code>sex</code>, <code>lifeStage</code> and <code>behavior</code>. It is a row of the results table. An image with nothing in it has one (<code>blank</code>, or
+  <code>unclassified</code> when nobody has looked).</li>
+<li><strong>Bounding box:</strong> an optional position of the observation in the image. It says <em>where</em>, not <em>what</em>: what is there is
+  said by the observation, and who said it by <code>classificationMethod</code> (<code>human</code> or <code>machine</code>) and <code>classifiedBy</code>. The
+  server versions store it differently, see <a href="#boxes">Boxes</a> below.</li>
+<li><strong><code>_id</code>:</strong> the primary key of the final <strong>classification</strong>, the same as the <code>pk</code> of the list. It is the identifier of
+  the classification, not of an observation: the rows of the same image share it (checked: a rabbit and a lynx in one
+  image are two rows with the same <code>_id</code>). It is what the import needs.</li>
 <li><strong><code>observationID</code>:</strong> only the <strong>number of the row</strong> in the table you asked for. It changes with the filters (the
-  same observation is 4 in the whole table and 1 with <code>sex=male</code>), so it does not identify an observation and cannot
-  be compared between two requests.</li>
+  same observation is 4 in the whole table and 1 with <code>sex=male</code>) and with the format (on v1 the same observation is 4
+  with <code>camtrapdp=False</code> and 28 with <code>camtrapdp=True</code>), so it identifies nothing and cannot be compared between two
+  requests. An observation has no identifier of its own: to find it again, use <code>_id</code> and the species.</li>
 </ul>
+<h4 id="several-things-in-one-image">Several things in one image</h4>
+<p>They are several observations of <strong>one</strong> classification, one row each, with the same <code>_id</code> and different <code>observationID</code>
+(checked on v1 and v2: a rabbit and a lynx in one image give two rows). Several animals of the <strong>same</strong> species are one
+observation with a <code>count</code> (a rabbit twice is <code>count=2</code>, one row). The boxes, which are optional, are stored differently
+by the two Trapper versions:</p>
+<h4 id="boxes">Boxes</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Trapper v1</th>
+<th>Trapper v2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stored per observation</td>
+<td>a <strong>list of boxes</strong>: <code>[[x, y, w, h], [x, y, w, h]]</code></td>
+<td><strong>one</strong> box: <code>[x, y, w, h]</code>, that of the first occurrence (from Trapper's model)</td>
+</tr>
+<tr>
+<td><code>camtrapdp=False</code></td>
+<td>one row per observation, <code>bboxes</code> is the list</td>
+<td>one row per observation, <code>bboxes</code> is <code>[x, y, w, h]</code></td>
+</tr>
+<tr>
+<td><code>camtrapdp=True</code> (default)</td>
+<td><strong>one row per box</strong>, each with <code>count</code> 1</td>
+<td>one row per observation, with <code>bboxX</code>, <code>bboxY</code>, <code>bboxWidth</code>, <code>bboxHeight</code></td>
+</tr>
+</tbody>
+</table>
+<p>So on v1 an observation of <code>count=2</code> with two boxes is <strong>two rows</strong> in the default format, and one in the other. Both
+are relative coordinates (0 to 1). A box is optional: <code>[]</code> when there is none.</p>
+<div class="admonition warning">
+<p class="admonition-title">A box in the other version's shape breaks the whole results table</p>
+<p>The default format (<code>camtrapdp=True</code>) answers <strong><code>500</code> for the entire project</strong> if one row has its boxes in the
+other version's shape (a flat box on v1, a list of boxes on v2). I met it writing test data by hand; whether the tools
+of each version can produce it was not checked. The <code>camtrapdp=False</code> format keeps working.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Two people, one image</p>
 <p>The results table has the <strong>final</strong> classification only, so it never holds two users' observations of the same
-image. To read what each user said, use <a href="../user_classifications/"><code>user_classifications</code></a>.</p>
-<p>Trapper links classifications by <strong>lineage</strong>, not by the position of an observation (from its source): a user's
-classification can be made from another one (the AI's, or another user's), and the final one points to the
-classification that was approved. Boxes have one use there: the task <code>CopyBboxesFromAI</code> copies the boxes of an AI
-classification to the approved expert one <strong>when both have the same total count and the same observation type and
-the expert's objects are indistinguishable</strong> (the same values in the fields compared); the boxes are then given to the
-objects at random, as its docstring says. It does not compare where the boxes of two users' classifications are. To
-tell whether two observations are the same animal, compare the boxes yourself when both have them (their overlap),
-and the species and the count when they do not. <em>Not checked with two users on one image: the test servers have
-one, and none of their observations has boxes.</em></p>
+image. <code>user_classifications</code> lists <strong>all</strong> of them, each its own record (checked with three users on one image:
+three records, with their own <code>pk</code> and owner), and <code>approved</code> marks the one the final classification is taken from.
+When another is approved, the final one <strong>copies</strong> it (on v1 it replaces the observations, boxes included; the
+others are left as they were), and the <code>approved</code> mark moves.</p>
+<p>Trapper does not match the observations of two classifications (from its source and checked on v1 and v2): there is
+no link between "the rabbit of ana" and "the rabbit of luis", and the user classification list <strong>does not carry the
+boxes</strong> (only <code>bboxes: true</code>; the species, type and count are there), so through the API the boxes of a user's
+classification cannot be read until it is approved, and then they are in the results table. Its only use of boxes
+is the task <code>CopyBboxesFromAI</code>, which copies the boxes of an AI classification to the approved expert one <strong>when
+both have the same total count and observation type and the expert's objects are indistinguishable</strong>, giving them
+to the objects at random (its docstring). To tell whether two observations are the same animal, compare their species
+and count, and, for the approved classification only, its boxes (their overlap).</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Not to be confused with the media table</p>
