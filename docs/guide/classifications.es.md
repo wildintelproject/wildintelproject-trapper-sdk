@@ -24,6 +24,34 @@ cada una con su propia forma (comprobado en Trapper v1 y v2):
 Así que **para saber qué muestra cada imagen, usa la tabla de resultados**; la lista dice qué resources están
 clasificados y aprobados, y nada más. Sus `dynamic_attrs` solo llevan `observation_type`, `species` y `count`.
 
+### Qué es cada cosa
+
+- **Clasificación:** lo que una persona (o la IA) decidió sobre un resource. La clasificación de cada usuario sobre un
+  resource es un registro propio (`user_classifications`, véase [Clasificaciones de usuario](user_classifications.md));
+  la clasificación **final** es el único registro por resource que lee este componente. Cuando se aprueba la
+  clasificación de alguien, la final apunta a ella y toma sus valores (según el código de Trapper): es **una**
+  clasificación elegida, no una mezcla de varias.
+- **Observación:** una cosa vista en el resource, con su tipo (`animal`, `human`, `blank`, ...), especie, `count`,
+  `sex`, `lifeStage` y `behavior`. Es una fila de la tabla de resultados. Dos especies en una imagen son dos
+  observaciones; una imagen sin nada es una (`blank` o `unclassified`).
+- **Caja (bounding box):** una posición opcional de la observación en la imagen (`bboxX`, `bboxY`, `bboxWidth`,
+  `bboxHeight`, y la lista `bboxes` con `camtrapdp=False`). Dice *dónde*, no *qué*: lo que hay lo dice la observación,
+  y quién lo dijo, `classificationMethod` (`human` o `machine`) y `classifiedBy`. Una observación puede tener varias
+  cajas (un conteo de tres) o ninguna.
+- **`_id`:** la clave primaria de la clasificación final del resource, igual que el `pk` de la lista. Es el
+  identificador estable, y el que necesita la importación.
+- **`observationID`:** solo el **número de fila** de la tabla que pediste. Cambia con los filtros (la misma observación
+  es 4 en la tabla entera y 1 con `sex=male`), así que no identifica una observación y no se puede comparar entre dos
+  peticiones.
+
+!!! note "Dos personas, una imagen"
+    La tabla de resultados tiene solo la clasificación **final**, así que nunca contiene las observaciones de dos
+    usuarios sobre la misma imagen. Para leer lo que dijo cada usuario, usa
+    [`user_classifications`](user_classifications.md). Trapper no enlaza una observación de una clasificación con una de
+    otra (según su código: son registros independientes y no compara cajas): para saber si dos observaciones son el
+    mismo animal, compara tú las cajas cuando ambas las tienen, y la especie y el conteo cuando no. *No comprobado con
+    dos usuarios sobre una imagen: los servidores de prueba tienen uno.*
+
 !!! note "No confundir con la tabla de media"
     [`client.classification_media`](classification_media.md) es la tabla de los *ficheros* del proyecto; esto es *lo que
     muestran*. Se unen por `mediaID`: hay un ejemplo allí.

@@ -24,6 +24,34 @@ with its own shape (checked on Trapper v1 and v2):
 So **to know what each image shows, use the results table**; the list tells you which resources are classified and
 approved, and nothing more. Its `dynamic_attrs` carry only `observation_type`, `species` and `count`.
 
+### What each thing is
+
+- **Classification:** what one person (or the AI) decided about one resource. Each user's classification of a resource
+  is its own record (`user_classifications`, see [User classifications](user_classifications.md)); the **final**
+  classification is the one record per resource that this component reads. When someone's classification is approved,
+  the final one points to it and takes its values (from Trapper's source): it is **one** classification chosen, not a
+  merge of several.
+- **Observation:** one thing seen in the resource, with its type (`animal`, `human`, `blank`, ...), species, `count`,
+  `sex`, `lifeStage` and `behavior`. It is a row of the results table. Two species in one image are two observations;
+  an image with nothing in it is one (`blank` or `unclassified`).
+- **Bounding box:** an optional position of the observation in the image (`bboxX`, `bboxY`, `bboxWidth`, `bboxHeight`,
+  and the `bboxes` list with `camtrapdp=False`). It says *where*, not *what*: what is there is said by the observation,
+  and who said it by `classificationMethod` (`human` or `machine`) and `classifiedBy`. An observation can have several
+  boxes (a count of three) or none.
+- **`_id`:** the primary key of the final classification of the resource, the same as the `pk` of the list. It is the
+  stable identifier, and the one the import needs.
+- **`observationID`:** only the **number of the row** in the table you asked for. It changes with the filters (the
+  same observation is 4 in the whole table and 1 with `sex=male`), so it does not identify an observation and cannot
+  be compared between two requests.
+
+!!! note "Two people, one image"
+    The results table has the **final** classification only, so it never holds two users' observations of the same
+    image. To read what each user said, use [`user_classifications`](user_classifications.md). Trapper does not
+    link an observation of one classification with one of another (from its source: they are independent records, and
+    it has no matching of boxes): to tell whether two observations are the same animal, compare the boxes yourself
+    when both have them, and the species and the count when they do not. *Not checked with two users on one image: the
+    test servers have one.*
+
 !!! note "Not to be confused with the media table"
     [`client.classification_media`](classification_media.md) is the table of the project's *files*; this is *what
     they show*. Join them by `mediaID`: there is an example there.
