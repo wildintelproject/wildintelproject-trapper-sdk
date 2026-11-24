@@ -11,9 +11,11 @@ import io
 from pathlib import Path
 from unittest.mock import MagicMock, patch, call
 
+import httpx
 import pytest
 
 from tests.base_component_tests import ComponentUnitTestBase, paginated_response
+from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.classification_media import ClassificationMediaComponent
 from trapper_client.schemas import Media, PaginatedResult
@@ -467,61 +469,89 @@ class TestCollectionMedia:
 
 class TestDownloadMediaFile:
 
-    @pytest.fixture
-    def client(self):
-        return MagicMock()
+    @staticmethod
+    def _component(handler, tmp_path=None):
+        client = MagicMock()
+        client._client = httpx.Client(transport=httpx.MockTransport(handler))
+        client._select_file.side_effect = lambda f: Path(f) if f else Path(tmp_path) / "temp.bin"
+        return ClassificationMediaComponent(client), client
 
-    @pytest.fixture
-    def component(self, client):
-        return ClassificationMediaComponent(client)
-
-    def test_download_media_file_writes_content(self, component, client, tmp_path):
-        """download_media_file() escribe el contenido de la respuesta en el fichero."""
-        mock_response = MagicMock()
-        mock_response.content = b"fake_image_data"
-        client.make_request.return_value = mock_response
-
+    def test_writes_content(self, tmp_path):
+        """download_media_file() escribe el cuerpo de la respuesta en el fichero."""
+        component, _ = self._component(lambda r: httpx.Response(200, content=b"fake_image_data"))
         out = tmp_path / "media.jpg"
-        client._select_file.return_value = out
 
-        result = component.download_media_file(file_url=FILE_URL, file=out)
-
-        assert result == out
+        assert component.download_media_file(file_url=FILE_URL, file=out) == out
         assert out.read_bytes() == b"fake_image_data"
+        assert not list(tmp_path.glob("*.part"))
 
-    def test_download_media_file_uses_file_url_as_endpoint(self, component, client, tmp_path):
-        """download_media_file() usa file_url directamente como endpoint.
+    def test_uses_file_url_as_is_and_sends_no_token(self, tmp_path):
+        """Pide file_url tal cual (con su ?rt=) y no manda la cabecera del token de la API.
 
-        Regresión: antes reconstruía la ruta a partir de media_id/file_field
-        apuntando a un endpoint inexistente (storage/api/resource/media/...,
-        cuando la ruta real de Django es storage/resource/media/... sin
-        'api/', y sin el token de acceso ?rt= que exige esa vista para
-        recursos privados). file_url ya viene completo desde filePath.
+        Regresión: antes reconstruía la ruta a partir de media_id apuntando a un endpoint inexistente,
+        sin el token ?rt= que exige la vista para recursos privados.
         """
-        mock_response = MagicMock()
-        mock_response.content = b"data"
-        client.make_request.return_value = mock_response
-        client._select_file.return_value = tmp_path / "media.jpg"
+        seen = []
+        component, _ = self._component(lambda r: seen.append(r) or httpx.Response(200, content=b"x"))
 
-        component.download_media_file(file_url=FILE_URL)
+        component.download_media_file(file_url=FILE_URL, file=tmp_path / "m.jpg")
 
-        called_endpoint = client.make_request.call_args[1]["endpoint"]
-        assert called_endpoint == FILE_URL
+        assert str(seen[0].url) == FILE_URL
+        assert "authorization" not in seen[0].headers
 
-    def test_download_media_file_retries_on_failure(self, component, client, tmp_path):
-        """download_media_file() reintenta en caso de fallo."""
-        mock_response = MagicMock()
-        mock_response.content = b"data"
-        client.make_request.side_effect = [Exception("timeout"), mock_response]
-        out = tmp_path / "media.jpg"
-        client._select_file.return_value = out
+    def test_retries_on_network_error(self, tmp_path):
+        """Un fallo de red se reintenta."""
+        calls = []
 
-        result = component.download_media_file(
-            file_url=FILE_URL, file=out, retry_attempts=2
-        )
+        def handler(request):
+            calls.append(1)
+            if len(calls) == 1:
+                raise httpx.ConnectError("boom")
+            return httpx.Response(200, content=b"data")
 
-        assert client.make_request.call_count == 2
-        assert result == out
+        component, _ = self._component(handler)
+        out = tmp_path / "m.jpg"
+
+        assert component.download_media_file(FILE_URL, out, retry_attempts=2, retry_min_wait=0, retry_max_wait=0) == out
+        assert len(calls) == 2
+
+    def test_retries_on_503(self, tmp_path):
+        """502/503/504 se reintentan."""
+        answers = [httpx.Response(503), httpx.Response(200, content=b"ok")]
+        component, _ = self._component(lambda r: answers.pop(0))
+        out = tmp_path / "m.jpg"
+
+        component.download_media_file(FILE_URL, out, retry_attempts=2, retry_min_wait=0, retry_max_wait=0)
+
+        assert out.read_bytes() == b"ok"
+
+    def test_does_not_retry_a_404(self, tmp_path):
+        """Un 404 es NotFoundError y no se reintenta."""
+        calls = []
+        component, _ = self._component(lambda r: calls.append(1) or httpx.Response(404))
+
+        with pytest.raises(err.NotFoundError):
+            component.download_media_file(FILE_URL, tmp_path / "m.jpg", retry_attempts=3, retry_min_wait=0, retry_max_wait=0)
+
+        assert len(calls) == 1
+        assert not (tmp_path / "m.jpg").exists()
+
+    def test_a_cut_download_leaves_no_file(self, tmp_path):
+        """Si el cuerpo se corta, no queda ni el fichero final ni el .part."""
+
+        class Cut(httpx.SyncByteStream):
+            def __iter__(self):
+                yield b"half"
+                raise httpx.ReadError("cut")
+
+        component, _ = self._component(lambda r: httpx.Response(200, stream=Cut()))
+        out = tmp_path / "m.jpg"
+
+        with pytest.raises(httpx.ReadError):
+            component.download_media_file(FILE_URL, out, retry_attempts=1)
+
+        assert not out.exists()
+        assert not list(tmp_path.glob("*.part"))
 
 
 # ── _download_media_files ─────────────────────────────────────────────────────

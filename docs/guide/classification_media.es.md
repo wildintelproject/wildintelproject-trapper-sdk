@@ -95,3 +95,9 @@ path = client.classification_media.download_media_file(
     file_url=row.filePath, file="media_4831.jpg",
 )
 ```
+
+Solo se envía la URL: ni el token de la API ni sesión, así que funciona con solo el token. El fichero se escribe
+por partes en un `.part` temporal que se mueve a su sitio cuando está completo, así que una descarga que falla
+nunca deja un fichero a medias. Los fallos de red y las respuestas `502`/`503`/`504` se reintentan con espera
+exponencial (`retry_attempts`, `retry_min_wait`, `retry_max_wait`); un `404` (fichero que no existe o token que
+ya no vale) es un `NotFoundError` y no se reintenta.
