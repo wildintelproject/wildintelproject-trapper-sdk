@@ -3222,17 +3222,17 @@ requires; the default <code>camtrapdp=True</code> does not), edit it and import 
 <tr>
 <td><code>classified</code>, <code>classified_ai</code></td>
 <td>boolean</td>
-<td>Has a classification by a user / by AI</td>
+<td>Has a classification by a user / by AI (on <strong>v2</strong> the results and media tables answer <code>500</code> to these two; the list works)</td>
 </tr>
 <tr>
 <td><code>approved</code></td>
 <td>boolean</td>
-<td>Approved. <strong>v2 only</strong>: v1 ignores it and calls the same filter <code>status</code></td>
+<td>Approved. It works on <strong>both</strong>: Trapper v1 ignores <code>approved</code> and calls the same filter <code>status</code>, so the SDK sends it as <code>status</code> there</td>
 </tr>
 <tr>
 <td><code>status</code></td>
 <td>boolean</td>
-<td>Approved, on <strong>v1 only</strong> (v2 ignores it)</td>
+<td>Approved, Trapper v1's own name for it (Trapper v2 ignores it, and the SDK warns)</td>
 </tr>
 <tr>
 <td><code>species</code></td>
@@ -3263,6 +3263,9 @@ the ones above, <code>user</code>, <code>feedback</code>, <code>confidence</code
 do nothing here (checked on v1 and v2: <code>user=1</code> and <code>ai_provider=1</code> return every row; they belong to the lists of
 user and AI classifications). A filter that leaves no row answers <code>200</code> with an empty list, but the results table
 and the media table answer <code>400 "Empty queryset..."</code>.</p>
+<p>The SDK emits an <code>UnknownFilterWarning</code> that names a parameter the server version does not apply (the request is
+still sent). Trapper also makes a filter of each custom attribute of the project's classificator, which the SDK
+cannot know: the warning says so, and <code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code> silences it.</p>
 </div>
 <h2 id="the-six-access-patterns">The six access patterns</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

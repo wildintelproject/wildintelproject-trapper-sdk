@@ -3225,17 +3225,17 @@ que la importación exige; el <code>camtrapdp=True</code> por defecto no lo llev
 <tr>
 <td><code>classified</code>, <code>classified_ai</code></td>
 <td>booleano</td>
-<td>Tiene una clasificación de un usuario / de la IA</td>
+<td>Tiene una clasificación de un usuario / de la IA (en <strong>v2</strong> la tabla de resultados y la de media contestan <code>500</code> a estos dos; la lista funciona)</td>
 </tr>
 <tr>
 <td><code>approved</code></td>
 <td>booleano</td>
-<td>Aprobada. <strong>Solo v2</strong>: v1 lo ignora y llama <code>status</code> al mismo filtro</td>
+<td>Aprobada. Funciona en <strong>las dos</strong>: Trapper v1 ignora <code>approved</code> y llama <code>status</code> al mismo filtro, así que el SDK lo envía como <code>status</code> allí</td>
 </tr>
 <tr>
 <td><code>status</code></td>
 <td>booleano</td>
-<td>Aprobada, <strong>solo en v1</strong> (v2 lo ignora)</td>
+<td>Aprobada, el nombre propio de Trapper v1 (Trapper v2 lo ignora, y el SDK avisa)</td>
 </tr>
 <tr>
 <td><code>species</code></td>
@@ -3266,6 +3266,9 @@ arriba, <code>user</code>, <code>feedback</code>, <code>confidence</code> y <cod
 nada aquí (comprobado en v1 y v2: <code>user=1</code> y <code>ai_provider=1</code> devuelven todas las filas; son de las listas de
 clasificaciones de usuario y de IA). Un filtro que no deja ninguna fila contesta <code>200</code> con una lista vacía, pero la
 tabla de resultados y la de media contestan <code>400 "Empty queryset..."</code>.</p>
+<p>El SDK emite un <code>UnknownFilterWarning</code> que nombra un parámetro que la versión del servidor no aplica (la petición se
+envía igualmente). Trapper también hace un filtro de cada atributo personalizado del clasificador del proyecto, que el
+SDK no puede conocer: el aviso lo dice, y <code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code> lo silencia.</p>
 </div>
 <h2 id="los-seis-patrones-de-acceso">Los seis patrones de acceso</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
