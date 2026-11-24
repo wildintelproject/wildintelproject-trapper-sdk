@@ -3029,9 +3029,11 @@ Anything else (<code>1</code>, <code>"yes"</code>, <code>None</code>) is a <code
 </code></pre></div>
 <p>Leave <code>private_human</code> as it is if you are going to share the rows or the files: by default the URL of a human
 carries no token, so the image cannot be downloaded with it.</p>
-<p>A project table with nothing to show (a filter that leaves no rows, or a project the account cannot see) is a
-<code>BadRequestError</code> ("Empty queryset or you have no permission...") and not an empty list; the two cases cannot be
-told apart.</p>
+<p>A project table with nothing to show (a filter that leaves no rows, or a project the account cannot see) is answered by
+Trapper with a <code>400</code> ("Empty queryset or you have no permission..."), not an empty list. The SDK reads it as <strong>an empty
+result</strong> in <code>get_*</code>, <code>where_*</code>, <code>export_*</code> and the downloads (<code>count</code> 0, nothing to iterate, <code>[]</code>, an empty file), as
+the classification list does. The <code>400</code> is also the answer to a missing permission, so a project that the account
+cannot see looks empty too; any other <code>400</code> (a wrong filter value) is still a <code>BadRequestError</code>.</p>
 <h2 id="filters">Filters</h2>
 <table>
 <thead>

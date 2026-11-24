@@ -3032,8 +3032,11 @@ antes de la petición. <em>Antes de esto (issue #85), <code>private_human=True</
 <p>Deja <code>private_human</code> como está si vas a compartir las filas o los ficheros: por defecto la URL de una persona no
 lleva token, así que su imagen no se puede descargar con ella.</p>
 <p>Una tabla de proyecto sin nada que mostrar (un filtro que no deja filas, o un proyecto que la cuenta no puede ver)
-es un <code>BadRequestError</code> («Empty queryset or you have no permission...») y no una lista vacía; los dos casos no se
-pueden distinguir.</p>
+la contesta Trapper con un <code>400</code> («Empty queryset or you have no permission...»), no con una lista vacía. El SDK lo lee
+como <strong>un resultado vacío</strong> en <code>get_*</code>, <code>where_*</code>, <code>export_*</code> y las descargas (<code>count</code> 0, nada que iterar, <code>[]</code>, un
+fichero vacío), como hace la lista de clasificaciones. El <code>400</code> es también la respuesta a un permiso que falta, así que
+un proyecto que la cuenta no puede ver parece vacío; cualquier otro <code>400</code> (un valor de filtro erróneo) sigue siendo un
+<code>BadRequestError</code>.</p>
 <h2 id="filtros">Filtros</h2>
 <table>
 <thead>

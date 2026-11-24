@@ -3262,7 +3262,8 @@ requires; the default <code>camtrapdp=True</code> does not), edit it and import 
 the ones above, <code>user</code>, <code>feedback</code>, <code>confidence</code> and <code>ai_provider</code>, which a previous version of this guide listed,
 do nothing here (checked on v1 and v2: <code>user=1</code> and <code>ai_provider=1</code> return every row; they belong to the lists of
 user and AI classifications). A filter that leaves no row answers <code>200</code> with an empty list, but the results table
-and the media table answer <code>400 "Empty queryset..."</code>.</p>
+and the media table answer <code>400 "Empty queryset..."</code>, which the SDK reads as an empty result (it is also the answer
+to a missing permission).</p>
 <p>The SDK emits an <code>UnknownFilterWarning</code> that names a parameter the server version does not apply (the request is
 still sent). Trapper also makes a filter of each custom attribute of the project's classificator, which the SDK
 cannot know: the warning says so, and <code>warnings.simplefilter("ignore", err.UnknownFilterWarning)</code> silences it.</p>
