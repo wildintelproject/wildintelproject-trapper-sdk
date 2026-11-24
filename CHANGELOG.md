@@ -127,6 +127,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- The classification media guide (issue #76) says what the component represents (the media table of a
+  classification project: its eleven columns, how it arrives, public and private files) and describes the
+  `private_*` parameters as they work: `True` hides the files of humans and vehicles, and Trapper reads only the
+  exact text `True`.
 - **`Resource.date_recorded` is a `datetime`** (issue #60), like the dates of a deployment: timezone-aware, `None` when
   empty, the original text when it cannot be read. Code that used it as a string has to format it. The reader moved to
   `schemas/base.py` (`read_datetime`) and both schemas use it.
