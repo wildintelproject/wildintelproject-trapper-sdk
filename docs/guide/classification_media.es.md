@@ -114,7 +114,7 @@ un proyecto que la cuenta no puede ver parece vacío; cualquier otro `400` (un v
 |---|---|---|
 | `owner` | booleano | `true` = recursos donde el usuario es propietario o gestor |
 | `deployment` | lista de PK | Filtra por PK de despliegue |
-| `collection` | lista de PK | Filtra por PK de colección |
+| `collection` | lista de PK | La pk del **vínculo entre el proyecto y la colección** (`ClassificationProjectCollection`), **no** la pk de la colección. Con `where_project_media(collection=3)`, 3 es un vínculo: en Trapper v1 devuelve las filas del vínculo 3, que puede ser otra colección, y ningún error. Para dar la pk de la colección usa [`where_collection_media()`](#medios-limitados-a-una-coleccion-dentro-del-proyecto), que la traduce. Los vínculos los lista `classification_projects.get_all_project_collections()` (`link.pk`, `link.collection_pk`) |
 | `locations_map` | PK separadas por comas | Filtra por PK de localización |
 | `rdate_from` / `rdate_to` | fecha | Rango de `date_recorded` |
 | `rtime_from` / `rtime_to` | HH:MM | Rango de hora del día sobre `date_recorded` |

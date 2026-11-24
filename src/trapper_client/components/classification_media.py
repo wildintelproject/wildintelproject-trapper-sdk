@@ -37,7 +37,7 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
     |--------------------------|----------------------|---------------------------------------------------------------------|
     | owner                    | boolean              | true = resources where the user is owner or manager                 |
     | deployment               | list of PKs          | Filter by deployment PKs                                            |
-    | collection               | list of PKs          | Filter by collection PKs                                            |
+    | collection               | list of PKs          | PK of the **link** between the project and the collection, not the collection's PK (see ``get_collection_media``)                                             |
     | locations_map            | comma-separated PKs  | Filter by location PKs                                              |
     | rdate_from / rdate_to    | date                 | date_recorded range                                                 |
     | rtime_from / rtime_to    | HH:MM                | Time-of-day range on date_recorded                                  |
