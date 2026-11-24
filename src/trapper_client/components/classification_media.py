@@ -11,11 +11,12 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from pydantic import BaseModel
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
+from trapper_client import err
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent
 from trapper_client.components.classification_projects import ClassificationProjectsComponent
+from trapper_client.retry_utils import retrying_for_download
 from trapper_client.schemas import Media, PaginatedResult
 
 
@@ -646,34 +647,51 @@ class ClassificationMediaComponent(TrapperComponent[Media]):
     ) -> Path:
         """Download one media file with retry support.
 
+        The file is streamed to disk into a temporary ``.part`` file that is moved to ``file`` when it is
+        complete, so a download that fails never leaves a half-written file there. Network failures and
+        ``502``/``503``/``504`` answers are retried with exponential backoff (tenacity); a ``404`` or any other
+        answer is not, since another attempt cannot fix it.
+
         Args:
             file_url: Absolute download URL for the file, as returned in a
                 media row's ``filePath`` field (see :meth:`_extract_file_url`).
                 Downloading via this URL — instead of guessing the storage
                 endpoint from a media id — is what makes this work for
                 private resources too, since it already carries the
-                resource's access token in the query string.
+                resource's access token in the query string. Nothing else is
+                sent: no API token and no session.
             file: Output file path. If ``None``, a temp file is created.
-            retry_attempts: Maximum number of download attempts.
+            retry_attempts: Attempts in total, the first one included (``1`` disables the retries).
             retry_min_wait: Minimum exponential backoff delay in seconds.
             retry_max_wait: Maximum exponential backoff delay in seconds.
 
         Returns:
             Path to the downloaded media file.
+
+        Raises:
+            err.NotFoundError: The file does not exist or the token is not valid (Trapper answers ``404``).
+            err.APIError: Any other failure.
         """
         output_path = self.client._select_file(file)
+        retrying = retrying_for_download(retry_attempts, retry_min_wait, retry_max_wait)
+        return retrying(self._download_once, file_url, output_path)
 
-        @retry(
-            reraise=True,
-            stop=stop_after_attempt(retry_attempts),
-            wait=wait_exponential(multiplier=1, min=retry_min_wait, max=retry_max_wait),
-            retry=retry_if_exception_type(Exception),
-        )
-        def _download_once() -> Path:
-            response = self.client.make_request(
-                endpoint=file_url, method="GET", raise_on_error=True
-            )
-            output_path.write_bytes(response.content)
-            return output_path
-
-        return _download_once()
+    def _download_once(self, file_url: str, target: Path) -> Path:
+        """One attempt at :meth:`download_media_file`: stream to ``<target>.part`` and move it into place."""
+        with self.client._client.stream("GET", file_url) as response:
+            status = response.status_code
+            if status != 200:
+                if status in (502, 503, 504):
+                    raise err.TransientDownloadError(f"the server answered {status}")
+                error = err.HTTP_ERRORS_MAP.get(status, err.APIError)
+                raise error(f"download of {file_url.split('?')[0]}: the server answered {status}")
+            part = target.with_name(target.name + ".part")
+            try:
+                with part.open("wb") as handle:
+                    for chunk in response.iter_bytes():
+                        handle.write(chunk)
+                part.replace(target)
+            except BaseException:
+                part.unlink(missing_ok=True)
+                raise
+        return target

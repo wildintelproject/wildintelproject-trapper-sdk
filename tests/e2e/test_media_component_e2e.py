@@ -318,17 +318,21 @@ class TestDownloadMediaE2E:
 
     @pytest.mark.e2e
     def test_download_media_file_downloads_content(self, component, tmp_path):
-        """download_media_file() descarga el fichero y devuelve Path."""
-        media_id = _media_id()
-        if not media_id:
-            pytest.skip("Set WILDINTEL_MEDIA_ID to run this test")
+        """download_media_file() descarga el fichero de la URL de una fila y devuelve Path."""
+        pk = _project_pk()
+        if not pk:
+            pytest.skip("Set WILDINTEL_CLASSIFICATION_PROJECT_PK to run this test")
+
+        rows = component._media_rows(component.get_project_media(int(pk), page_size=5).results)
+        if not rows:
+            pytest.skip("The classification project has no downloadable media")
 
         out = tmp_path / "media.jpg"
-        result = component.download_media_file(media_id=int(media_id), file=out)
+        result = component.download_media_file(file_url=rows[0][1], file=out)
 
         assert isinstance(result, Path)
-        assert out.exists()
         assert out.stat().st_size > 0
+        assert not list(tmp_path.glob("*.part"))
 
     @pytest.mark.e2e
     def test_download_project_media_files_returns_list(self, component, tmp_path):

@@ -148,6 +148,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `classification_media.download_media_file()` (issue #73) read the whole file into memory, retried on any exception
+  (a `404` included) and left a half-written file under its final name if the download was cut. It streams to a
+  `.part` file that is moved into place when complete, retries only network errors and `502`/`503`/`504`, and sends
+  nothing but the URL (no API token). Its signature is the same.
 - `DeploymentExport` left `session`, `array`, `tags` and `bait_type` always empty (issue #43): Trapper has no
   column for them, it puts them in `deploymentGroups` and `deploymentTags` (with `baitType:<value>` among the
   tags). They are read from there now, and `camera_depth` is a field.
