@@ -1048,6 +1048,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Descargar los ficheros">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-devuelven-las-descargas-de-un-proyecto-o-de-una-coleccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué devuelven las descargas de un proyecto o de una colección
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -2880,6 +2897,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Descargar los ficheros">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-devuelven-las-descargas-de-un-proyecto-o-de-una-coleccion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué devuelven las descargas de un proyecto o de una colección
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -3216,6 +3250,21 @@ por partes en un <code>.part</code> temporal que se mueve a su sitio cuando est�
 nunca deja un fichero a medias. Los fallos de red y las respuestas <code>502</code>/<code>503</code>/<code>504</code> se reintentan con espera
 exponencial (<code>retry_attempts</code>, <code>retry_min_wait</code>, <code>retry_max_wait</code>); un <code>404</code> (fichero que no existe o token que
 ya no vale) es un <code>NotFoundError</code> y no se reintenta.</p>
+<h3 id="que-devuelven-las-descargas-de-un-proyecto-o-de-una-coleccion">Qué devuelven las descargas de un proyecto o de una colección</h3>
+<p><code>download_project_media_files()</code> y <code>download_collection_media_files()</code> devuelven la <strong>lista de rutas que se
+descargaron</strong> (un <code>DownloadedFiles</code>, que es una <code>list</code>) y llevan lo que pasó con el resto:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">files</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">download_project_media_files</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s2">&quot;media/&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span> <span class="s2">&quot;descargados&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">failed</span><span class="p">)</span>        <span class="c1"># {7: &#39;download of http://.../media/7/file/: the server answered 404&#39;, ...}</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">ok</span><span class="p">)</span>            <span class="c1"># False si algo falló</span>
+</code></pre></div>
+<ul>
+<li>Un fichero que falla (tras sus reintentos) está en <code>.failed</code> (<code>{id de media: mensaje}</code>) y se registra en el log; los demás
+  siguen. Con <code>on_error="raise"</code> el primer fallo lo detiene. Antes un fallo desaparecía: con el <code>private_human</code> por
+  defecto los ficheros de personas (una fila sin token) se quedaban fuera y nada lo decía.</li>
+<li><code>skip_existing=True</code> deja un fichero que ya está en la carpeta, así que una ejecución interrumpida se repite con la
+  misma llamada; esos están en <code>.skipped</code>. Los ficheros se llaman <code>media_&lt;id&gt;</code>, sin extensión.</li>
+</ul>
 
 
 

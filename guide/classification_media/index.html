@@ -1046,6 +1046,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Downloading the actual files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-downloads-of-a-project-or-a-collection-return" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the downloads of a project or a collection return
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -2878,6 +2895,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Downloading the actual files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-the-downloads-of-a-project-or-a-collection-return" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the downloads of a project or a collection return
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -3213,6 +3247,21 @@ streamed to a temporary <code>.part</code> file that is moved into place when co
 a half-written file. Network failures and <code>502</code>/<code>503</code>/<code>504</code> answers are retried with exponential backoff
 (<code>retry_attempts</code>, <code>retry_min_wait</code>, <code>retry_max_wait</code>); a <code>404</code> (a missing file or a token that is no longer
 valid) is a <code>NotFoundError</code> and is not retried.</p>
+<h3 id="what-the-downloads-of-a-project-or-a-collection-return">What the downloads of a project or a collection return</h3>
+<p><code>download_project_media_files()</code> and <code>download_collection_media_files()</code> return the <strong>list of the paths that were
+downloaded</strong> (a <code>DownloadedFiles</code>, which is a <code>list</code>) and carry what happened to the rest:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">files</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">download_project_media_files</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s2">&quot;media/&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span> <span class="s2">&quot;downloaded&quot;</span><span class="p">)</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">failed</span><span class="p">)</span>        <span class="c1"># {7: &#39;download of http://.../media/7/file/: the server answered 404&#39;, ...}</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">files</span><span class="o">.</span><span class="n">ok</span><span class="p">)</span>            <span class="c1"># False when something failed</span>
+</code></pre></div>
+<ul>
+<li>A file that fails (after its retries) is in <code>.failed</code> (<code>{media id: message}</code>) and is logged; the rest go on. With
+  <code>on_error="raise"</code> the first failure stops it. Before, a failure disappeared: with the default <code>private_human</code> the
+  files of the humans (a row with no token) were left out and nothing said so.</li>
+<li><code>skip_existing=True</code> leaves a file that is already in the folder, so an interrupted run is repeated with the same call;
+  those are in <code>.skipped</code>. Files are named <code>media_&lt;id&gt;</code>, with no extension.</li>
+</ul>
 
 
 
