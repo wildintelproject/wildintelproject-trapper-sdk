@@ -40,6 +40,24 @@ How it arrives: the server sends the whole table as one gzip CSV and **ignores p
 effect, and `page=2` returns the same rows as `page=1`, with `pages=1`. `where_project_media()` and `get_all`
 are fine with that; do not rely on `page` to walk it.
 
+!!! note "What is in each image is not here"
+    The table describes the **resources of the classification project** and their files, not what they show. There is
+    no animal, vehicle, species, count, sex or bounding box in a row: that is in the project's classification
+    results ([`client.classification_results`](classifications.md)). A resource that is in no classification project
+    has no row here either. To have both, join them by `mediaID`:
+
+    ```python
+    seen = {}
+    for obs in client.classification_results.where_project_results(7):
+        seen.setdefault(obs.mediaID, []).append(obs.observationType)
+
+    for row in client.classification_media.where_project_media(7):
+        print(row.fileName, seen.get(row.mediaID))      # don01-2024a_0004 ['animal']
+    ```
+
+    The [filters](#filters) do look at the classification (`species`, `observation_type`, ...), so you can ask for
+    the images with a lynx, but the row you get back does not say it is a lynx.
+
 ### Public and private files
 
 `filePath` is always there, but only a **public** file has `?rt=<token>` in it, and only that URL can be

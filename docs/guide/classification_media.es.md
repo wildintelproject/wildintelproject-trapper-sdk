@@ -40,6 +40,24 @@ Cómo llega: el servidor manda la tabla entera en un único CSV gzip e **ignora 
 tiene efecto, y `page=2` devuelve las mismas filas que `page=1`, con `pages=1`. `where_project_media()` y
 `get_all` lo manejan bien; no te apoyes en `page` para recorrerla.
 
+!!! note "Lo que hay en cada imagen no está aquí"
+    La tabla describe los **resources del proyecto de clasificación** y sus ficheros, no lo que muestran. En una fila
+    no hay animal, vehículo, especie, número, sexo ni caja: eso está en los resultados de clasificación del proyecto
+    ([`client.classification_results`](classifications.md)). Un resource que no está en ningún proyecto de
+    clasificación tampoco tiene fila aquí. Para tener las dos cosas, únelas por `mediaID`:
+
+    ```python
+    vistos = {}
+    for obs in client.classification_results.where_project_results(7):
+        vistos.setdefault(obs.mediaID, []).append(obs.observationType)
+
+    for row in client.classification_media.where_project_media(7):
+        print(row.fileName, vistos.get(row.mediaID))    # don01-2024a_0004 ['animal']
+    ```
+
+    Los [filtros](#filtros) sí miran la clasificación (`species`, `observation_type`, ...), así que puedes pedir las
+    imágenes con un lince, pero la fila que recibes no dice que es un lince.
+
 ### Ficheros públicos y privados
 
 `filePath` siempre está, pero solo un fichero **público** lleva `?rt=<token>`, y solo esa URL se puede descargar
