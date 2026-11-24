@@ -127,6 +127,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- The classifications guide (issue #83) says that a classification is a set of observations, how several things in one image
+  are handled (several observations sharing the `_id`), that `observationID` is only a row number, how boxes are stored in
+  v1 (a list) and v2 (one box), and what happens when several users classify one image (checked with three users).
 - The classifications guide (issue #81) says what `classification_results` represents (the final classification of each
   resource and its three views: list, results table and import), corrects the filter table (`user`, `feedback`,
   `confidence` and `ai_provider` are ignored; `approved` is v2 only and v1 uses `status`; `deployment` and `collection`
