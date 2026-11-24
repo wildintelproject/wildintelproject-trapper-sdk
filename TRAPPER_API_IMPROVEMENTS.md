@@ -64,6 +64,7 @@ the SDK does in the meantime.
 | 49 | Let the media table be read in pages | media_classification |
 | 50 | Say in the media table what each image shows, and fill `exifData` | media_classification |
 | 51 | Filter by the collection's own pk, not by its link to the classification project | media_classification |
+| 52 | Make `private_species` of the media table work | media_classification |
 
 ---
 
@@ -986,6 +987,23 @@ the message of the `400`.
 **Workaround in the SDK.** `where_collection_media()` and `get_collection_media()` translate the collection's pk into
 its link; `where_project_media(collection=...)` and `where_project_results(collection=...)` take the link's pk as they
 are given.
+
+## 52. Make `private_species` of the media table work
+
+**Labels:** bug, api
+
+**Problem.** `private_species` is meant to hide the files of some species, like `private_human` and `private_vehicle`,
+and the view reads it with `query_params.getlist("private_species", [])`. But `GET media_classification/api/media/<project_pk>/`
+answers **`500`** for any value (checked on v1 and v2, project 2: `?private_species=1`, `=1&private_species=2`, `=999999`
+and an empty `?private_species=`), while the same request without it answers the table. The cause was not found: the
+values arrive as text and are compared with the `speciesID` column of the table (`is_in(private_species)`), which could
+be the mismatch *(a guess, not checked)*. A caller has no way to hide a species.
+
+**Proposal.** Convert the values to the type of the column, reject a value that is not a species pk with a `400`, and
+answer the table.
+
+**Workaround in the SDK.** The guide says not to use it. To hide a species, filter the rows on the client with the
+results table (the observation type and the species of each `mediaID`) and leave those files out of the download.
 
 ---
 

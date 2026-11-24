@@ -66,13 +66,38 @@ downloaded with no session. By default Trapper hides the images of **humans** an
 
 - `private_human` and `private_vehicle` (default **hide**): `True` hides the files whose observation is a
   human, or a vehicle; `False` shows them with their token.
-- `private_species`: the species (primary keys) to hide.
+- `private_species`: meant to hide the files of some species (primary keys), but Trapper answers **`500`** with any
+  value, an empty one included (checked on v1 and v2). Do not use it.
 - `trapper_url_token`: `False` leaves the token out of every URL, so all the rows are private.
 
 !!! warning "Trapper reads only the exact text `True`"
     Anything else, `true` included, is `False` for the server. The SDK sends a Python `True` as `true`, so
     `private_human=True` **shows** the humans, the opposite of what it says, while the default hides them. Give
     the text: `private_human="True"` or `private_human="False"` (issue to follow).
+
+For example, with a project that has two images of humans (checked on Trapper v2, 28 rows):
+
+```python
+cm = client.classification_media
+
+# The default: humans and vehicles are private. 26 of the 28 rows are public.
+rows = list(cm.where_project_media(7))
+print(sum(r.filePublic for r in rows))                       # 26
+print([r.fileName for r in rows if not r.filePublic])        # the two private ones: their URL has no token
+
+# Treat humans and vehicles as public: every URL carries the token (the text "False", not the boolean)
+rows = list(cm.where_project_media(7, private_human="False", private_vehicle="False"))
+print(sum(r.filePublic for r in rows))                       # 28
+
+# Humans stay private, vehicles do not
+rows = list(cm.where_project_media(7, private_human="True", private_vehicle="False"))
+
+# The same parameters go to the downloads: with the default, the private files are not downloaded
+cm.download_project_media_files(7, "out/", private_human="False", private_vehicle="False")
+```
+
+Leave `private_human` as it is if you are going to share the rows or the files: by default the URL of a human
+carries no token, so the image cannot be downloaded with it.
 
 A project table with nothing to show (a filter that leaves no rows, or a project the account cannot see) is a
 `BadRequestError` ("Empty queryset or you have no permission...") and not an empty list; the two cases cannot be
@@ -106,7 +131,7 @@ told apart.
 | `trapper_url_token` | bool | `True` | `False` leaves the token out of every URL (all the files are then private) |
 | `private_human` | bool | `True` | `True` hides the files of humans (see [Public and private files](#public-and-private-files)) |
 | `private_vehicle` | bool | `True` | `True` hides the files of vehicles |
-| `private_species` | list of PKs | `[]` | Species whose files are hidden |
+| `private_species` | list of PKs | `[]` | Meant to hide the files of those species; answers `500` with any value |
 
 ## Media for a whole project
 
