@@ -3,7 +3,36 @@
 !!! info "Trapper compatibility"
     **v1** ✔ · **v2** ✔ — except `import_classifications(overwrite_attrs=True)`, which is **v1 only**. See [Trapper versions](versions.md).
 
-`client.classification_results` — final (approved) classification observations.
+`client.classification_results` — the **final classifications** of a classification project.
+
+## What it represents
+
+In a classification project every resource has one **final classification**: the record that holds the result for
+that resource (what it shows), taken from the classification someone made or imported and then approved (from
+Trapper's source). `approved` says whether that has happened; the resources nobody has classified have a final
+classification too, with the observation type `unclassified`. This component reads those records in three ways, each
+with its own shape (checked on Trapper v1 and v2):
+
+| | List (`where()`, `find()`) | Results table (`where_project_results()`, `export_project_results()`) | Import |
+|---|---|---|---|
+| One row per | **resource** | **observation** (a resource with two species has two rows) | the `_id` of a final classification |
+| Species | text (`"European Rabbit (Oryctolagus cuniculus)"`), no pk | `scientificName` | `scientificName` |
+| `sex`, `lifeStage`, `behavior`, `bboxes` | **not there** | yes | yes |
+| Identifier | `pk`, the primary key of the classification | `_id` (only with `camtrapdp=False`) | `_id` |
+| Needs a project | for `deployment` and `collection` | yes, in the URL | yes |
+
+So **to know what each image shows, use the results table**; the list tells you which resources are classified and
+approved, and nothing more. Its `dynamic_attrs` carry only `observation_type`, `species` and `count`.
+
+!!! note "Not to be confused with the media table"
+    [`client.classification_media`](classification_media.md) is the table of the project's *files*; this is *what
+    they show*. Join them by `mediaID`: there is an example there.
+
+!!! note "Reading, then editing"
+    The API cannot create, edit or approve a classification: the list is read-only (`Allow: GET, HEAD, OPTIONS`
+    on v1 and v2) and the only write is the [import](#importing-observations-from-a-csv). To correct classifications
+    by script: export the results table with **`camtrapdp=False`** (the format that carries `_id`, which the import
+    requires; the default `camtrapdp=True` does not), edit it and import it.
 
 **Endpoints:**
 
@@ -15,24 +44,29 @@
 
 | Parameter | Type | Description |
 |---|---|---|
-| `project` | PK | Auto-filtered by URL when using the project-scoped export methods below — not needed there |
+| `project` | PK | The project of the list. **Required for `deployment` and `collection`**: Trapper checks them against the project's own and, without it, answers `400 "Select a valid choice"`. The project-scoped methods below take it from the URL |
 | `owner` | boolean | `true` = resources where user is owner/manager |
-| `deployment` | list of PKs | Filter by deployment PKs |
-| `collection` | list of PKs | Filter by collection PKs |
+| `deployment` | list of PKs | Deployment PKs (needs `project`) |
+| `collection` | list of PKs | The pk of the **link between the project and the collection**, not the collection's pk (needs `project`; see entry 51 of `TRAPPER_API_IMPROVEMENTS.md`) |
 | `locations_map` | comma-separated PKs | Filter by location PKs |
 | `rdate_from` / `rdate_to` | date | `date_recorded` range |
 | `rtime_from` / `rtime_to` | HH:MM | Time-of-day range |
 | `ftype` | choice | Resource type (IMAGE, VIDEO, ...) |
 | `bboxes` | boolean | Has bounding boxes |
-| `user` | list of PKs | Filter by owner user PKs |
-| `approved` | boolean | Has a FINAL approved classification |
-| `feedback` | boolean | Is a feedback classification |
+| `classified`, `classified_ai` | boolean | Has a classification by a user / by AI |
+| `approved` | boolean | Approved. **v2 only**: v1 ignores it and calls the same filter `status` |
+| `status` | boolean | Approved, on **v1 only** (v2 ignores it) |
 | `species` | list of PKs | Filter by species PKs |
 | `observation_type` | choice | Filter by observation type |
 | `sex` | choice | Filter by sex |
 | `age` | choice | Filter by age |
-| `confidence` | number | `dynamic_attrs.classification_confidence >= value` |
-| `ai_provider` | list of PKs | Filter by AI provider PKs |
+
+!!! warning "Filters that this endpoint ignores"
+    Trapper ignores a parameter it does not know **without an error**, and the list comes back unfiltered. Besides
+    the ones above, `user`, `feedback`, `confidence` and `ai_provider`, which a previous version of this guide listed,
+    do nothing here (checked on v1 and v2: `user=1` and `ai_provider=1` return every row; they belong to the lists of
+    user and AI classifications). A filter that leaves no row answers `200` with an empty list, but the results table
+    and the media table answer `400 "Empty queryset..."`.
 
 ## The six access patterns
 
