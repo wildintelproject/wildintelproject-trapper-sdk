@@ -12,6 +12,72 @@
     `all()`/`find()` inherited from every component wouldn't work here — use the `_project_media`/
     `_collection_media` methods below instead, all of which resolve the URL for you.
 
+## What it represents
+
+A **classification project** takes collections of resources and records what is in each one (its
+*classification*). `client.classification_media` is the **media table of that project**: one row per resource of
+the project, in the shape of the Camtrap DP *media* file (Trapper builds it from the project's final
+classification of each resource, from its source). It is **not** a list of every resource in Trapper: a resource
+that is in no classification project has no row here, and so no download URL with a token. For those, see
+[Downloading the file](resources.md#downloading-the-file) in the resources guide.
+
+Each row is a [`Media`](../api/schemas/classifications.md), the same eleven columns on Trapper v1 and v2:
+
+| Column | What it is |
+|---|---|
+| `mediaID` | The **primary key of the resource** (`Resource.pk`) |
+| `deploymentID` | The deployment's `deployment_id` text (`don01-2024a`), not its primary key |
+| `captureMethod` | How the deployment captures (`activityDetection` in Trapper's data) |
+| `timestamp` | `date_recorded`, with its UTC offset (`2024-03-19T13:30:31+0100`) |
+| `filePath` | The URL to download the file, with the resource's token when the file is public (see below) |
+| `filePublic` | `True` when `filePath` carries the token, `False` when it does not |
+| `fileName` | The resource's name, **without extension** (`don01-2024a_0004`) |
+| `fileMediatype` | Its MIME type (`image/jpeg`) |
+| `exifData` | Always empty: Trapper does not fill it (from its source) |
+| `favorite`, `mediaComments` | Flag and comments; empty in the data checked |
+
+How it arrives: the server sends the whole table as one gzip CSV and **ignores paging**. `page_size` has no
+effect, and `page=2` returns the same rows as `page=1`, with `pages=1`. `where_project_media()` and `get_all`
+are fine with that; do not rely on `page` to walk it.
+
+!!! note "What is in each image is not here"
+    The table describes the **resources of the classification project** and their files, not what they show. There is
+    no animal, vehicle, species, count, sex or bounding box in a row: that is in the project's classification
+    results ([`client.classification_results`](classifications.md)). A resource that is in no classification project
+    has no row here either. To have both, join them by `mediaID`:
+
+    ```python
+    seen = {}
+    for obs in client.classification_results.where_project_results(7):
+        seen.setdefault(obs.mediaID, []).append(obs.observationType)
+
+    for row in client.classification_media.where_project_media(7):
+        print(row.fileName, seen.get(row.mediaID))      # don01-2024a_0004 ['animal']
+    ```
+
+    The [filters](#filters) do look at the classification (`species`, `observation_type`, ...), so you can ask for
+    the images with a lynx, but the row you get back does not say it is a lynx.
+
+### Public and private files
+
+`filePath` is always there, but only a **public** file has `?rt=<token>` in it, and only that URL can be
+downloaded with no session. By default Trapper hides the images of **humans** and **vehicles**: their row has
+`filePublic` false and a URL without token, which answers `404`. The extra parameters decide it:
+
+- `private_human` and `private_vehicle` (default **hide**): `True` hides the files whose observation is a
+  human, or a vehicle; `False` shows them with their token.
+- `private_species`: the species (primary keys) to hide.
+- `trapper_url_token`: `False` leaves the token out of every URL, so all the rows are private.
+
+!!! warning "Trapper reads only the exact text `True`"
+    Anything else, `true` included, is `False` for the server. The SDK sends a Python `True` as `true`, so
+    `private_human=True` **shows** the humans, the opposite of what it says, while the default hides them. Give
+    the text: `private_human="True"` or `private_human="False"` (issue to follow).
+
+A project table with nothing to show (a filter that leaves no rows, or a project the account cannot see) is a
+`BadRequestError` ("Empty queryset or you have no permission...") and not an empty list; the two cases cannot be
+told apart.
+
 ## Filters
 
 | Parameter | Type | Description |
@@ -36,11 +102,11 @@
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `trapper_url` | bool | `True` | Include absolute Trapper URLs for each media |
-| `trapper_url_token` | bool | `True` | Include access tokens in URLs |
-| `private_human` | bool | `True` | Include human preview URL |
-| `private_vehicle` | bool | `True` | Include vehicle preview URL |
-| `private_species` | list | `[]` | List of species to hide |
+| `trapper_url` | bool | `True` | Read by Trapper but not used: the URL is always absolute (from its source) |
+| `trapper_url_token` | bool | `True` | `False` leaves the token out of every URL (all the files are then private) |
+| `private_human` | bool | `True` | `True` hides the files of humans (see [Public and private files](#public-and-private-files)) |
+| `private_vehicle` | bool | `True` | `True` hides the files of vehicles |
+| `private_species` | list of PKs | `[]` | Species whose files are hidden |
 
 ## Media for a whole project
 

@@ -12,6 +12,73 @@
     `all()`/`find()` genéricos, heredados de todos los componentes, no funcionaría aquí: usa los métodos
     `_project_media`/`_collection_media` de más abajo, que resuelven la URL por ti.
 
+## Qué representa
+
+Un **proyecto de clasificación** toma colecciones de resources y registra qué hay en cada uno (su
+*clasificación*). `client.classification_media` es la **tabla de media de ese proyecto**: una fila por resource del
+proyecto, con la forma del fichero *media* de Camtrap DP (Trapper la construye a partir de la clasificación final
+de cada resource, según su código). **No** es una lista de todos los resources de Trapper: un resource que no está
+en ningún proyecto de clasificación no tiene fila aquí, y por tanto tampoco URL de descarga con token. Para esos,
+véase [Descargar el fichero](resources.md#descargar-el-fichero) en la guía de resources.
+
+Cada fila es un [`Media`](../api/schemas/classifications.md), con las mismas once columnas en Trapper v1 y v2:
+
+| Columna | Qué es |
+|---|---|
+| `mediaID` | La **clave primaria del resource** (`Resource.pk`) |
+| `deploymentID` | El texto `deployment_id` del deployment (`don01-2024a`), no su clave primaria |
+| `captureMethod` | Cómo captura el deployment (`activityDetection` en los datos de Trapper) |
+| `timestamp` | `date_recorded`, con su desfase UTC (`2024-03-19T13:30:31+0100`) |
+| `filePath` | La URL para descargar el fichero, con el token del resource si el fichero es público (véase abajo) |
+| `filePublic` | `True` si `filePath` lleva el token, `False` si no |
+| `fileName` | El nombre del resource, **sin extensión** (`don01-2024a_0004`) |
+| `fileMediatype` | Su tipo MIME (`image/jpeg`) |
+| `exifData` | Siempre vacío: Trapper no lo rellena (según su código) |
+| `favorite`, `mediaComments` | Marca y comentarios; vacíos en los datos comprobados |
+
+Cómo llega: el servidor manda la tabla entera en un único CSV gzip e **ignora la paginación**. `page_size` no
+tiene efecto, y `page=2` devuelve las mismas filas que `page=1`, con `pages=1`. `where_project_media()` y
+`get_all` lo manejan bien; no te apoyes en `page` para recorrerla.
+
+!!! note "Lo que hay en cada imagen no está aquí"
+    La tabla describe los **resources del proyecto de clasificación** y sus ficheros, no lo que muestran. En una fila
+    no hay animal, vehículo, especie, número, sexo ni caja: eso está en los resultados de clasificación del proyecto
+    ([`client.classification_results`](classifications.md)). Un resource que no está en ningún proyecto de
+    clasificación tampoco tiene fila aquí. Para tener las dos cosas, únelas por `mediaID`:
+
+    ```python
+    vistos = {}
+    for obs in client.classification_results.where_project_results(7):
+        vistos.setdefault(obs.mediaID, []).append(obs.observationType)
+
+    for row in client.classification_media.where_project_media(7):
+        print(row.fileName, vistos.get(row.mediaID))    # don01-2024a_0004 ['animal']
+    ```
+
+    Los [filtros](#filtros) sí miran la clasificación (`species`, `observation_type`, ...), así que puedes pedir las
+    imágenes con un lince, pero la fila que recibes no dice que es un lince.
+
+### Ficheros públicos y privados
+
+`filePath` siempre está, pero solo un fichero **público** lleva `?rt=<token>`, y solo esa URL se puede descargar
+sin sesión. Por defecto Trapper oculta las imágenes de **personas** y de **vehículos**: su fila tiene `filePublic`
+a falso y una URL sin token, que contesta `404`. Los parámetros extra lo deciden:
+
+- `private_human` y `private_vehicle` (por defecto **ocultan**): `True` oculta los ficheros cuya observación es una
+  persona, o un vehículo; `False` los muestra con su token.
+- `private_species`: las especies (claves primarias) que se ocultan.
+- `trapper_url_token`: `False` deja el token fuera de todas las URLs, así que todas las filas son privadas.
+
+!!! warning "Trapper solo lee el texto exacto `True`"
+    Cualquier otra cosa, `true` incluido, es `False` para el servidor. El SDK envía un `True` de Python como
+    `true`, así que `private_human=True` **muestra** a las personas, lo contrario de lo que dice, mientras que el
+    valor por defecto las oculta. Pasa el texto: `private_human="True"` o `private_human="False"` (hay un issue
+    para arreglarlo).
+
+Una tabla de proyecto sin nada que mostrar (un filtro que no deja filas, o un proyecto que la cuenta no puede ver)
+es un `BadRequestError` («Empty queryset or you have no permission...») y no una lista vacía; los dos casos no se
+pueden distinguir.
+
 ## Filtros
 
 | Parámetro | Tipo | Descripción |
@@ -36,11 +103,11 @@
 
 | Parámetro | Tipo | Por defecto | Descripción |
 |---|---|---|---|
-| `trapper_url` | bool | `True` | Incluye URL absolutas de Trapper para cada medio |
-| `trapper_url_token` | bool | `True` | Incluye tokens de acceso en las URL |
-| `private_human` | bool | `True` | Incluye la URL de vista previa de humanos |
-| `private_vehicle` | bool | `True` | Incluye la URL de vista previa de vehículos |
-| `private_species` | list | `[]` | Lista de especies que se ocultan |
+| `trapper_url` | bool | `True` | Trapper lo lee pero no lo usa: la URL siempre es absoluta (según su código) |
+| `trapper_url_token` | bool | `True` | `False` deja el token fuera de todas las URL (todos los ficheros pasan a ser privados) |
+| `private_human` | bool | `True` | `True` oculta los ficheros de personas (véase [Ficheros públicos y privados](#ficheros-publicos-y-privados)) |
+| `private_vehicle` | bool | `True` | `True` oculta los ficheros de vehículos |
+| `private_species` | lista de PK | `[]` | Especies cuyos ficheros se ocultan |
 
 ## Medios de todo un proyecto
 
