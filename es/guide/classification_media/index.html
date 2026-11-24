@@ -3033,6 +3033,11 @@ forma parte de la API DRF y no respeta la cabecera <code>Authorization</code>.</
 <a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">file_url</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="n">filePath</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;media_4831.jpg&quot;</span><span class="p">,</span>
 <a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">)</span>
 </code></pre></div>
+<p>Solo se envía la URL: ni el token de la API ni sesión, así que funciona con solo el token. El fichero se escribe
+por partes en un <code>.part</code> temporal que se mueve a su sitio cuando está completo, así que una descarga que falla
+nunca deja un fichero a medias. Los fallos de red y las respuestas <code>502</code>/<code>503</code>/<code>504</code> se reintentan con espera
+exponencial (<code>retry_attempts</code>, <code>retry_min_wait</code>, <code>retry_max_wait</code>); un <code>404</code> (fichero que no existe o token que
+ya no vale) es un <code>NotFoundError</code> y no se reintenta.</p>
 
 
 

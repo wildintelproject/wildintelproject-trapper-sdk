@@ -3031,6 +3031,11 @@ isn't part of the DRF API and doesn't honor the <code>Authorization</code> heade
 <a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">file_url</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="n">filePath</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;media_4831.jpg&quot;</span><span class="p">,</span>
 <a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">)</span>
 </code></pre></div>
+<p>Nothing but the URL is sent: no API token and no session, so it works with a token alone. The file is
+streamed to a temporary <code>.part</code> file that is moved into place when complete, so a failed download never leaves
+a half-written file. Network failures and <code>502</code>/<code>503</code>/<code>504</code> answers are retried with exponential backoff
+(<code>retry_attempts</code>, <code>retry_min_wait</code>, <code>retry_max_wait</code>); a <code>404</code> (a missing file or a token that is no longer
+valid) is a <code>NotFoundError</code> and is not retried.</p>
 
 
 
