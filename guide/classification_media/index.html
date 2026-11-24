@@ -977,6 +977,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#what-it-represents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it represents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What it represents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#public-and-private-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public and private files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filters" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2781,6 +2809,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#what-it-represents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What it represents
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What it represents">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#public-and-private-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public and private files
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filters" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2857,6 +2913,102 @@
 <code>all()</code>/<code>find()</code> inherited from every component wouldn't work here — use the <code>_project_media</code>/
 <code>_collection_media</code> methods below instead, all of which resolve the URL for you.</p>
 </div>
+<h2 id="what-it-represents">What it represents</h2>
+<p>A <strong>classification project</strong> takes collections of resources and records what is in each one (its
+<em>classification</em>). <code>client.classification_media</code> is the <strong>media table of that project</strong>: one row per resource of
+the project, in the shape of the Camtrap DP <em>media</em> file (Trapper builds it from the project's final
+classification of each resource, from its source). It is <strong>not</strong> a list of every resource in Trapper: a resource
+that is in no classification project has no row here, and so no download URL with a token. For those, see
+<a href="../resources/#downloading-the-file">Downloading the file</a> in the resources guide.</p>
+<p>Each row is a <a href="../../api/schemas/classifications/"><code>Media</code></a>, the same eleven columns on Trapper v1 and v2:</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mediaID</code></td>
+<td>The <strong>primary key of the resource</strong> (<code>Resource.pk</code>)</td>
+</tr>
+<tr>
+<td><code>deploymentID</code></td>
+<td>The deployment's <code>deployment_id</code> text (<code>don01-2024a</code>), not its primary key</td>
+</tr>
+<tr>
+<td><code>captureMethod</code></td>
+<td>How the deployment captures (<code>activityDetection</code> in Trapper's data)</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td><code>date_recorded</code>, with its UTC offset (<code>2024-03-19T13:30:31+0100</code>)</td>
+</tr>
+<tr>
+<td><code>filePath</code></td>
+<td>The URL to download the file, with the resource's token when the file is public (see below)</td>
+</tr>
+<tr>
+<td><code>filePublic</code></td>
+<td><code>True</code> when <code>filePath</code> carries the token, <code>False</code> when it does not</td>
+</tr>
+<tr>
+<td><code>fileName</code></td>
+<td>The resource's name, <strong>without extension</strong> (<code>don01-2024a_0004</code>)</td>
+</tr>
+<tr>
+<td><code>fileMediatype</code></td>
+<td>Its MIME type (<code>image/jpeg</code>)</td>
+</tr>
+<tr>
+<td><code>exifData</code></td>
+<td>Always empty: Trapper does not fill it (from its source)</td>
+</tr>
+<tr>
+<td><code>favorite</code>, <code>mediaComments</code></td>
+<td>Flag and comments; empty in the data checked</td>
+</tr>
+</tbody>
+</table>
+<p>How it arrives: the server sends the whole table as one gzip CSV and <strong>ignores paging</strong>. <code>page_size</code> has no
+effect, and <code>page=2</code> returns the same rows as <code>page=1</code>, with <code>pages=1</code>. <code>where_project_media()</code> and <code>get_all</code>
+are fine with that; do not rely on <code>page</code> to walk it.</p>
+<div class="admonition note">
+<p class="admonition-title">What is in each image is not here</p>
+<p>The table describes the <strong>resources of the classification project</strong> and their files, not what they show. There is
+no animal, vehicle, species, count, sex or bounding box in a row: that is in the project's classification
+results (<a href="../classifications/"><code>client.classification_results</code></a>). A resource that is in no classification project
+has no row here either. To have both, join them by <code>mediaID</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">seen</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">where_project_results</span><span class="p">(</span><span class="mi">7</span><span class="p">):</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">seen</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">mediaID</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">observationType</span><span class="p">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">where_project_media</span><span class="p">(</span><span class="mi">7</span><span class="p">):</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">fileName</span><span class="p">,</span> <span class="n">seen</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">mediaID</span><span class="p">))</span>      <span class="c1"># don01-2024a_0004 [&#39;animal&#39;]</span>
+</code></pre></div>
+<p>The <a href="#filters">filters</a> do look at the classification (<code>species</code>, <code>observation_type</code>, ...), so you can ask for
+the images with a lynx, but the row you get back does not say it is a lynx.</p>
+</div>
+<h3 id="public-and-private-files">Public and private files</h3>
+<p><code>filePath</code> is always there, but only a <strong>public</strong> file has <code>?rt=&lt;token&gt;</code> in it, and only that URL can be
+downloaded with no session. By default Trapper hides the images of <strong>humans</strong> and <strong>vehicles</strong>: their row has
+<code>filePublic</code> false and a URL without token, which answers <code>404</code>. The extra parameters decide it:</p>
+<ul>
+<li><code>private_human</code> and <code>private_vehicle</code> (default <strong>hide</strong>): <code>True</code> hides the files whose observation is a
+  human, or a vehicle; <code>False</code> shows them with their token.</li>
+<li><code>private_species</code>: the species (primary keys) to hide.</li>
+<li><code>trapper_url_token</code>: <code>False</code> leaves the token out of every URL, so all the rows are private.</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Trapper reads only the exact text <code>True</code></p>
+<p>Anything else, <code>true</code> included, is <code>False</code> for the server. The SDK sends a Python <code>True</code> as <code>true</code>, so
+<code>private_human=True</code> <strong>shows</strong> the humans, the opposite of what it says, while the default hides them. Give
+the text: <code>private_human="True"</code> or <code>private_human="False"</code> (issue to follow).</p>
+</div>
+<p>A project table with nothing to show (a filter that leaves no rows, or a project the account cannot see) is a
+<code>BadRequestError</code> ("Empty queryset or you have no permission...") and not an empty list; the two cases cannot be
+told apart.</p>
 <h2 id="filters">Filters</h2>
 <table>
 <thead>
@@ -2959,77 +3111,77 @@
 <td><code>trapper_url</code></td>
 <td>bool</td>
 <td><code>True</code></td>
-<td>Include absolute Trapper URLs for each media</td>
+<td>Read by Trapper but not used: the URL is always absolute (from its source)</td>
 </tr>
 <tr>
 <td><code>trapper_url_token</code></td>
 <td>bool</td>
 <td><code>True</code></td>
-<td>Include access tokens in URLs</td>
+<td><code>False</code> leaves the token out of every URL (all the files are then private)</td>
 </tr>
 <tr>
 <td><code>private_human</code></td>
 <td>bool</td>
 <td><code>True</code></td>
-<td>Include human preview URL</td>
+<td><code>True</code> hides the files of humans (see <a href="#public-and-private-files">Public and private files</a>)</td>
 </tr>
 <tr>
 <td><code>private_vehicle</code></td>
 <td>bool</td>
 <td><code>True</code></td>
-<td>Include vehicle preview URL</td>
+<td><code>True</code> hides the files of vehicles</td>
 </tr>
 <tr>
 <td><code>private_species</code></td>
-<td>list</td>
+<td>list of PKs</td>
 <td><code>[]</code></td>
-<td>List of species to hide</td>
+<td>Species whose files are hidden</td>
 </tr>
 </tbody>
 </table>
 <h2 id="media-for-a-whole-project">Media for a whole project</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># One page</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">get_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Lazy iteration</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">where_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">deployment</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># CSV export</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">export_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;media.csv&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># Find one media row by its media/resource ID</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="n">row</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">get_project_media_by_id</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="mi">4831</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># One page</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">get_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Lazy iteration</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">where_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">deployment</span><span class="o">=</span><span class="mi">12</span><span class="p">):</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="c1"># CSV export</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">export_project_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;media.csv&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1"># Find one media row by its media/resource ID</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="n">row</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">get_project_media_by_id</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">media_id</span><span class="o">=</span><span class="mi">4831</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="media-scoped-to-a-collection-within-the-project">Media scoped to a collection within the project</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">get_collection_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">where_collection_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">export_collection_media</span><span class="p">(</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;collection_media.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">get_collection_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">where_collection_media</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">export_collection_media</span><span class="p">(</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;collection_media.csv&quot;</span><span class="p">,</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="p">)</span>
 </code></pre></div>
 <h2 id="downloading-the-actual-files">Downloading the actual files</h2>
 <p>Each media row's <code>filePath</code> is an absolute, ready-to-download URL (it already carries the
 resource's access token) — required for private resources, since the underlying file-serving view
 isn't part of the DRF API and doesn't honor the <code>Authorization</code> header.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Download every media file from a project</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">files</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">download_project_media_files</span><span class="p">(</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;media&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># Same, but scoped to a collection, in parallel, compressed into one ZIP</span>
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">files</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">download_collection_media_files</span><span class="p">(</span>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;collection_media&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">)</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="c1"># Download one file directly if you already have its URL</span>
-<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="n">path</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">download_media_file</span><span class="p">(</span>
-<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">file_url</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="n">filePath</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;media_4831.jpg&quot;</span><span class="p">,</span>
-<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Download every media file from a project</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">files</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">download_project_media_files</span><span class="p">(</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;media&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="c1"># Same, but scoped to a collection, in parallel, compressed into one ZIP</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">files</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">download_collection_media_files</span><span class="p">(</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">collection_pk</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s2">&quot;collection_media&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="p">)</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1"># Download one file directly if you already have its URL</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">path</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_media</span><span class="o">.</span><span class="n">download_media_file</span><span class="p">(</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>    <span class="n">file_url</span><span class="o">=</span><span class="n">row</span><span class="o">.</span><span class="n">filePath</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;media_4831.jpg&quot;</span><span class="p">,</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="p">)</span>
 </code></pre></div>
 <p>Nothing but the URL is sent: no API token and no session, so it works with a token alone. The file is
 streamed to a temporary <code>.part</code> file that is moved into place when complete, so a failed download never leaves
