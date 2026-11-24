@@ -68,6 +68,8 @@ the SDK does in the meantime.
 | 53 | Create, update and approve classifications through the API | media_classification |
 | 54 | Return in the classification list the fields the results table has | media_classification |
 | 55 | Document the format of the results table that can be imported, and what `observationID` is | media_classification |
+| 56 | Use one shape for `bboxes` in both versions, and do not fail the whole results table for one row | media_classification |
+| 57 | Do not fetch the Camtrap DP schema from the internet in every classification import | media_classification |
 
 ---
 
@@ -1054,8 +1056,10 @@ be imported again, and nothing in the API says that the other format is the one 
 identifiers and they are not explained: `_id` is the pk of the final classification (it equals the `pk` of the list row,
 checked: 5 and 5 on v1, 6 and 6 on v2), and `observationID` is **only the position of the row in the table that was
 asked** (in the source it is a counter from 1 that is reset after the rows are sorted; checked on v2: the same
-observation is 4 in the whole table and 1 with `sex=male`, while its `_id` stays 6). It is not a key, it changes with
-every filter, and the list does not have it. The table also ignores `page` and `page_size`, like the media table (#49):
+observation is 4 in the whole table and 1 with `sex=male`, while its `_id` stays 6; on v1 it is also 4 with `camtrapdp=False`
+and 28 with `camtrapdp=True`). It is not a key, it changes with every filter and format, and the list does not have it.
+`_id` is the classification's, not the observation's: **two observations of one image share it** (checked on v1 and v2: a
+rabbit and a lynx in one image are two rows with `_id` 6), so an observation has no identifier at all. The table also ignores `page` and `page_size`, like the media table (#49):
 `page_size=5` and `page=2` return the same 28 rows.
 
 **Proposal.** Say which format is the one to import (or give a single format that serves to read and to import), explain
@@ -1063,6 +1067,43 @@ the two identifiers (or do not put a row counter in a column called `observation
 
 **Workaround in the SDK.** `ClassificationResultRecordCamtrapDP` and `ClassificationResultRecordTrapper` are the two
 formats, and the guide says to use `camtrapdp=False` for the cycle of exporting, editing and importing.
+
+## 56. Use one shape for `bboxes` in both versions, and do not fail the whole results table for one row
+
+**Labels:** bug, api
+
+**Problem.** The boxes of an observation are stored differently: Trapper v1 keeps a **list of boxes**
+(`[[x, y, w, h], [x, y, w, h]]`), v2 **one box**, `[x, y, w, h]`, "for the first occurrence of given object" (the
+comment of its model). `GET classifications/results/<project_pk>/` reads each its own way, and a row with the other
+shape makes the default format (`camtrapdp=True`) answer **`500` for the whole project**: v2 with `[[x, y, w, h]]` (a
+polars `ComputeError: error deserializing JSON ... as numeric` in `_process_bboxes`) and v1 with `[x, y, w, h]`
+(checked on both, writing rows from a shell, which skips the forms; whether the web form, the import or the AI worker
+check the shape was not checked). The `camtrapdp=False` format passes the text as it is stored and keeps working.
+In the default format v1 gives **one row per box, each with `count` 1** (an observation of `count` 2 with two boxes is
+two rows), and v2 one row per observation: the same data, a different table.
+
+**Proposal.** One shape, documented, in both versions; reject a wrong one when it is saved; and give the row with a
+bad value as an error of its own instead of a `500` for every other row of the project.
+
+**Workaround in the SDK.** The guide has the table of boxes per version. `ClassificationResultRecordTrapper` reads the
+v1 list; a v2 box (`[x, y, w, h]`) is not read and the row falls back to the CamtrapDP class with `bboxes` as text *(a
+bug of the SDK, pending)*.
+
+## 57. Do not fetch the Camtrap DP schema from the internet in every classification import
+
+**Labels:** bug, api
+
+**Problem.** `POST classifications/import/` answers `200` ("You have successfully run a celery task. Classifications
+are being imported now.") and the task then downloads
+`https://raw.githubusercontent.com/tdwg/camtrap-dp/1.0.2/observations-table-schema.json` to validate the table. On a
+server that cannot reach GitHub the task ends in `FAILURE` (`ConnectionError ... Temporary failure in name resolution`,
+seen in the task result on v2) and nothing changed, and the API gave no sign of it (#9). Checked once, on v2; v1 was
+not checked.
+
+**Proposal.** Ship the schema with Trapper (or cache it), and answer the failure through the task state (#9).
+
+**Workaround in the SDK.** None: the import returns the message and the `task_id`, and the failure can only be seen in
+the task result, or because the classifications did not change.
 
 ---
 
