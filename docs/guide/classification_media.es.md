@@ -66,7 +66,8 @@ a falso y una URL sin token, que contesta `404`. Los parámetros extra lo decide
 
 - `private_human` y `private_vehicle` (por defecto **ocultan**): `True` oculta los ficheros cuya observación es una
   persona, o un vehículo; `False` los muestra con su token.
-- `private_species`: las especies (claves primarias) que se ocultan.
+- `private_species`: sirve para ocultar los ficheros de unas especies (claves primarias), pero Trapper contesta **`500`**
+  con cualquier valor, también con uno vacío (comprobado en v1 y v2). No lo uses.
 - `trapper_url_token`: `False` deja el token fuera de todas las URLs, así que todas las filas son privadas.
 
 !!! warning "Trapper solo lee el texto exacto `True`"
@@ -74,6 +75,30 @@ a falso y una URL sin token, que contesta `404`. Los parámetros extra lo decide
     `true`, así que `private_human=True` **muestra** a las personas, lo contrario de lo que dice, mientras que el
     valor por defecto las oculta. Pasa el texto: `private_human="True"` o `private_human="False"` (hay un issue
     para arreglarlo).
+
+Por ejemplo, con un proyecto que tiene dos imágenes de personas (comprobado en Trapper v2, 28 filas):
+
+```python
+cm = client.classification_media
+
+# Por defecto: personas y vehículos son privados. 26 de las 28 filas son públicas.
+rows = list(cm.where_project_media(7))
+print(sum(r.filePublic for r in rows))                       # 26
+print([r.fileName for r in rows if not r.filePublic])        # las dos privadas: su URL no lleva token
+
+# Tratar personas y vehículos como públicos: todas las URL llevan el token (el texto "False", no el booleano)
+rows = list(cm.where_project_media(7, private_human="False", private_vehicle="False"))
+print(sum(r.filePublic for r in rows))                       # 28
+
+# Las personas siguen siendo privadas, los vehículos no
+rows = list(cm.where_project_media(7, private_human="True", private_vehicle="False"))
+
+# Los mismos parámetros valen para las descargas: con el valor por defecto, los ficheros privados no se descargan
+cm.download_project_media_files(7, "out/", private_human="False", private_vehicle="False")
+```
+
+Deja `private_human` como está si vas a compartir las filas o los ficheros: por defecto la URL de una persona no
+lleva token, así que su imagen no se puede descargar con ella.
 
 Una tabla de proyecto sin nada que mostrar (un filtro que no deja filas, o un proyecto que la cuenta no puede ver)
 es un `BadRequestError` («Empty queryset or you have no permission...») y no una lista vacía; los dos casos no se
@@ -107,7 +132,7 @@ pueden distinguir.
 | `trapper_url_token` | bool | `True` | `False` deja el token fuera de todas las URL (todos los ficheros pasan a ser privados) |
 | `private_human` | bool | `True` | `True` oculta los ficheros de personas (véase [Ficheros públicos y privados](#ficheros-publicos-y-privados)) |
 | `private_vehicle` | bool | `True` | `True` oculta los ficheros de vehículos |
-| `private_species` | lista de PK | `[]` | Especies cuyos ficheros se ocultan |
+| `private_species` | lista de PK | `[]` | Sirve para ocultar los ficheros de esas especies; contesta `500` con cualquier valor |
 
 ## Medios de todo un proyecto
 
