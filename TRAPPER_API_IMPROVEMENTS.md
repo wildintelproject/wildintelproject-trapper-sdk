@@ -685,19 +685,32 @@ deployment or a collection to its resources. The deployment of one resource cann
 
 **Labels:** enhancement, api
 
-**Problem.** The API lists resources but the files are served by a web view, `storage/resource/media/<pk>/file/`
-(and `pfile`, `tfile`), which does not take the API token: with a token, or none, it answers `404`, and it answers
-`404` too when the account has no permission (the view raises `Http404` instead of `403`), so a missing file and a
-forbidden one look alike. With a web session it serves the file (checked on v2: the original JPEG). `url` is the
-preview, which does not exist if it was not generated (`404`), and `preview_url` and `thumbnail_url` fall back to a
-placeholder that is a static file. The only other way in is a per-resource token (`?rt=`) that the API does not
-give. Behind no proxy, a development v1 answers `200` with an empty body and an `X-Accel-Redirect` header.
+**Problem.** The resources API lists resources but does not serve their files. They come from a web view,
+`storage/resource/media/<pk>/file/` (and `pfile`, `tfile`), which does not take the API token: with a token, or with no
+login at all, it answers `404`, and it answers `404` too when the account has no permission (the view raises `Http404`
+instead of `403`), so a missing file and a forbidden one look alike. With a web session it serves the file (checked on
+v1 and v2: the original JPEG). `url` is the preview, which does not exist if it was not generated (`404`), and
+`preview_url` and `thumbnail_url` fall back to a placeholder that is a static file. Behind no proxy, a development v1
+answers `200` with an empty body and an `X-Accel-Redirect` header.
+
+There is a way in without a session, but it is not in the resources API. The view accepts the resource's own token as
+`?rt=<token>`, and **the media table of a classification project** (`GET media_classification/api/media/<project_pk>/`)
+gives it in the URL of every file: an anonymous `GET` of that URL answers `200` with the file (checked on v1 and v2).
+So the token exists and works, but:
+
+- it is only given for the resources of a classification project (the table lists the **final classifications** of the
+  project), and the resources API, which is where a caller starts, does not have it;
+- it is the resource's `token`, the same one in every table and valid until someone regenerates it with a web action
+  *(from the source)*: a link that is leaked keeps working, and the API has no way to revoke or expire it.
 
 **Proposal.** `GET storage/api/resources/<pk>/file` (and `/preview`, `/thumbnail`), with token authentication, `401`,
-`403` and `404` told apart, and the file in the body whatever serves it.
+`403` and `404` told apart, and the file in the body whatever serves it, for any resource and not only those of a
+classification project. Or, at least, give the download URL of a resource in the resources API.
 
-**Workaround in the SDK.** `resources.download()` logs in with a web session (`user_name`/`user_password`), streams
-the file to disk and retries network failures with tenacity.
+**Workaround in the SDK.** For the resources of a classification project,
+`classification_media.download_project_media_files()` uses those URLs: only a token, in parallel, with a ZIP if wanted.
+For any other, `resources.download()` logs in with a web session (`user_name`/`user_password`), streams the file to disk
+and retries network failures with tenacity.
 
 ## 37. Do not answer `deployment__isnull` with a `500`
 
@@ -758,32 +771,37 @@ list, plus the ones entry 35 asks for.
 
 **Labels:** enhancement, api
 
-**Problem.** The API lists resources but gives no way to get their files together: each one is a request to a web
-view that does not take the token (entry 36), so the files of a deployment, of a collection or of a filtered search
-take one request each, with a web session. Trapper v1 does have a way, only in its web page: marking resources in
-the list and choosing *Generate data package* (`POST storage/resource/data-package/`, with `resources_pks`,
-`package_name` and `metadata`). Checked on v1 with two resources: it answers `{"success": true, "msg": "...your data
-package is being generated now."}`, a celery task builds a ZIP, and the ZIP is served at
-`/accounts/data-package/<pk>/` with a web session (its files are `<pk>_<name>.<ext>`, plus a `00_METADATA.csv` with
-`metadata`, *from the source*). But:
+**Problem.** The files of several resources, those of a deployment, of a collection or of a filtered search, cannot be
+asked for together. Two ways exist and neither is an API for resources:
 
-- It takes a **list of primary keys**, not filters: the resources of a deployment, a collection or a date range have to
-  be listed first.
-- The whole package is **refused above `DATA_PACKAGE_MAX_SIZE`**, 10 MB by default (*from the source*): about two
-  hundred camera-trap photos.
-- The answer **does not say which package it is**: no id, no task id. The packages of an account are listed only on its
-  profile page *(from the source)*, so there is nothing to poll and nothing to download from a script.
-- It is a web page: no token, and **on v2 it does not exist** (`404`).
+- **The media table of a classification project** (`media_classification/api/media/<project_pk>/`, with the filters of
+  the classifications list: deployment, collection, dates, species, ...) gives a URL with the resource's token for each
+  file, which can be downloaded with no session (see entry 36). It works for **the resources of a classification
+  project only**, and a caller must fetch the table and then make one request per file.
+- **Trapper v1's web page** has *Generate data package* for the resources marked in the list
+  (`POST storage/resource/data-package/`, with `resources_pks`, `package_name` and `metadata`). Checked on v1 with two
+  resources: it answers `{"success": true, "msg": "...your data package is being generated now."}`, a celery task builds a
+  ZIP, and the ZIP is served at `/accounts/data-package/<pk>/` with a web session (its files are `<pk>_<name>.<ext>`,
+  plus a `00_METADATA.csv` with `metadata`, *from the source*). But it takes a **list of primary keys**, not filters; it
+  refuses the whole package above `DATA_PACKAGE_MAX_SIZE`, 10 MB by default (*from the source*: about two hundred
+  camera-trap photos); the answer **does not say which package it is** (no id, no task id) and the packages of an
+  account are listed only on its profile page *(from the source)*; it takes no token; and **on v2 it does not exist**
+  (`404`).
 
-**Proposal.** An API endpoint, in v1 and v2, that takes the filters of the resource list (`deployments`,
-`collections`, `rdate_from`, `tags`, ... or a list of pks), starts the packaging as a background task and answers with
-a task id; `GET .../tasks/<id>/` with its state (see #9), and a download link that takes the token once it is ready.
-No fixed small cap (or one the answer states), and a `404` that tells a missing file from a permission (entry 36).
+So for a resource that is in no classification project, or for a plain selection, the only way is one request per file
+with a web session.
 
-**Workaround in the SDK.** `deployments.download_resources()` and `collections.download_resources()` (and
-`resources.download_many()`) download the resources one by one with a web session, choosing them with the filters of
-the list or a `filter_fn`, skipping what is already on disk, and report what failed. It is sequential and slow for
-thousands of files; the SDK would use the server's own package when this exists.
+**Proposal.** An API endpoint, in v1 and v2, that takes the filters of the resource list (`deployments`, `collections`,
+`rdate_from`, `tags`, ... or a list of pks), starts the packaging as a background task and answers with a task id;
+`GET .../tasks/<id>/` with its state (see #9), and a download link that takes the token once it is ready. No fixed small
+cap (or one the answer states), and a `404` that tells a missing file from a permission (entry 36).
+
+**Workaround in the SDK.** For the resources of a classification project,
+`classification_media.download_project_media_files()` and `download_collection_media_files()`: only a token, in parallel
+(`parallel=True`), with a ZIP (`compress=True`), choosing with the filters of the media table. For any deployment or
+collection, `deployments.download_resources()` and `collections.download_resources()` (and `resources.download_many()`):
+one file at a time with a web session, choosing with the filters of the resource list or a `filter_fn`, skipping what
+is already on disk, and reporting what failed; sequential, so slow for thousands of files.
 
 ## 42. Create, update and delete collections, and add or remove their resources, through the API
 
