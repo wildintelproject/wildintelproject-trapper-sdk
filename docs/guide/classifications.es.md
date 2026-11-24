@@ -129,7 +129,8 @@ Con `camtrapdp=False` el SDK lee las dos formas en `row.bboxes`, una lista de `B
     arriba, `user`, `feedback`, `confidence` y `ai_provider`, que una versión anterior de esta guía listaba, no hacen
     nada aquí (comprobado en v1 y v2: `user=1` y `ai_provider=1` devuelven todas las filas; son de las listas de
     clasificaciones de usuario y de IA). Un filtro que no deja ninguna fila contesta `200` con una lista vacía, pero la
-    tabla de resultados y la de media contestan `400 "Empty queryset..."`.
+    tabla de resultados y la de media contestan `400 "Empty queryset..."`, que el SDK lee como un resultado vacío (es también
+    la respuesta a un permiso que falta).
 
     El SDK emite un `UnknownFilterWarning` que nombra un parámetro que la versión del servidor no aplica (la petición se
     envía igualmente). Trapper también hace un filtro de cada atributo personalizado del clasificador del proyecto, que el

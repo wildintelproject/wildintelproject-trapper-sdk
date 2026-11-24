@@ -53,6 +53,8 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
         schema: Optional Pydantic schema used to parse each page response.
         filter_fn: Optional client-side item predicate.
         page_size: Number of items requested per API page.
+        empty_if: Optional predicate on the error of a page request: when it is true the endpoint is taken to have
+            no rows (an endpoint that answers ``400`` for an empty result) and the iteration just ends.
     """
 
     def __init__(
@@ -63,7 +65,8 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
         schema: type[TModel] | None = None,
         filter_fn: Callable[[TModel | dict], bool] | None = None,
         page_size: int = 50,
-        validate: bool = True
+        validate: bool = True,
+        empty_if: Callable[[Exception], bool] | None = None,
     ):
         self.client = client
         self.endpoint = endpoint
@@ -78,6 +81,7 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
         self._last_index = 0
         self._exhausted = False
         self.validate = validate
+        self.empty_if = empty_if
 
     def __iter__(self) -> "APIQuery[TModel]":
         """Return the iterator itself.
@@ -119,7 +123,13 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
                         )
 
                 logger.debug(f"Loading page {page_query['page']} from {endpoint_resolved}")
-                response = self.client.get(endpoint_resolved, page_query, raise_on_error=True)
+                try:
+                    response = self.client.get(endpoint_resolved, page_query, raise_on_error=True)
+                except Exception as exc:
+                    if self.empty_if is not None and self.empty_if(exc):
+                        self._exhausted = True
+                        raise StopIteration from None
+                    raise
                 raw_results = response.get("results", [])
 
                 if self.schema:

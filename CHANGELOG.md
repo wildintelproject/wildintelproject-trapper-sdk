@@ -131,6 +131,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- An empty results table or media table (`400 "Empty queryset or you have no permission..."`) is an empty result in
+  `classification_results` and `classification_media` (issue #91): `get_*` has `count` 0, `where_*` iterates nothing,
+  `export_*` gives `[]` or an empty file and the downloads give `[]`, as the classification list does. It used to be a
+  `BadRequestError`. A missing permission is the same `400`, so it looks empty too; any other `400` is still an error.
 - `classification_results.get()`, `get_all()`, `where()` and `all()` raise a `ValueError` when `deployment` or `collection` is given
   without `project` (issue #89): Trapper answers `400 "Select a valid choice"`, which reads as if the deployment did not exist.
 - The classifications guide (issue #83) says that a classification is a set of observations, how several things in one image

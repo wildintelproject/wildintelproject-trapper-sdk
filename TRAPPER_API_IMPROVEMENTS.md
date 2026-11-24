@@ -938,8 +938,8 @@ missing permission look alike.
 
 **Proposal.** As in #31: `200` with the header row only, and `403` for a missing permission.
 
-**Workaround in the SDK.** The guide describes the `BadRequestError`. *(Not done yet: reading it as an empty list, which
-would hide a missing permission too.)*
+**Workaround in the SDK.** The results and media components read this `400` as an empty result (`get_*`, `where_*`,
+`export_*` and the downloads), which hides a missing permission too: the two cannot be told apart.
 
 ## 49. Let the media table be read in pages
 

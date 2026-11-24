@@ -265,6 +265,33 @@ class TrapperComponent(Generic[TModel]):
         """Hook: put the values of a query in the form the server reads (see ``ResourcesComponent``)."""
         return query
 
+    def _is_empty_result(self, exc: Exception) -> bool:
+        """Hook: is this error the way the endpoint says "no rows"? (some answer ``400`` instead of an empty list)."""
+        return False
+
+    @staticmethod
+    def _empty_page(page_size: int = 50) -> Dict[str, Any]:
+        """The answer of a list endpoint with no rows."""
+        return {"pagination": {"page": 1, "page_size": page_size, "pages": 1, "count": 0}, "results": []}
+
+    def _get_or_empty(self, endpoint: str, q: Dict[str, Any]) -> Dict[str, Any]:
+        """``client.get``, with an endpoint's way of saying "no rows" (``_is_empty_result``) as an empty page."""
+        try:
+            return self.client.get(endpoint, query=q)
+        except Exception as exc:
+            if self._is_empty_result(exc):
+                return self._empty_page(q.get("page_size", 50))
+            raise
+
+    def _get_all_or_empty(self, endpoint: str, q: Dict[str, Any]) -> Dict[str, Any]:
+        """``client.get_all``, with an endpoint's way of saying "no rows" as an empty result."""
+        try:
+            return self.client.get_all(endpoint, query=q)
+        except Exception as exc:
+            if self._is_empty_result(exc):
+                return self._empty_page(q.get("page_size", 50))
+            raise
+
     @staticmethod
     def _as_list(value: Any) -> list[Any] | None:
         """The items of a list-like or comma-separated value, ``[value]`` for a single one, ``None`` for ``None``."""
@@ -420,7 +447,7 @@ class TrapperComponent(Generic[TModel]):
         q.setdefault("page_size", page_size)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema
-        data = self.client.get(endpoint, query=q)
+        data = self._get_or_empty(endpoint, q)
         return self._to_paginated(data, validate=validate, schema=schema)
 
     def where(
@@ -454,7 +481,8 @@ class TrapperComponent(Generic[TModel]):
             filter_fn=filter_fn,
             page_size=page_size,
             schema=schema,
-            validate=validate
+            validate=validate,
+            empty_if=self._is_empty_result,
         )
 
     def all(
@@ -511,7 +539,7 @@ class TrapperComponent(Generic[TModel]):
         q.setdefault("page_size", page_size)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema
-        data = self.client.get_all(endpoint, query=q)
+        data = self._get_all_or_empty(endpoint, q)
         return self._to_paginated(data, validate=validate, schema=schema)
 
     def export(
@@ -558,11 +586,18 @@ class TrapperComponent(Generic[TModel]):
         endpoint = overwrite_endpoint or self.export_endpoint or self.endpoint
 
         if raw:
-            return self.client.export_all(endpoint, query=q, file=file)
+            try:
+                return self.client.export_all(endpoint, query=q, file=file)
+            except Exception as exc:
+                if not self._is_empty_result(exc):
+                    raise
+                output_path = self.client._select_file(file)
+                output_path.write_text("")
+                return output_path
         target_schema = overwrite_schema or self.export_schema or self.schema
 
 
-        raw_data = self.client.get_all(endpoint, query=q)
+        raw_data = self._get_all_or_empty(endpoint, q)
         rows_raw = raw_data.get("results", [])
         items = [self._to_model(row, validate=validate, schema=target_schema) for row in rows_raw]
 

@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
+from trapper_client import err
+
 #: Filters that both Trapper versions apply (checked on v1 and v2, and on the three endpoints).
 _COMMON = frozenset({
     "project", "owner", "deployment", "collection", "locations_map",
@@ -45,3 +47,10 @@ class ClassificationFiltersMixin:
             query = dict(query)
             query.setdefault("status", query.pop("approved"))
         return query
+
+    def _is_empty_result(self, exc: Exception) -> bool:
+        """The results table and the media table answer ``400 "Empty queryset ..."`` when no row matches.
+
+        The same ``400`` is the answer to a missing permission, so the two cannot be told apart.
+        """
+        return isinstance(exc, err.BadRequestError) and "Empty queryset" in str(exc)

@@ -128,7 +128,8 @@ With `camtrapdp=False` the SDK reads both shapes into `row.bboxes`, a list of `B
     the ones above, `user`, `feedback`, `confidence` and `ai_provider`, which a previous version of this guide listed,
     do nothing here (checked on v1 and v2: `user=1` and `ai_provider=1` return every row; they belong to the lists of
     user and AI classifications). A filter that leaves no row answers `200` with an empty list, but the results table
-    and the media table answer `400 "Empty queryset..."`.
+    and the media table answer `400 "Empty queryset..."`, which the SDK reads as an empty result (it is also the answer
+    to a missing permission).
 
     The SDK emits an `UnknownFilterWarning` that names a parameter the server version does not apply (the request is
     still sent). Trapper also makes a filter of each custom attribute of the project's classificator, which the SDK
