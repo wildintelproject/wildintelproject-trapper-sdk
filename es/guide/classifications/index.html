@@ -923,6 +923,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#que-representa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué representa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Qué representa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-es-cada-cosa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué es cada cosa
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filtros" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2811,6 +2839,34 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#que-representa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué representa
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Qué representa">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#que-es-cada-cosa" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué es cada cosa
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#filtros" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2907,7 +2963,104 @@
 <p class="admonition-title">Compatibilidad con Trapper</p>
 <p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — salvo <code>import_classifications(overwrite_attrs=True)</code>, que es <strong>solo v1</strong>. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
 </div>
-<p><code>client.classification_results</code> — observaciones de clasificación finales (aprobadas).</p>
+<p><code>client.classification_results</code> — las <strong>clasificaciones finales</strong> de un proyecto de clasificación.</p>
+<h2 id="que-representa">Qué representa</h2>
+<p>En un proyecto de clasificación cada resource tiene una <strong>clasificación final</strong>: el registro que guarda el resultado de
+ese resource (qué muestra), tomado de la clasificación que alguien hizo o importó y que después se aprobó (según el
+código de Trapper). <code>approved</code> dice si eso ha ocurrido; los resources que nadie ha clasificado tienen también una
+clasificación final, con el tipo de observación <code>unclassified</code>. Este componente lee esos registros de tres formas,
+cada una con su propia forma (comprobado en Trapper v1 y v2):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Lista (<code>where()</code>, <code>find()</code>)</th>
+<th>Tabla de resultados (<code>where_project_results()</code>, <code>export_project_results()</code>)</th>
+<th>Importación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Una fila por</td>
+<td><strong>resource</strong></td>
+<td><strong>observación</strong> (un resource con dos especies tiene dos filas)</td>
+<td>el <code>_id</code> de una clasificación final</td>
+</tr>
+<tr>
+<td>Especie</td>
+<td>texto (<code>"European Rabbit (Oryctolagus cuniculus)"</code>), sin pk</td>
+<td><code>scientificName</code></td>
+<td><code>scientificName</code></td>
+</tr>
+<tr>
+<td><code>sex</code>, <code>lifeStage</code>, <code>behavior</code>, <code>bboxes</code></td>
+<td><strong>no están</strong></td>
+<td>sí</td>
+<td>sí</td>
+</tr>
+<tr>
+<td>Identificador</td>
+<td><code>pk</code>, la clave primaria de la clasificación</td>
+<td><code>_id</code> (solo con <code>camtrapdp=False</code>); <code>observationID</code> es solo el <strong>número de fila</strong> de la tabla que pediste (cambia con los filtros) y no está en la lista</td>
+<td><code>_id</code></td>
+</tr>
+<tr>
+<td>Necesita proyecto</td>
+<td>para <code>deployment</code> y <code>collection</code></td>
+<td>sí, en la URL</td>
+<td>sí</td>
+</tr>
+</tbody>
+</table>
+<p>Así que <strong>para saber qué muestra cada imagen, usa la tabla de resultados</strong>; la lista dice qué resources están
+clasificados y aprobados, y nada más. Sus <code>dynamic_attrs</code> solo llevan <code>observation_type</code>, <code>species</code> y <code>count</code>.</p>
+<h3 id="que-es-cada-cosa">Qué es cada cosa</h3>
+<ul>
+<li><strong>Clasificación:</strong> lo que una persona (o la IA) decidió sobre un resource. La clasificación de cada usuario sobre un
+  resource es un registro propio (<code>user_classifications</code>, véase <a href="../user_classifications/">Clasificaciones de usuario</a>);
+  la clasificación <strong>final</strong> es el único registro por resource que lee este componente. Cuando se aprueba la
+  clasificación de alguien, la final apunta a ella y toma sus valores (según el código de Trapper): es <strong>una</strong>
+  clasificación elegida, no una mezcla de varias.</li>
+<li><strong>Observación:</strong> una cosa vista en el resource, con su tipo (<code>animal</code>, <code>human</code>, <code>blank</code>, ...), especie, <code>count</code>,
+  <code>sex</code>, <code>lifeStage</code> y <code>behavior</code>. Es una fila de la tabla de resultados. Dos especies en una imagen son dos
+  observaciones; una imagen sin nada es una (<code>blank</code> o <code>unclassified</code>).</li>
+<li><strong>Caja (bounding box):</strong> una posición opcional de la observación en la imagen (<code>bboxX</code>, <code>bboxY</code>, <code>bboxWidth</code>,
+  <code>bboxHeight</code>, y la lista <code>bboxes</code> con <code>camtrapdp=False</code>). Dice <em>dónde</em>, no <em>qué</em>: lo que hay lo dice la observación,
+  y quién lo dijo, <code>classificationMethod</code> (<code>human</code> o <code>machine</code>) y <code>classifiedBy</code>. Una observación puede tener varias
+  cajas (un conteo de tres) o ninguna.</li>
+<li><strong><code>_id</code>:</strong> la clave primaria de la clasificación final del resource, igual que el <code>pk</code> de la lista. Es el
+  identificador estable, y el que necesita la importación.</li>
+<li><strong><code>observationID</code>:</strong> solo el <strong>número de fila</strong> de la tabla que pediste. Cambia con los filtros (la misma observación
+  es 4 en la tabla entera y 1 con <code>sex=male</code>), así que no identifica una observación y no se puede comparar entre dos
+  peticiones.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Dos personas, una imagen</p>
+<p>La tabla de resultados tiene solo la clasificación <strong>final</strong>, así que nunca contiene las observaciones de dos
+usuarios sobre la misma imagen. Para leer lo que dijo cada usuario, usa
+<a href="../user_classifications/"><code>user_classifications</code></a>.</p>
+<p>Trapper enlaza las clasificaciones por <strong>linaje</strong>, no por la posición de una observación (según su código): la
+clasificación de un usuario puede hacerse a partir de otra (la de la IA, o la de otro usuario), y la final apunta a la
+que se aprobó. Las cajas tienen un uso ahí: la tarea <code>CopyBboxesFromAI</code> copia las cajas de una clasificación de la IA
+a la del experto aprobada <strong>cuando las dos tienen el mismo conteo total y el mismo tipo de observación y los objetos
+del experto son indistinguibles</strong> (los mismos valores en los campos que se comparan); las cajas se reparten entonces
+entre los objetos al azar, como dice su docstring. No compara dónde están las cajas de las clasificaciones de dos
+usuarios. Para saber si dos observaciones son el mismo animal, compara tú las cajas cuando ambas las tienen (su
+solapamiento), y la especie y el conteo cuando no. <em>No comprobado con dos usuarios sobre una imagen: los servidores de
+prueba tienen uno, y ninguna de sus observaciones tiene cajas.</em></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">No confundir con la tabla de media</p>
+<p><a href="../classification_media/"><code>client.classification_media</code></a> es la tabla de los <em>ficheros</em> del proyecto; esto es <em>lo que
+muestran</em>. Se unen por <code>mediaID</code>: hay un ejemplo allí.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Leer y luego editar</p>
+<p>La API no puede crear, editar ni aprobar una clasificación: la lista es de solo lectura (<code>Allow: GET, HEAD, OPTIONS</code>
+en v1 y v2) y la única escritura es la <a href="#importar-observaciones-desde-un-csv">importación</a>. Para corregir
+clasificaciones con un script: exporta la tabla de resultados con <strong><code>camtrapdp=False</code></strong> (el formato que lleva <code>_id</code>,
+que la importación exige; el <code>camtrapdp=True</code> por defecto no lo lleva), edítala e impórtala.</p>
+</div>
 <p><strong>Endpoints:</strong></p>
 <ul>
 <li><code>GET /media_classification/api/classifications</code> (listado + detalle)</li>
@@ -2927,7 +3080,7 @@
 <tr>
 <td><code>project</code></td>
 <td>PK</td>
-<td>Se filtra automáticamente por la URL con los métodos de exportación por proyecto de más abajo; no hace falta allí</td>
+<td>El proyecto de la lista. <strong>Obligatorio para <code>deployment</code> y <code>collection</code></strong>: Trapper los comprueba contra los del proyecto y, sin él, contesta <code>400 "Select a valid choice"</code>. Los métodos por proyecto de más abajo lo toman de la URL</td>
 </tr>
 <tr>
 <td><code>owner</code></td>
@@ -2937,12 +3090,12 @@
 <tr>
 <td><code>deployment</code></td>
 <td>lista de PK</td>
-<td>Filtra por PK de despliegue</td>
+<td>PK de despliegue (necesita <code>project</code>)</td>
 </tr>
 <tr>
 <td><code>collection</code></td>
 <td>lista de PK</td>
-<td>Filtra por PK de colección</td>
+<td>La pk del <strong>vínculo entre el proyecto y la colección</strong>, no la de la colección (necesita <code>project</code>; véase la entrada 51 de <code>TRAPPER_API_IMPROVEMENTS.md</code>)</td>
 </tr>
 <tr>
 <td><code>locations_map</code></td>
@@ -2970,19 +3123,19 @@
 <td>Tiene cajas delimitadoras</td>
 </tr>
 <tr>
-<td><code>user</code></td>
-<td>lista de PK</td>
-<td>Filtra por PK de usuario propietario</td>
+<td><code>classified</code>, <code>classified_ai</code></td>
+<td>booleano</td>
+<td>Tiene una clasificación de un usuario / de la IA</td>
 </tr>
 <tr>
 <td><code>approved</code></td>
 <td>booleano</td>
-<td>Tiene una clasificación FINAL aprobada</td>
+<td>Aprobada. <strong>Solo v2</strong>: v1 lo ignora y llama <code>status</code> al mismo filtro</td>
 </tr>
 <tr>
-<td><code>feedback</code></td>
+<td><code>status</code></td>
 <td>booleano</td>
-<td>Es una clasificación de retroalimentación</td>
+<td>Aprobada, <strong>solo en v1</strong> (v2 lo ignora)</td>
 </tr>
 <tr>
 <td><code>species</code></td>
@@ -3004,18 +3157,16 @@
 <td>opción</td>
 <td>Filtra por edad</td>
 </tr>
-<tr>
-<td><code>confidence</code></td>
-<td>número</td>
-<td><code>dynamic_attrs.classification_confidence &gt;= valor</code></td>
-</tr>
-<tr>
-<td><code>ai_provider</code></td>
-<td>lista de PK</td>
-<td>Filtra por PK de proveedor de IA</td>
-</tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">Filtros que este endpoint ignora</p>
+<p>Trapper ignora un parámetro que no conoce <strong>sin dar error</strong>, y la lista vuelve sin filtrar. Además de los de
+arriba, <code>user</code>, <code>feedback</code>, <code>confidence</code> y <code>ai_provider</code>, que una versión anterior de esta guía listaba, no hacen
+nada aquí (comprobado en v1 y v2: <code>user=1</code> y <code>ai_provider=1</code> devuelven todas las filas; son de las listas de
+clasificaciones de usuario y de IA). Un filtro que no deja ninguna fila contesta <code>200</code> con una lista vacía, pero la
+tabla de resultados y la de media contestan <code>400 "Empty queryset..."</code>.</p>
+</div>
 <h2 id="los-seis-patrones-de-acceso">Los seis patrones de acceso</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
