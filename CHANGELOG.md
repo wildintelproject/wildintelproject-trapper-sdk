@@ -131,6 +131,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   nothing changes; it needs `file`.
 
 ### Changed
+- The classification media guide and docstring say that `collection` is the pk of the link between the project and the collection, not
+  the collection's (issue #93). It is not translated, because `wildintel-zooniverse` passes the link's pk to `where_project_media()`:
+  use `where_collection_media()` to give the collection's.
 - An empty results table or media table (`400 "Empty queryset or you have no permission..."`) is an empty result in
   `classification_results` and `classification_media` (issue #91): `get_*` has `count` 0, `where_*` iterates nothing,
   `export_*` gives `[]` or an empty file and the downloads give `[]`, as the classification list does. It used to be a

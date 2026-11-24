@@ -113,7 +113,7 @@ cannot see looks empty too; any other `400` (a wrong filter value) is still a `B
 |---|---|---|
 | `owner` | boolean | `true` = resources where the user is owner or manager |
 | `deployment` | list of PKs | Filter by deployment PKs |
-| `collection` | list of PKs | Filter by collection PKs |
+| `collection` | list of PKs | The pk of the **link between the project and the collection** (`ClassificationProjectCollection`), **not** the collection's pk. With `where_project_media(collection=3)`, 3 is a link: on Trapper v1 it answers the rows of link 3, which can be another collection, and no error. To give the collection's pk use [`where_collection_media()`](#media-scoped-to-a-collection-within-the-project), which translates it. Links are listed by `classification_projects.get_all_project_collections()` (`link.pk`, `link.collection_pk`) |
 | `locations_map` | comma-separated PKs | Filter by location PKs |
 | `rdate_from` / `rdate_to` | date | `date_recorded` range |
 | `rtime_from` / `rtime_to` | HH:MM | Time-of-day range on `date_recorded` |
