@@ -2,980 +2,980 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/about/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/about/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/about/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/features/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/features/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/features/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/installation/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/installation/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/installation/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/testing/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/testing/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/testing/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/usage/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/usage/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/usage/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/api_client_base/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/api_client_base/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/api_client_base/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/api_query/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/api_query/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/api_query/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/base_component/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/base_component/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/base_component/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/errors/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/errors/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/errors/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/trapper_client/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/trapper_client/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/trapper_client/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/ai_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/ai_classifications/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/ai_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_media/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_media/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_media/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_package/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_package/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_package/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_projects/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_results_agg/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_results_agg/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_results_agg/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classifications/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classifications_map/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classifications_map/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classifications_map/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classificators/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classificators/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classificators/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/collections/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/collections/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/collections/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/deployments/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/locations/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/locations/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/locations/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/locations_geojson/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/locations_geojson/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/locations_geojson/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/maps/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/maps/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/maps/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/project_deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/project_deployments/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/project_deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/research_project_collections/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/research_project_collections/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/research_project_collections/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/research_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/research_projects/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/research_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/resources/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/resources/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/resources/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/sequences/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/sequences/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/sequences/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/species/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/species/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/species/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/user_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/user_classifications/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/user_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/users/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/users/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/users/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/ai_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/ai_classifications/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/ai_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/classifications/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/classifications_map/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/classifications_map/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/classifications_map/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/classificators/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/classificators/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/classificators/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/collections/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/collections/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/collections/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/common/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/common/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/common/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/deployments/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/locations/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/locations/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/locations/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/maps/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/maps/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/maps/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/project_deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/project_deployments/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/project_deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/research_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/research_projects/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/research_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/resources/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/resources/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/resources/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/sequences/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/sequences/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/sequences/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/species/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/species/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/species/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/user_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/user_classifications/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/user_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/users/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/users/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/users/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/ai_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/ai_classifications/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/ai_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_media/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_media/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_media/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_package/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_package/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_package/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_projects/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_results_agg/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_results_agg/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_results_agg/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classifications/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classifications_map/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classifications_map/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classifications_map/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classificators/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classificators/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classificators/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/collections/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/collections/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/collections/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/deployments/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/locations/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/locations/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/locations/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/locations_geojson/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/locations_geojson/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/locations_geojson/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/maps/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/maps/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/maps/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/project_deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/project_deployments/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/project_deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/research_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/research_projects/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/research_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/resources/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/resources/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/resources/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/sequences/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/sequences/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/sequences/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/species/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/species/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/species/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/user_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/user_classifications/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/user_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/users/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/users/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/users/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/versions/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/versions/"/>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/versions/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/about/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/about/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/about/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/features/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/features/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/features/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/installation/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/installation/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/installation/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/testing/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/testing/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/testing/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/usage/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/usage/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/usage/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/api_client_base/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/api_client_base/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/api_client_base/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/api_query/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/api_query/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/api_query/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/base_component/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/base_component/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/base_component/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/errors/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/errors/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/errors/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/trapper_client/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/trapper_client/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/trapper_client/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/ai_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/ai_classifications/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/ai_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_media/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_media/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_media/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_package/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_package/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_package/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_projects/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_results_agg/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classification_results_agg/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classification_results_agg/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classifications/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classifications_map/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classifications_map/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classifications_map/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classificators/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/classificators/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/classificators/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/collections/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/collections/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/collections/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/deployments/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/locations/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/locations/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/locations/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/locations_geojson/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/locations_geojson/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/locations_geojson/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/maps/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/maps/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/maps/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/project_deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/project_deployments/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/project_deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/research_project_collections/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/research_project_collections/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/research_project_collections/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/research_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/research_projects/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/research_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/resources/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/resources/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/resources/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/sequences/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/sequences/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/sequences/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/species/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/species/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/species/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/user_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/user_classifications/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/user_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/users/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/components/users/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/components/users/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/ai_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/ai_classifications/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/ai_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/classifications/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/classifications_map/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/classifications_map/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/classifications_map/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/classificators/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/classificators/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/classificators/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/collections/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/collections/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/collections/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/common/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/common/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/common/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/deployments/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/locations/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/locations/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/locations/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/maps/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/maps/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/maps/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/project_deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/project_deployments/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/project_deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/research_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/research_projects/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/research_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/resources/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/resources/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/resources/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/sequences/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/sequences/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/sequences/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/species/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/species/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/species/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/user_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/user_classifications/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/user_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/users/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/api/schemas/users/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/api/schemas/users/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/ai_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/ai_classifications/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/ai_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_media/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_media/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_media/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_package/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_package/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_package/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_projects/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_results_agg/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classification_results_agg/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classification_results_agg/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classifications/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classifications_map/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classifications_map/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classifications_map/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classificators/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/classificators/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/classificators/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/collections/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/collections/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/collections/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/deployments/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/locations/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/locations/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/locations/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/locations_geojson/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/locations_geojson/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/locations_geojson/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/maps/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/maps/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/maps/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/project_deployments/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/project_deployments/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/project_deployments/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/research_projects/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/research_projects/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/research_projects/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/resources/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/resources/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/resources/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/sequences/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/sequences/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/sequences/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/species/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/species/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/species/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/user_classifications/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/user_classifications/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/user_classifications/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/users/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/users/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/users/"/>
     </url>
     <url>
         <loc>https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/versions/</loc>
-        <lastmod>2026-11-23</lastmod>
+        <lastmod>2026-11-24</lastmod>
         <changefreq>daily</changefreq>
         <xhtml:link rel="alternate" hreflang="es" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/es/guide/versions/"/>
         <xhtml:link rel="alternate" hreflang="en" href="https://wildintelproject.github.io/wildintelproject-trapper-sdk/guide/versions/"/>
