@@ -63,6 +63,8 @@ de forma distinta las dos versiones de Trapper:
 Así que en v1 una observación de `count=2` con dos cajas son **dos filas** en el formato por defecto, y una en el otro.
 Son coordenadas relativas (de 0 a 1). Una caja es opcional: `[]` cuando no hay.
 
+Con `camtrapdp=False` el SDK lee las dos formas en `row.bboxes`, una lista de `BBox` (una observación de v2 tiene una).
+
 !!! warning "Una caja con la forma de la otra versión rompe toda la tabla de resultados"
     El formato por defecto (`camtrapdp=True`) contesta **`500` para todo el proyecto** si una fila tiene sus cajas con la
     forma de la otra versión (una caja plana en v1, una lista de cajas en v2). Me lo encontré al escribir datos de prueba

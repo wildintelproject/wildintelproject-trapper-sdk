@@ -161,6 +161,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- A results row of Trapper v2 with a bounding box (`[x, y, w, h]`) was read as the CamtrapDP class, with `bboxes` as text and no
+  error (issue #85). `ClassificationResultRecordTrapper` reads the box of v2 as well as the list of boxes of v1, and the row
+  class is chosen by the `_id` column (only the Trapper format has it), so a row it cannot read is a `ValidationError`.
 - `classification_media.download_media_file()` (issue #73) read the whole file into memory, retried on any exception
   (a `404` included) and left a half-written file under its final name if the download was cut. It streams to a
   `.part` file that is moved into place when complete, retries only network errors and `502`/`503`/`504`, and sends
