@@ -3060,7 +3060,7 @@ un proyecto que la cuenta no puede ver parece vacío; cualquier otro <code>400</
 <tr>
 <td><code>collection</code></td>
 <td>lista de PK</td>
-<td>Filtra por PK de colección</td>
+<td>La pk del <strong>vínculo entre el proyecto y la colección</strong> (<code>ClassificationProjectCollection</code>), <strong>no</strong> la pk de la colección. Con <code>where_project_media(collection=3)</code>, 3 es un vínculo: en Trapper v1 devuelve las filas del vínculo 3, que puede ser otra colección, y ningún error. Para dar la pk de la colección usa <a href="#medios-limitados-a-una-coleccion-dentro-del-proyecto"><code>where_collection_media()</code></a>, que la traduce. Los vínculos los lista <code>classification_projects.get_all_project_collections()</code> (<code>link.pk</code>, <code>link.collection_pk</code>)</td>
 </tr>
 <tr>
 <td><code>locations_map</code></td>

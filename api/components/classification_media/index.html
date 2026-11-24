@@ -3101,7 +3101,7 @@
 <tr>
 <td>collection</td>
 <td>list of PKs</td>
-<td>Filter by collection PKs</td>
+<td>PK of the <strong>link</strong> between the project and the collection, not the collection's PK (see <code>get_collection_media</code>)</td>
 </tr>
 <tr>
 <td>locations_map</td>
@@ -3973,7 +3973,7 @@ files = client.classification_media.download_collection_media_files(
 <a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    |--------------------------|----------------------|---------------------------------------------------------------------|</span>
 <a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    | owner                    | boolean              | true = resources where the user is owner or manager                 |</span>
 <a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    | deployment               | list of PKs          | Filter by deployment PKs                                            |</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    | collection               | list of PKs          | Filter by collection PKs                                            |</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    | collection               | list of PKs          | PK of the **link** between the project and the collection, not the collection&#39;s PK (see ``get_collection_media``)                                             |</span>
 <a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    | locations_map            | comma-separated PKs  | Filter by location PKs                                              |</span>
 <a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">    | rdate_from / rdate_to    | date                 | date_recorded range                                                 |</span>
 <a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">    | rtime_from / rtime_to    | HH:MM                | Time-of-day range on date_recorded                                  |</span>

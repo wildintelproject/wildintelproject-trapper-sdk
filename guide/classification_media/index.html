@@ -3057,7 +3057,7 @@ cannot see looks empty too; any other <code>400</code> (a wrong filter value) is
 <tr>
 <td><code>collection</code></td>
 <td>list of PKs</td>
-<td>Filter by collection PKs</td>
+<td>The pk of the <strong>link between the project and the collection</strong> (<code>ClassificationProjectCollection</code>), <strong>not</strong> the collection's pk. With <code>where_project_media(collection=3)</code>, 3 is a link: on Trapper v1 it answers the rows of link 3, which can be another collection, and no error. To give the collection's pk use <a href="#media-scoped-to-a-collection-within-the-project"><code>where_collection_media()</code></a>, which translates it. Links are listed by <code>classification_projects.get_all_project_collections()</code> (<code>link.pk</code>, <code>link.collection_pk</code>)</td>
 </tr>
 <tr>
 <td><code>locations_map</code></td>
