@@ -161,72 +161,6 @@ def component(client):
     return AIClassificationsComponent(client)
 
 
-# ── _clean_row ────────────────────────────────────────────────────────────────
-
-class TestCleanRow:
-
-    @pytest.fixture
-    def component(self):
-        return AIClassificationsComponent(MagicMock())
-
-    def test_replaces_empty_strings_with_none(self, component):
-        """_clean_row() reemplaza strings vacíos por None."""
-        result = component._clean_row({"name": "test", "value": ""})
-        assert result["value"] is None
-        assert result["name"] == "test"
-
-    def test_keeps_none_values(self, component):
-        """_clean_row() mantiene None existentes."""
-        result = component._clean_row({"value": None})
-        assert result["value"] is None
-
-    def test_keeps_zero_values(self, component):
-        """_clean_row() mantiene valores 0 (no los convierte a None)."""
-        result = component._clean_row({"value": 0})
-        assert result["value"] == 0
-
-    def test_keeps_false_values(self, component):
-        """_clean_row() mantiene False (no lo convierte a None)."""
-        result = component._clean_row({"active": False})
-        assert result["active"] is False
-
-    def test_handles_empty_dict(self, component):
-        """_clean_row() maneja dict vacío."""
-        assert component._clean_row({}) == {}
-
-    def test_replaces_multiple_empty_strings(self, component):
-        """_clean_row() reemplaza múltiples strings vacíos."""
-        result = component._clean_row({"a": "", "b": "", "c": "value"})
-        assert result["a"] is None
-        assert result["b"] is None
-        assert result["c"] == "value"
-
-
-# ── _validate_ai_export_record ────────────────────────────────────────────────
-
-class TestValidateAIExportRecord:
-
-    @pytest.fixture
-    def component(self):
-        return AIClassificationsComponent(MagicMock())
-
-    def test_returns_trapper_schema_when_id_field_present(self, component):
-        """_validate_ai_export_record() devuelve Trapper schema cuando hay _id."""
-        result = component._validate_ai_export_record(VALID_EXPORT_TRAPPER)
-        assert isinstance(result, AIClassificationRecordExportTrapper)
-
-    def test_returns_camtrap_schema_when_no_id_field(self, component):
-        """_validate_ai_export_record() devuelve CamTrap schema cuando no hay _id."""
-        result = component._validate_ai_export_record(VALID_EXPORT_CAMTRAP)
-        assert isinstance(result, AIClassificationRecordExportCamTrap)
-
-    def test_cleans_empty_strings_before_validating(self, component):
-        """_validate_ai_export_record() limpia strings vacíos antes de validar."""
-        row = {**VALID_EXPORT_TRAPPER, "extra_field": ""}
-        result = component._validate_ai_export_record(row)
-        assert isinstance(result, AIClassificationRecordExportTrapper)
-
-
 # ── export ────────────────────────────────────────────────────────────────────
 
 class TestExport:
@@ -252,8 +186,6 @@ class TestExport:
 
     def test_export_returns_list_of_trapper_models_when_file_none(self, component, client):
         """export() devuelve lista de AIClassificationRecordExportTrapper cuando file=None."""
-        mock_record = MagicMock(spec=AIClassificationRecordExportTrapper)
-        component._validate_ai_export_record = MagicMock(return_value=mock_record)
         client.get_all.return_value = paginated_response([VALID_EXPORT_TRAPPER])
 
         result = component.export(PROJECT_PK, file=None)
@@ -272,8 +204,6 @@ class TestExport:
 
     def test_export_writes_csv_when_file_provided(self, component, client, tmp_path):
         """export() escribe CSV y devuelve Path cuando se indica file."""
-        mock_record = MagicMock(spec=AIClassificationRecordExportTrapper)
-        component._validate_ai_export_record = MagicMock(return_value=mock_record)
         client.get_all.return_value = paginated_response([VALID_EXPORT_TRAPPER])
         out = tmp_path / "ai_export.csv"
         client._select_file.return_value = out
@@ -302,9 +232,9 @@ class TestExport:
         params = client.get_all.call_args[1]["query"]
         assert params["species"] == 42
 
-    def test_export_cleans_empty_strings_in_rows(self, component, client):
-        """export() limpia strings vacíos de cada fila antes de parsear."""
-        dirty_row = {**VALID_EXPORT_TRAPPER, "some_field": ""}
+    def test_export_accepts_empty_strings_in_rows(self, component, client):
+        """export() reads the empty cells of the CSV (an empty eventID, with no sequences, stays valid)."""
+        dirty_row = {**VALID_EXPORT_TRAPPER, "some_field": "", "eventID": "", "lifeStage": ""}
         client.get_all.return_value = paginated_response([dirty_row])
 
         result = component.export(PROJECT_PK, file=None)
@@ -327,3 +257,113 @@ class TestAIClassificationTimestampEmptyString:
         row = {**VALID_EXPORT_CAMTRAP, "classificationTimestamp": ""}
         result = AIClassificationRecordExportCamTrap.model_validate(row)
         assert result.classificationTimestamp is None
+
+# ── the rows of Trapper v1 and v2 (captured from the test servers) ────────────
+
+# v1, camtrapdp=True: observationID and eventID empty (no sequences)
+V1_CAMTRAP_ROW = {
+    "observationID": "", "deploymentID": "don01-2024a", "mediaID": "5", "eventID": "",
+    "eventStart": "2024-03-19T13:30:31+0100", "eventEnd": "2024-03-19T13:30:31+0100",
+    "observationLevel": "media", "observationType": "animal", "cameraSetupType": "",
+    "scientificName": "Oryctolagus cuniculus", "count": "1", "lifeStage": "", "sex": "", "behavior": "",
+    "individualID": "", "individualPositionRadius": "", "individualPositionAngle": "", "individualSpeed": "",
+    "bboxX": "0.1", "bboxY": "0.1", "bboxWidth": "0.3", "bboxHeight": "0.3", "classificationMethod": "",
+    "classifiedBy": "SDK test provider", "classificationTimestamp": "2026-11-24 11:38:51.050903+00:00",
+    "classificationProbability": "0.93", "observationTags": "", "observationComments": "",
+}
+
+# v2, camtrapdp=False: one flat box
+V2_TRAPPER_ROW = {
+    **{k: v for k, v in V1_CAMTRAP_ROW.items() if not k.startswith("bbox")},
+    "observationID": "1", "bboxX": "", "bboxY": "", "bboxWidth": "", "bboxHeight": "",
+    "classifiedBy": "DeepFaune Classifier v1.2", "classificationTimestamp": "",
+    "countNew": "", "englishName": "European Rabbit", "bboxes": "[0.1,0.1,0.3,0.3]", "_id": "88",
+}
+
+
+class TestExportRowsOfBothVersions:
+
+    def test_v1_camtrapdp_row_with_empty_event_and_observation(self, component, client):
+        client.get_all.return_value = paginated_response([V1_CAMTRAP_ROW])
+        row = component.export(PROJECT_PK)[0]
+        assert isinstance(row, AIClassificationRecordExportCamTrap)
+        assert row.observationID is None and row.eventID == ""
+        assert row.bboxX == 0.1 and row.classificationProbability == 0.93
+
+    def test_v2_trapper_row_with_a_flat_box(self, component, client):
+        client.get_all.return_value = paginated_response([V2_TRAPPER_ROW])
+        row = component.export(PROJECT_PK, camtrapdp=False)[0]
+        assert isinstance(row, AIClassificationRecordExportTrapper)
+        assert row.id == 88 and len(row.bboxes) == 1 and row.bboxes[0].width == 0.3
+        assert row.classificationTimestamp is None
+
+    def test_the_ai_rows_are_results_table_rows(self):
+        from trapper_client.schemas import ClassificationResultRecordCamtrapDP, ClassificationResultRecordTrapper
+
+        assert issubclass(AIClassificationRecordExportCamTrap, ClassificationResultRecordCamtrapDP)
+        assert issubclass(AIClassificationRecordExportTrapper, ClassificationResultRecordTrapper)
+
+
+class TestExportWithNoRows:
+    """Trapper answers ``400 "Empty queryset ..."`` for a project with no AI classifications."""
+
+    @staticmethod
+    def _empty():
+        from trapper_client import err
+
+        return err.BadRequestError(
+            '["Empty queryset or you have no permission to access the requested objects."]',
+        )
+
+    def test_list_is_empty(self, component, client):
+        client.get_all.side_effect = self._empty()
+        assert component.export(PROJECT_PK) == []
+
+    def test_file_is_empty(self, component, client, tmp_path):
+        client.get_all.side_effect = self._empty()
+        out = tmp_path / "ai.csv"
+        client._select_file.return_value = out
+        client._write_csv = lambda rows, path: path.write_text("")
+        assert component.export(PROJECT_PK, file=out) == out and out.read_text() == ""
+
+    def test_validate_false_file_is_empty(self, component, client, tmp_path):
+        client.export_all.side_effect = self._empty()
+        out = tmp_path / "ai.csv"
+        client._select_file.return_value = out
+        assert component.export(PROJECT_PK, file=out, validate=False) == out and out.read_text() == ""
+
+    def test_other_400s_still_raise(self, component, client):
+        from trapper_client import err
+
+        client.get_all.side_effect = err.BadRequestError("{'species': ['Select a valid choice.']}")
+        with pytest.raises(err.BadRequestError):
+            component.export(PROJECT_PK)
+
+
+class TestCamtrapdpParam:
+    """Trapper compares ``camtrapdp`` with the text ``"True"``: a Python ``True`` went out as ``true`` = False."""
+
+    @pytest.mark.parametrize("value, sent", [(True, "True"), (False, "False"), ("true", "True"), ("FALSE", "False")])
+    def test_export_sends_camtrapdp_as_trapper_reads_it(self, component, client, value, sent):
+        client.get_all.return_value = paginated_response([])
+        component.export(PROJECT_PK, camtrapdp=value)
+        assert client.get_all.call_args[1]["query"]["camtrapdp"] == sent
+
+    def test_anything_else_is_a_value_error(self, component, client):
+        with pytest.raises(ValueError, match="camtrapdp must be True or False"):
+            component.export(PROJECT_PK, camtrapdp="yes")
+
+    def test_not_sent_when_not_given(self, component, client):
+        client.get_all.return_value = paginated_response([])
+        component.export(PROJECT_PK)
+        assert "camtrapdp" not in client.get_all.call_args[1]["query"]
+
+    @pytest.mark.parametrize("value, sent", [(True, "True"), (False, "False")])
+    def test_results_table_of_classification_results_too(self, value, sent):
+        from trapper_client.components.classifications import ClassificationsComponent
+
+        client = MagicMock()
+        client.server_version = "v2"
+        client.get.return_value = paginated_response([])
+        ClassificationsComponent(client).get_project_results(PROJECT_PK, camtrapdp=value)
+        assert client.get.call_args[1]["query"]["camtrapdp"] == sent

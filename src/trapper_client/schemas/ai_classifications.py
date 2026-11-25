@@ -1,12 +1,10 @@
 """Schemas for AI classification Trapper endpoints."""
-import json
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
+from typing import Annotated, Any, Dict, List, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, Discriminator, Field, Tag, field_validator
 
-from .base import TrapperSchema
-from .classifications import BBox
+from .classifications import ClassificationResultRecordCamtrapDP, ClassificationResultRecordTrapper
+from .user_classifications import UserObservationAttr
 from trapper_client._deprecated import deprecated_getattr
 
 
@@ -24,196 +22,81 @@ class ResourceAI(BaseModel):
     deployment_id: str
 
 
-class AIObservationAttr(BaseModel):
-    """A single observation attribute returned by the AI classifier."""
+class AIObservationAttr(UserObservationAttr):
+    """One observation of an AI classification: see :class:`UserObservationAttr` (v1 and v2 read the same way).
 
-    observation_type: str
-    species: Optional[str] = None
-    count: Optional[str] = None
-    classification_confidence: Optional[str] = None
+    ``classification_confidence`` is the confidence of the model as a fraction (``"0.93"``) on both versions.
+    """
 
 
 class AIClassification(BaseModel):
-    """Schema for ``/media_classification/api/ai-classifications`` items."""
+    """Schema for ``/media_classification/api/ai-classifications`` items.
+
+    Trapper v2 does not send ``owner``, ``owner_profile``, ``classification`` or ``created_at``, and may send
+    ``updated_at`` as ``null``; v1 does not send ``is_setup``, ``bboxes`` or ``classification_project``.
+    """
 
     pk: int
-    owner: str
-    owner_profile: Optional[str] = None  # null in Trapper v2
-    classification: int
+    owner: Optional[str] = None
+    owner_profile: Optional[str] = None
+    classification: Optional[int] = None
 
     resource: ResourceAI
-    collection: int
+    collection: Optional[int] = None
 
-    updated_at: str
-    created_at: str
+    updated_at: Optional[str] = None
+    created_at: Optional[str] = None
     approved: bool
+    is_setup: Optional[bool] = None
+    bboxes: Optional[bool] = None
+    classification_project: Optional[str] = None
 
     static_attrs: Dict[str, Any] = Field(default_factory=dict)
     dynamic_attrs: List[AIObservationAttr] = Field(default_factory=list)
 
     detail_data: Optional[str] = None
     delete_data: Optional[str] = None
-    ai_provider: str
+    ai_provider: Optional[str] = None
 
 
-class AIClassificationRecordExportCamTrap(TrapperSchema):
-    """CamtrapDP-flavoured row from the AI classification export endpoint."""
+class AIClassificationRecordExportCamTrap(ClassificationResultRecordCamtrapDP):
+    """Camtrap DP row of the AI results table (``camtrapdp=True``, the default).
+
+    The table has the columns of the results table of ``client.classification_results``, and is read the same
+    way. Only ``observationID`` differs: Trapper v1 leaves it empty in the AI table.
+    """
 
     observationID: Optional[int] = None
-    deploymentID: str
-    mediaID: int
-    eventID: str
 
-    eventStart: datetime
-    eventEnd: datetime
-
-    observationLevel: str
-    observationType: str
-    cameraSetupType: Optional[str] = None
-
-    scientificName: Optional[str] = None
-    count: Optional[int] = 1
-
-    lifeStage: Optional[str] = None
-    sex: Optional[str] = None
-    behavior: Optional[str] = None
-
-    individualID: Optional[str] = None
-
-    bboxX: Optional[float] = Field(None, ge=0, le=1)
-    bboxY: Optional[float] = Field(None, ge=0, le=1)
-    bboxWidth: Optional[float] = Field(None, gt=0, le=1)
-    bboxHeight: Optional[float] = Field(None, gt=0, le=1)
-
-    classificationMethod: Optional[str] = None
-    classifiedBy: Optional[str] = None
-    classificationTimestamp: Optional[datetime] = None
-    classificationProbability: Optional[float] = Field(None, ge=0, le=1)
-
-    observationTags: Optional[str] = None
-    observationComments: Optional[str] = None
-
-    @field_validator("scientificName")
+    @field_validator("observationID", mode="before")
     @classmethod
-    def clean_scientific_name(cls, v):
-        if v == "" or v is None:
-            return None
-        return v
-
-    @field_validator("observationType")
-    @classmethod
-    def normalize_observation_type(cls, v):
-        return v.lower()
-
-    @field_validator(
-        "observationID",
-        "bboxX", "bboxY", "bboxWidth", "bboxHeight", "classificationProbability",
-        "classificationTimestamp",
-        mode="before",
-    )
-    @classmethod
-    def empty_str_to_none(cls, v):
-        if v == "":
-            return None
-        return v
-
-
-class AIClassificationRecordExportTrapper(BaseModel):
-    """Trapper-flavoured row from the AI classification export endpoint."""
-
-    model_config = ConfigDict(populate_by_name=True)
-
-    id: int = Field(alias="_id")
-    observationID: int
-    deploymentID: str
-    mediaID: int
-    eventID: str
-
-    eventStart: datetime
-    eventEnd: datetime
-
-    observationLevel: str
-    observationType: str
-
-    cameraSetupType: Optional[str] = None
-    scientificName: Optional[str] = None
-
-    count: Optional[int] = None
-
-    lifeStage: Optional[str] = None
-    sex: Optional[str] = None
-    behavior: Optional[str] = None
-
-    individualID: Optional[str] = None
-    individualPositionRadius: Optional[float] = None
-    individualPositionAngle: Optional[float] = None
-    individualSpeed: Optional[float] = None
-
-    bboxX: Optional[float] = None
-    bboxY: Optional[float] = None
-    bboxWidth: Optional[float] = None
-    bboxHeight: Optional[float] = None
-
-    classificationMethod: Optional[str] = None
-    classifiedBy: Optional[str] = None
-    classificationTimestamp: Optional[datetime] = None
-    classificationProbability: Optional[float] = None
-
-    observationTags: Optional[str] = None
-    observationComments: Optional[str] = None
-
-    countNew: Optional[int] = None
-    englishName: Optional[str] = None
-
-    bboxes: Optional[List[BBox]] = None
-
-    @field_validator(
-        "lifeStage", "sex", "behavior", "individualID", "cameraSetupType",
-        "scientificName", "observationTags", "observationComments",
-        "classificationMethod", "classifiedBy", "englishName",
-        mode="before",
-    )
-    @classmethod
-    def empty_str_to_none(cls, v):
+    def _empty_observation_id(cls, v):
         if isinstance(v, str) and v.strip() == "":
             return None
         return v
 
-    @field_validator(
-        "individualPositionRadius", "individualPositionAngle", "individualSpeed",
-        "bboxX", "bboxY", "bboxWidth", "bboxHeight",
-        "classificationProbability", "count", "countNew",
-        mode="before",
-    )
-    @classmethod
-    def empty_numeric_to_none(cls, v):
-        if isinstance(v, str) and v.strip() == "":
-            return None
-        return v
 
-    @field_validator("classificationTimestamp", mode="before")
-    @classmethod
-    def empty_datetime_to_none(cls, v):
-        if isinstance(v, str) and v.strip() == "":
-            return None
-        return v
+class AIClassificationRecordExportTrapper(ClassificationResultRecordTrapper):
+    """Trapper row of the AI results table (``camtrapdp=False``, with ``_id``).
 
-    @field_validator("bboxes", mode="before")
-    @classmethod
-    def parse_bboxes(cls, v):
-        if isinstance(v, str):
-            parsed = json.loads(v)
-            if parsed and isinstance(parsed[0], list):
-                return [BBox(x=b[0], y=b[1], width=b[2], height=b[3]) for b in parsed]
-            return parsed
-        if isinstance(v, list) and v and isinstance(v[0], list):
-            return [BBox(x=b[0], y=b[1], width=b[2], height=b[3]) for b in v]
-        return v
+    Read like the results table of ``client.classification_results``, boxes included (v1 writes a list of boxes,
+    v2 one flat box).
+    """
 
 
-AIClassificationRecordExport = Union[
-    AIClassificationRecordExportCamTrap,
-    AIClassificationRecordExportTrapper,
+def _ai_record_kind(row: Any) -> str:
+    """Only the Trapper format (``camtrapdp=False``) has an ``_id`` column."""
+    if isinstance(row, dict):
+        return "trapper" if "_id" in row else "camtrapdp"
+    return "trapper" if isinstance(row, ClassificationResultRecordTrapper) else "camtrapdp"
+
+
+AIClassificationRecordExport = Annotated[
+    Union[
+        Annotated[AIClassificationRecordExportCamTrap, Tag("camtrapdp")],
+        Annotated[AIClassificationRecordExportTrapper, Tag("trapper")],
+    ],
+    Discriminator(_ai_record_kind),
 ]
 
 

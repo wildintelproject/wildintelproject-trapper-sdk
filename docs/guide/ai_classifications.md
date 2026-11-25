@@ -1,7 +1,7 @@
 # AI Classifications
 
 !!! info "Trapper compatibility"
-    **v1** ✔ · **v2** ✔ (not yet validated against a live Trapper v2 server). See [Trapper versions](versions.md).
+    **v1** ✔ · **v2** ✔ — checked against both. See [Trapper versions](versions.md).
 
 `client.ai_classifications` — classification observations produced by an AI provider.
 
@@ -44,6 +44,17 @@ row = client.ai_classifications.find(1)
 
 See [Usage](../usage.md) if any of this looks unfamiliar — it's the same interface on every component.
 
+## What a row has on each version
+
+The list reads the same on both versions, but v2 sends less: no `owner`, `owner_profile`, `classification` or
+`created_at` (they are `None`), and `updated_at` may be `None`. v2 adds `is_setup`, `bboxes` and
+`classification_project`.
+
+Each observation of `dynamic_attrs` has `observation_type`, `species`, `count` and `classification_confidence`
+as text, as v1 sends them. The confidence is a fraction (`"0.93"`) on both versions — v2 sends it as a percentage
+next to the value, and the SDK converts it —, the same scale as the `confidence` filter (`confidence=0.9`).
+A missing species, which Trapper writes as the text `"None"`, is `None`.
+
 ## Export, scoped to a project
 
 Unlike every other component, `export()` here has a **different signature**: it requires a
@@ -59,8 +70,13 @@ client.ai_classifications.export(
 records = client.ai_classifications.export(classification_project_pk=7, file=None)
 ```
 
-Rows are parsed as either the CamtrapDP-flavoured or Trapper-flavoured export schema, depending on
-whether the server includes a Trapper-internal `_id` field.
+It is a table with one row per observation, with the same columns as the
+[results table](classifications.md) of `client.classification_results`, and is read the same way:
+`AIClassificationRecordExportCamTrap` rows by default and `AIClassificationRecordExportTrapper` rows (with `_id`
+and the boxes in `bboxes`) with `camtrapdp=False`. A project with no AI classifications, or none that match the
+filters, gives no rows (`[]`, or an empty file) instead of Trapper's `400 "Empty queryset"`.
+
+`raw=True` (or `validate=False`, as before) saves the CSV as Trapper sends it.
 
 Additional field on the export endpoint:
 

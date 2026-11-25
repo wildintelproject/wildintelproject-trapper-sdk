@@ -25,6 +25,27 @@ CLASSIFICATION_FILTERS = {
 }
 
 
+def true_false(name: str, value: Any) -> str:
+    """A boolean parameter as Trapper reads it: it compares it with the text ``"True"``.
+
+    A Python ``True`` goes over HTTP as ``true``, which Trapper took as false. A boolean, or the text
+    ``true``/``false`` in any case, is accepted; anything else is a ``ValueError`` before the request.
+    """
+    if isinstance(value, bool):
+        return "True" if value else "False"
+    if isinstance(value, str) and value.strip().lower() in ("true", "false"):
+        return "True" if value.strip().lower() == "true" else "False"
+    raise ValueError(f"{name} must be True or False, not {value!r}")
+
+
+def camtrapdp_param(query: Dict[str, Any]) -> Dict[str, Any]:
+    """``camtrapdp`` of the results tables as Trapper reads it (``camtrapdp=True`` used to give Trapper's format)."""
+    if "camtrapdp" in query:
+        query = dict(query)
+        query["camtrapdp"] = true_false("camtrapdp", query["camtrapdp"])
+    return query
+
+
 class ClassificationFiltersMixin:
     """``known_filters`` and a portable ``approved`` for the components that use ``ClassificationFilter``.
 
@@ -43,6 +64,7 @@ class ClassificationFiltersMixin:
 
     def _normalize_query(self, query: Dict[str, Any]) -> Dict[str, Any]:
         """``approved`` on Trapper v1, where the same filter is called ``status`` (v1 ignores ``approved``)."""
+        query = camtrapdp_param(query)
         if "approved" in query and self.client.server_version == "v1":
             query = dict(query)
             query.setdefault("status", query.pop("approved"))
