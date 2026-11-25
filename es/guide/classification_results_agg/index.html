@@ -90,7 +90,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#resultados-agregados-de-clasificacion" class="md-skip">
+        <a href="#resultados-agregados-de-clasificacion-tasas-de-captura" class="md-skip">
           Saltar a contenido
         </a>
       
@@ -1007,10 +1007,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#obtener-una-pagina" class="md-nav__link">
+  <a href="#una-fila" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Obtener una página
+        Una fila
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parametros-y-filtros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parámetros y filtros
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geojson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoJSON
       
     </span>
   </a>
@@ -2761,10 +2783,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#obtener-una-pagina" class="md-nav__link">
+  <a href="#una-fila" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Obtener una página
+        Una fila
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parametros-y-filtros" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parámetros y filtros
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geojson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoJSON
       
     </span>
   </a>
@@ -2802,33 +2846,109 @@
   
 
 
-<h1 id="resultados-agregados-de-clasificacion">Resultados agregados de clasificación</h1>
+<h1 id="resultados-agregados-de-clasificacion-tasas-de-captura">Resultados agregados de clasificación (tasas de captura)</h1>
 <div class="admonition info">
 <p class="admonition-title">Compatibilidad con Trapper</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — el mismo código en ambas. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — comprobado en los dos. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
 </div>
-<p><code>client.classification_results_agg</code> — resultados de clasificación agregados por despliegue
-(recuentos, coordenadas) de un proyecto de clasificación.</p>
-<p><strong>Endpoint:</strong> <code>GET /media_classification/api/classifications/results/agg/{project_pk}/</code>.
-Devuelve CSV (gzip) por defecto, o GeoJSON cuando <code>geojson=True</code>.</p>
-<div class="admonition note">
-<p class="admonition-title">No se puede usar directamente con <code>get()</code>/<code>where()</code></p>
-<p>El endpoint necesita un <code>project_pk</code> en su URL: usa <code>get_project_results_agg()</code> o
-<code>export_project_results_agg()</code>, más abajo, que resuelven la URL por ti.</p>
-</div>
-<h2 id="obtener-una-pagina">Obtener una página</h2>
+<p><code>client.classification_results_agg</code> — las <strong>tasas de captura</strong> de un proyecto de clasificación. Trapper toma las
+clasificaciones finales del proyecto (las que dejan pasar los filtros), suma el recuento de cada especie por
+despliegue y lo divide entre los días que funcionó el despliegue.</p>
+<p><strong>Endpoint:</strong> <code>GET /media_classification/api/classifications/results/agg/{project_pk}/</code> — un CSV en gzip, o un
+<code>FeatureCollection</code> GeoJSON con <code>geojson=True</code>. El proyecto va en la URL, así que no hay <code>get()</code>/<code>where()</code>: usa los
+métodos de abajo.</p>
+<h2 id="una-fila">Una fila</h2>
+<p>Una fila por <strong>despliegue y especie</strong> (<code>ClassificationAgg</code>), con valores tipados (las celdas vacías son <code>None</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Campos</th>
+<th>Qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>deploymentID</code>, <code>locationID</code>, <code>locationName</code>, <code>latitude</code>, <code>longitude</code>, <code>coordinateUncertainty</code></td>
+<td>Dónde</td>
+</tr>
+<tr>
+<td><code>deploymentStart</code>, <code>deploymentEnd</code> (<code>datetime</code>), <code>days</code></td>
+<td>Cuándo, y los días que funcionó</td>
+</tr>
+<tr>
+<td><code>setupBy</code>, <code>cameraID</code>, <code>cameraModel</code>, <code>cameraDelay</code>, <code>cameraHeight</code>, <code>cameraDepth</code>, <code>cameraTilt</code>, <code>cameraHeading</code>, <code>detectionDistance</code>, <code>timestampIssues</code>, <code>baitUse</code>, <code>featureType</code>, <code>habitat</code>, <code>deploymentGroups</code>, <code>deploymentTags</code>, <code>deploymentComments</code></td>
+<td>Los campos Camtrap DP del despliegue</td>
+</tr>
+<tr>
+<td><code>observationType</code>, <code>scientificName</code></td>
+<td>Qué se vio (<code>None</code> en un despliegue sin observaciones, con <code>all_dep=True</code>)</td>
+</tr>
+<tr>
+<td><code>count</code> (o <code>countNew</code>)</td>
+<td>Cuántos</td>
+</tr>
+<tr>
+<td><code>trapRate</code></td>
+<td><code>count / days</code></td>
+</tr>
+</tbody>
+</table>
+<p>Se excluyen los despliegues sin fecha de inicio o de fin.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">get_project_results_agg</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">page</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">deploymentID</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">countNew</span><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">deploymentID</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">scientificName</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">trapRate</span><span class="p">)</span>
 </code></pre></div>
+<p>Trapper envía la tabla entera de una vez (<code>page</code> y <code>page_size</code> no hacen nada). Sin filas responde
+<code>400 "Empty queryset"</code>; el SDK no devuelve filas (una lista vacía, un <code>FeatureCollection</code> vacío o un fichero vacío).</p>
+<h2 id="parametros-y-filtros">Parámetros y filtros</h2>
+<table>
+<thead>
+<tr>
+<th>Parámetro</th>
+<th>Tipo</th>
+<th>Por defecto</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>count_var</code></td>
+<td><code>"count"</code> / <code>"countNew"</code></td>
+<td><code>"count"</code></td>
+<td>Qué se suma. <code>countNew</code> solo si el clasificador lo tiene (<code>400</code> si no)</td>
+</tr>
+<tr>
+<td><code>all_dep</code></td>
+<td>booleano</td>
+<td><code>False</code></td>
+<td>Todos los despliegues del proyecto, también los que no tienen observaciones</td>
+</tr>
+<tr>
+<td><code>filter_dep</code></td>
+<td>texto</td>
+<td></td>
+<td>Solo los despliegues cuyo <code>deploymentID</code> lo contiene</td>
+</tr>
+</tbody>
+</table>
+<p>Los filtros son los de la tabla de resultados de <a href="../classifications/">resultados de clasificación</a>: <code>approved</code> (se
+envía como <code>status</code> en v1), <code>species</code>, <code>observation_type</code>, <code>deployment</code>, <code>collection</code>, <code>rdate_from</code>/<code>rdate_to</code>,
+<code>ftype</code>, <code>bboxes</code>, ... Trapper ignora sin error cualquier otro; el SDK emite un <code>UnknownFilterWarning</code>.
+<code>classified</code>/<code>classified_ai</code> responden <code>500</code> en v2 (el SDK avisa).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">get_project_results_agg</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">filter_dep</span><span class="o">=</span><span class="s2">&quot;don&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="geojson">GeoJSON</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">fc</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">get_project_geojson</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">fc</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]:</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">],</span> <span class="n">feature</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;trapRate&quot;</span><span class="p">])</span>
+</code></pre></div>
+<p>Un punto por fila, con los campos de la fila (sin <code>latitude</code> ni <code>longitude</code>) como propiedades.
+<code>get_project_results_agg(geojson=True)</code> es un <code>ValueError</code>: da un <code>FeatureCollection</code>, no filas.</p>
 <h2 id="exportar-a-csv">Exportar a CSV</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">export_project_results_agg</span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;agg_results.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">export_project_results_agg</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;tasas.csv&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># El CSV de Trapper tal cual llega (su cabecera y su orden de columnas)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">export_project_results_agg</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;tasas.csv&quot;</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
-<p><code>export_project_results_agg()</code> <strong>solo admite CSV</strong>: lanza <code>ValueError</code> si pasas <code>geojson=True</code>. Para la
-variante GeoJSON, usa directamente <code>get_project_results_agg(project_pk=7, geojson=True)</code> (la forma de la
-respuesta es distinta, así que no se envuelve como una exportación CSV).</p>
 
 
 

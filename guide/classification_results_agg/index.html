@@ -88,7 +88,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#classification-results-agg" class="md-skip">
+        <a href="#classification-results-agg-trap-rates" class="md-skip">
           Skip to content
         </a>
       
@@ -1005,10 +1005,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#fetching-a-page" class="md-nav__link">
+  <a href="#a-row" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fetching a page
+        A row
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters-and-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters and filters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geojson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoJSON
       
     </span>
   </a>
@@ -2759,10 +2781,32 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#fetching-a-page" class="md-nav__link">
+  <a href="#a-row" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Fetching a page
+        A row
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters-and-filters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters and filters
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#geojson" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GeoJSON
       
     </span>
   </a>
@@ -2800,33 +2844,109 @@
   
 
 
-<h1 id="classification-results-agg">Classification Results Agg</h1>
+<h1 id="classification-results-agg-trap-rates">Classification Results Agg (trap rates)</h1>
 <div class="admonition info">
 <p class="admonition-title">Trapper compatibility</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — same code on both. See <a href="../versions/">Trapper versions</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — checked against both. See <a href="../versions/">Trapper versions</a>.</p>
 </div>
-<p><code>client.classification_results_agg</code> — aggregated classification results per deployment
-(counts, coordinates), for a classification project.</p>
-<p><strong>Endpoint:</strong> <code>GET /media_classification/api/classifications/results/agg/{project_pk}/</code>.
-Returns CSV (gzip) by default, or GeoJSON when <code>geojson=True</code>.</p>
-<div class="admonition note">
-<p class="admonition-title">Not directly usable via <code>get()</code>/<code>where()</code></p>
-<p>The endpoint needs a <code>project_pk</code> in its URL — use <code>get_project_results_agg()</code>/
-<code>export_project_results_agg()</code> below, which resolve the URL for you.</p>
-</div>
-<h2 id="fetching-a-page">Fetching a page</h2>
+<p><code>client.classification_results_agg</code> — the <strong>trap rates</strong> of a classification project. Trapper takes the final
+classifications of the project (the ones the filters keep), adds up the count of each species per deployment and
+divides it by the days the deployment worked.</p>
+<p><strong>Endpoint:</strong> <code>GET /media_classification/api/classifications/results/agg/{project_pk}/</code> — a gzip CSV, or a GeoJSON
+<code>FeatureCollection</code> with <code>geojson=True</code>. The project is in the URL, so there is no <code>get()</code>/<code>where()</code>: use the
+methods below.</p>
+<h2 id="a-row">A row</h2>
+<p>One row per <strong>deployment and species</strong> (<code>ClassificationAgg</code>), with typed values (empty cells are <code>None</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Fields</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>deploymentID</code>, <code>locationID</code>, <code>locationName</code>, <code>latitude</code>, <code>longitude</code>, <code>coordinateUncertainty</code></td>
+<td>Where</td>
+</tr>
+<tr>
+<td><code>deploymentStart</code>, <code>deploymentEnd</code> (<code>datetime</code>), <code>days</code></td>
+<td>When, and the days it worked</td>
+</tr>
+<tr>
+<td><code>setupBy</code>, <code>cameraID</code>, <code>cameraModel</code>, <code>cameraDelay</code>, <code>cameraHeight</code>, <code>cameraDepth</code>, <code>cameraTilt</code>, <code>cameraHeading</code>, <code>detectionDistance</code>, <code>timestampIssues</code>, <code>baitUse</code>, <code>featureType</code>, <code>habitat</code>, <code>deploymentGroups</code>, <code>deploymentTags</code>, <code>deploymentComments</code></td>
+<td>The deployment's Camtrap DP fields</td>
+</tr>
+<tr>
+<td><code>observationType</code>, <code>scientificName</code></td>
+<td>What was seen (<code>None</code> for a deployment with no observation, with <code>all_dep=True</code>)</td>
+</tr>
+<tr>
+<td><code>count</code> (or <code>countNew</code>)</td>
+<td>How many</td>
+</tr>
+<tr>
+<td><code>trapRate</code></td>
+<td><code>count / days</code></td>
+</tr>
+</tbody>
+</table>
+<p>Deployments without start or end date are left out.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">get_project_results_agg</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">page</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">deploymentID</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">countNew</span><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">deploymentID</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">scientificName</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">trapRate</span><span class="p">)</span>
 </code></pre></div>
+<p>Trapper sends the whole table at once (<code>page</code> and <code>page_size</code> do nothing). With no rows it answers
+<code>400 "Empty queryset"</code>; the SDK gives no rows (an empty list, an empty <code>FeatureCollection</code> or an empty file).</p>
+<h2 id="parameters-and-filters">Parameters and filters</h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>count_var</code></td>
+<td><code>"count"</code> / <code>"countNew"</code></td>
+<td><code>"count"</code></td>
+<td>What is added up. <code>countNew</code> only if the classificator has it (<code>400</code> otherwise)</td>
+</tr>
+<tr>
+<td><code>all_dep</code></td>
+<td>boolean</td>
+<td><code>False</code></td>
+<td>Every deployment of the project, also the ones with no observation</td>
+</tr>
+<tr>
+<td><code>filter_dep</code></td>
+<td>text</td>
+<td></td>
+<td>Only deployments whose <code>deploymentID</code> contains it</td>
+</tr>
+</tbody>
+</table>
+<p>The filters are those of the results table of <a href="../classifications/">classification results</a>: <code>approved</code> (sent as
+<code>status</code> on v1), <code>species</code>, <code>observation_type</code>, <code>deployment</code>, <code>collection</code>, <code>rdate_from</code>/<code>rdate_to</code>, <code>ftype</code>,
+<code>bboxes</code>, ... Trapper ignores any other without an error; the SDK emits an <code>UnknownFilterWarning</code>.
+<code>classified</code>/<code>classified_ai</code> answer <code>500</code> on v2 (the SDK warns).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">get_project_results_agg</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="n">filter_dep</span><span class="o">=</span><span class="s2">&quot;don&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="geojson">GeoJSON</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">fc</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">get_project_geojson</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">approved</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">fc</span><span class="p">[</span><span class="s2">&quot;features&quot;</span><span class="p">]:</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">feature</span><span class="p">[</span><span class="s2">&quot;geometry&quot;</span><span class="p">][</span><span class="s2">&quot;coordinates&quot;</span><span class="p">],</span> <span class="n">feature</span><span class="p">[</span><span class="s2">&quot;properties&quot;</span><span class="p">][</span><span class="s2">&quot;trapRate&quot;</span><span class="p">])</span>
+</code></pre></div>
+<p>One point per row, with the row's fields (without <code>latitude</code> and <code>longitude</code>) as properties.
+<code>get_project_results_agg(geojson=True)</code> is a <code>ValueError</code>: it gives a <code>FeatureCollection</code>, not rows.</p>
 <h2 id="exporting-to-csv">Exporting to CSV</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">export_project_results_agg</span><span class="p">(</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;agg_results.csv&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">export_project_results_agg</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;trap_rates.csv&quot;</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="c1"># Trapper&#39;s CSV as it comes (its header and column order)</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results_agg</span><span class="o">.</span><span class="n">export_project_results_agg</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s2">&quot;trap_rates.csv&quot;</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
-<p><code>export_project_results_agg()</code> <strong>only supports CSV</strong> — it raises <code>ValueError</code> if you pass
-<code>geojson=True</code>. For the GeoJSON variant, use <code>get_project_results_agg(project_pk=7, geojson=True)</code>
-directly instead (the response shape differs, so it isn't wrapped as a CSV export).</p>
 
 
 
