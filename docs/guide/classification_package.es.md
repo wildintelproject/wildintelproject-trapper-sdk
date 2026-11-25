@@ -1,87 +1,75 @@
 # Paquete de clasificación
 
 !!! info "Compatibilidad con Trapper"
-    **v1** ✔ · **v2** ✔ — el mismo código en ambas. Consulta [Versiones de Trapper](versions.md).
+    **v1** ✔ · **v2** ✔ — comprobado en los dos. Consulta [Versiones de Trapper](versions.md).
 
-`client.classification_package` — genera (o reutiliza uno en caché) un paquete de datos Camtrap DP de
-un proyecto de clasificación y devuelve su URL de descarga.
+`client.classification_package` — el **paquete de datos Camtrap DP** de un proyecto de clasificación: un zip con
+`datapackage.json` y las tablas `deployments`, `media` y `observations` (más `events` con `include_events=True`).
 
-**Endpoint:** `GET /media_classification/api/package/{project_pk}/`.
+**Endpoint:** `GET /media_classification/api/package/{project_pk}/`. Trapper construye el paquete en la petición
+(segundos en un proyecto pequeño), o lo toma de su caché (uno por cada conjunto de parámetros; `clear_cache=True` lo
+reconstruye), y responde `{"data": {"message", "errors", "package"}}`. `package` es la URL de descarga: lleva su
+propio token (`?rt=...`), funciona sin el token de la API y sigue valiendo hasta que se reconstruye el paquete.
 
-!!! note "No se puede usar directamente con `get()`/`where()`"
-    Es una única respuesta JSON de forma fija, no un listado paginado: usa `get_project_package()`,
-    más abajo.
-
-## Generar y descargar un paquete
+## Construir y descargar un paquete
 
 ```python
-response = client.classification_package.get_project_package(project_pk=7)
+# En una llamada
+ruta = client.classification_package.download_project_package(7, "doñana.zip", clear_cache=True)
 
+# O en dos
+response = client.classification_package.get_project_package(project_pk=7, approved_only=False)
 print(response.data.message)
-print(response.data.package)  # URL de descarga absoluta, ya lleva su propio token de un solo uso
-
-file_response = client.make_request(endpoint=response.data.package, method="GET")
-with open("camtrapdp_project_7.zip", "wb") as f:
-    f.write(file_response.content)
+ruta = client.classification_package.download_package(response, "paquetes/")   # paquetes/<id>.zip
 ```
 
-La URL de `response.data.package` ya lleva un token de acceso de un solo uso (`?rt=...`): descárgala tal
-cual con `client.make_request()`, y nunca la vuelvas a pedir a través de un método de componente.
+`download_package()` acepta la respuesta o su URL, descarga el zip a `<fichero>.part` y lo mueve a su sitio, y
+reintenta los fallos de red. También hay un script listo para usar:
+[`examples/download_camtrapdp_for_classification_project.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/development/examples/download_camtrapdp_for_classification_project.py).
 
-También hay un script listo para ejecutar:
-[`examples/download_camtrapdp_for_classification_project.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/download_camtrapdp_for_classification_project.py).
+## Parámetros
 
-## Parámetros de generación y caché
-
-| Parámetro | Tipo | Por defecto | Descripción |
-|---|---|---|---|
-| `clear_cache` | bool | `False` | Fuerza la regeneración en lugar de reutilizar el paquete en caché |
-| `release` | bool | `False` | Marca el paquete generado como una versión publicada |
-| `get_released` | bool | `False` | Devuelve la última versión ya publicada |
-| `export_format` | str | `"camtrapdp"` | Admite también `"trapper"` (desactiva `include_events`) |
-| `export_filetype` | str | `"csv.gz"` | Formato de fichero de las tablas de datos dentro del paquete |
-
-## Parámetros de filtrado de contenido
+Trapper ignora sin error cualquier otro parámetro; el SDK emite un `UnknownFilterWarning`.
 
 | Parámetro | Tipo | Por defecto | Descripción |
 |---|---|---|---|
-| `approved_only` | bool | `True` | Incluye solo clasificaciones aprobadas |
-| `exclude_blank` | bool | `False` | Excluye observaciones en blanco |
-| `all_deployments` | bool | `True` | Incluye todos los despliegues del proyecto |
-| `filter_deployments` | str | `None` | PK de despliegue separadas por comas (cuando `all_deployments=False`) |
-| `include_events` | bool | `False` | Incluye la tabla de eventos/secuencias |
-| `events_count_var` | str | `"count"` | Nombre de la variable de recuento en la tabla de eventos |
+| `clear_cache` | bool | `False` | Reconstruir en lugar de reutilizar el paquete en caché |
+| `release` | bool | `False` | Marcar el paquete como publicación |
+| `get_released` | bool | `False` | Devolver la última publicación |
+| `export_format` | str | `"camtrapdp"` | O `"trapper"` (columnas de Trapper; sin eventos) |
+| `export_filetype` | str | `"csv.gz"` | O `"parquet"` (cualquier otro es un `400`) |
+| `split_custom_attrs` | bool | `False` | **v2**, formato `"trapper"`: una columna por atributo propio (no se puede importar) |
+| `approved_only` | bool | `True` | Solo clasificaciones aprobadas |
+| `exclude_blank` | bool | `False` | Excluir las observaciones vacías |
+| `all_deployments` | bool | `True` | Todos los despliegues del proyecto |
+| `filter_deployments` | str | | Solo los despliegues cuyo `deploymentID` **contiene** este texto (no PK) |
+| `include_events` | bool | `False` | Añadir la tabla de eventos (secuencias) |
+| `events_count_var` | str | `"count"` | Variable de recuento de la tabla de eventos |
+| `trapper_url_token`, `private_human`, `private_vehicle` | bool | `True` | Como en [media de clasificación](classification_media.md) |
+| `name`, `version`, `title`, `description` | str | | Metadatos del paquete (`version` es `"1.0"`) |
 
-## Parámetros de URL y privacidad de los medios
+!!! warning "`keywords`, `licenses` y `private_species` no se pueden enviar"
+    Trapper los tipa como listas pero lee un único texto por parámetro, y siempre falla con ellos (`400`). El SDK
+    lanza un `ValueError` en su lugar. El paquete toma las palabras clave del proyecto de investigación y licencias
+    `private`.
 
-Los mismos indicadores que en [Medios de clasificación](classification_media.md):
+!!! warning "`release` y `get_released`"
+    No funcionan juntos a través de la API: una publicación construida aquí se guarda como paquete en caché, que
+    `get_released` no mira; y `get_released=True` sin ninguna publicación construye un paquete nuevo junto al de la
+    caché, y desde entonces Trapper responde `400 "get() returned more than one UserDataPackage"` para esos
+    parámetros (`clear_cache` incluido) hasta que un administrador borra uno (admin de Django, *User data packages*).
+    El error del SDK lo dice.
 
-| Parámetro | Tipo | Por defecto |
-|---|---|---|
-| `trapper_url_token` | bool | `True` |
-| `private_human` | bool | `True` |
-| `private_vehicle` | bool | `True` |
-| `private_species` | list | `[]` |
-
-## Parámetros de metadatos del paquete
-
-Se escriben en el `datapackage.json` del paquete:
-
-| Parámetro | Tipo | Por defecto |
-|---|---|---|
-| `name` | str | `None` |
-| `version` | str | `"1.0"` |
-| `title` | str | `None` |
-| `description` | str | `None` |
-| `keywords` | list | `[]` |
-| `licenses` | list | `[]` |
+!!! note "v1: el proyecto necesita un administrador"
+    En v1 los contribuidores del paquete son los administradores del proyecto de clasificación: un proyecto sin
+    rol de administrador falla con `[] should be non-empty at property 'contributors'` (el error del SDK lo dice).
 
 ```python
 response = client.classification_package.get_project_package(
     project_pk=7,
     clear_cache=True,
     approved_only=False,
-    title="Doñana camera traps 2026",
-    keywords=["camera-trap", "doñana"],
+    filter_deployments="don",          # deploymentID que contienen "don"
+    title="Cámaras trampa de Doñana 2026",
 )
 ```

@@ -1,87 +1,74 @@
 # Classification Package
 
 !!! info "Trapper compatibility"
-    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+    **v1** ✔ · **v2** ✔ — checked against both. See [Trapper versions](versions.md).
 
-`client.classification_package` — generates (or reuses a cached) Camtrap DP data package for a
-classification project, and returns its download URL.
+`client.classification_package` — the **Camtrap DP data package** of a classification project: a zip with
+`datapackage.json` and the `deployments`, `media` and `observations` tables (plus `events` with
+`include_events=True`).
 
-**Endpoint:** `GET /media_classification/api/package/{project_pk}/`.
+**Endpoint:** `GET /media_classification/api/package/{project_pk}/`. Trapper builds the package in the request
+(seconds for a small project), or takes it from its cache (one per set of parameters; `clear_cache=True` rebuilds
+it), and answers `{"data": {"message", "errors", "package"}}`. `package` is the download URL: it carries its own
+token (`?rt=...`), works without the API token and stays valid until the package is rebuilt.
 
-!!! note "Not directly usable via `get()`/`where()`"
-    This is a single fixed-shape JSON response, not a paginated list — use `get_project_package()`
-    below.
-
-## Generating and downloading a package
+## Building and downloading a package
 
 ```python
-response = client.classification_package.get_project_package(project_pk=7)
+# In one call
+path = client.classification_package.download_project_package(7, "doñana.zip", clear_cache=True)
 
+# Or in two
+response = client.classification_package.get_project_package(project_pk=7, approved_only=False)
 print(response.data.message)
-print(response.data.package)  # absolute download URL, already carries its own one-time token
-
-file_response = client.make_request(endpoint=response.data.package, method="GET")
-with open("camtrapdp_project_7.zip", "wb") as f:
-    f.write(file_response.content)
+path = client.classification_package.download_package(response, "packages/")   # packages/<id>.zip
 ```
 
-`response.data.package`'s URL already carries a one-time access token (`?rt=...`) — download it
-as-is via `client.make_request()`, never re-request it through a component method.
+`download_package()` takes the response or its URL, streams the zip to `<file>.part` and moves it into place, and
+retries network failures. There's also a ready-to-run script:
+[`examples/download_camtrapdp_for_classification_project.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/development/examples/download_camtrapdp_for_classification_project.py).
 
-There's also a ready-to-run script:
-[`examples/download_camtrapdp_for_classification_project.py`](https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/download_camtrapdp_for_classification_project.py).
+## Parameters
 
-## Generation/cache parameters
-
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `clear_cache` | bool | `False` | Force regeneration instead of reusing the cached package |
-| `release` | bool | `False` | Mark the generated package as a release |
-| `get_released` | bool | `False` | Return the latest already-published release instead |
-| `export_format` | str | `"camtrapdp"` | Also accepts `"trapper"` (disables `include_events`) |
-| `export_filetype` | str | `"csv.gz"` | File format for the data tables inside the package |
-
-## Content-filtering parameters
+Trapper ignores any other parameter without an error; the SDK emits an `UnknownFilterWarning`.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
-| `approved_only` | bool | `True` | Only include approved classifications |
-| `exclude_blank` | bool | `False` | Exclude blank observations |
-| `all_deployments` | bool | `True` | Include all deployments of the project |
-| `filter_deployments` | str | `None` | Comma-separated deployment PKs (when `all_deployments=False`) |
-| `include_events` | bool | `False` | Include the events/sequences table |
-| `events_count_var` | str | `"count"` | Name of the count variable in the events table |
+| `clear_cache` | bool | `False` | Rebuild instead of reusing the cached package |
+| `release` | bool | `False` | Mark the package as a release |
+| `get_released` | bool | `False` | Return the latest release instead |
+| `export_format` | str | `"camtrapdp"` | Or `"trapper"` (Trapper's columns; no events) |
+| `export_filetype` | str | `"csv.gz"` | Or `"parquet"` (anything else is a `400`) |
+| `split_custom_attrs` | bool | `False` | **v2**, `"trapper"` format: one column per custom attribute (not importable) |
+| `approved_only` | bool | `True` | Only approved classifications |
+| `exclude_blank` | bool | `False` | Leave out blank observations |
+| `all_deployments` | bool | `True` | Every deployment of the project |
+| `filter_deployments` | str | | Only deployments whose `deploymentID` **contains** this text (not PKs) |
+| `include_events` | bool | `False` | Add the events (sequences) table |
+| `events_count_var` | str | `"count"` | Count variable of the events table |
+| `trapper_url_token`, `private_human`, `private_vehicle` | bool | `True` | As in [classification media](classification_media.md) |
+| `name`, `version`, `title`, `description` | str | | Package metadata (`version` is `"1.0"`) |
 
-## Media URL/privacy parameters
+!!! warning "`keywords`, `licenses` and `private_species` cannot be sent"
+    Trapper types them as lists but reads one text per parameter, and always fails on them (`400`). The SDK
+    raises a `ValueError` instead. The package takes the research project's keywords and `private` licenses.
 
-Same flags as [Classification Media](classification_media.md):
+!!! warning "`release` and `get_released`"
+    They do not work together through the API: a release built here is stored as a cached package, which
+    `get_released` does not look at; and `get_released=True` with no release builds a new package next to the
+    cached one, after which Trapper answers `400 "get() returned more than one UserDataPackage"` for those parameters
+    (`clear_cache` included) until an admin deletes one (Django admin, *User data packages*). The SDK's error says so.
 
-| Parameter | Type | Default |
-|---|---|---|
-| `trapper_url_token` | bool | `True` |
-| `private_human` | bool | `True` |
-| `private_vehicle` | bool | `True` |
-| `private_species` | list | `[]` |
-
-## Package metadata parameters
-
-Written into the package's `datapackage.json`:
-
-| Parameter | Type | Default |
-|---|---|---|
-| `name` | str | `None` |
-| `version` | str | `"1.0"` |
-| `title` | str | `None` |
-| `description` | str | `None` |
-| `keywords` | list | `[]` |
-| `licenses` | list | `[]` |
+!!! note "v1: the project needs an admin"
+    On v1 the contributors of the package are the admins of the classification project: a project with no admin
+    role fails with `[] should be non-empty at property 'contributors'` (the SDK's error says so).
 
 ```python
 response = client.classification_package.get_project_package(
     project_pk=7,
     clear_cache=True,
     approved_only=False,
+    filter_deployments="don",          # deploymentIDs that contain "don"
     title="Doñana camera traps 2026",
-    keywords=["camera-trap", "doñana"],
 )
 ```

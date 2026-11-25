@@ -4,9 +4,8 @@ Example: generate and download the Camtrap DP data package of a classification p
 
 ``/media_classification/api/package/{project_pk}/`` generates (or reuses a cached)
 Camtrap DP zip package for a classification project and returns its download URL
-in ``data.package``. That URL is already absolute and carries its own one-time
-access token (``?rt=...``) — it does not need the client's ``Authorization``
-header, so it's downloaded as-is via ``client.make_request()``.
+in ``data.package``. That URL carries its own token (``?rt=...``), so
+``download_package()`` saves it without logging in.
 
 Usage:
     export WILDINTEL_BASE_URL="https://your-trapper-instance.example"
@@ -57,11 +56,8 @@ def main() -> None:
     print(response.data.message)
     print(f"Downloading from {response.data.package} ...")
 
-    file_response = client.make_request(endpoint=response.data.package, method="GET")
-    with open(output_path, "wb") as f:
-        f.write(file_response.content)
-
-    print(f"Saved to {output_path}")
+    path = client.classification_package.download_package(response, output_path)
+    print(f"Saved to {path}")
 
 
 if __name__ == "__main__":

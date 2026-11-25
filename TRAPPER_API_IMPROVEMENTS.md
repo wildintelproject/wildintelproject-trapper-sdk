@@ -78,6 +78,9 @@ the SDK does in the meantime.
 | 63 | Filter the user and AI lists by deployment or collection without the project | media_classification |
 | 64 | Apply the same filters to the user and AI lists in v1 and v2 | media_classification |
 | 65 | Read `camtrapdp` (and every boolean) as a boolean, and say "no species" with `null` | cross-cutting |
+| 66 | Read the list parameters of the data package (`keywords`, `licenses`, `private_species`) | media_classification |
+| 67 | Make `release` and `get_released` of the data package work, and never cache two packages for one key | media_classification |
+| 68 | Do not fail the data package of a project with no admin | media_classification |
 
 ---
 
@@ -1219,6 +1222,50 @@ a missing species as the text `"None"` (`str(None)`), in v1 and v2.
 **Proposal.** Read booleans with the same parser as the filters (`true`/`false`/`1`/`0`), and send `null` for no species.
 
 **Workaround in the SDK.** `camtrapdp` is sent as `True`/`False`; `"None"` is read as `None`.
+
+## 66. Read the list parameters of the data package (`keywords`, `licenses`, `private_species`)
+
+**Labels:** bug, api
+
+**Problem.** `ResultsDataPackageGeneratorParams` types `keywords`, `licenses` and `private_species` as `List`, but
+`AbstractParams.from_query_params` reads one text per parameter (`query_params.get`) and `List("a")` fails, so the text is
+kept. Every request with them fails (checked, v1 and v2): `keywords=a` → `400 'a' is not of type 'array'`, `licenses=x` →
+`400 'str' object has no attribute 'name'`, `private_species=3` → `400 'is_in' cannot check for List(String) values`.
+The package can only have the research project's keywords and `private` licenses.
+
+**Proposal.** Read them with `query_params.getlist` (repeated parameters, or comma-separated), and `licenses` as names
+of licenses.
+
+**Workaround in the SDK.** A `ValueError` that says so, before the request.
+
+## 67. Make `release` and `get_released` of the data package work, and never cache two packages for one key
+
+**Labels:** bug, api
+
+**Problem.** The API saves every package as `CLASSIFICATION_RESULTS_CACHE` (with `released` from `release`), and
+`get_released` looks for `CLASSIFICATION_RESULTS` packages: a release made through the API is never found. When there is
+none, `get_released=True` builds a new package with the same `cache_key` (the flags are left out of the key) **without
+deleting the cached one**. From then on `_check_cache` does `UserDataPackage.objects.get(...)` on two rows and every request
+with those parameters, `clear_cache=true` included, answers `400 get() returned more than one UserDataPackage` (checked
+on v2; it needed deleting one in the database).
+
+**Proposal.** `get_released` with no release: say so (`404`) instead of building one; use `filter(...).first()` (or a
+unique constraint) for the cache; let the API release a package as `CLASSIFICATION_RESULTS`.
+
+**Workaround in the SDK.** The error says what happened and that an admin has to delete one; the docs warn.
+
+## 68. Do not fail the data package of a project with no admin
+
+**Labels:** bug, api
+
+**Problem.** On v1 the package's `contributors` are the admins of the classification project
+(`classification_project_roles` with role admin). A project with none answers `400 [package-error] ... [] should be
+non-empty at property 'contributors'`, which does not say what to do. Also, the download URL answers `200` with an empty
+body and `X-Accel-Redirect` when Trapper is not behind its nginx.
+
+**Proposal.** Fall back to the project's owner (or the research project's), or answer a `400` that names the cause.
+
+**Workaround in the SDK.** The error adds "give the project an admin role"; the download says when there is no proxy.
 
 ---
 
