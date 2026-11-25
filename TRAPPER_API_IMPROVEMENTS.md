@@ -8,6 +8,8 @@ the SDK does in the meantime.
   that stays open: Trapper's API is not ours, so nothing here is "fixed" by a pull request of this repository.
 - **Checked against:** the Trapper v1 source (`development`, v1.7.3-63) and a live v1.7.4 server.
 - **Trapper v2:** not checked unless an issue says so. Re-check each one before filing it.
+- **The new API** (`/api/v2/`, branch `refactor-api-ninja`, 2.0.0a4): see the section *Status on the new API* at the
+  end, which says which entries it solves.
 - Add new issues at the end, keep the numbering, and move one to the *Done* list when Trapper fixes it.
   Mark what was not checked as *(unverified)*, and open the pull request with `Refs #26`, not `Closes`.
 
@@ -1296,6 +1298,37 @@ without an error, so finding one user means reading them all.
 `username` and `search` filters.
 
 **Workaround in the SDK.** `UnknownFilterWarning` for any filter; the docs show a client-side lookup.
+
+## Status on the new API (`refactor-api-ninja`, 2.0.0a4)
+
+Checked on 2026-11-25 on a 2.0.0a4 server (image `refactor-api-ninja`) with the data of the v2 test server, through
+its new routes (`/api/v2/...`). The old routes are still served next to them ("deleted in phase 10" of the refactor).
+Only the entries checked are listed; the others are *(unchecked)*.
+
+| # | Entry | On `/api/v2/` |
+|---|---|---|
+| 58 | `classified`/`classified_ai` in the results and media tables | **Open**: `500` (results, agg); now documented by Trapper |
+| 59 | One name for the approved filter | **Solved**: `approved` and `is_approved` filter (25 of 43); `status` is ignored |
+| 60 | `approved` in the AI results table | **Open**: `500` |
+| 61 | Same fields in the AI list | **Open**: no `owner`, `owner_profile`, `classification`, `created_at` |
+| 62 | One scale for the AI confidence | **Open**: a percentage inside each attribute (`{"value", "confidence": 93.0}`); user classifications have it too now |
+| 63 | `deployment`/`collection` without `project` | **Solved in the lists** (`deployment=3` → 4 rows); the results/media tables still reject them without `project` (documented) |
+| 64 | Same filters in the user and AI lists | **Partly**: both apply the date filters; unknown filters are still ignored without an error |
+| 65 | `camtrapdp` as a boolean | **Open**: only the exact `True` gives Camtrap DP (`true` gives Trapper's format), documented |
+| 48 | An empty table as an empty list | **Open**: `400 {"non_field_errors": ["Empty queryset ..."]}`, documented |
+| 66 | List parameters of the data package | **Open**: `keywords=a&keywords=b` and `private_species=3` still answer `400` |
+| 67 | `release`/`get_released` | **Open** (documented: `get_released` with no release builds one) *(the duplicate cache not re-checked)* |
+| 69 | Sequences: permissions, `search`, `deployment` | **Worse**: still every sequence for every user (now documented) and `search` answers `500`; `deployment` answers `500` even with one PK, and `9,3` a `400` |
+| 70 | Every account and email to every user; user filters | **Partly**: still every account and email (documented); a `pk` filter works, but the documented `search` filters nothing |
+| — | Lists without a stable order (SDK issue #108) | **Solved with `sort_by`**: `?sort_by=pk` pages without repeats (the default order, by recording time, still repeats and skips rows in classifications and resources) |
+| — | Unknown filters ignored without an error | **Open**: `?zzz=1` returns every row; a bad value of a known filter is now a `400` keyed by parameter |
+
+New on `/api/v2/`: `sort_by`/`reverse`, `all_filtered=true` (the matching PKs), `page_size` up to 500, `400` for a
+malformed filter value, `GET /api/v2/probe/auth/` to test a token, the species' `taxon_rank`, OAuth2/Basic on some
+routes, and a description of every operation in the OpenAPI schema. The species' text in classifications changed to
+`"Oryctolagus cuniculus (European Rabbit) [species]"`. There are still no routes to create locations, deployments,
+research projects, classification projects or classificators: outside citizen science the only writes are the
+collection package (`collections/process/`) and the classification import.
 
 ---
 
