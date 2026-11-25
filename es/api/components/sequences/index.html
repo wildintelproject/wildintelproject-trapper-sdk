@@ -2808,16 +2808,17 @@
 
 
 
-        <p>Component for <code>/media_classification/api/sequences</code>.</p>
-<p>Retrieve and filter resource sequences (events grouping resources
-recorded within a configurable time interval of each other).</p>
-<p>Main endpoints:
-- <code>GET /media_classification/api/sequences</code>: List of sequences
-  (this endpoint is <strong>not paginated</strong> server-side; <code>get_all</code>/<code>where</code>
-  still work transparently since a single unpaginated page is treated
-  as page 1 of 1)
-- <code>GET /media_classification/api/sequences/{pk}</code>: Single sequence detail</p>
-<p><strong>Available filter fields:</strong></p>
+        <p>The sequences of Trapper (<code>client.sequences</code>): groups of resources recorded within <code>interval</code> seconds of each
+other in a collection of a classification project, the events of Camtrap DP (<code>eventID</code>).</p>
+<ul>
+<li><code>GET /media_classification/api/sequences</code> (and <code>/{pk}</code>): <strong>not paginated</strong> (one answer with every row;
+  <code>page</code>/<code>page_size</code> do nothing) and <strong>not limited to what the user can see</strong>: every sequence of the server.
+  Read-only: Trapper builds them in the classification UI.</li>
+</ul>
+<p>A row has <code>sequence_id</code> (its number inside the collection), <code>sequence_uuid</code> (the <code>eventID</code>),
+<code>resources</code> (the resource PKs; Trapper v2 repeats a resource once per classification of it, the SDK keeps one)
+and <code>created_at</code>.</p>
+<p><strong>Filters</strong> (Trapper ignores any other without an error; the SDK emits an <code>UnknownFilterWarning</code>):</p>
 <table>
 <thead>
 <tr>
@@ -2830,30 +2831,36 @@ recorded within a configurable time interval of each other).</p>
 <tr>
 <td>sequence_id</td>
 <td>int</td>
-<td>Filter by sequence id</td>
+<td>Number of the sequence inside its collection</td>
 </tr>
 <tr>
 <td>sequence_uuid</td>
 <td>str</td>
-<td>Filter by sequence UUID</td>
+<td>UUID (the <code>eventID</code>)</td>
 </tr>
 <tr>
 <td>interval</td>
 <td>int</td>
-<td>Filter by grouping interval (seconds)</td>
+<td>Grouping interval in seconds</td>
 </tr>
 <tr>
 <td>collection</td>
 <td>PK</td>
-<td>Filter by classification-project-collection PK</td>
+<td>PK of the <strong>link</strong> between the classification project and the collection</td>
 </tr>
 <tr>
 <td>deployment</td>
-<td>comma-separated PKs</td>
-<td>Filter by deployment PKs of member resources</td>
+<td>list of PKs</td>
+<td>Deployments of its resources (sent comma-separated: Trapper reads only one repeated value)</td>
+</tr>
+<tr>
+<td>pk</td>
+<td>PK</td>
+<td>The sequence</td>
 </tr>
 </tbody>
 </table>
+<p><code>search</code> answers <code>500</code> (Trapper searches a <code>name</code> that sequences do not have): the SDK warns.</p>
 
 
 
@@ -2864,11 +2871,7 @@ recorded within a configurable time interval of each other).</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/trapper_client/components/sequences.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-11">11</a></span>
-<span class="normal"><a href="#__codelineno-0-12">12</a></span>
-<span class="normal"><a href="#__codelineno-0-13">13</a></span>
-<span class="normal"><a href="#__codelineno-0-14">14</a></span>
-<span class="normal"><a href="#__codelineno-0-15">15</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-15">15</a></span>
 <span class="normal"><a href="#__codelineno-0-16">16</a></span>
 <span class="normal"><a href="#__codelineno-0-17">17</a></span>
 <span class="normal"><a href="#__codelineno-0-18">18</a></span>
@@ -2890,33 +2893,53 @@ recorded within a configurable time interval of each other).</p>
 <span class="normal"><a href="#__codelineno-0-34">34</a></span>
 <span class="normal"><a href="#__codelineno-0-35">35</a></span>
 <span class="normal"><a href="#__codelineno-0-36">36</a></span>
-<span class="normal"><a href="#__codelineno-0-37">37</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">SequencesComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]):</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    Component for ``/media_classification/api/sequences``.</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">    Retrieve and filter resource sequences (events grouping resources</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">    recorded within a configurable time interval of each other).</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    Main endpoints:</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">    - ``GET /media_classification/api/sequences``: List of sequences</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">      (this endpoint is **not paginated** server-side; ``get_all``/``where``</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">      still work transparently since a single unpaginated page is treated</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">      as page 1 of 1)</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">    - ``GET /media_classification/api/sequences/{pk}``: Single sequence detail</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    **Available filter fields:**</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    | Parameter     | Type                | Description                                  |</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    |---------------|---------------------|-----------------------------------------------|</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    | sequence_id   | int                 | Filter by sequence id                          |</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    | sequence_uuid | str                 | Filter by sequence UUID                        |</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    | interval      | int                 | Filter by grouping interval (seconds)          |</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">    | collection    | PK                  | Filter by classification-project-collection PK |</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    | deployment    | comma-separated PKs | Filter by deployment PKs of member resources   |</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;media_classification/api/sequences&quot;</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Sequence</span>
+<span class="normal"><a href="#__codelineno-0-37">37</a></span>
+<span class="normal"><a href="#__codelineno-0-38">38</a></span>
+<span class="normal"><a href="#__codelineno-0-39">39</a></span>
+<span class="normal"><a href="#__codelineno-0-40">40</a></span>
+<span class="normal"><a href="#__codelineno-0-41">41</a></span>
+<span class="normal"><a href="#__codelineno-0-42">42</a></span>
+<span class="normal"><a href="#__codelineno-0-43">43</a></span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+<span class="normal"><a href="#__codelineno-0-45">45</a></span>
+<span class="normal"><a href="#__codelineno-0-46">46</a></span>
+<span class="normal"><a href="#__codelineno-0-47">47</a></span>
+<span class="normal"><a href="#__codelineno-0-48">48</a></span>
+<span class="normal"><a href="#__codelineno-0-49">49</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="k">class</span><span class="w"> </span><span class="nc">SequencesComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]):</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="sd">    The sequences of Trapper (``client.sequences``): groups of resources recorded within ``interval`` seconds of each</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    other in a collection of a classification project, the events of Camtrap DP (``eventID``).</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19"></a>
+<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">    - ``GET /media_classification/api/sequences`` (and ``/{pk}``): **not paginated** (one answer with every row;</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">      ``page``/``page_size`` do nothing) and **not limited to what the user can see**: every sequence of the server.</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">      Read-only: Trapper builds them in the classification UI.</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23"></a>
+<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    A row has ``sequence_id`` (its number inside the collection), ``sequence_uuid`` (the ``eventID``),</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    ``resources`` (the resource PKs; Trapper v2 repeats a resource once per classification of it, the SDK keeps one)</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    and ``created_at``.</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    **Filters** (Trapper ignores any other without an error; the SDK emits an ``UnknownFilterWarning``):</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    | Parameter | Type | Description |</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    |---|---|---|</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">    | sequence_id | int | Number of the sequence inside its collection |</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    | sequence_uuid | str | UUID (the ``eventID``) |</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">    | interval | int | Grouping interval in seconds |</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    | collection | PK | PK of the **link** between the classification project and the collection |</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    | deployment | list of PKs | Deployments of its resources (sent comma-separated: Trapper reads only one repeated value) |</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    | pk | PK | The sequence |</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    ``search`` answers ``500`` (Trapper searches a ``name`` that sequences do not have): the SDK warns.</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;media_classification/api/sequences&quot;</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Sequence</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="n">_SEQUENCE_FILTERS</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">:</span> <span class="n">_SEQUENCE_FILTERS</span><span class="p">}</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="n">broken_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="s2">&quot;answers 500 (it searches a field &#39;name&#39; that sequences do not have)&quot;</span><span class="p">}</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;``deployment`` as Trapper reads it: comma-separated PKs.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_lists</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">comma</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;deployment&quot;</span><span class="p">,))</span>
 </code></pre></div></td></tr></table></div>
               </details>
 

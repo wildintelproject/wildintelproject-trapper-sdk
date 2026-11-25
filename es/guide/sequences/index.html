@@ -1214,10 +1214,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#los-seis-patrones-de-acceso" class="md-nav__link">
+  <a href="#uso" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Los seis patrones de acceso
+        Uso
       
     </span>
   </a>
@@ -2772,10 +2772,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#los-seis-patrones-de-acceso" class="md-nav__link">
+  <a href="#uso" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Los seis patrones de acceso
+        Uso
       
     </span>
   </a>
@@ -2805,14 +2805,22 @@
 <h1 id="secuencias">Secuencias</h1>
 <div class="admonition info">
 <p class="admonition-title">Compatibilidad con Trapper</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — el mismo código en ambas. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — comprobado en los dos. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
 </div>
-<p><code>client.sequences</code> — secuencias de recursos: eventos que agrupan recursos registrados dentro de un
-intervalo de tiempo configurable entre sí.</p>
-<p><strong>Endpoint:</strong> <code>GET /media_classification/api/sequences</code> (listado + detalle). Este endpoint <strong>no está
-paginado</strong> en el servidor: <code>get_all()</code>/<code>where()</code>/<code>all()</code> siguen funcionando de forma transparente,
-porque la única respuesta sin paginar se trata como la página 1 de 1.</p>
+<p><code>client.sequences</code> — grupos de recursos grabados con menos de <code>interval</code> segundos de diferencia en una colección de
+un proyecto de clasificación: los eventos de Camtrap DP (<code>eventID</code>). Trapper los construye en la interfaz de
+clasificación; la API solo los lee.</p>
+<p><strong>Endpoint:</strong> <code>GET /media_classification/api/sequences</code> (listado + detalle):</p>
+<ul>
+<li><strong>Sin paginar</strong>: una respuesta con todas las filas (<code>page</code>/<code>page_size</code> no hacen nada); <code>get_all()</code>/<code>where()</code>
+  funcionan.</li>
+<li><strong>Sin limitarse a lo que ve el usuario</strong>: todas las secuencias del servidor.</li>
+</ul>
+<p>Una fila (<code>Sequence</code>) tiene <code>sequence_id</code> (su número dentro de la colección), <code>sequence_uuid</code> (el <code>eventID</code>),
+<code>resources</code> (las PK de los recursos — Trapper v2 repite un recurso una vez por cada clasificación suya; el SDK deja
+una) y <code>created_at</code>.</p>
 <h2 id="filtros">Filtros</h2>
+<p>Trapper ignora sin error cualquier otro filtro; el SDK emite un <code>UnknownFilterWarning</code>.</p>
 <table>
 <thead>
 <tr>
@@ -2825,39 +2833,41 @@ porque la única respuesta sin paginar se trata como la página 1 de 1.</p>
 <tr>
 <td><code>sequence_id</code></td>
 <td>int</td>
-<td>Filtra por id de secuencia</td>
+<td>Número de la secuencia dentro de su colección</td>
 </tr>
 <tr>
 <td><code>sequence_uuid</code></td>
 <td>str</td>
-<td>Filtra por UUID de secuencia</td>
+<td>UUID (el <code>eventID</code>)</td>
 </tr>
 <tr>
 <td><code>interval</code></td>
 <td>int</td>
-<td>Filtra por intervalo de agrupación (segundos)</td>
+<td>Intervalo de agrupación en segundos</td>
 </tr>
 <tr>
 <td><code>collection</code></td>
 <td>PK</td>
-<td>Filtra por PK de colección de proyecto de clasificación</td>
+<td>PK del <strong>enlace</strong> entre el proyecto de clasificación y la colección</td>
 </tr>
 <tr>
 <td><code>deployment</code></td>
-<td>PK separadas por comas</td>
-<td>Filtra por PK de despliegue de los recursos miembros</td>
+<td>lista de PK</td>
+<td>Despliegues de sus recursos. Una lista, una tupla o <code>"9,3"</code>: el SDK lo envía separado por comas, la única forma en que Trapper lee más de uno</td>
+</tr>
+<tr>
+<td><code>pk</code></td>
+<td>PK</td>
+<td>La secuencia</td>
 </tr>
 </tbody>
 </table>
-<h2 id="los-seis-patrones-de-acceso">Los seis patrones de acceso</h2>
-<p>Este componente no tiene métodos especiales: es exactamente la interfaz genérica descrita en
-<a href="../../usage/">Uso</a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">collection</span><span class="o">=</span><span class="mi">35</span><span class="p">):</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">seq</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">client</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;sequences.csv&quot;</span><span class="p">)</span>
+<p><code>search</code> responde <code>500</code> (Trapper busca un <code>name</code> que las secuencias no tienen): el SDK avisa.</p>
+<h2 id="uso">Uso</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">for</span> <span class="n">seq</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">collection</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">deployment</span><span class="o">=</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">3</span><span class="p">]):</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">seq</span><span class="o">.</span><span class="n">sequence_uuid</span><span class="p">,</span> <span class="n">seq</span><span class="o">.</span><span class="n">resources</span><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">seq</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">client</span><span class="o">.</span><span class="n">sequences</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;secuencias.csv&quot;</span><span class="p">)</span>
 </code></pre></div>
 
 
