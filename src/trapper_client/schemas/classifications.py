@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Discriminator, Field, HttpUrl, Tag, 
 
 from trapper_client.enums import ClassificationProjectRoleType
 
-from .base import TrapperSchema, choice
+from .base import TrapperSchema, choice, read_datetime
 from .classificators import Classificator
 from .research_projects import ResearchProject
 from .resources import Resource
@@ -319,14 +319,60 @@ ClassificationRecordExport = Annotated[
 ]
 
 
-class ClassificationAgg(TrapperSchema):
-    """Schema for ``/media_classification/api/classifications/results/agg/{project_pk}`` rows."""
+def _empty_to_none(value: Any) -> Any:
+    """An empty CSV cell is ``None``."""
+    return None if isinstance(value, str) and not value.strip() else value
 
-    deploymentID: str | None = None
-    count: int | str | None = None
-    countNew: int | str | None = None
-    latitude: float | str | None = None
-    longitude: float | str | None = None
+
+class ClassificationAgg(TrapperSchema):
+    """A row of ``/media_classification/api/classifications/results/agg/{project_pk}/``: one deployment and species.
+
+    The deployment's Camtrap DP fields (dates, place, camera), the days it worked (``days``), what was seen
+    (``observationType``, ``scientificName``), how many (``count``, or ``countNew`` with ``count_var="countNew"``)
+    and the trap rate (``trapRate`` = count / days). A deployment with no observations has one row with no species.
+    Empty cells are ``None``.
+    """
+
+    deploymentID: Optional[str] = None
+    locationID: Optional[str] = None
+    locationName: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    coordinateUncertainty: Optional[int] = None
+    deploymentStart: Optional[datetime] = None
+    deploymentEnd: Optional[datetime] = None
+    setupBy: Optional[str] = None
+    cameraID: Optional[str] = None
+    cameraModel: Optional[str] = None
+    cameraDelay: Optional[int] = None
+    cameraHeight: Optional[float] = None
+    cameraDepth: Optional[float] = None
+    cameraTilt: Optional[int] = None
+    cameraHeading: Optional[int] = None
+    detectionDistance: Optional[float] = None
+    timestampIssues: Optional[bool] = None
+    baitUse: Optional[bool] = None
+    featureType: Optional[str] = None
+    habitat: Optional[str] = None
+    deploymentGroups: Optional[str] = None
+    deploymentTags: Optional[str] = None
+    deploymentComments: Optional[str] = None
+    days: Optional[int] = None
+    observationType: Optional[str] = None
+    scientificName: Optional[str] = None
+    count: Optional[int] = None
+    countNew: Optional[int] = None
+    trapRate: Optional[float] = None
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def _empty_cell(cls, v):
+        return _empty_to_none(v)
+
+    @field_validator("deploymentStart", "deploymentEnd", mode="before")
+    @classmethod
+    def _date(cls, v):
+        return read_datetime(v)
 
 
 class ResultsDataPackageData(TrapperSchema):

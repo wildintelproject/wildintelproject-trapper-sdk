@@ -1121,7 +1121,8 @@ the task result, or because the classifications did not change.
 `classified_ai`, two annotations that only the list view (`ClassificationViewSet.get_queryset`) adds to the queryset. The
 results table (`classifications/results/<project_pk>/`) and the media table (`media/<project_pk>/`) use the same
 filter without them, and on **v2 answer `500`** to `?classified=true`, `?classified=false` and `?classified_ai=true`
-(checked; the list answers, `27` and `1` of the `28`). v1 answers them in the three.
+(checked; the list answers, `27` and `1` of the `28`). v1 answers them in the three. The trap-rate table (`classifications/results/agg/<project_pk>/`)
+does the same on v2 (checked).
 
 **Proposal.** Add the annotations to the two views, or take the filters out of those endpoints.
 
