@@ -162,3 +162,8 @@ res = client.resources.find_by_location(location_pk=42, resource_pk=99)
 
 This is also how you list resources within a [collection](collections.md) — `CollectionsComponent`
 itself only lists *collections*, not the resources inside one.
+
+!!! note "Paging"
+    On the old routes Trapper orders the resource list by recording time, which is not unique, so its pages can
+    repeat and skip rows. `where()`, `all()` and `get_all()` ask for pages of 500 (one request when the list fits)
+    and drop repeated rows; a longer list emits an `UnstableOrderWarning`. On the new API it is ordered by `pk`.

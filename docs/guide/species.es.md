@@ -35,3 +35,9 @@ for sp in client.species.where(search="fox"):
     print(sp.pk, sp.display_name)
 sp = client.species.find(632)
 ```
+
+!!! note "Paginación"
+    En las rutas antiguas la lista se ordena por nombre inglés, que se repite, así que sus páginas pueden repetir y
+    saltarse filas: `where()`, `all()` y `get_all()` piden páginas de 500, quitan las filas repetidas y emiten un
+    `UnstableOrderWarning` si la lista ocupa más de una página (las 36433 especies de v2 la ocupan). En la API
+    nueva se ordena por `pk`.

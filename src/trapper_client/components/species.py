@@ -37,5 +37,7 @@ class SpeciesComponent(TrapperComponent[Species]):
     """
 
     endpoint = versioned("tables/api/species", ninja="api/v2/species/")
+    #: Ordered by a key that is not unique on the old routes (issue #132).
+    unstable_order = True
     schema = Species
     known_filters = {"v1": _SPECIES_FILTERS, "v2": _SPECIES_FILTERS}

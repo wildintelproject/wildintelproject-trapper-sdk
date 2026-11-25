@@ -150,6 +150,8 @@ class ResourcesComponent(TrapperComponent[Resource]):
     """
 
     endpoint = versioned("storage/api/resources", ninja="api/v2/resources/")
+    #: Ordered by a key that is not unique on the old routes (issue #132).
+    unstable_order = True
     schema = Resource
 
     # What each version applies (checked live on v1 and v2): a parameter that is not here is ignored.

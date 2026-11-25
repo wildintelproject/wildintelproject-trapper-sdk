@@ -65,14 +65,7 @@ PROJECT_PK = 7
 class TestClassificationsComponent(ComponentUnitTestBase):
     component_class = ClassificationsComponent
 
-    # The list is read in pages of 500, the most Trapper sends (issue #108).
-    def test_get_all_sends_page_size(self, component, client):
-        client.get_all.return_value = paginated_response([])
-        component.get_all(page_size=100)
-        assert client.get_all.call_args[1]["query"]["page_size"] == 500
-
-    def test_where_passes_page_size(self, component):
-        assert component.where(page_size=25)._page_size == 500
+    def test_where_keeps_a_bigger_page_size(self, component):
         assert component.where(page_size=800)._page_size == 800
     schema = Classification
     export_schema = ClassificationResultRecordCamtrapDP

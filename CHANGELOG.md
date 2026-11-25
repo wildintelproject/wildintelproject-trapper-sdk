@@ -199,6 +199,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- The resource and species lists repeat and skip rows when paged on the old routes, like the classification list
+  (issue #132): the workaround of #108 is now `TrapperComponent.unstable_order`, set on the three (pages of 500,
+  repeated rows dropped, `UnstableOrderWarning`), and off on the new API, ordered by `sort_by=pk`.
 - `classification_projects.*_collection_resources()` failed on Trapper v2: `classification_data.url` is `null` there
   (issue #129).
 - The final classification list repeated some rows and skipped others when paged (issue #108): Trapper does not order

@@ -161,3 +161,9 @@ res = client.resources.find_by_location(location_pk=42, resource_pk=99)
 
 Así es también como se listan los recursos de una [colección](collections.md): `CollectionsComponent`
 solo lista *colecciones*, no los recursos que contienen.
+
+!!! note "Paginación"
+    En las rutas antiguas Trapper ordena la lista de recursos por fecha de grabación, que no es única, así que sus
+    páginas pueden repetir y saltarse filas. `where()`, `all()` y `get_all()` piden páginas de 500 (una petición si
+    la lista cabe) y quitan las filas repetidas; una lista más larga emite un `UnstableOrderWarning`. En la API
+    nueva se ordena por `pk`.

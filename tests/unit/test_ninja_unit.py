@@ -135,3 +135,17 @@ def test_the_new_routes_get_their_trailing_slash():
     client = _client(_server(ninja=True, calls=calls), trapper_version="ninja")
     client.get_one("api/v2/locations/1")
     assert calls[-1].url.path == "/api/v2/locations/1/"
+
+
+@pytest.mark.parametrize("name", ["classification_results", "resources", "species"])
+def test_lists_without_a_stable_order_read_pages_of_500_on_the_old_api_only(name):
+    from trapper_client.components.classifications import ClassificationsComponent
+    from trapper_client.components.resources import ResourcesComponent
+    from trapper_client.components.species import SpeciesComponent
+
+    cls = {"classification_results": ClassificationsComponent, "resources": ResourcesComponent,
+           "species": SpeciesComponent}[name]
+    assert cls(_mock("legacy")).where(page_size=10)._page_size == 500
+    assert cls(_mock("legacy")).where().unique_by == "pk"
+    ninja = cls(_mock("ninja")).where(page_size=10)
+    assert ninja._page_size == 10 and ninja.unique_by is None and ninja.query["sort_by"] == "pk"

@@ -198,7 +198,8 @@ class ComponentUnitTestBase:
         component.get_all(page_size=100)
 
         call_params = client.get_all.call_args[1]["query"]
-        assert call_params["page_size"] == 100
+        # a list without a stable order is read in pages of 500 (issue #108/#132)
+        assert call_params["page_size"] == (500 if getattr(component, "unstable_order", False) else 100)
 
     def test_get_all_uses_overwrite_endpoint(self, component, client):
         """get_all() usa overwrite_endpoint cuando se especifica."""
@@ -241,7 +242,7 @@ class ComponentUnitTestBase:
 
     def test_where_passes_page_size(self, component):
         """where() pasa page_size al APIQuery."""
-        assert component.where(page_size=25)._page_size == 25
+        assert component.where(page_size=25)._page_size == (500 if getattr(component, "unstable_order", False) else 25)
 
     def test_where_passes_query_params(self, component):
         """where() pasa los parámetros de query al APIQuery."""
