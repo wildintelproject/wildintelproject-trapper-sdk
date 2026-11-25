@@ -2833,6 +2833,8 @@
 </tr>
 </tbody>
 </table>
+<p>Trapper ignores any other filter without an error; the SDK emits an <code>UnknownFilterWarning</code>. A row has no
+<code>name</code> (Trapper does not send it): <code>slug</code> and <code>detail_data</code> identify the map.</p>
 
 
 
@@ -2863,7 +2865,11 @@
 <span class="normal"><a href="#__codelineno-0-28">28</a></span>
 <span class="normal"><a href="#__codelineno-0-29">29</a></span>
 <span class="normal"><a href="#__codelineno-0-30">30</a></span>
-<span class="normal"><a href="#__codelineno-0-31">31</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">MapsComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Map</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-31">31</a></span>
+<span class="normal"><a href="#__codelineno-0-32">32</a></span>
+<span class="normal"><a href="#__codelineno-0-33">33</a></span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span>
+<span class="normal"><a href="#__codelineno-0-35">35</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">MapsComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Map</span><span class="p">]):</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    Component for ``/geomap/api/maps``.</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14"></a>
@@ -2879,11 +2885,15 @@
 <a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    |-----------|---------|-----------------------------------------------------------|</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    | owner     | boolean | true = maps owned by the current user                     |</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    | search    | string  | Free-text search across name, description, owner__username |</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;geomap/api/maps&quot;</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Map</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a>    <span class="n">supported_versions</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;v1&quot;</span><span class="p">,)</span>  <span class="c1"># removed in Trapper v2</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    Trapper ignores any other filter without an error; the SDK emits an ``UnknownFilterWarning``. A row has no</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    ``name`` (Trapper does not send it): ``slug`` and ``detail_data`` identify the map.</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31"></a>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;geomap/api/maps&quot;</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Map</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="n">supported_versions</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;v1&quot;</span><span class="p">,)</span>  <span class="c1"># removed in Trapper v2</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;owner&quot;</span><span class="p">,</span> <span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;pk&quot;</span><span class="p">})}</span>
 </code></pre></div></td></tr></table></div>
               </details>
 

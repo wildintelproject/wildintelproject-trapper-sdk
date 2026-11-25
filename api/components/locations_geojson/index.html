@@ -2878,18 +2878,61 @@
 <p>This endpoint returns a GeoJSON FeatureCollection (not paginated).
 Use :meth:<code>get</code> as the primary method. All other inherited methods
 raise <code>NotImplementedError</code>.</p>
-<p><strong>Available filter fields:</strong></p>
-<p>In addition to the filters provided for Localizations, the following are added:</p>
-<p>|------------------|-------------|-------------|
-| Parameter        | Type        | Description |
-|------------------|-------------|-------------|
-| locations        | Location PKs | (alias for locations_map)
-| colls                | Collection PKs | associated via deployments
-| reses                | Resource PKs | associated via deployments
-| classes          | Classification PKs | associated via deployments
-| radius           | lon,lat,meters |  filters by distance from a point
-| search=          | string        | Searches across: location_id, name, description, county, city, owner__username, deployments__deployment_id
-| in_bbox          | minLon,minLat,maxLon,maxLat |  Filters locations within a geographic bounding box</p>
+<p><strong>Filters</strong> (<code>LocationGeoFilter</code>; Trapper ignores any other without an error, the SDK emits an
+<code>UnknownFilterWarning</code>): those of the location list (<code>owner</code>, <code>owners</code>, <code>research_project</code>,
+<code>research_projects_member</code>, <code>locations_map</code>, <code>location_id</code>, <code>name</code>, <code>city</code>, <code>county</code>, <code>state</code>,
+<code>country</code>, <code>is_public</code>, ...) and:</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>locations</td>
+<td>list of PKs</td>
+<td>Location PKs (like <code>locations_map</code>)</td>
+</tr>
+<tr>
+<td>colls</td>
+<td>list of PKs</td>
+<td>Collections, through the deployments (<code>collection_id=</code> sets it)</td>
+</tr>
+<tr>
+<td>reses</td>
+<td>list of PKs</td>
+<td>Resources, through the deployments</td>
+</tr>
+<tr>
+<td>classes</td>
+<td>list of PKs</td>
+<td>Classifications, through the deployments</td>
+</tr>
+<tr>
+<td>deployments</td>
+<td>list of PKs</td>
+<td>Deployments</td>
+</tr>
+<tr>
+<td>radius</td>
+<td><code>lon,lat,meters</code></td>
+<td>Within that distance of a point</td>
+</tr>
+<tr>
+<td>in_bbox</td>
+<td><code>minLon,minLat,maxLon,maxLat</code></td>
+<td>Inside a bounding box</td>
+</tr>
+<tr>
+<td>search</td>
+<td>string</td>
+<td><code>location_id</code>, <code>name</code>, <code>description</code>, <code>county</code>, <code>city</code>, owner's username, <code>deployment_id</code></td>
+</tr>
+</tbody>
+</table>
 <p><strong>Example:</strong></p>
 <p>Fetch all locations as GeoJSON::</p>
 <div class="highlight"><pre><span></span><code>geojson = client.locations_geojson.get()
@@ -3053,7 +3096,13 @@ for feature in geojson[&quot;features&quot;]:
 <span class="normal"><a href="#__codelineno-0-134">134</a></span>
 <span class="normal"><a href="#__codelineno-0-135">135</a></span>
 <span class="normal"><a href="#__codelineno-0-136">136</a></span>
-<span class="normal"><a href="#__codelineno-0-137">137</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="k">class</span><span class="w"> </span><span class="nc">LocationsGeoJsonComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">LocationGeoJsonFeatureCollection</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-137">137</a></span>
+<span class="normal"><a href="#__codelineno-0-138">138</a></span>
+<span class="normal"><a href="#__codelineno-0-139">139</a></span>
+<span class="normal"><a href="#__codelineno-0-140">140</a></span>
+<span class="normal"><a href="#__codelineno-0-141">141</a></span>
+<span class="normal"><a href="#__codelineno-0-142">142</a></span>
+<span class="normal"><a href="#__codelineno-0-143">143</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="k">class</span><span class="w"> </span><span class="nc">LocationsGeoJsonComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">LocationGeoJsonFeatureCollection</span><span class="p">]):</span>
 <a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">    Component for the ``/geomap/api/locations/geojson/`` resource.</span>
 <a id="__codelineno-0-22" name="__codelineno-0-22"></a>
@@ -3061,117 +3110,123 @@ for feature in geojson[&quot;features&quot;]:
 <a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    Use :meth:`get` as the primary method. All other inherited methods</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    raise ``NotImplementedError``.</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26"></a>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    **Available filter fields:**</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    In addition to the filters provided for Localizations, the following are added:</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    |------------------|-------------|-------------|</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">    | Parameter        | Type        | Description |</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    |------------------|-------------|-------------|</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">    | locations	       | Location PKs | (alias for locations_map)</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    | colls	           | Collection PKs | associated via deployments</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    | reses	           | Resource PKs | associated via deployments</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    | classes	       | Classification PKs | associated via deployments</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    | radius	       | lon,lat,meters |  filters by distance from a point</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    | search=          | string        | Searches across: location_id, name, description, county, city, owner__username, deployments__deployment_id</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    | in_bbox          | minLon,minLat,maxLon,maxLat |	Filters locations within a geographic bounding box</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">    **Example:**</span>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    Fetch all locations as GeoJSON::</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">        geojson = client.locations_geojson.get()</span>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        print(geojson[&quot;type&quot;])           # &quot;FeatureCollection&quot;</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">        print(len(geojson[&quot;features&quot;]))  # number of locations</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>
-<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    Filter by collection ID::</span>
-<a id="__codelineno-0-51" name="__codelineno-0-51"></a>
-<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">        geojson = client.locations_geojson.get(collection_id=3)</span>
-<a id="__codelineno-0-53" name="__codelineno-0-53"></a>
-<a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">    Filter by research project::</span>
-<a id="__codelineno-0-55" name="__codelineno-0-55"></a>
-<a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">        geojson = client.locations_geojson.get(research_project=5)</span>
-<a id="__codelineno-0-57" name="__codelineno-0-57"></a>
-<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">    Text search::</span>
-<a id="__codelineno-0-59" name="__codelineno-0-59"></a>
-<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">        geojson = client.locations_geojson.get(search=&quot;camera trap&quot;)</span>
-<a id="__codelineno-0-61" name="__codelineno-0-61"></a>
-<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">    Filter by bounding box (minLon, minLat, maxLon, maxLat)::</span>
-<a id="__codelineno-0-63" name="__codelineno-0-63"></a>
-<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">        geojson = client.locations_geojson.get(in_bbox=&quot;-6.0,36.0,0.0,44.0&quot;)</span>
-<a id="__codelineno-0-65" name="__codelineno-0-65"></a>
-<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    Filter by radius (lon, lat, meters)::</span>
-<a id="__codelineno-0-67" name="__codelineno-0-67"></a>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a><span class="sd">        geojson = client.locations_geojson.get(radius=&quot;-5.5,37.3,10000&quot;)</span>
-<a id="__codelineno-0-69" name="__codelineno-0-69"></a>
-<a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">    Access feature properties::</span>
-<a id="__codelineno-0-71" name="__codelineno-0-71"></a>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a><span class="sd">        geojson = client.locations_geojson.get(owner=True)</span>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        for feature in geojson[&quot;features&quot;]:</span>
-<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">            props = feature[&quot;properties&quot;]</span>
-<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">            coords = feature[&quot;geometry&quot;][&quot;coordinates&quot;]</span>
-<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">            print(f&quot;{props[&#39;name&#39;]} → lon={coords[0]}, lat={coords[1]}&quot;)</span>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a>
-<a id="__codelineno-0-78" name="__codelineno-0-78"></a><span class="sd">    Combine multiple filters::</span>
-<a id="__codelineno-0-79" name="__codelineno-0-79"></a>
-<a id="__codelineno-0-80" name="__codelineno-0-80"></a><span class="sd">        geojson = client.locations_geojson.get(</span>
-<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">            research_project=2,</span>
-<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">            search=&quot;river&quot;,</span>
-<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">            in_bbox=&quot;-6.0,36.0,0.0,44.0&quot;,</span>
-<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">        )</span>
-<a id="__codelineno-0-85" name="__codelineno-0-85"></a>
-<a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-87" name="__codelineno-0-87"></a>
-<a id="__codelineno-0-88" name="__codelineno-0-88"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;geomap/api/locations/geojson/&quot;</span>
-<a id="__codelineno-0-89" name="__codelineno-0-89"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">LocationGeoJsonFeatureCollection</span>
-<a id="__codelineno-0-90" name="__codelineno-0-90"></a>    <span class="n">supported_versions</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;v1&quot;</span><span class="p">,)</span>  <span class="c1"># removed in Trapper v2</span>
-<a id="__codelineno-0-91" name="__codelineno-0-91"></a>
-<a id="__codelineno-0-92" name="__codelineno-0-92"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a>        <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a>        <span class="n">collection_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a>        <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch locations as a GeoJSON FeatureCollection.</span>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">        Args:</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="sd">            collection_id: Optional collection ID mapped to ``colls`` query param.</span>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">            query: Base query parameters.</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">        Returns:</span>
-<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">            GeoJSON payload as a ``dict`` (FeatureCollection).</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a>        <span class="n">q</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">query</span> <span class="ow">or</span> <span class="p">{})</span>
-<a id="__codelineno-0-110" name="__codelineno-0-110"></a>        <span class="n">q</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-111" name="__codelineno-0-111"></a>        <span class="k">if</span> <span class="n">collection_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-112" name="__codelineno-0-112"></a>            <span class="n">q</span><span class="p">[</span><span class="s2">&quot;colls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collection_id</span>
-<a id="__codelineno-0-113" name="__codelineno-0-113"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unwrap_feature_collection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">))</span>
-<a id="__codelineno-0-114" name="__codelineno-0-114"></a>
-<a id="__codelineno-0-115" name="__codelineno-0-115"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<a id="__codelineno-0-116" name="__codelineno-0-116"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a>
-<a id="__codelineno-0-118" name="__codelineno-0-118"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    **Filters** (``LocationGeoFilter``; Trapper ignores any other without an error, the SDK emits an</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    ``UnknownFilterWarning``): those of the location list (``owner``, ``owners``, ``research_project``,</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    ``research_projects_member``, ``locations_map``, ``location_id``, ``name``, ``city``, ``county``, ``state``,</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    ``country``, ``is_public``, ...) and:</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31"></a>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">    | Parameter | Type | Description |</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    |---|---|---|</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">    | locations | list of PKs | Location PKs (like ``locations_map``) |</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    | colls | list of PKs | Collections, through the deployments (``collection_id=`` sets it) |</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    | reses | list of PKs | Resources, through the deployments |</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    | classes | list of PKs | Classifications, through the deployments |</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    | deployments | list of PKs | Deployments |</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    | radius | ``lon,lat,meters`` | Within that distance of a point |</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    | in_bbox | ``minLon,minLat,maxLon,maxLat`` | Inside a bounding box |</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    | search | string | ``location_id``, ``name``, ``description``, ``county``, ``city``, owner&#39;s username, ``deployment_id`` |</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">    **Example:**</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    Fetch all locations as GeoJSON::</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">        geojson = client.locations_geojson.get()</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">        print(geojson[&quot;type&quot;])           # &quot;FeatureCollection&quot;</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">        print(len(geojson[&quot;features&quot;]))  # number of locations</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">    Filter by collection ID::</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">        geojson = client.locations_geojson.get(collection_id=3)</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">    Filter by research project::</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="sd">        geojson = client.locations_geojson.get(research_project=5)</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">    Text search::</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">        geojson = client.locations_geojson.get(search=&quot;camera trap&quot;)</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a><span class="sd">    Filter by bounding box (minLon, minLat, maxLon, maxLat)::</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">        geojson = client.locations_geojson.get(in_bbox=&quot;-6.0,36.0,0.0,44.0&quot;)</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a><span class="sd">    Filter by radius (lon, lat, meters)::</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        geojson = client.locations_geojson.get(radius=&quot;-5.5,37.3,10000&quot;)</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    Access feature properties::</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a><span class="sd">        geojson = client.locations_geojson.get(owner=True)</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">        for feature in geojson[&quot;features&quot;]:</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">            props = feature[&quot;properties&quot;]</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="sd">            coords = feature[&quot;geometry&quot;][&quot;coordinates&quot;]</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="sd">            print(f&quot;{props[&#39;name&#39;]} → lon={coords[0]}, lat={coords[1]}&quot;)</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78"></a>
+<a id="__codelineno-0-79" name="__codelineno-0-79"></a><span class="sd">    Combine multiple filters::</span>
+<a id="__codelineno-0-80" name="__codelineno-0-80"></a>
+<a id="__codelineno-0-81" name="__codelineno-0-81"></a><span class="sd">        geojson = client.locations_geojson.get(</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82"></a><span class="sd">            research_project=2,</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83"></a><span class="sd">            search=&quot;river&quot;,</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">            in_bbox=&quot;-6.0,36.0,0.0,44.0&quot;,</span>
+<a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">        )</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86"></a>
+<a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-88" name="__codelineno-0-88"></a>
+<a id="__codelineno-0-89" name="__codelineno-0-89"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;geomap/api/locations/geojson/&quot;</span>
+<a id="__codelineno-0-90" name="__codelineno-0-90"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">LocationGeoJsonFeatureCollection</span>
+<a id="__codelineno-0-91" name="__codelineno-0-91"></a>    <span class="n">supported_versions</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;v1&quot;</span><span class="p">,)</span>  <span class="c1"># removed in Trapper v2</span>
+<a id="__codelineno-0-92" name="__codelineno-0-92"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">({</span>
+<a id="__codelineno-0-93" name="__codelineno-0-93"></a>        <span class="s2">&quot;city&quot;</span><span class="p">,</span> <span class="s2">&quot;classes&quot;</span><span class="p">,</span> <span class="s2">&quot;colls&quot;</span><span class="p">,</span> <span class="s2">&quot;coordinate_uncertainty&quot;</span><span class="p">,</span> <span class="s2">&quot;country&quot;</span><span class="p">,</span> <span class="s2">&quot;county&quot;</span><span class="p">,</span> <span class="s2">&quot;date_created&quot;</span><span class="p">,</span> <span class="s2">&quot;deployments&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-94" name="__codelineno-0-94"></a>        <span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;ignore_DST&quot;</span><span class="p">,</span> <span class="s2">&quot;is_public&quot;</span><span class="p">,</span> <span class="s2">&quot;location_id&quot;</span><span class="p">,</span> <span class="s2">&quot;locations&quot;</span><span class="p">,</span> <span class="s2">&quot;locations_map&quot;</span><span class="p">,</span> <span class="s2">&quot;managers&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-95" name="__codelineno-0-95"></a>        <span class="s2">&quot;owner&quot;</span><span class="p">,</span> <span class="s2">&quot;owners&quot;</span><span class="p">,</span> <span class="s2">&quot;pk&quot;</span><span class="p">,</span> <span class="s2">&quot;radius&quot;</span><span class="p">,</span> <span class="s2">&quot;research_project&quot;</span><span class="p">,</span> <span class="s2">&quot;research_projects_member&quot;</span><span class="p">,</span> <span class="s2">&quot;reses&quot;</span><span class="p">,</span> <span class="s2">&quot;state&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-96" name="__codelineno-0-96"></a>        <span class="s2">&quot;search&quot;</span><span class="p">,</span> <span class="s2">&quot;in_bbox&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-97" name="__codelineno-0-97"></a>    <span class="p">})}</span>
+<a id="__codelineno-0-98" name="__codelineno-0-98"></a>
+<a id="__codelineno-0-99" name="__codelineno-0-99"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a>        <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a>        <span class="n">collection_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a>        <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a>        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch locations as a GeoJSON FeatureCollection.</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">        Args:</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">            collection_id: Optional collection ID mapped to ``colls`` query param.</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">            query: Base query parameters.</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">            **kwargs: Extra query parameters merged into ``query``.</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a>
+<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">        Returns:</span>
+<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">            GeoJSON payload as a ``dict`` (FeatureCollection).</span>
+<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">        &quot;&quot;&quot;</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
+<a id="__codelineno-0-116" name="__codelineno-0-116"></a>        <span class="k">if</span> <span class="n">collection_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a>            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="s2">&quot;colls&quot;</span><span class="p">:</span> <span class="n">collection_id</span><span class="p">}</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118"></a>        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unwrap_feature_collection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">))</span>
 <a id="__codelineno-0-120" name="__codelineno-0-120"></a>
-<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">where</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<a id="__codelineno-0-121" name="__codelineno-0-121"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <a id="__codelineno-0-122" name="__codelineno-0-122"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
 <a id="__codelineno-0-123" name="__codelineno-0-123"></a>
-<a id="__codelineno-0-124" name="__codelineno-0-124"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<a id="__codelineno-0-124" name="__codelineno-0-124"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <a id="__codelineno-0-125" name="__codelineno-0-125"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
 <a id="__codelineno-0-126" name="__codelineno-0-126"></a>
-<a id="__codelineno-0-127" name="__codelineno-0-127"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<a id="__codelineno-0-127" name="__codelineno-0-127"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">where</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <a id="__codelineno-0-128" name="__codelineno-0-128"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
 <a id="__codelineno-0-129" name="__codelineno-0-129"></a>
-<a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<a id="__codelineno-0-130" name="__codelineno-0-130"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <a id="__codelineno-0-131" name="__codelineno-0-131"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
 <a id="__codelineno-0-132" name="__codelineno-0-132"></a>
-<a id="__codelineno-0-133" name="__codelineno-0-133"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<a id="__codelineno-0-133" name="__codelineno-0-133"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <a id="__codelineno-0-134" name="__codelineno-0-134"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
 <a id="__codelineno-0-135" name="__codelineno-0-135"></a>
-<a id="__codelineno-0-136" name="__codelineno-0-136"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<a id="__codelineno-0-136" name="__codelineno-0-136"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <a id="__codelineno-0-137" name="__codelineno-0-137"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
+<a id="__codelineno-0-138" name="__codelineno-0-138"></a>
+<a id="__codelineno-0-139" name="__codelineno-0-139"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<a id="__codelineno-0-140" name="__codelineno-0-140"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
+<a id="__codelineno-0-141" name="__codelineno-0-141"></a>
+<a id="__codelineno-0-142" name="__codelineno-0-142"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<a id="__codelineno-0-143" name="__codelineno-0-143"></a>        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">_NOT_SUPPORTED</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -3292,14 +3347,7 @@ for feature in geojson[&quot;features&quot;]:
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/trapper_client/components/locations_geojson.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-92"> 92</a></span>
-<span class="normal"><a href="#__codelineno-0-93"> 93</a></span>
-<span class="normal"><a href="#__codelineno-0-94"> 94</a></span>
-<span class="normal"><a href="#__codelineno-0-95"> 95</a></span>
-<span class="normal"><a href="#__codelineno-0-96"> 96</a></span>
-<span class="normal"><a href="#__codelineno-0-97"> 97</a></span>
-<span class="normal"><a href="#__codelineno-0-98"> 98</a></span>
-<span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-99"> 99</a></span>
 <span class="normal"><a href="#__codelineno-0-100">100</a></span>
 <span class="normal"><a href="#__codelineno-0-101">101</a></span>
 <span class="normal"><a href="#__codelineno-0-102">102</a></span>
@@ -3313,28 +3361,33 @@ for feature in geojson[&quot;features&quot;]:
 <span class="normal"><a href="#__codelineno-0-110">110</a></span>
 <span class="normal"><a href="#__codelineno-0-111">111</a></span>
 <span class="normal"><a href="#__codelineno-0-112">112</a></span>
-<span class="normal"><a href="#__codelineno-0-113">113</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-92" name="__codelineno-0-92"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
-<a id="__codelineno-0-93" name="__codelineno-0-93"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-94" name="__codelineno-0-94"></a>    <span class="n">collection_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-95" name="__codelineno-0-95"></a>    <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-96" name="__codelineno-0-96"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<a id="__codelineno-0-97" name="__codelineno-0-97"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-98" name="__codelineno-0-98"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch locations as a GeoJSON FeatureCollection.</span>
-<a id="__codelineno-0-99" name="__codelineno-0-99"></a>
-<a id="__codelineno-0-100" name="__codelineno-0-100"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-101" name="__codelineno-0-101"></a><span class="sd">        collection_id: Optional collection ID mapped to ``colls`` query param.</span>
-<a id="__codelineno-0-102" name="__codelineno-0-102"></a><span class="sd">        query: Base query parameters.</span>
-<a id="__codelineno-0-103" name="__codelineno-0-103"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
-<a id="__codelineno-0-104" name="__codelineno-0-104"></a>
-<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-106" name="__codelineno-0-106"></a><span class="sd">        GeoJSON payload as a ``dict`` (FeatureCollection).</span>
-<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-108" name="__codelineno-0-108"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
-<a id="__codelineno-0-109" name="__codelineno-0-109"></a>    <span class="n">q</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">query</span> <span class="ow">or</span> <span class="p">{})</span>
-<a id="__codelineno-0-110" name="__codelineno-0-110"></a>    <span class="n">q</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-<a id="__codelineno-0-111" name="__codelineno-0-111"></a>    <span class="k">if</span> <span class="n">collection_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-112" name="__codelineno-0-112"></a>        <span class="n">q</span><span class="p">[</span><span class="s2">&quot;colls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collection_id</span>
-<a id="__codelineno-0-113" name="__codelineno-0-113"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unwrap_feature_collection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">))</span>
+<span class="normal"><a href="#__codelineno-0-113">113</a></span>
+<span class="normal"><a href="#__codelineno-0-114">114</a></span>
+<span class="normal"><a href="#__codelineno-0-115">115</a></span>
+<span class="normal"><a href="#__codelineno-0-116">116</a></span>
+<span class="normal"><a href="#__codelineno-0-117">117</a></span>
+<span class="normal"><a href="#__codelineno-0-118">118</a></span>
+<span class="normal"><a href="#__codelineno-0-119">119</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-99" name="__codelineno-0-99"></a><span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span>
+<a id="__codelineno-0-100" name="__codelineno-0-100"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-101" name="__codelineno-0-101"></a>    <span class="n">collection_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-102" name="__codelineno-0-102"></a>    <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-103" name="__codelineno-0-103"></a>    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<a id="__codelineno-0-104" name="__codelineno-0-104"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-0-105" name="__codelineno-0-105"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch locations as a GeoJSON FeatureCollection.</span>
+<a id="__codelineno-0-106" name="__codelineno-0-106"></a>
+<a id="__codelineno-0-107" name="__codelineno-0-107"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-108" name="__codelineno-0-108"></a><span class="sd">        collection_id: Optional collection ID mapped to ``colls`` query param.</span>
+<a id="__codelineno-0-109" name="__codelineno-0-109"></a><span class="sd">        query: Base query parameters.</span>
+<a id="__codelineno-0-110" name="__codelineno-0-110"></a><span class="sd">        **kwargs: Extra query parameters merged into ``query``.</span>
+<a id="__codelineno-0-111" name="__codelineno-0-111"></a>
+<a id="__codelineno-0-112" name="__codelineno-0-112"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-113" name="__codelineno-0-113"></a><span class="sd">        GeoJSON payload as a ``dict`` (FeatureCollection).</span>
+<a id="__codelineno-0-114" name="__codelineno-0-114"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-115" name="__codelineno-0-115"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_supported</span><span class="p">()</span>
+<a id="__codelineno-0-116" name="__codelineno-0-116"></a>    <span class="k">if</span> <span class="n">collection_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a>        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="s2">&quot;colls&quot;</span><span class="p">:</span> <span class="n">collection_id</span><span class="p">}</span>
+<a id="__codelineno-0-118" name="__codelineno-0-118"></a>    <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+<a id="__codelineno-0-119" name="__codelineno-0-119"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unwrap_feature_collection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">q</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

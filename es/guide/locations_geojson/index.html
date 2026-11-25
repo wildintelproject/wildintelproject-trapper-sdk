@@ -2887,6 +2887,7 @@ paginada, así que <code>get_all()</code>, <code>where()</code>, <code>all()</co
 </tr>
 </tbody>
 </table>
+<p>Trapper ignora sin error cualquier otro filtro; el SDK emite un <code>UnknownFilterWarning</code>.</p>
 <h2 id="ejemplos">Ejemplos</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Filtrar por ID de colección</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">geojson</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">locations_geojson</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">collection_id</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
