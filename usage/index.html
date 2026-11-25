@@ -690,6 +690,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#passing-objects-where-a-primary-key-goes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passing objects where a primary key goes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generic-endpoint" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2953,6 +2964,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#passing-objects-where-a-primary-key-goes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Passing objects where a primary key goes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generic-endpoint" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3158,10 +3180,21 @@ which methods expect which pk, and how to resolve one from the other.</p>
 <p>See the <a href="../guide/classifications/">Classifications guide</a> for the full picture, including
 <code>import_classifications()</code>.</p>
 <hr />
+<h2 id="passing-objects-where-a-primary-key-goes">Passing objects where a primary key goes</h2>
+<p>Every <code>*_pk</code> parameter (and the <code>pk</code> of <code>find()</code>) takes the primary key as an <code>int</code> — or a numeric string — and also
+the SDK object it stands for, as the methods return it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">project</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">get_project_results</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>        <span class="c1"># same as get_project_results(2)</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="n">link</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">get_all_project_collections</span><span class="p">(</span><span class="n">project</span><span class="p">)</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_projects</span><span class="o">.</span><span class="n">get_all_collection_resources</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>  <span class="c1"># the link, a ClassificationProjectCollection</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="n">client</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">get_all_by_location</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">locations</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">27</span><span class="p">))</span>
+</code></pre></div>
+<p>The signatures say which objects each one takes (<code>project_pk: int | ClassificationProject</code>). An object of another
+type — a <code>ClassificationProject</code> where a research project goes — is a <code>TypeError</code> before any request.</p>
 <h2 id="generic-endpoint">Generic endpoint</h2>
 <p>For any endpoint not covered by a component, use <code>client.where()</code> directly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;api/deployments/&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;research_project&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">}):</span>
-<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;api/deployments/&quot;</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;research_project&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">}):</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 </code></pre></div>
 
 
