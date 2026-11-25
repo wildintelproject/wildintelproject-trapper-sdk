@@ -1033,10 +1033,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#generating-and-downloading-a-package" class="md-nav__link">
+  <a href="#building-and-downloading-a-package" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Generating and downloading a package
+        Building and downloading a package
       
     </span>
   </a>
@@ -1044,43 +1044,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#generationcache-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Generation/cache parameters
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#content-filtering-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Content-filtering parameters
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#media-urlprivacy-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Media URL/privacy parameters
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#package-metadata-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Package metadata parameters
+        Parameters
       
     </span>
   </a>
@@ -2792,10 +2759,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#generating-and-downloading-a-package" class="md-nav__link">
+  <a href="#building-and-downloading-a-package" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Generating and downloading a package
+        Building and downloading a package
       
     </span>
   </a>
@@ -2803,43 +2770,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#generationcache-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Generation/cache parameters
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#content-filtering-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Content-filtering parameters
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#media-urlprivacy-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Media URL/privacy parameters
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#package-metadata-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Package metadata parameters
+        Parameters
       
     </span>
   </a>
@@ -2869,31 +2803,29 @@
 <h1 id="classification-package">Classification Package</h1>
 <div class="admonition info">
 <p class="admonition-title">Trapper compatibility</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — same code on both. See <a href="../versions/">Trapper versions</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — checked against both. See <a href="../versions/">Trapper versions</a>.</p>
 </div>
-<p><code>client.classification_package</code> — generates (or reuses a cached) Camtrap DP data package for a
-classification project, and returns its download URL.</p>
-<p><strong>Endpoint:</strong> <code>GET /media_classification/api/package/{project_pk}/</code>.</p>
-<div class="admonition note">
-<p class="admonition-title">Not directly usable via <code>get()</code>/<code>where()</code></p>
-<p>This is a single fixed-shape JSON response, not a paginated list — use <code>get_project_package()</code>
-below.</p>
-</div>
-<h2 id="generating-and-downloading-a-package">Generating and downloading a package</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">get_project_package</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">package</span><span class="p">)</span>  <span class="c1"># absolute download URL, already carries its own one-time token</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">file_response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">package</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;camtrapdp_project_7.zip&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+<p><code>client.classification_package</code> — the <strong>Camtrap DP data package</strong> of a classification project: a zip with
+<code>datapackage.json</code> and the <code>deployments</code>, <code>media</code> and <code>observations</code> tables (plus <code>events</code> with
+<code>include_events=True</code>).</p>
+<p><strong>Endpoint:</strong> <code>GET /media_classification/api/package/{project_pk}/</code>. Trapper builds the package in the request
+(seconds for a small project), or takes it from its cache (one per set of parameters; <code>clear_cache=True</code> rebuilds
+it), and answers <code>{"data": {"message", "errors", "package"}}</code>. <code>package</code> is the download URL: it carries its own
+token (<code>?rt=...</code>), works without the API token and stays valid until the package is rebuilt.</p>
+<h2 id="building-and-downloading-a-package">Building and downloading a package</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># In one call</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">path</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">download_project_package</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s2">&quot;doñana.zip&quot;</span><span class="p">,</span> <span class="n">clear_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># Or in two</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">get_project_package</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">approved_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">path</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">download_package</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s2">&quot;packages/&quot;</span><span class="p">)</span>   <span class="c1"># packages/&lt;id&gt;.zip</span>
 </code></pre></div>
-<p><code>response.data.package</code>'s URL already carries a one-time access token (<code>?rt=...</code>) — download it
-as-is via <code>client.make_request()</code>, never re-request it through a component method.</p>
-<p>There's also a ready-to-run script:
-<a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/download_camtrapdp_for_classification_project.py"><code>examples/download_camtrapdp_for_classification_project.py</code></a>.</p>
-<h2 id="generationcache-parameters">Generation/cache parameters</h2>
+<p><code>download_package()</code> takes the response or its URL, streams the zip to <code>&lt;file&gt;.part</code> and moves it into place, and
+retries network failures. There's also a ready-to-run script:
+<a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/development/examples/download_camtrapdp_for_classification_project.py"><code>examples/download_camtrapdp_for_classification_project.py</code></a>.</p>
+<h2 id="parameters">Parameters</h2>
+<p>Trapper ignores any other parameter without an error; the SDK emits an <code>UnknownFilterWarning</code>.</p>
 <table>
 <thead>
 <tr>
@@ -2908,165 +2840,111 @@ as-is via <code>client.make_request()</code>, never re-request it through a comp
 <td><code>clear_cache</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Force regeneration instead of reusing the cached package</td>
+<td>Rebuild instead of reusing the cached package</td>
 </tr>
 <tr>
 <td><code>release</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Mark the generated package as a release</td>
+<td>Mark the package as a release</td>
 </tr>
 <tr>
 <td><code>get_released</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Return the latest already-published release instead</td>
+<td>Return the latest release instead</td>
 </tr>
 <tr>
 <td><code>export_format</code></td>
 <td>str</td>
 <td><code>"camtrapdp"</code></td>
-<td>Also accepts <code>"trapper"</code> (disables <code>include_events</code>)</td>
+<td>Or <code>"trapper"</code> (Trapper's columns; no events)</td>
 </tr>
 <tr>
 <td><code>export_filetype</code></td>
 <td>str</td>
 <td><code>"csv.gz"</code></td>
-<td>File format for the data tables inside the package</td>
+<td>Or <code>"parquet"</code> (anything else is a <code>400</code>)</td>
 </tr>
-</tbody>
-</table>
-<h2 id="content-filtering-parameters">Content-filtering parameters</h2>
-<table>
-<thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
-<th>Description</th>
+<td><code>split_custom_attrs</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td><strong>v2</strong>, <code>"trapper"</code> format: one column per custom attribute (not importable)</td>
 </tr>
-</thead>
-<tbody>
 <tr>
 <td><code>approved_only</code></td>
 <td>bool</td>
 <td><code>True</code></td>
-<td>Only include approved classifications</td>
+<td>Only approved classifications</td>
 </tr>
 <tr>
 <td><code>exclude_blank</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Exclude blank observations</td>
+<td>Leave out blank observations</td>
 </tr>
 <tr>
 <td><code>all_deployments</code></td>
 <td>bool</td>
 <td><code>True</code></td>
-<td>Include all deployments of the project</td>
+<td>Every deployment of the project</td>
 </tr>
 <tr>
 <td><code>filter_deployments</code></td>
 <td>str</td>
-<td><code>None</code></td>
-<td>Comma-separated deployment PKs (when <code>all_deployments=False</code>)</td>
+<td></td>
+<td>Only deployments whose <code>deploymentID</code> <strong>contains</strong> this text (not PKs)</td>
 </tr>
 <tr>
 <td><code>include_events</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Include the events/sequences table</td>
+<td>Add the events (sequences) table</td>
 </tr>
 <tr>
 <td><code>events_count_var</code></td>
 <td>str</td>
 <td><code>"count"</code></td>
-<td>Name of the count variable in the events table</td>
+<td>Count variable of the events table</td>
+</tr>
+<tr>
+<td><code>trapper_url_token</code>, <code>private_human</code>, <code>private_vehicle</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>As in <a href="../classification_media/">classification media</a></td>
+</tr>
+<tr>
+<td><code>name</code>, <code>version</code>, <code>title</code>, <code>description</code></td>
+<td>str</td>
+<td></td>
+<td>Package metadata (<code>version</code> is <code>"1.0"</code>)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="media-urlprivacy-parameters">Media URL/privacy parameters</h2>
-<p>Same flags as <a href="../classification_media/">Classification Media</a>:</p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>trapper_url_token</code></td>
-<td>bool</td>
-<td><code>True</code></td>
-</tr>
-<tr>
-<td><code>private_human</code></td>
-<td>bool</td>
-<td><code>True</code></td>
-</tr>
-<tr>
-<td><code>private_vehicle</code></td>
-<td>bool</td>
-<td><code>True</code></td>
-</tr>
-<tr>
-<td><code>private_species</code></td>
-<td>list</td>
-<td><code>[]</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="package-metadata-parameters">Package metadata parameters</h2>
-<p>Written into the package's <code>datapackage.json</code>:</p>
-<table>
-<thead>
-<tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>name</code></td>
-<td>str</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>version</code></td>
-<td>str</td>
-<td><code>"1.0"</code></td>
-</tr>
-<tr>
-<td><code>title</code></td>
-<td>str</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>description</code></td>
-<td>str</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>keywords</code></td>
-<td>list</td>
-<td><code>[]</code></td>
-</tr>
-<tr>
-<td><code>licenses</code></td>
-<td>list</td>
-<td><code>[]</code></td>
-</tr>
-</tbody>
-</table>
+<div class="admonition warning">
+<p class="admonition-title"><code>keywords</code>, <code>licenses</code> and <code>private_species</code> cannot be sent</p>
+<p>Trapper types them as lists but reads one text per parameter, and always fails on them (<code>400</code>). The SDK
+raises a <code>ValueError</code> instead. The package takes the research project's keywords and <code>private</code> licenses.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title"><code>release</code> and <code>get_released</code></p>
+<p>They do not work together through the API: a release built here is stored as a cached package, which
+<code>get_released</code> does not look at; and <code>get_released=True</code> with no release builds a new package next to the
+cached one, after which Trapper answers <code>400 "get() returned more than one UserDataPackage"</code> for those parameters
+(<code>clear_cache</code> included) until an admin deletes one (Django admin, <em>User data packages</em>). The SDK's error says so.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">v1: the project needs an admin</p>
+<p>On v1 the contributors of the package are the admins of the classification project: a project with no admin
+role fails with <code>[] should be non-empty at property 'contributors'</code> (the SDK's error says so).</p>
+</div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">get_project_package</span><span class="p">(</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">clear_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">approved_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Doñana camera traps 2026&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">keywords</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;camera-trap&quot;</span><span class="p">,</span> <span class="s2">&quot;doñana&quot;</span><span class="p">],</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">filter_deployments</span><span class="o">=</span><span class="s2">&quot;don&quot;</span><span class="p">,</span>          <span class="c1"># deploymentIDs that contain &quot;don&quot;</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Doñana camera traps 2026&quot;</span><span class="p">,</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">)</span>
 </code></pre></div>
 

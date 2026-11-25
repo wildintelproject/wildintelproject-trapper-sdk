@@ -1035,10 +1035,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#generar-y-descargar-un-paquete" class="md-nav__link">
+  <a href="#construir-y-descargar-un-paquete" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Generar y descargar un paquete
+        Construir y descargar un paquete
       
     </span>
   </a>
@@ -1046,43 +1046,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parametros-de-generacion-y-cache" class="md-nav__link">
+  <a href="#parametros" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Parámetros de generación y caché
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parametros-de-filtrado-de-contenido" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Parámetros de filtrado de contenido
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parametros-de-url-y-privacidad-de-los-medios" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Parámetros de URL y privacidad de los medios
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parametros-de-metadatos-del-paquete" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Parámetros de metadatos del paquete
+        Parámetros
       
     </span>
   </a>
@@ -2794,10 +2761,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#generar-y-descargar-un-paquete" class="md-nav__link">
+  <a href="#construir-y-descargar-un-paquete" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Generar y descargar un paquete
+        Construir y descargar un paquete
       
     </span>
   </a>
@@ -2805,43 +2772,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parametros-de-generacion-y-cache" class="md-nav__link">
+  <a href="#parametros" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Parámetros de generación y caché
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parametros-de-filtrado-de-contenido" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Parámetros de filtrado de contenido
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parametros-de-url-y-privacidad-de-los-medios" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Parámetros de URL y privacidad de los medios
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parametros-de-metadatos-del-paquete" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Parámetros de metadatos del paquete
+        Parámetros
       
     </span>
   </a>
@@ -2871,31 +2805,28 @@
 <h1 id="paquete-de-clasificacion">Paquete de clasificación</h1>
 <div class="admonition info">
 <p class="admonition-title">Compatibilidad con Trapper</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — el mismo código en ambas. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — comprobado en los dos. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
 </div>
-<p><code>client.classification_package</code> — genera (o reutiliza uno en caché) un paquete de datos Camtrap DP de
-un proyecto de clasificación y devuelve su URL de descarga.</p>
-<p><strong>Endpoint:</strong> <code>GET /media_classification/api/package/{project_pk}/</code>.</p>
-<div class="admonition note">
-<p class="admonition-title">No se puede usar directamente con <code>get()</code>/<code>where()</code></p>
-<p>Es una única respuesta JSON de forma fija, no un listado paginado: usa <code>get_project_package()</code>,
-más abajo.</p>
-</div>
-<h2 id="generar-y-descargar-un-paquete">Generar y descargar un paquete</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">get_project_package</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">package</span><span class="p">)</span>  <span class="c1"># URL de descarga absoluta, ya lleva su propio token de un solo uso</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">file_response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">make_request</span><span class="p">(</span><span class="n">endpoint</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">package</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;GET&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;camtrapdp_project_7.zip&quot;</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+<p><code>client.classification_package</code> — el <strong>paquete de datos Camtrap DP</strong> de un proyecto de clasificación: un zip con
+<code>datapackage.json</code> y las tablas <code>deployments</code>, <code>media</code> y <code>observations</code> (más <code>events</code> con <code>include_events=True</code>).</p>
+<p><strong>Endpoint:</strong> <code>GET /media_classification/api/package/{project_pk}/</code>. Trapper construye el paquete en la petición
+(segundos en un proyecto pequeño), o lo toma de su caché (uno por cada conjunto de parámetros; <code>clear_cache=True</code> lo
+reconstruye), y responde <code>{"data": {"message", "errors", "package"}}</code>. <code>package</code> es la URL de descarga: lleva su
+propio token (<code>?rt=...</code>), funciona sin el token de la API y sigue valiendo hasta que se reconstruye el paquete.</p>
+<h2 id="construir-y-descargar-un-paquete">Construir y descargar un paquete</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># En una llamada</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">ruta</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">download_project_package</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s2">&quot;doñana.zip&quot;</span><span class="p">,</span> <span class="n">clear_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># O en dos</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">get_project_package</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">approved_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">ruta</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">download_package</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="s2">&quot;paquetes/&quot;</span><span class="p">)</span>   <span class="c1"># paquetes/&lt;id&gt;.zip</span>
 </code></pre></div>
-<p>La URL de <code>response.data.package</code> ya lleva un token de acceso de un solo uso (<code>?rt=...</code>): descárgala tal
-cual con <code>client.make_request()</code>, y nunca la vuelvas a pedir a través de un método de componente.</p>
-<p>También hay un script listo para ejecutar:
-<a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/refactor/examples/download_camtrapdp_for_classification_project.py"><code>examples/download_camtrapdp_for_classification_project.py</code></a>.</p>
-<h2 id="parametros-de-generacion-y-cache">Parámetros de generación y caché</h2>
+<p><code>download_package()</code> acepta la respuesta o su URL, descarga el zip a <code>&lt;fichero&gt;.part</code> y lo mueve a su sitio, y
+reintenta los fallos de red. También hay un script listo para usar:
+<a href="https://github.com/wildintelproject/wildintelproject-trapper-sdk/blob/development/examples/download_camtrapdp_for_classification_project.py"><code>examples/download_camtrapdp_for_classification_project.py</code></a>.</p>
+<h2 id="parametros">Parámetros</h2>
+<p>Trapper ignora sin error cualquier otro parámetro; el SDK emite un <code>UnknownFilterWarning</code>.</p>
 <table>
 <thead>
 <tr>
@@ -2910,165 +2841,113 @@ cual con <code>client.make_request()</code>, y nunca la vuelvas a pedir a travé
 <td><code>clear_cache</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Fuerza la regeneración en lugar de reutilizar el paquete en caché</td>
+<td>Reconstruir en lugar de reutilizar el paquete en caché</td>
 </tr>
 <tr>
 <td><code>release</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Marca el paquete generado como una versión publicada</td>
+<td>Marcar el paquete como publicación</td>
 </tr>
 <tr>
 <td><code>get_released</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Devuelve la última versión ya publicada</td>
+<td>Devolver la última publicación</td>
 </tr>
 <tr>
 <td><code>export_format</code></td>
 <td>str</td>
 <td><code>"camtrapdp"</code></td>
-<td>Admite también <code>"trapper"</code> (desactiva <code>include_events</code>)</td>
+<td>O <code>"trapper"</code> (columnas de Trapper; sin eventos)</td>
 </tr>
 <tr>
 <td><code>export_filetype</code></td>
 <td>str</td>
 <td><code>"csv.gz"</code></td>
-<td>Formato de fichero de las tablas de datos dentro del paquete</td>
+<td>O <code>"parquet"</code> (cualquier otro es un <code>400</code>)</td>
 </tr>
-</tbody>
-</table>
-<h2 id="parametros-de-filtrado-de-contenido">Parámetros de filtrado de contenido</h2>
-<table>
-<thead>
 <tr>
-<th>Parámetro</th>
-<th>Tipo</th>
-<th>Por defecto</th>
-<th>Descripción</th>
+<td><code>split_custom_attrs</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td><strong>v2</strong>, formato <code>"trapper"</code>: una columna por atributo propio (no se puede importar)</td>
 </tr>
-</thead>
-<tbody>
 <tr>
 <td><code>approved_only</code></td>
 <td>bool</td>
 <td><code>True</code></td>
-<td>Incluye solo clasificaciones aprobadas</td>
+<td>Solo clasificaciones aprobadas</td>
 </tr>
 <tr>
 <td><code>exclude_blank</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Excluye observaciones en blanco</td>
+<td>Excluir las observaciones vacías</td>
 </tr>
 <tr>
 <td><code>all_deployments</code></td>
 <td>bool</td>
 <td><code>True</code></td>
-<td>Incluye todos los despliegues del proyecto</td>
+<td>Todos los despliegues del proyecto</td>
 </tr>
 <tr>
 <td><code>filter_deployments</code></td>
 <td>str</td>
-<td><code>None</code></td>
-<td>PK de despliegue separadas por comas (cuando <code>all_deployments=False</code>)</td>
+<td></td>
+<td>Solo los despliegues cuyo <code>deploymentID</code> <strong>contiene</strong> este texto (no PK)</td>
 </tr>
 <tr>
 <td><code>include_events</code></td>
 <td>bool</td>
 <td><code>False</code></td>
-<td>Incluye la tabla de eventos/secuencias</td>
+<td>Añadir la tabla de eventos (secuencias)</td>
 </tr>
 <tr>
 <td><code>events_count_var</code></td>
 <td>str</td>
 <td><code>"count"</code></td>
-<td>Nombre de la variable de recuento en la tabla de eventos</td>
+<td>Variable de recuento de la tabla de eventos</td>
+</tr>
+<tr>
+<td><code>trapper_url_token</code>, <code>private_human</code>, <code>private_vehicle</code></td>
+<td>bool</td>
+<td><code>True</code></td>
+<td>Como en <a href="../classification_media/">media de clasificación</a></td>
+</tr>
+<tr>
+<td><code>name</code>, <code>version</code>, <code>title</code>, <code>description</code></td>
+<td>str</td>
+<td></td>
+<td>Metadatos del paquete (<code>version</code> es <code>"1.0"</code>)</td>
 </tr>
 </tbody>
 </table>
-<h2 id="parametros-de-url-y-privacidad-de-los-medios">Parámetros de URL y privacidad de los medios</h2>
-<p>Los mismos indicadores que en <a href="../classification_media/">Medios de clasificación</a>:</p>
-<table>
-<thead>
-<tr>
-<th>Parámetro</th>
-<th>Tipo</th>
-<th>Por defecto</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>trapper_url_token</code></td>
-<td>bool</td>
-<td><code>True</code></td>
-</tr>
-<tr>
-<td><code>private_human</code></td>
-<td>bool</td>
-<td><code>True</code></td>
-</tr>
-<tr>
-<td><code>private_vehicle</code></td>
-<td>bool</td>
-<td><code>True</code></td>
-</tr>
-<tr>
-<td><code>private_species</code></td>
-<td>list</td>
-<td><code>[]</code></td>
-</tr>
-</tbody>
-</table>
-<h2 id="parametros-de-metadatos-del-paquete">Parámetros de metadatos del paquete</h2>
-<p>Se escriben en el <code>datapackage.json</code> del paquete:</p>
-<table>
-<thead>
-<tr>
-<th>Parámetro</th>
-<th>Tipo</th>
-<th>Por defecto</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>name</code></td>
-<td>str</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>version</code></td>
-<td>str</td>
-<td><code>"1.0"</code></td>
-</tr>
-<tr>
-<td><code>title</code></td>
-<td>str</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>description</code></td>
-<td>str</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>keywords</code></td>
-<td>list</td>
-<td><code>[]</code></td>
-</tr>
-<tr>
-<td><code>licenses</code></td>
-<td>list</td>
-<td><code>[]</code></td>
-</tr>
-</tbody>
-</table>
+<div class="admonition warning">
+<p class="admonition-title"><code>keywords</code>, <code>licenses</code> y <code>private_species</code> no se pueden enviar</p>
+<p>Trapper los tipa como listas pero lee un único texto por parámetro, y siempre falla con ellos (<code>400</code>). El SDK
+lanza un <code>ValueError</code> en su lugar. El paquete toma las palabras clave del proyecto de investigación y licencias
+<code>private</code>.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title"><code>release</code> y <code>get_released</code></p>
+<p>No funcionan juntos a través de la API: una publicación construida aquí se guarda como paquete en caché, que
+<code>get_released</code> no mira; y <code>get_released=True</code> sin ninguna publicación construye un paquete nuevo junto al de la
+caché, y desde entonces Trapper responde <code>400 "get() returned more than one UserDataPackage"</code> para esos
+parámetros (<code>clear_cache</code> incluido) hasta que un administrador borra uno (admin de Django, <em>User data packages</em>).
+El error del SDK lo dice.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">v1: el proyecto necesita un administrador</p>
+<p>En v1 los contribuidores del paquete son los administradores del proyecto de clasificación: un proyecto sin
+rol de administrador falla con <code>[] should be non-empty at property 'contributors'</code> (el error del SDK lo dice).</p>
+</div>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_package</span><span class="o">.</span><span class="n">get_project_package</span><span class="p">(</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>    <span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">clear_cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="n">approved_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Doñana camera traps 2026&quot;</span><span class="p">,</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">keywords</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;camera-trap&quot;</span><span class="p">,</span> <span class="s2">&quot;doñana&quot;</span><span class="p">],</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="n">filter_deployments</span><span class="o">=</span><span class="s2">&quot;don&quot;</span><span class="p">,</span>          <span class="c1"># deploymentID que contienen &quot;don&quot;</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Cámaras trampa de Doñana 2026&quot;</span><span class="p">,</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">)</span>
 </code></pre></div>
 
