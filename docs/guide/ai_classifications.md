@@ -12,25 +12,27 @@
 
 ## Filters
 
-| Parameter | Type | Description |
-|---|---|---|
-| `owner` | boolean | `true` = resources where user is owner/manager |
-| `deployment` | list of PKs | Filter by deployment PKs |
-| `collection` | list of PKs | Filter by collection PKs |
-| `locations_map` | comma-separated PKs | Filter by location PKs |
-| `rdate_from` / `rdate_to` | date | `date_recorded` range |
-| `rtime_from` / `rtime_to` | HH:MM | Time-of-day range |
-| `ftype` | choice | Resource type (IMAGE, VIDEO, ...) |
-| `bboxes` | boolean | Has bounding boxes |
-| `user` | list of PKs | Filter by owner user PKs |
-| `approved` | boolean | Has a FINAL approved classification |
-| `feedback` | boolean | Is a feedback classification |
-| `species` | list of PKs | Filter by species PKs |
-| `observation_type` | choice | Filter by observation type |
-| `sex` | choice | Filter by sex |
-| `age` | choice | Filter by age |
-| `confidence` | number | `dynamic_attrs.classification_confidence >= value` |
-| `ai_provider` | list of PKs | Filter by AI provider PKs |
+The same filters for the list and the AI results table (`export()`). Trapper ignores a filter it does not apply,
+without an error, and returns every row: the SDK emits an `UnknownFilterWarning`.
+
+| Parameter | Type | Version | Description |
+|---|---|---|---|
+| `project` | PK | both | Classification project. **Needed for `deployment` and `collection`** in the list (`ValueError` without it) |
+| `deployment` | list of PKs | both | Deployment PKs of the project |
+| `collection` | list of PKs | both | PK of the **link** between the project and the collection |
+| `ai_provider` | list of PKs | both | AI provider (model) PKs |
+| `confidence` | number 0-1 | both | Some observation has at least this confidence |
+| `approved` | boolean | both | It became the final classification. **v2: the table answers 500** (the SDK warns) |
+| `bboxes` | boolean | both | Has bounding boxes |
+| `ftype` | choice | both | Resource type (`I`, `V`, ...) |
+| `species` | list of PKs | both | Species PKs |
+| `observation_type` | choice | both | Observation type |
+| `search` | text | both | Species (Latin or English name), resource name or attribute (list) |
+| `owner`, `user`, `feedback` | | v2 | As in the [user list](user_classifications.md) |
+| `locations_map`, `rdate_from`/`rdate_to`, `rtime_from`/`rtime_to` | | v2 | Location, date and time of the resource |
+| `sex`, `age`, `classified`, `classified_ai` | | v2 | As in the user list |
+
+v1 also applies one filter per custom attribute of the project's classificator, when `project` is given.
 
 ## The six access patterns
 

@@ -76,3 +76,44 @@ class ClassificationFiltersMixin:
         The same ``400`` is the answer to a missing permission, so the two cannot be told apart.
         """
         return isinstance(exc, err.BadRequestError) and "Empty queryset" in str(exc)
+
+
+class RequireProjectMixin:
+    """``deployment`` and ``collection`` of a classification list need ``project``.
+
+    Trapper checks them against the project's own: without ``project`` it answers ``400 "Select a valid choice.
+    19 is not one of the available choices"`` (v1 answers ``404 No ClassificationProject matches`` in the user and
+    AI lists), which reads as if the deployment did not exist. The SDK raises a ``ValueError`` before the request.
+    A project-scoped call (``overwrite_endpoint``, with the project in the URL) needs nothing.
+    """
+
+    #: A way out added to the message (``"or use where_project_results() ..."``).
+    project_hint: str = ""
+
+    def _require_project(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> None:
+        if kwargs.get("overwrite_endpoint"):
+            return
+        given = {**(query or {}), **kwargs}
+        needing = [name for name in ("deployment", "collection") if name in given]
+        if needing and "project" not in given:
+            hint = f", {self.project_hint}" if self.project_hint else ""
+            raise ValueError(
+                f"{' and '.join(needing)} of {self.endpoint} need project=<pk>: Trapper checks them against the "
+                f"project's own and otherwise answers an error that reads as if they did not exist. "
+                f"Add project{hint}."
+            )
+
+    def get(self, query: Dict[str, Any] | None = None, *args: Any, **kwargs: Any):
+        """One page of the list; see :meth:`TrapperComponent.get`. ``deployment`` and ``collection`` need ``project``."""
+        self._require_project(query, kwargs)
+        return super().get(query, *args, **kwargs)
+
+    def where(self, query: Dict[str, Any] | None = None, *args: Any, **kwargs: Any):
+        """Lazy iteration; see :meth:`TrapperComponent.where`. ``deployment`` and ``collection`` need ``project``."""
+        self._require_project(query, kwargs)
+        return super().where(query, *args, **kwargs)
+
+    def get_all(self, query: Dict[str, Any] | None = None, *args: Any, **kwargs: Any):
+        """Every page; see :meth:`TrapperComponent.get_all`. ``deployment`` and ``collection`` need ``project``."""
+        self._require_project(query, kwargs)
+        return super().get_all(query, *args, **kwargs)
