@@ -4,7 +4,7 @@ Component for the species table of Trapper.
 
 from __future__ import annotations
 
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import Species
 
 _SPECIES_FILTERS = frozenset({"english_name", "latin_name", "search", "pk"})
@@ -36,6 +36,6 @@ class SpeciesComponent(TrapperComponent[Species]):
         client.classification_results.get(project=2, species=lynx.pk)
     """
 
-    endpoint = "tables/api/species"
+    endpoint = versioned("tables/api/species", ninja="api/v2/species/")
     schema = Species
     known_filters = {"v1": _SPECIES_FILTERS, "v2": _SPECIES_FILTERS}

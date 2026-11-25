@@ -72,7 +72,7 @@ class ClassificationResourceClassificationData(BaseModel):
     """Nested ``classification_data`` block inside a classification-resource row."""
 
     pk: int
-    url: str
+    url: str | None = None  # null on Trapper v2 (old and new API)
     is_approved: bool
     is_classified: bool
 

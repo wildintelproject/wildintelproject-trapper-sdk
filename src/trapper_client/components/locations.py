@@ -12,7 +12,7 @@ from typing import Any, Dict, Iterable, Iterator
 from tenacity import Retrying
 
 from trapper_client import err
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.geo import distance_m, in_bbox
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
 from trapper_client.retry_utils import retrying_for_chunk_upload
@@ -74,7 +74,7 @@ class LocationsComponent(TrapperComponent[Location]):
         client.locations.export(query={"research_project": 5}, file="/tmp/project5_locations.csv")
     """
 
-    endpoint = "/geomap/api/locations"
+    endpoint = versioned("/geomap/api/locations", ninja="api/v2/locations/")
 
     # Checked against live Trapper v1 and v2: a parameter that is not here is ignored by the server.
     _V2_FILTERS = frozenset({

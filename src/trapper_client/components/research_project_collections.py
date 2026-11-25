@@ -5,7 +5,7 @@ Component for the /research/api/project/{project_pk}/collections resource.
 from typing import Dict, Any, Callable
 
 from trapper_client.api_query import APIQuery
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import PaginatedResult, ResearchProjectCollection
 
 
@@ -40,7 +40,8 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
         link_pk = client.research_projects.collections.find_collection_in_project(7, collection_pk=42)
     """
 
-    endpoint = "research/api/project/{project_pk}/collections"
+    endpoint = versioned("research/api/project/{project_pk}/collections",
+                         ninja="api/v2/research/projects/{project_pk}/collections/")
     schema = ResearchProjectCollection
     known_filters = {"v1": _RP_COLLECTION_FILTERS, "v2": _RP_COLLECTION_FILTERS}
 

@@ -51,6 +51,18 @@ class TestResearchProjectCollectionsE2E:
     def projects(self, real_api_base):
         return ResearchProjectsComponent(real_api_base)
 
+    @pytest.fixture(autouse=True)
+    def _visible(self, projects):
+        """The new API answers 403 for a project the user cannot see (pending approval); the old one an empty list."""
+        from trapper_client import err
+
+        pk = _project_pk()
+        if pk:
+            try:
+                projects.get_project_collections(project_pk=int(pk), page_size=1)
+            except err.ForbiddenError:
+                pytest.skip(f"research project {pk} is not visible to this user (403 on the new API)")
+
     # ── get_project_collections ───────────────────────────────────────────────
 
     @pytest.mark.e2e

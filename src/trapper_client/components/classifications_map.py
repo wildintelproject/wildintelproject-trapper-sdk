@@ -5,7 +5,7 @@ Component for the light, unpaginated list of the final classifications (the map 
 from __future__ import annotations
 
 from trapper_client.components._classification_filters import ClassificationFiltersMixin, RequireProjectMixin
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import ClassificationMap
 
 
@@ -40,6 +40,6 @@ class ClassificationsMapComponent(RequireProjectMixin, ClassificationFiltersMixi
     | observation_type, sex, age | choice | Observation type, sex, age |
     """
 
-    endpoint = "/media_classification/api/classifications_map"
+    endpoint = versioned("/media_classification/api/classifications_map", ninja="api/v2/classifications/map/")
     schema = ClassificationMap
     known_filters = ClassificationFiltersMixin._filters_for(frozenset())

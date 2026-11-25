@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 from trapper_client import err
 from trapper_client.components._classification_filters import RequireProjectMixin, camtrapdp_param
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.components.user_classifications import _LIST_COMMON
 from trapper_client.schemas import AIClassification, AIClassificationRecordExport
 
@@ -65,7 +65,7 @@ class AIClassificationsComponent(RequireProjectMixin, TrapperComponent[AIClassif
     Trapper's format.
     """
 
-    endpoint = "/media_classification/api/ai-classifications"
+    endpoint = versioned("/media_classification/api/ai-classifications", ninja="api/v2/ai-classifications/")
     export_endpoint = "/media_classification/api/ai-classifications/results/{project_pk}/"
     schema = AIClassification
     export_schema = AIClassificationRecordExport

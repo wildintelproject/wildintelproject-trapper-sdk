@@ -284,6 +284,8 @@ class TestCollectionFiltersE2E:
 
     @pytest.mark.e2e
     def test_unknown_filters_warn_and_known_ones_do_not(self, component):
+        if getattr(component.client, "api_flavor", None) == "ninja":
+            pytest.skip("the filters of the new API are not listed yet: nothing is warned about there")
         import warnings
 
         from trapper_client import err

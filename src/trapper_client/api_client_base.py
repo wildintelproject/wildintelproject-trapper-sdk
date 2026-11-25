@@ -18,8 +18,15 @@ import bz2
 
 logger = logging.getLogger(__name__)
 
-#: Accepted values for ``trapper_version``.
-TRAPPER_VERSIONS = ("auto", "v1", "v2")
+#: Accepted values for ``trapper_version``. ``"ninja"`` is Trapper 2.x through its new API (``/api/v2/...``).
+TRAPPER_VERSIONS = ("auto", "v1", "v2", "ninja")
+
+#: Route of the new API (``refactor-api-ninja``) that tests the credentials: ``200``/``401`` where the new API is
+#: served, ``404`` on v1 and on the old v2.
+NINJA_PROBE_ENDPOINT = "api/v2/probe/auth/"
+
+#: Prefix of the routes of the new API, which all end with a slash (it answers ``301`` without one).
+NINJA_PREFIX = "api/v2/"
 
 #: Public route that reports the server's release (``{"version": "v1.7.4"}``, ``{"version": "2.0.0a"}``).
 VERSION_ENDPOINT = "api/cs/version/"
@@ -46,9 +53,10 @@ class APIClientBase:
         verify_ssl: Whether to verify SSL certificates.
         base_url: Base URL of the Trapper API.
         timeout: Request timeout in seconds.
-        trapper_version: Trapper server major version: ``"v1"``, ``"v2"`` or ``"auto"``
-            (default). With ``"auto"`` the version is detected on first use by probing
-            ``storage/api/upload-auth/`` (see :meth:`detect_server_version`) and cached.
+        trapper_version: Trapper server major version: ``"v1"``, ``"v2"``, ``"ninja"`` or ``"auto"``
+            (default). ``"ninja"`` is Trapper 2.x through its new API (``/api/v2/...``, the
+            ``refactor-api-ninja`` branch). With ``"auto"`` the version is detected on first use (see
+            :meth:`detect_server_version`) and cached.
     """
 
     access_token: str = attr.ib(repr=False, default=None)
@@ -85,6 +93,7 @@ class APIClientBase:
         self._web_client = httpx.Client(verify=self.verify_ssl, timeout=self.timeout)
         self._web_csrf_token: str | None = None
         self._detected_version: str | None = None
+        self._detected_flavor: str | None = None
         self._server_release: str | None = None
         self._release_probed = False
 
@@ -103,14 +112,34 @@ class APIClientBase:
     def server_version(self) -> Literal["v1", "v2"]:
         """Trapper major version this client talks to (``"v1"`` or ``"v2"``).
 
-        Returns ``trapper_version`` when it was set explicitly; otherwise detects the
-        version once with :meth:`detect_server_version` and caches it.
+        Returns ``trapper_version`` when it was set explicitly (``"ninja"`` is ``"v2"``: it is Trapper 2.x);
+        otherwise detects the version once with :meth:`detect_server_version` and caches it.
         """
+        if self.trapper_version == "ninja":
+            return "v2"
         if self.trapper_version != "auto":
             return self.trapper_version
         if self._detected_version is None:
             self._detected_version = self.detect_server_version()
         return self._detected_version
+
+    @property
+    def api_flavor(self) -> Literal["legacy", "ninja"]:
+        """Which API of the server the components use: ``"legacy"`` (the routes of v1 and of the first v2) or
+        ``"ninja"`` (the new ``/api/v2/...`` of Trapper 2.x).
+
+        ``trapper_version="ninja"`` forces the new one and ``"v1"``/``"v2"`` the old one. With ``"auto"``, a v2
+        server that serves ``GET api/v2/probe/auth/`` (``200`` or ``401``) uses the new one. Detected once and
+        cached. Routes not mapped to the new API yet go through the old ones, which Trapper still serves.
+        """
+        if self.trapper_version == "ninja":
+            return "ninja"
+        if self.trapper_version != "auto" or self.server_version != "v2":
+            return "legacy"
+        if self._detected_flavor is None:
+            r = self._send_request(NINJA_PROBE_ENDPOINT, "GET", None, None)
+            self._detected_flavor = "ninja" if r.status_code in (200, 401) else "legacy"
+        return self._detected_flavor
 
     def _read_release(self) -> str | None:
         """Fetch ``api/cs/version/``; return the release string, or ``None`` if unusable.
@@ -483,7 +512,10 @@ class APIClientBase:
         if endpoint.startswith("http://") or endpoint.startswith("https://"):
             url = endpoint
         else:
-            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+            path = endpoint.lstrip("/")
+            if path.startswith(NINJA_PREFIX) and not path.endswith("/"):
+                path += "/"  # the new API answers 301 without the trailing slash
+            url = f"{self.base_url.rstrip('/')}/{path}"
 
         self.logger.debug(f"POST(multipart) {url}")
         self.logger.debug(f"Query: {query}")
@@ -994,7 +1026,10 @@ class APIClientBase:
         if endpoint.startswith("http://") or endpoint.startswith("https://"):
             url = endpoint
         else:
-            url = f"{self.base_url.rstrip('/')}/{endpoint.lstrip('/')}"
+            path = endpoint.lstrip("/")
+            if path.startswith(NINJA_PREFIX) and not path.endswith("/"):
+                path += "/"  # the new API answers 301 without the trailing slash
+            url = f"{self.base_url.rstrip('/')}/{path}"
 
         self.logger.debug(f"{method} {url}")
         self.logger.debug(f"Query: {query}")

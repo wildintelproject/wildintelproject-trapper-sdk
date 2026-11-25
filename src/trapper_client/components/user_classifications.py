@@ -5,7 +5,7 @@ Component for the user classifications of Trapper.
 from __future__ import annotations
 
 from trapper_client.components._classification_filters import RequireProjectMixin
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import UserClassification
 
 #: Filters both versions apply to the user and AI lists.
@@ -65,7 +65,7 @@ class UserClassificationsComponent(RequireProjectMixin, TrapperComponent[UserCla
     filter per custom attribute of the project's classificator.
     """
 
-    endpoint = "/media_classification/api/user-classifications"
+    endpoint = versioned("/media_classification/api/user-classifications", ninja="api/v2/user-classifications/")
     schema = UserClassification
     known_filters = USER_CLASSIFICATION_FILTERS
     unknown_filter_hint = "; or the name of an attribute of the project's classificator (v2)"

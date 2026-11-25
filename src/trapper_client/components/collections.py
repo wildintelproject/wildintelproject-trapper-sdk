@@ -10,7 +10,7 @@ from typing import Any, Dict, Callable, Literal
 import httpx
 
 from trapper_client.api_query import APIQuery
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.components.resources import DownloadReport, ResourcesComponent, safe_filename
 from trapper_client.enums import CollectionStatus
 from trapper_client.schemas import Collection, PaginatedResult, Resource
@@ -77,7 +77,7 @@ class CollectionsComponent(TrapperComponent[Collection]):
         client.resources.export(file="/tmp/resources.csv", collections=3)
     """
 
-    endpoint = "storage/api/collections"
+    endpoint = versioned("storage/api/collections", ninja="api/v2/collections/")
     schema = Collection
 
     # What each version applies (checked live on v1 and v2): a parameter that is not here is ignored.

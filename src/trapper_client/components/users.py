@@ -4,7 +4,7 @@ Component for the user accounts of Trapper.
 
 from __future__ import annotations
 
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import User
 
 
@@ -22,6 +22,6 @@ class UsersComponent(TrapperComponent[User]):
         ana = next(client.users.where(filter_fn=lambda u: u.username == "ana"))
     """
 
-    endpoint = "accounts/api/users"
+    endpoint = versioned("accounts/api/users", ninja="api/v2/users/")
     schema = User
     known_filters = {"v1": frozenset(), "v2": frozenset()}

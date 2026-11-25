@@ -13,7 +13,7 @@ from typing import Any, Callable, Dict, Iterable, Literal
 import httpx
 
 from trapper_client import err
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.retry_utils import retrying_for_download
 from trapper_client.schemas import PaginatedResult, Resource
 from trapper_client.api_query import APIQuery
@@ -149,7 +149,7 @@ class ResourcesComponent(TrapperComponent[Resource]):
         client.resources.export(file="/tmp/resources.csv", status="Public")
     """
 
-    endpoint = "storage/api/resources"
+    endpoint = versioned("storage/api/resources", ninja="api/v2/resources/")
     schema = Resource
 
     # What each version applies (checked live on v1 and v2): a parameter that is not here is ignored.

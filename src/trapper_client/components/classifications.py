@@ -14,7 +14,7 @@ from tenacity import Retrying
 from trapper_client import err
 from trapper_client.api_query import APIQuery, warn_unstable_order
 from trapper_client.components._classification_filters import ClassificationFiltersMixin, RequireProjectMixin
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, is_ninja, versioned
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
 from trapper_client.retry_utils import retrying_for_chunk_upload
 from trapper_client.schemas import (
@@ -80,7 +80,7 @@ class ClassificationsComponent(RequireProjectMixin, ClassificationFiltersMixin, 
     #: Where the project goes instead, in the ``ValueError`` of ``deployment``/``collection`` without ``project``.
     project_hint = "or use where_project_results() (the project is in its URL)"
 
-    endpoint = "/media_classification/api/classifications"
+    endpoint = versioned("/media_classification/api/classifications", ninja="api/v2/classifications/")
     export_endpoint = "/media_classification/api/classifications/results/{project_pk}/"
     schema = Classification
     export_schema = ClassificationRecordExport
@@ -98,7 +98,7 @@ class ClassificationsComponent(RequireProjectMixin, ClassificationFiltersMixin, 
         is read page by page with the repeated rows dropped, and an ``UnstableOrderWarning`` says that some may be
         missing: narrow it with a filter.
         """
-        if kwargs.get("overwrite_endpoint"):
+        if kwargs.get("overwrite_endpoint") or is_ninja(self.client):  # the new API orders it (sort_by=pk)
             return super().where(query, *args, **kwargs)
         kwargs["page_size"] = max(int(kwargs.get("page_size") or 0), self.LIST_PAGE_SIZE)
         result = super().where(query, *args, **kwargs)
@@ -107,7 +107,7 @@ class ClassificationsComponent(RequireProjectMixin, ClassificationFiltersMixin, 
 
     def get_all(self, query: Dict[str, Any] | None = None, *args: Any, **kwargs: Any):
         """Every row of the list; see :meth:`TrapperComponent.get_all`. In one request when it fits (see :meth:`where`)."""
-        if kwargs.get("overwrite_endpoint"):
+        if kwargs.get("overwrite_endpoint") or is_ninja(self.client):
             return super().get_all(query, *args, **kwargs)
         kwargs["page_size"] = max(int(kwargs.get("page_size") or 0), self.LIST_PAGE_SIZE)
         result = super().get_all(query, *args, **kwargs)
