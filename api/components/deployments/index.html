@@ -3793,7 +3793,7 @@ UI's <code>geomap/deployment/import/</code> form via cookie/session auth instead
 <a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">    (see :meth:`~trapper_client.api_client_base.APIClientBase.session_login`).</span>
 <a id="__codelineno-0-71" name="__codelineno-0-71"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-72" name="__codelineno-0-72"></a>
-<a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;geomap/api/deployments&quot;</span>
+<a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">versioned</span><span class="p">(</span><span class="s2">&quot;geomap/api/deployments&quot;</span><span class="p">,</span> <span class="n">ninja</span><span class="o">=</span><span class="s2">&quot;api/v2/deployments/&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-74" name="__codelineno-0-74"></a>
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a>    <span class="c1"># Checked against live Trapper v1 and v2: a parameter that is not here is ignored by the server.</span>
 <a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="n">_V1_FILTERS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>

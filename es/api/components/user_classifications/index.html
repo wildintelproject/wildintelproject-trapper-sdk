@@ -3020,7 +3020,7 @@ filter per custom attribute of the project's classificator.</p>
 <a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    filter per custom attribute of the project&#39;s classificator.</span>
 <a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-67" name="__codelineno-0-67"></a>
-<a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/media_classification/api/user-classifications&quot;</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">versioned</span><span class="p">(</span><span class="s2">&quot;/media_classification/api/user-classifications&quot;</span><span class="p">,</span> <span class="n">ninja</span><span class="o">=</span><span class="s2">&quot;api/v2/user-classifications/&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">UserClassification</span>
 <a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="n">USER_CLASSIFICATION_FILTERS</span>
 <a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="n">unknown_filter_hint</span> <span class="o">=</span> <span class="s2">&quot;; or the name of an attribute of the project&#39;s classificator (v2)&quot;</span>

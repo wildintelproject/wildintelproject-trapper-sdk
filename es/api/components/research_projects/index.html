@@ -3339,7 +3339,7 @@ client.research_projects.export(file=&quot;/tmp/research_projects.csv&quot;)
 <a id="__codelineno-0-69" name="__codelineno-0-69"></a><span class="sd">        client.research_projects.export(file=&quot;/tmp/research_projects.csv&quot;)</span>
 <a id="__codelineno-0-70" name="__codelineno-0-70"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-71" name="__codelineno-0-71"></a>
-<a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;research/api/projects&quot;</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">versioned</span><span class="p">(</span><span class="s2">&quot;research/api/projects&quot;</span><span class="p">,</span> <span class="n">ninja</span><span class="o">=</span><span class="s2">&quot;api/v2/research/projects/&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">ResearchProject</span>
 <a id="__codelineno-0-74" name="__codelineno-0-74"></a>
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>

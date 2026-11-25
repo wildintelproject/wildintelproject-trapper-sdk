@@ -2903,7 +2903,11 @@ and <code>created_at</code>.</p>
 <span class="normal"><a href="#__codelineno-0-46">46</a></span>
 <span class="normal"><a href="#__codelineno-0-47">47</a></span>
 <span class="normal"><a href="#__codelineno-0-48">48</a></span>
-<span class="normal"><a href="#__codelineno-0-49">49</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="k">class</span><span class="w"> </span><span class="nc">SequencesComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-49">49</a></span>
+<span class="normal"><a href="#__codelineno-0-50">50</a></span>
+<span class="normal"><a href="#__codelineno-0-51">51</a></span>
+<span class="normal"><a href="#__codelineno-0-52">52</a></span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="k">class</span><span class="w"> </span><span class="nc">SequencesComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Sequence</span><span class="p">]):</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="sd">    The sequences of Trapper (``client.sequences``): groups of resources recorded within ``interval`` seconds of each</span>
 <a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    other in a collection of a classification project, the events of Camtrap DP (``eventID``).</span>
@@ -2930,14 +2934,18 @@ and <code>created_at</code>.</p>
 <a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    ``search`` answers ``500`` (Trapper searches a ``name`` that sequences do not have): the SDK warns.</span>
 <a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-41" name="__codelineno-0-41"></a>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;media_classification/api/sequences&quot;</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">versioned</span><span class="p">(</span><span class="s2">&quot;media_classification/api/sequences&quot;</span><span class="p">,</span> <span class="n">ninja</span><span class="o">=</span><span class="s2">&quot;api/v2/sequences/&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Sequence</span>
 <a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="n">_SEQUENCE_FILTERS</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">:</span> <span class="n">_SEQUENCE_FILTERS</span><span class="p">}</span>
 <a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="n">broken_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="s2">&quot;answers 500 (it searches a field &#39;name&#39; that sequences do not have)&quot;</span><span class="p">}</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;``deployment`` as Trapper reads it: comma-separated PKs.&quot;&quot;&quot;</span>
-<a id="__codelineno-0-49" name="__codelineno-0-49"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_lists</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">comma</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;deployment&quot;</span><span class="p">,))</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a>    <span class="n">ninja_broken_filters</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a>        <span class="s2">&quot;search&quot;</span><span class="p">:</span> <span class="s2">&quot;answers 500 (it searches a field &#39;name&#39; that sequences do not have)&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a>        <span class="s2">&quot;deployment&quot;</span><span class="p">:</span> <span class="s2">&quot;answers 500 on the new API (400 for several comma-separated PKs)&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a>    <span class="p">}</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_normalize_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;``deployment`` as Trapper reads it: comma-separated PKs.&quot;&quot;&quot;</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_lists</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">comma</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;deployment&quot;</span><span class="p">,))</span>
 </code></pre></div></td></tr></table></div>
               </details>
 

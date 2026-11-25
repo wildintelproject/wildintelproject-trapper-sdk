@@ -710,6 +710,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#la-nueva-api-de-trapper-2-ninja" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        La nueva API de Trapper 2 (ninja)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#que-cambia" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2800,6 +2811,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#la-nueva-api-de-trapper-2-ninja" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        La nueva API de Trapper 2 (ninja)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#que-cambia" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2912,6 +2934,29 @@ ruta que solo existe en v2:</p>
 </tbody>
 </table>
 <p>Para evitar la sonda, pasa <code>trapper_version="v1"</code> o <code>"v2"</code>.</p>
+<h2 id="la-nueva-api-de-trapper-2-ninja">La nueva API de Trapper 2 (<code>ninja</code>)</h2>
+<p>Trapper 2 está estrenando una API nueva bajo <code>/api/v2/...</code> (rama <code>refactor-api-ninja</code>, release <code>2.0.0a4</code>), con un
+esquema versionado y documentado. Mientras se construye, el servidor sirve las dos: las rutas antiguas y las nuevas.
+El SDK usa la nueva cuando está disponible:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">client</span> <span class="o">=</span> <span class="n">TrapperClient</span><span class="p">(</span><span class="n">access_token</span><span class="o">=</span><span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="s2">&quot;https://trapper.example.org&quot;</span><span class="p">)</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">client</span><span class="o">.</span><span class="n">server_version</span>   <span class="c1"># &quot;v2&quot;: es Trapper 2.x</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">client</span><span class="o">.</span><span class="n">api_flavor</span>       <span class="c1"># &quot;ninja&quot; si el servidor sirve la API nueva; si no, &quot;legacy&quot;</span>
+</code></pre></div>
+<p>Con <code>trapper_version="auto"</code>, un servidor v2 que responde a <code>GET api/v2/probe/auth/</code> (<code>200</code> o <code>401</code>; v1 y la primera
+v2 responden <code>404</code>) usa la API nueva. <code>trapper_version="ninja"</code> la fuerza, y <code>trapper_version="v2"</code> mantiene las
+rutas antiguas.</p>
+<p>En la API nueva:</p>
+<ul>
+<li>Las listas usan sus rutas: localizaciones, despliegues, recursos (también por colección y por localización),
+  colecciones, proyectos de investigación y sus colecciones, proyectos de clasificación y sus colecciones,
+  clasificadores, clasificaciones finales, de usuario y de IA, el mapa de clasificaciones, secuencias, especies y
+  usuarios. Las tablas, exportaciones e importaciones siguen yendo de momento por las rutas antiguas.</li>
+<li>Las listas se ordenan por <code>pk</code> (<code>sort_by=pk</code>) salvo que pases <code>sort_by</code>: sus páginas nunca repiten ni se saltan
+  filas. Se aceptan <code>sort_by</code>, <code>reverse</code> y <code>all_filtered</code>.</li>
+<li><code>deployment</code> y <code>collection</code> de las listas de clasificaciones funcionan sin <code>project</code>.</li>
+<li>Las colecciones de un proyecto de investigación que el usuario no puede ver responden <code>403</code> (la ruta antigua
+  respondía con una lista vacía).</li>
+</ul>
 <h2 id="que-cambia">Qué cambia</h2>
 <table>
 <thead>
@@ -2985,8 +3030,8 @@ ruta que solo existe en v2:</p>
 </tbody>
 </table>
 <h2 id="subir-ficheros">Subir ficheros</h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">uploader</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_uploader</span><span class="p">()</span>          <span class="c1"># HTTPUploader en v1, TusUploader en v2</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">uploader</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/data/package.zip&quot;</span><span class="p">),</span> <span class="s2">&quot;season1/package.zip&quot;</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">uploader</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get_uploader</span><span class="p">()</span>          <span class="c1"># HTTPUploader en v1, TusUploader en v2</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">uploader</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/data/package.zip&quot;</span><span class="p">),</span> <span class="s2">&quot;season1/package.zip&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>En v2 el cargador se autentica con <code>Authorization: Token ...</code>, así que el cliente necesita un
 <code>access_token</code>. Llama primero a <code>client.upload_auth()</code> para saber, antes de mover ningún byte, si el
@@ -2998,12 +3043,12 @@ desde el último byte que conserva el servidor; su URL se guarda en un fichero a
 HTTP</strong> (<code>UserHttpUploaderAccount</code>), que un administrador de Trapper concede en el admin de Django
 (<em>Accounts → User HTTP uploader accounts → Add</em>, eligiendo al usuario). Sin ella, el servidor rechaza
 la subida con <code>403 "HTTP uploader access not granted"</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">client</span><span class="o">.</span><span class="n">upload_auth</span><span class="p">()</span>                    <span class="c1"># {&quot;username&quot;: &quot;...&quot;} cuando el token puede subir</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">except</span> <span class="n">err</span><span class="o">.</span><span class="n">ForbiddenError</span><span class="p">:</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>    <span class="o">...</span>                                     <span class="c1"># token válido, pero aún sin cuenta de cargador</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">except</span> <span class="n">err</span><span class="o">.</span><span class="n">UnauthorizedError</span><span class="p">:</span>
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>    <span class="o">...</span>                                     <span class="c1"># token desconocido o ausente</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">client</span><span class="o">.</span><span class="n">upload_auth</span><span class="p">()</span>                    <span class="c1"># {&quot;username&quot;: &quot;...&quot;} cuando el token puede subir</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="k">except</span> <span class="n">err</span><span class="o">.</span><span class="n">ForbiddenError</span><span class="p">:</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    <span class="o">...</span>                                     <span class="c1"># token válido, pero aún sin cuenta de cargador</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="k">except</span> <span class="n">err</span><span class="o">.</span><span class="n">UnauthorizedError</span><span class="p">:</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="o">...</span>                                     <span class="c1"># token desconocido o ausente</span>
 </code></pre></div>
 <p>Compruébalo una vez antes de una subida larga en lugar de descubrirlo en el primer byte. v1 no tiene
 ese requisito (ni <code>upload_auth()</code>: lanza <code>UnsupportedVersionError</code>).</p>

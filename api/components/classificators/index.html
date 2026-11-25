@@ -3027,7 +3027,7 @@ through query parameters.</p>
 <a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">    through query parameters.</span>
 <a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-34" name="__codelineno-0-34"></a>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/media_classification/api/classificators&quot;</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">versioned</span><span class="p">(</span><span class="s2">&quot;/media_classification/api/classificators&quot;</span><span class="p">,</span> <span class="n">ninja</span><span class="o">=</span><span class="s2">&quot;api/v2/classificators/&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-36" name="__codelineno-0-36"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Classificator</span>
 <a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="n">create_endpoint</span> <span class="o">=</span> <span class="s2">&quot;media_classification/classificator/create/&quot;</span>
 <a id="__codelineno-0-38" name="__codelineno-0-38"></a>    <span class="n">_CREATED_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;/classificator/update/(\d+)/&quot;</span><span class="p">)</span>

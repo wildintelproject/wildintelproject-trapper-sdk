@@ -2858,7 +2858,7 @@ every user; the SDK emits an <code>UnknownFilterWarning</code>. Filter on the cl
 <a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">        ana = next(client.users.where(filter_fn=lambda u: u.username == &quot;ana&quot;))</span>
 <a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24"></a>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;accounts/api/users&quot;</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">versioned</span><span class="p">(</span><span class="s2">&quot;accounts/api/users&quot;</span><span class="p">,</span> <span class="n">ninja</span><span class="o">=</span><span class="s2">&quot;api/v2/users/&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">User</span>
 <a id="__codelineno-0-27" name="__codelineno-0-27"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">(),</span> <span class="s2">&quot;v2&quot;</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">()}</span>
 </code></pre></div></td></tr></table></div>

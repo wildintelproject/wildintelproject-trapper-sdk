@@ -3417,7 +3417,7 @@ client.locations.export(query={&quot;research_project&quot;: 5}, file=&quot;/tmp
 <a id="__codelineno-0-74" name="__codelineno-0-74"></a><span class="sd">        client.locations.export(query={&quot;research_project&quot;: 5}, file=&quot;/tmp/project5_locations.csv&quot;)</span>
 <a id="__codelineno-0-75" name="__codelineno-0-75"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-76" name="__codelineno-0-76"></a>
-<a id="__codelineno-0-77" name="__codelineno-0-77"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/geomap/api/locations&quot;</span>
+<a id="__codelineno-0-77" name="__codelineno-0-77"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">versioned</span><span class="p">(</span><span class="s2">&quot;/geomap/api/locations&quot;</span><span class="p">,</span> <span class="n">ninja</span><span class="o">=</span><span class="s2">&quot;api/v2/locations/&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-78" name="__codelineno-0-78"></a>
 <a id="__codelineno-0-79" name="__codelineno-0-79"></a>    <span class="c1"># Checked against live Trapper v1 and v2: a parameter that is not here is ignored by the server.</span>
 <a id="__codelineno-0-80" name="__codelineno-0-80"></a>    <span class="n">_V2_FILTERS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>
