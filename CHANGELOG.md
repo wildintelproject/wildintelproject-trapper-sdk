@@ -16,6 +16,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Upcoming release
 
 ### Added
+- Every `*_pk` parameter, and the `pk` of `find()`, also takes the SDK object it stands for (issue #75):
+  `client.classification_results.get_project_results(project)` with a `ClassificationProject`. The signatures say
+  which (`project_pk: int | ClassificationProject`); an object of another type is a `TypeError` before any request.
+  `trapper_client._pk.as_pk()`/`takes_pk()`.
 - **The new API of Trapper 2** (`/api/v2/...`, branch `refactor-api-ninja`; issue #129, phase 1 of #99):
   `trapper_version="ninja"`, or auto-detected on a v2 server that serves `GET api/v2/probe/auth/`; `server_version`
   stays `"v2"` and the new `client.api_flavor` is `"legacy"` or `"ninja"`. The read lists use the new routes

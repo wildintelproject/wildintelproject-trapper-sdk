@@ -20,6 +20,8 @@ from trapper_client.schemas import (
     ProjectDeploymentProgress,
     ProjectLocation,
 )
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import Deployment, ProjectDeployment, ProjectDeploymentDetail  # noqa: F401  (pk parameters)
 
 
 class ProjectDeploymentsComponent(TrapperComponent[ProjectDeployment]):
@@ -82,14 +84,16 @@ class ProjectDeploymentsComponent(TrapperComponent[ProjectDeployment]):
         data = self.client.get(self._url(project_slug, "locations"), query=filters or None)
         return [ProjectLocation.model_validate(row) for row in data.get("results", [])]
 
-    def find(self, project_slug: str, deployment_pk: int) -> ProjectDeploymentDetail:  # type: ignore[override]
+    @takes_pk(deployment_pk=(ProjectDeployment, ProjectDeploymentDetail, Deployment,))
+    def find(self, project_slug: str, deployment_pk: int | ProjectDeployment | ProjectDeploymentDetail | Deployment) -> ProjectDeploymentDetail:  # type: ignore[override]
         """The full, editable record of one deployment."""
         self._ensure_supported()
         return ProjectDeploymentDetail.model_validate(self._single(self._url(project_slug, deployment_pk)))
 
     # ── actions ───────────────────────────────────────────────────────────────
 
-    def update(self, project_slug: str, deployment_pk: int, **fields: Any) -> ProjectDeploymentDetail:
+    @takes_pk(deployment_pk=(ProjectDeployment, ProjectDeploymentDetail, Deployment,))
+    def update(self, project_slug: str, deployment_pk: int | ProjectDeployment | ProjectDeploymentDetail | Deployment, **fields: Any) -> ProjectDeploymentDetail:
         """Change some fields of a deployment (``PATCH``).
 
         Accepts the editable fields of :class:`~trapper_client.schemas.ProjectDeploymentDetail`
@@ -103,12 +107,14 @@ class ProjectDeploymentsComponent(TrapperComponent[ProjectDeployment]):
         response = self.client.make_request(self._url(project_slug, deployment_pk), "PATCH", body=fields)
         return ProjectDeploymentDetail.model_validate(response.json())
 
-    def delete(self, project_slug: str, deployment_pk: int) -> None:
+    @takes_pk(deployment_pk=(ProjectDeployment, ProjectDeploymentDetail, Deployment,))
+    def delete(self, project_slug: str, deployment_pk: int | ProjectDeployment | ProjectDeploymentDetail | Deployment) -> None:
         """Delete a deployment (``DELETE``). Needs ``can_delete``; irreversible."""
         self._ensure_supported()
         self.client.make_request(self._url(project_slug, deployment_pk), "DELETE")
 
-    def update_timestamps(self, project_slug: str, deployment_pk: int, time_offset: int) -> None:
+    @takes_pk(deployment_pk=(ProjectDeployment, ProjectDeploymentDetail, Deployment,))
+    def update_timestamps(self, project_slug: str, deployment_pk: int | ProjectDeployment | ProjectDeploymentDetail | Deployment, time_offset: int) -> None:
         """Shift the ``date_recorded`` of every resource of the deployment by ``time_offset`` seconds.
 
         Fixes a camera clock that was wrong: use a negative value to go back. The classifications'
@@ -120,7 +126,8 @@ class ProjectDeploymentsComponent(TrapperComponent[ProjectDeployment]):
             body={"time_offset": int(time_offset)},
         )
 
-    def progress(self, project_slug: str, deployment_pk: int) -> ProjectDeploymentProgress:
+    @takes_pk(deployment_pk=(ProjectDeployment, ProjectDeploymentDetail, Deployment,))
+    def progress(self, project_slug: str, deployment_pk: int | ProjectDeployment | ProjectDeploymentDetail | Deployment) -> ProjectDeploymentProgress:
         """Per-stage AI pipeline progress of the deployment (``running`` is ``False`` when idle)."""
         self._ensure_supported()
         return ProjectDeploymentProgress.model_validate(
@@ -129,8 +136,9 @@ class ProjectDeploymentsComponent(TrapperComponent[ProjectDeployment]):
 
     # ── AI calibration (needs the project's AI models; not exercised against a live AI) ──
 
+    @takes_pk(deployment_pk=(ProjectDeployment, ProjectDeploymentDetail, Deployment,))
     def request_depth_calibration(
-        self, project_slug: str, deployment_pk: int,
+        self, project_slug: str, deployment_pk: int | ProjectDeployment | ProjectDeploymentDetail | Deployment,
         calibration_ids: Iterable[int] | None = None,
         job_config_overrides: Dict[str, Any] | None = None,
     ) -> Dict[str, Any]:
@@ -149,8 +157,9 @@ class ProjectDeploymentsComponent(TrapperComponent[ProjectDeployment]):
             self._url(project_slug, deployment_pk, "depth-calibration"), "POST", body=body
         ).json()
 
+    @takes_pk(deployment_pk=(ProjectDeployment, ProjectDeploymentDetail, Deployment,))
     def request_distance_estimation(
-        self, project_slug: str, deployment_pk: int, **payload: Any
+        self, project_slug: str, deployment_pk: int | ProjectDeployment | ProjectDeploymentDetail | Deployment, **payload: Any
     ) -> Dict[str, Any]:
         """Ask the AI pipeline to estimate animal distances for the deployment."""
         self._ensure_supported()
@@ -158,7 +167,8 @@ class ProjectDeploymentsComponent(TrapperComponent[ProjectDeployment]):
             self._url(project_slug, deployment_pk, "estimate-distances"), "POST", body=payload
         ).json()
 
-    def calibration_results(self, project_slug: str, deployment_pk: int) -> list[Dict[str, Any]]:
+    @takes_pk(deployment_pk=(ProjectDeployment, ProjectDeploymentDetail, Deployment,))
+    def calibration_results(self, project_slug: str, deployment_pk: int | ProjectDeployment | ProjectDeploymentDetail | Deployment) -> list[Dict[str, Any]]:
         """Results of the deployment's calibrations (raw rows; empty until a calibration ran)."""
         self._ensure_supported()
         data = self.client.get(self._url(project_slug, deployment_pk, "calibration-results"))

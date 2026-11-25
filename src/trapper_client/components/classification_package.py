@@ -11,6 +11,8 @@ from trapper_client import err
 from trapper_client.components.base import TrapperComponent
 from trapper_client.retry_utils import retrying_for_download
 from trapper_client.schemas import ResultsDataPackageResponse
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import ClassificationProject  # noqa: F401  (pk parameters)
 
 
 #: The parameters Trapper reads (``ResultsDataPackageGeneratorParams``), by version.
@@ -94,9 +96,10 @@ class ClassificationPackageComponent(TrapperComponent[ResultsDataPackageResponse
                 "the research project's keywords and 'private' licenses."
             )
 
+    @takes_pk(project_pk=ClassificationProject)
     def get_project_package(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         query: Dict[str, Any] | None = None,
         validate: bool = True,
         raise_on_error: bool = True,
@@ -285,8 +288,9 @@ class ClassificationPackageComponent(TrapperComponent[ResultsDataPackageResponse
                 raise
         return target
 
+    @takes_pk(project_pk=ClassificationProject)
     def download_project_package(
-        self, project_pk: int, file: str | Path, query: Dict[str, Any] | None = None, **kwargs: Any,
+        self, project_pk: int | ClassificationProject, file: str | Path, query: Dict[str, Any] | None = None, **kwargs: Any,
     ) -> Path:
         """Build (or take from the cache) the package of a project and save it to a zip.
 

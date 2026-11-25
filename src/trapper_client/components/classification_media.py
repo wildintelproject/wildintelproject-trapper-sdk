@@ -20,6 +20,8 @@ from trapper_client.components.base import TrapperComponent
 from trapper_client.components.classification_projects import ClassificationProjectsComponent
 from trapper_client.retry_utils import retrying_for_download
 from trapper_client.schemas import Media, PaginatedResult
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import ClassificationProject, Collection  # noqa: F401  (pk parameters)
 
 logger = logging.getLogger(__name__)
 
@@ -376,9 +378,10 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
 
     # ── project media ─────────────────────────────────────────────────────────
 
+    @takes_pk(project_pk=ClassificationProject)
     def get_project_media(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         query: Dict[str, Any] | None = None,
         page: int = 1,
         page_size: int = 50,
@@ -407,9 +410,10 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             **kwargs,
         )
 
+    @takes_pk(project_pk=ClassificationProject)
     def where_project_media(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
@@ -435,9 +439,10 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             **kwargs,
         )
 
+    @takes_pk(project_pk=ClassificationProject)
     def export_project_media(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         query: Dict[str, Any] | None = None,
         file: str | Path | None = None,
         validate: bool = True,
@@ -464,9 +469,10 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             **kwargs,
         )
 
+    @takes_pk(project_pk=ClassificationProject)
     def get_project_media_by_id(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         media_id: int,
         query: Dict[str, Any] | None = None,
         validate: bool = True,
@@ -497,9 +503,10 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
                 return row
         return None
 
+    @takes_pk(project_pk=ClassificationProject)
     def download_project_media_files(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         output_dir: str | Path | None = None,
         query: Dict[str, Any] | None = None,
         parallel: bool = False,
@@ -560,10 +567,11 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
 
     # ── collection media ──────────────────────────────────────────────────────
 
+    @takes_pk(project_pk=ClassificationProject, collection_pk=Collection)
     def get_collection_media(
         self,
-        project_pk: int,
-        collection_pk: int,
+        project_pk: int | ClassificationProject,
+        collection_pk: int | Collection,
         query: Dict[str, Any] | None = None,
         page: int = 1,
         page_size: int = 50,
@@ -595,10 +603,11 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             overwrite_endpoint=self._resolve_endpoint(project_pk),
         )
 
+    @takes_pk(project_pk=ClassificationProject, collection_pk=Collection)
     def where_collection_media(
         self,
-        project_pk: int,
-        collection_pk: int,
+        project_pk: int | ClassificationProject,
+        collection_pk: int | Collection,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
@@ -627,10 +636,11 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             overwrite_endpoint=self._resolve_endpoint(project_pk),
         )
 
+    @takes_pk(project_pk=ClassificationProject, collection_pk=Collection)
     def export_collection_media(
         self,
-        project_pk: int,
-        collection_pk: int,
+        project_pk: int | ClassificationProject,
+        collection_pk: int | Collection,
         query: Dict[str, Any] | None = None,
         file: str | Path | None = None,
         validate: bool = True,
@@ -660,10 +670,11 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
             overwrite_endpoint=self._resolve_endpoint(project_pk),
         )
 
+    @takes_pk(project_pk=ClassificationProject, collection_pk=Collection)
     def download_collection_media_files(
         self,
-        project_pk: int,
-        collection_pk: int,
+        project_pk: int | ClassificationProject,
+        collection_pk: int | Collection,
         output_dir: str | Path | None = None,
         query: Dict[str, Any] | None = None,
         parallel: bool = False,

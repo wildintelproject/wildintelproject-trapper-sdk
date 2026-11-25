@@ -14,6 +14,8 @@ from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.components.resources import DownloadReport, ResourcesComponent, safe_filename
 from trapper_client.enums import CollectionStatus
 from trapper_client.schemas import Collection, PaginatedResult, Resource
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import Collection  # noqa: F401  (pk parameters)
 
 
 class CollectionsComponent(TrapperComponent[Collection]):
@@ -216,9 +218,10 @@ class CollectionsComponent(TrapperComponent[Collection]):
             **kwargs,
         )
 
+    @takes_pk(pk=Collection)
     def find_ondemand(
         self,
-        pk: int | str,
+        pk: int | Collection,
         validate: bool = True,
     ) -> Collection:
         """Retrieve a single on-demand collection by PK.
@@ -346,9 +349,10 @@ class CollectionsComponent(TrapperComponent[Collection]):
             **kwargs,
         )
 
+    @takes_pk(pk=Collection)
     def find_map(
         self,
-        pk: int | str,
+        pk: int | Collection,
         validate: bool = True,
     ) -> Collection:
         """Retrieve a single map collection by PK.
@@ -475,9 +479,10 @@ class CollectionsComponent(TrapperComponent[Collection]):
             **kwargs,
         )
 
+    @takes_pk(pk=Collection)
     def find_append(
         self,
-        pk: int | str,
+        pk: int | Collection,
         validate: bool = True,
     ) -> Collection:
         """Retrieve a single append collection by PK.
@@ -501,9 +506,10 @@ class CollectionsComponent(TrapperComponent[Collection]):
             overwrite_endpoint=self._append_endpoint,
         )
 
+    @takes_pk(collection_pk=Collection)
     def download_resources(
         self,
-        collection_pk: int,
+        collection_pk: int | Collection,
         directory: str | Path,
         kind: Literal["original", "preview", "thumbnail"] = "original",
         filter_fn: Callable[[Any], bool] | None = None,

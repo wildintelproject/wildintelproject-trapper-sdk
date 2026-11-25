@@ -12,6 +12,8 @@ from trapper_client import err
 from trapper_client.components._classification_filters import ClassificationFiltersMixin
 from trapper_client.components.base import TrapperComponent
 from trapper_client.schemas import ClassificationAgg, PaginatedResult
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import ClassificationProject  # noqa: F401  (pk parameters)
 
 
 class ClassificationResultsAggComponent(ClassificationFiltersMixin, TrapperComponent[ClassificationAgg]):
@@ -69,9 +71,10 @@ class ClassificationResultsAggComponent(ClassificationFiltersMixin, TrapperCompo
     def _is_geojson(q: Dict[str, Any]) -> bool:
         return str(q.get("geojson", "False")).strip().lower() == "true"
 
+    @takes_pk(project_pk=ClassificationProject)
     def get_project_results_agg(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         query: Dict[str, Any] | None = None,
         page: int = 1,
         page_size: int = 50,
@@ -104,8 +107,9 @@ class ClassificationResultsAggComponent(ClassificationFiltersMixin, TrapperCompo
         data = self._get_or_empty(self._endpoint_for(project_pk), q)
         return self._to_paginated(data, validate=validate)
 
+    @takes_pk(project_pk=ClassificationProject)
     def get_project_geojson(
-        self, project_pk: int, query: Dict[str, Any] | None = None, **kwargs: Any,
+        self, project_pk: int | ClassificationProject, query: Dict[str, Any] | None = None, **kwargs: Any,
     ) -> Dict[str, Any]:
         """The trap rates of a project as a GeoJSON ``FeatureCollection``: one point per deployment and species.
 
@@ -131,9 +135,10 @@ class ClassificationResultsAggComponent(ClassificationFiltersMixin, TrapperCompo
             return results[0]
         return data
 
+    @takes_pk(project_pk=ClassificationProject)
     def export_project_results_agg(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         query: Dict[str, Any] | None = None,
         file: str | Path | None = None,
         validate: bool = True,
