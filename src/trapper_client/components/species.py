@@ -1,5 +1,5 @@
 """
-Component for the Species taxonomy data endpoint.
+Component for the species table of Trapper.
 """
 
 from __future__ import annotations
@@ -7,28 +7,35 @@ from __future__ import annotations
 from trapper_client.components.base import TrapperComponent
 from trapper_client.schemas import Species
 
+_SPECIES_FILTERS = frozenset({"english_name", "latin_name", "search", "pk"})
+
 
 class SpeciesComponent(TrapperComponent[Species]):
     """
-    Component for ``/tables/api/species``.
+    The species table of Trapper (``client.species``). Its PKs are the ones the ``species`` filter of the
+    classification components takes.
 
-    Retrieve and filter the species taxonomy table from Trapper. Species
-    PKs returned here are the same ones referenced by the ``species``
-    filter on classification-related components (e.g. ``classifications``,
-    ``ai_classifications``).
+    - ``GET /tables/api/species`` (and ``/{pk}``): paginated, ordered by English name. Trapper v1 servers usually
+      have the species someone added (a few); Trapper v2 ships the whole taxonomy (36433 species): use a filter.
 
-    Main endpoints:
-    - ``GET /tables/api/species``: List of species (paginated)
-    - ``GET /tables/api/species/{pk}``: Single species detail
+    A row has ``display_name`` (``"Iberian lynx (Lynx pardinus)"``), ``english_name``, ``latin_name``, ``family`` and
+    ``genus``, plus ``taxon_class`` and ``order`` on v2.
 
-    **Available filter fields:**
+    **Filters** (Trapper ignores any other without an error — ``genus=Lynx`` returns every species —; the SDK emits
+    an ``UnknownFilterWarning``):
 
-    | Parameter    | Type   | Description                                       |
-    |--------------|--------|-----------------------------------------------------|
-    | english_name | string | Filter by exact english name                        |
-    | latin_name   | string | Filter by exact latin name                          |
-    | search       | string | Free-text search across english_name, latin_name    |
+    | Parameter | Type | Description |
+    |---|---|---|
+    | latin_name | string | **Exact and case-sensitive** Latin name (``"Lynx pardinus"``) |
+    | english_name | string | **Exact and case-sensitive** English name (v1 ``"Iberian lynx"``, v2 ``"Iberian Lynx"``) |
+    | search | string | Part of the English or Latin name, any case |
+
+    Example::
+
+        lynx = client.species.get(latin_name="Lynx pardinus").results[0]
+        client.classification_results.get(project=2, species=lynx.pk)
     """
 
     endpoint = "tables/api/species"
     schema = Species
+    known_filters = {"v1": _SPECIES_FILTERS, "v2": _SPECIES_FILTERS}
