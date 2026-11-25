@@ -149,6 +149,13 @@ row = client.classification_results.find(1)
 
 Consulta [Uso](../usage.md) si algo de esto te resulta desconocido: es la misma interfaz en todos los componentes.
 
+!!! warning "La lista no tiene un orden estable"
+    Trapper no ordena la lista de clasificaciones, así que sus páginas repiten unas filas y se saltan otras.
+    `where()`, `all()` y `get_all()` la piden en páginas de 500, lo máximo que envía Trapper: una lista que cabe se
+    lee en una petición y sale completa. Una más larga se lee página a página quitando las filas repetidas, y un
+    `UnstableOrderWarning` avisa de que pueden faltar algunas — acótala con un filtro (`project`, `deployment`, ...).
+    `get()` devuelve la página que pides, tal como llega.
+
 ## Exportación de observaciones, limitada a un proyecto
 
 El endpoint de exportación devuelve un esquema *distinto* al anterior: filas de observación con formato

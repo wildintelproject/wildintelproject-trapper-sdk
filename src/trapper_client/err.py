@@ -73,6 +73,10 @@ HTTP_ERRORS_MAP = {
 }
 
 
+class UnstableOrderWarning(UserWarning):
+    """A list without a stable order took more than one page: some rows may be missing (repeated ones are dropped)."""
+
+
 def user_stacklevel() -> int:
     """The ``stacklevel`` of a warning that points at the user's code, the first frame outside ``trapper_client``.
 

@@ -64,6 +64,16 @@ PROJECT_PK = 7
 
 class TestClassificationsComponent(ComponentUnitTestBase):
     component_class = ClassificationsComponent
+
+    # The list is read in pages of 500, the most Trapper sends (issue #108).
+    def test_get_all_sends_page_size(self, component, client):
+        client.get_all.return_value = paginated_response([])
+        component.get_all(page_size=100)
+        assert client.get_all.call_args[1]["query"]["page_size"] == 500
+
+    def test_where_passes_page_size(self, component):
+        assert component.where(page_size=25)._page_size == 500
+        assert component.where(page_size=800)._page_size == 800
     schema = Classification
     export_schema = ClassificationResultRecordCamtrapDP
     find_pk = 1
@@ -880,3 +890,52 @@ class TestCheckTable:
         with pytest.raises(ValueError) as e:
             C._check_table(self._write(tmp_path, "_id,sex\n1,macho\n"))
         assert "classificationMethod" in str(e.value) and "row 2" in str(e.value)
+
+
+
+# ── the list has no stable order (issue #108) ─────────────────────────────────
+
+import warnings as _w
+
+from trapper_client import err as _err
+
+
+def _row(pk):
+    return {"pk": pk}
+
+
+class TestUnstableOrder:
+
+    @pytest.fixture
+    def client(self):
+        c = MagicMock()
+        c.server_version = "v2"
+        return c
+
+    def test_where_reads_one_page_when_it_fits(self, client):
+        client.get.return_value = {"pagination": {"page": 1, "pages": 1, "page_size": 500, "count": 3},
+                                   "results": [_row(1), _row(2), _row(3)]}
+        with _w.catch_warnings():
+            _w.simplefilter("error", _err.UnstableOrderWarning)
+            pks = [r.pk for r in ClassificationsComponent(client).where(validate=False)]
+        assert pks == [1, 2, 3] and client.get.call_count == 1
+        assert client.get.call_args[0][1]["page_size"] == 500
+
+    def test_where_drops_repeats_and_warns_when_it_does_not_fit(self, client):
+        pages = {1: [_row(1), _row(2)], 2: [_row(2), _row(4)]}
+        client.get.side_effect = lambda endpoint, q, **kw: {
+            "pagination": {"page": q["page"], "pages": 2, "page_size": 2, "count": 4}, "results": pages[q["page"]]}
+        with pytest.warns(_err.UnstableOrderWarning, match="4 rows take 2 pages"):
+            pks = [r.pk for r in ClassificationsComponent(client).where(validate=False)]
+        assert pks == [1, 2, 4]
+
+    def test_get_all_drops_repeats_and_warns(self, client):
+        client.get_all.return_value = {"pagination": {"page": 2, "pages": 2, "page_size": 500, "count": 4},
+                                       "results": [_row(1), _row(2), _row(2), _row(4)]}
+        with pytest.warns(_err.UnstableOrderWarning):
+            result = ClassificationsComponent(client).get_all(validate=False)
+        assert [r.pk for r in result.results] == [1, 2, 4]
+
+    def test_project_results_are_not_touched(self, client):
+        client.get.return_value = {"pagination": {"page": 1, "pages": 1}, "results": []}
+        assert ClassificationsComponent(client).where_project_results(2, page_size=50)._page_size == 50
