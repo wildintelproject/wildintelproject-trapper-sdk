@@ -190,6 +190,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `species` (issue #117): `taxon_class` and `order` of v2; `UnknownFilterWarning` (`genus=Lynx` returned every
+  species); the docs say the name filters are exact and case-sensitive and that v2 has the whole taxonomy (36433).
 - `sequences` (issue #115): `deployment` is sent comma-separated (a list kept only one deployment); `resources`
   without the repeats of v2; `UnknownFilterWarning` for unknown filters and for `search`, which answers `500`; the
   docs say the list is not paginated and not limited to what the user can see.

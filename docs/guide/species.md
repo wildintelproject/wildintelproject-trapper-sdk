@@ -1,32 +1,36 @@
 # Species
 
 !!! info "Trapper compatibility"
-    **v1** ✔ · **v2** ✔ (not yet validated against a live Trapper v2 server). See [Trapper versions](versions.md).
+    **v1** ✔ · **v2** ✔ — checked against both. See [Trapper versions](versions.md).
 
-`client.species` — the species taxonomy table. PKs returned here are the same ones referenced by
-the `species` filter on classification-related components (e.g.
-[`classifications`](classifications.md), [`ai_classifications`](ai_classifications.md)).
+`client.species` — the species table of Trapper. Its PKs are the ones the `species` filter of the classification
+components takes ([`classification_results`](classifications.md), [`ai_classifications`](ai_classifications.md), ...).
 
-**Endpoint:** `GET /tables/api/species` (list + detail).
+**Endpoint:** `GET /tables/api/species` (list + detail), paginated and ordered by English name. A Trapper v1 server
+usually has the species someone added (a few); **Trapper v2 ships the whole taxonomy (36433 species)**: use a
+filter rather than `get_all()`.
+
+A row (`Species`) has `display_name` (`"Iberian lynx (Lynx pardinus)"`), `english_name`, `latin_name`, `family` and
+`genus`, plus `taxon_class` and `order` on v2.
 
 ## Filters
 
+Trapper ignores any other filter without an error — `genus=Lynx` returns every species —; the SDK emits an
+`UnknownFilterWarning`.
+
 | Parameter | Type | Description |
 |---|---|---|
-| `english_name` | string | Filter by exact english name |
-| `latin_name` | string | Filter by exact latin name |
-| `search` | string | Free-text search across `english_name`, `latin_name` |
+| `latin_name` | string | **Exact and case-sensitive** Latin name (`"Lynx pardinus"`) |
+| `english_name` | string | **Exact and case-sensitive** English name (v1 `"Iberian lynx"`, v2 `"Iberian Lynx"`) |
+| `search` | string | Part of the English or Latin name, any case |
 
-## The six access patterns
-
-This component has no special methods — it's exactly the generic interface described in
-[Usage](../usage.md):
+## Usage
 
 ```python
-page = client.species.get(page=1, page_size=50)
+lynx = client.species.get(latin_name="Lynx pardinus").results[0]
+client.classification_results.get(project=2, species=lynx.pk)
+
 for sp in client.species.where(search="fox"):
-    print(sp)
-result = client.species.get_all()
-sp = client.species.find(1)
-client.species.export(file="species.csv")
+    print(sp.pk, sp.display_name)
+sp = client.species.find(632)
 ```

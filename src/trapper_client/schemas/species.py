@@ -20,8 +20,10 @@ class Species(BaseModel):
     display_name: Optional[str] = Field(default=None, alias="__str__")
     english_name: Optional[str] = None
     latin_name: Optional[str] = None
-    genus: Optional[str] = None
+    taxon_class: Optional[str] = None  # Trapper v2 only
+    order: Optional[str] = None  # Trapper v2 only
     family: Optional[str] = None
+    genus: Optional[str] = None
 
 
 __getattr__ = deprecated_getattr(__name__)

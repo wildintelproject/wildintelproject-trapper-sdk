@@ -1,32 +1,37 @@
 # Especies
 
 !!! info "Compatibilidad con Trapper"
-    **v1** ✔ · **v2** ✔ (aún sin validar contra un servidor Trapper v2 real). Consulta [Versiones de Trapper](versions.md).
+    **v1** ✔ · **v2** ✔ — comprobado en los dos. Consulta [Versiones de Trapper](versions.md).
 
-`client.species` — la tabla de taxonomía de especies. Las PK que devuelve son las mismas que usa el
-filtro `species` de los componentes relacionados con clasificaciones (p. ej.
-[`classifications`](classifications.md), [`ai_classifications`](ai_classifications.md)).
+`client.species` — la tabla de especies de Trapper. Sus PK son las que recibe el filtro `species` de los
+componentes de clasificación ([`classification_results`](classifications.md),
+[`ai_classifications`](ai_classifications.md), ...).
 
-**Endpoint:** `GET /tables/api/species` (listado + detalle).
+**Endpoint:** `GET /tables/api/species` (listado + detalle), paginado y ordenado por nombre inglés. Un servidor
+Trapper v1 suele tener las especies que alguien añadió (unas pocas); **Trapper v2 trae la taxonomía completa (36433
+especies)**: usa un filtro en lugar de `get_all()`.
+
+Una fila (`Species`) tiene `display_name` (`"Iberian lynx (Lynx pardinus)"`), `english_name`, `latin_name`, `family`
+y `genus`, más `taxon_class` y `order` en v2.
 
 ## Filtros
 
+Trapper ignora sin error cualquier otro filtro —`genus=Lynx` devuelve todas las especies—; el SDK emite un
+`UnknownFilterWarning`.
+
 | Parámetro | Tipo | Descripción |
 |---|---|---|
-| `english_name` | cadena | Filtra por nombre en inglés exacto |
-| `latin_name` | cadena | Filtra por nombre latino exacto |
-| `search` | cadena | Búsqueda de texto libre en `english_name` y `latin_name` |
+| `latin_name` | texto | Nombre latino **exacto, distinguiendo mayúsculas** (`"Lynx pardinus"`) |
+| `english_name` | texto | Nombre inglés **exacto, distinguiendo mayúsculas** (v1 `"Iberian lynx"`, v2 `"Iberian Lynx"`) |
+| `search` | texto | Parte del nombre inglés o latino, sin distinguir mayúsculas |
 
-## Los seis patrones de acceso
-
-Este componente no tiene métodos especiales: es exactamente la interfaz genérica descrita en
-[Uso](../usage.md):
+## Uso
 
 ```python
-page = client.species.get(page=1, page_size=50)
+lince = client.species.get(latin_name="Lynx pardinus").results[0]
+client.classification_results.get(project=2, species=lince.pk)
+
 for sp in client.species.where(search="fox"):
-    print(sp)
-result = client.species.get_all()
-sp = client.species.find(1)
-client.species.export(file="species.csv")
+    print(sp.pk, sp.display_name)
+sp = client.species.find(632)
 ```

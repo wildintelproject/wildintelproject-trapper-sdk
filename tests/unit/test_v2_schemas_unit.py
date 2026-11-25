@@ -96,3 +96,27 @@ def test_resource_without_name_validates():
     from trapper_client.schemas import Resource
 
     assert Resource.model_validate({"pk": 29, "resource_type": "I"}).name is None
+
+
+def test_v2_species_has_class_and_order():
+    from trapper_client.schemas import Species
+
+    row = {"pk": 632, "__str__": "Iberian Lynx (Lynx pardinus)", "english_name": "Iberian Lynx",
+           "latin_name": "Lynx pardinus", "taxon_class": "Mammalia", "order": "Carnivora", "family": "Felidae",
+           "genus": "Lynx"}
+    sp = Species.model_validate(row)
+    assert sp.display_name == "Iberian Lynx (Lynx pardinus)" and sp.taxon_class == "Mammalia" and sp.order == "Carnivora"
+
+
+def test_species_unknown_filter_warns():
+    from unittest.mock import MagicMock
+
+    from tests.base_component_tests import paginated_response
+    from trapper_client import err
+    from trapper_client.components.species import SpeciesComponent
+
+    client = MagicMock()
+    client.server_version = "v2"
+    client.get.return_value = paginated_response([])
+    with pytest.warns(err.UnknownFilterWarning, match="ignores 'genus'"):
+        SpeciesComponent(client).get(genus="Lynx")
