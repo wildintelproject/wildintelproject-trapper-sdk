@@ -1205,6 +1205,8 @@ upload = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "aiofiles" },
+    { name = "blake3" },
     { name = "mkdocs" },
     { name = "mkdocs-material" },
     { name = "mkdocs-static-i18n" },
@@ -1237,6 +1239,8 @@ provides-extras = ["upload", "dev", "docs"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "aiofiles", specifier = ">=23.0" },
+    { name = "blake3", specifier = ">=0.4" },
     { name = "mkdocs", specifier = ">=1.6" },
     { name = "mkdocs-material", specifier = ">=9.5" },
     { name = "mkdocs-static-i18n", specifier = ">=1.2" },

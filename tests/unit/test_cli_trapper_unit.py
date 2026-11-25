@@ -61,7 +61,7 @@ def test_the_image_is_looked_for_locally_and_then_in_the_registry(monkeypatch):
 def test_the_env_has_the_image_the_ports_and_secrets(state):
     path = cli._write_env(stack("v2"), "img:tag")
     env = cli._read_env(path)
-    assert env["TRAPPER_IMAGE"] == "img:tag" and env["COMPOSE_PROJECT_NAME"] == "wildintel-trapper-v2"
+    assert env["TRAPPER_IMAGE"] == "img:tag" and env["COMPOSE_PROJECT_NAME"] == "wildintel-sdktest-trapper-v2"
     assert (env["APP_PORT"], env["NGINX_PORT"], env["UPLOADER_PORT"]) == ("8100", "8180", "8188")
     assert all(len(env[k]) >= 20 for k in ("POSTGRES_PASSWORD", "RABBITMQ_PASSWORD", "TRAPPER_SECRET_KEY", "TUS_HOOK_SECRET"))
 
@@ -80,7 +80,7 @@ def test_an_instance_with_an_offset_is_a_separate_one(state):
     assert other.project != base.project and other.state != base.state and other.name == "v2-p1000"
     env_base = cli._read_env(cli._write_env(base, "img:a"))
     env_other = cli._read_env(cli._write_env(other, "img:b"))
-    assert env_other["COMPOSE_PROJECT_NAME"] == "wildintel-trapper-v2-p1000"
+    assert env_other["COMPOSE_PROJECT_NAME"] == "wildintel-sdktest-trapper-v2-p1000"
     assert env_other["NGINX_PORT"] == "9180" and env_base["NGINX_PORT"] == "8180"
     assert env_other["POSTGRES_PASSWORD"] != env_base["POSTGRES_PASSWORD"]      # each has its own database
     assert env_base["TRAPPER_IMAGE"] == "img:a"                                  # and writing one leaves the other alone
@@ -196,9 +196,40 @@ def test_up_deploys_the_image_of_the_branch_it_is_given(state, monkeypatch):
     monkeypatch.setattr(cli, "_seed_accounts", lambda stack: {"research_project": 1})
     result = CliRunner().invoke(cli.app, ["trapper", "up", "all", "--v2-branch", "refactor/api-ninja", "--branch", "development"])
     assert result.exit_code == 0, result.output
-    assert resolved == ["development", "refactor/api-ninja"]
+    assert resolved == ["development", "refactor/api-ninja", "development"]      # all: v1, v2 and ninja
     assert cli._read_env(state / "v1" / ".env")["TRAPPER_IMAGE"] == "img:development"
     assert cli._read_env(state / "v2" / ".env")["TRAPPER_IMAGE"] == "img:refactor/api-ninja"
+    assert cli._read_env(state / "v2-ninja" / ".env")["TRAPPER_IMAGE"] == "img:development"
+
+
+def test_ninja_is_a_v2_with_its_own_name_ports_and_branch(state):
+    ninja, v2 = stack("ninja"), stack("v2")
+    assert ninja.compose_file == v2.compose_file and ninja.name == "v2-ninja"
+    assert ninja.project == "wildintel-sdktest-trapper-v2-ninja" and ninja.state.name == "v2-ninja"
+    assert not {ninja.app_port, ninja.nginx_port, ninja.uploader_port, ninja.rabbitmq_port} & \
+        {v2.app_port, v2.nginx_port, v2.uploader_port, v2.rabbitmq_port}
+    assert cli._branch_for(ninja, None, None, None) == "refactor-api-ninja"
+    assert cli._branch_for(ninja, None, None, "x", "feature/y") == "feature/y"      # --v2-branch is not for it
+    assert cli._stacks(cli.StackChoice.ninja, 0, "other")[0].name == "v2-other"    # --name still relabels it
+
+
+def test_seed_runs_the_dataset_script_against_the_instance(state, monkeypatch):
+    stack_ = stack("v1")
+    cli._write_env(stack_, "img:a")
+    (stack_.state / "seed.json").write_text('{"tokens": {"sdktest": "t"}, "password": "p", "research_project": 1}')
+    calls = []
+    monkeypatch.setattr(cli.subprocess, "run", lambda cmd, **kw: calls.append(cmd) or MagicMock(
+        returncode=0, stdout='species: 9\nDATASET1_JSON:{"version": "v1"}\n', stderr=""))
+    result = CliRunner().invoke(cli.app, ["trapper", "seed", "v1", "--dataset", "1"])
+    assert result.exit_code == 0, result.output
+    assert calls[0][1].endswith("dataset1.py") and calls[0][-1] == "wildintel-sdktest-trapper-v1-trapper-1"
+    assert calls[0][calls[0].index("--base-url") + 1] == "http://localhost:8080"
+    assert (stack_.state / "dataset1.json").read_text() == '{"version": "v1"}'
+
+
+def test_seed_refuses_an_instance_that_was_not_deployed(state):
+    result = CliRunner().invoke(cli.app, ["trapper", "seed", "v2", "--dataset", "2"])
+    assert result.exit_code == 1 and "trapper up v2" in result.output
 
 
 def test_each_instance_has_its_own_subnet_in_the_env_and_the_compose_files(state):
@@ -207,3 +238,13 @@ def test_each_instance_has_its_own_subnet_in_the_env_and_the_compose_files(state
     assert cli._read_env(cli._write_env(stack("v1"), "img:a"))["NETWORK_SUBNET"] == stack("v1").subnet
     for version in ("v1", "v2"):
         assert "${NETWORK_SUBNET}" in stack(version).compose_file.read_text()
+
+
+def test_a_named_instance_takes_its_label_instead_of_the_offset(state):
+    """``--name ninja`` makes ``v2-ninja``: one can tell what an instance is for from ``docker ps``."""
+    named = cli._stacks(cli.StackChoice.v2, 1000, "Ninja API")[0]
+    assert named.name == "v2-ninja-api" and named.project == "wildintel-sdktest-trapper-v2-ninja-api"
+    assert named.state.name == "v2-ninja-api"
+    env = cli._read_env(cli._write_env(named, "img:a"))
+    assert env["NGINX_PORT"] == "9180"                                           # the offset still moves the ports
+    assert cli._stacks(cli.StackChoice.v2, 1000)[0].name == "v2-p1000"
