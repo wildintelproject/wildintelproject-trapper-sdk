@@ -79,7 +79,9 @@ def _paginated(
 
 @pytest.fixture
 def api_client():
-    return APIClientBase(access_token=TOKEN, base_url=BASE_URL, verify_ssl=False)
+    # The version is fixed: with "auto" the first list would probe it (api_flavor), with requests these mocks do
+    # not expect.
+    return APIClientBase(access_token=TOKEN, base_url=BASE_URL, verify_ssl=False, trapper_version="v1")
 
 
 @pytest.fixture
