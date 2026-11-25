@@ -3280,6 +3280,14 @@ SDK no puede conocer: el aviso lo dice, y <code>warnings.simplefilter("ignore", 
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">row</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <p>Consulta <a href="../../usage/">Uso</a> si algo de esto te resulta desconocido: es la misma interfaz en todos los componentes.</p>
+<div class="admonition warning">
+<p class="admonition-title">La lista no tiene un orden estable</p>
+<p>Trapper no ordena la lista de clasificaciones, así que sus páginas repiten unas filas y se saltan otras.
+<code>where()</code>, <code>all()</code> y <code>get_all()</code> la piden en páginas de 500, lo máximo que envía Trapper: una lista que cabe se
+lee en una petición y sale completa. Una más larga se lee página a página quitando las filas repetidas, y un
+<code>UnstableOrderWarning</code> avisa de que pueden faltar algunas — acótala con un filtro (<code>project</code>, <code>deployment</code>, ...).
+<code>get()</code> devuelve la página que pides, tal como llega.</p>
+</div>
 <h2 id="exportacion-de-observaciones-limitada-a-un-proyecto">Exportación de observaciones, limitada a un proyecto</h2>
 <p>El endpoint de exportación devuelve un esquema <em>distinto</em> al anterior: filas de observación con formato
 CamtrapDP o de Trapper (<code>ClassificationRecordExport</code>), según lo que devuelva el servidor:</p>
