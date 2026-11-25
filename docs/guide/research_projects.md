@@ -61,6 +61,14 @@ result = client.research_projects.get_all_project_collections(project_pk=7)
 col = client.research_projects.find_project_collection(project_pk=7, pk=12)
 ```
 
+!!! note "When the list is empty"
+    The list is **empty, not a `403`**, unless the research project is approved and the user is its owner or has a
+    role in it (a superuser is not exempt): the owner of a project pending approval sees no collection.
+
+Filters: `status` (`Private`, `OnDemand`, `Public`), `owner` (`true` = collections the user owns or manages),
+`owners` (PKs) and `search` (collection name or owner's username). Trapper ignores any other without an error; the
+SDK emits an `UnknownFilterWarning`. `date_created` is a `datetime`.
+
 !!! warning "`pk` here is a *link* pk, not the storage collection pk"
     `find_project_collection`'s `pk` is the primary key of the `ResearchProjectCollection` row that
     links this project to a collection — not the storage `Collection`'s own pk. Passing the storage

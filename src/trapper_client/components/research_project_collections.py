@@ -9,28 +9,40 @@ from trapper_client.components.base import TrapperComponent
 from trapper_client.schemas import PaginatedResult, ResearchProjectCollection
 
 
+_RP_COLLECTION_FILTERS = frozenset({"owner", "owners", "status", "search", "pk"})
+
+
 class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectCollection]):
     """
-    Component for the ``/research/api/project/{project_pk}/collections`` resource.
+    The collections linked to a research project (``client.research_projects.collections``).
 
-    Retrieve, filter, and iterate collections linked to research projects.
+    - ``GET /research/api/project/{project_pk}/collections`` (and ``/{pk}``): one row per link, paginated. A row's
+      ``pk`` is the **link's** PK; ``collection_pk`` is the collection's. ``name``, ``owner``, ``status``,
+      ``date_created`` and ``description`` are the collection's.
 
-    **Main endpoints:**
+    The list is **empty, not a 403**, unless the research project is approved and the user is its owner or has a
+    role in it (a superuser is not exempt): the owner of a project pending approval sees no collection.
 
-    - ``GET /research/api/project/{project_pk}/collections``
-    - ``GET /research/api/project/{project_pk}/collections/{pk}``
+    **Filters** (Trapper ignores any other without an error; the SDK emits an ``UnknownFilterWarning``):
+
+    | Parameter | Type | Description |
+    |---|---|---|
+    | status | choice | The collection's status: ``Private``, ``OnDemand``, ``Public`` |
+    | owner | boolean | true = collections the user owns or manages |
+    | owners | list of PKs | Owners of the collections |
+    | search | text | Collection name or owner's username |
 
     **Example::**
 
-        for col in client.research_projects_collections.where_project(project_pk=7):
-            print(col)
+        for col in client.research_projects.collections.where_project(project_pk=7, status="Private"):
+            print(col.pk, col.collection_pk, col.name)
 
-        page = client.research_projects_collections.get_project(project_pk=7)
-        print(page.pagination, len(page.results))
+        link_pk = client.research_projects.collections.find_collection_in_project(7, collection_pk=42)
     """
 
     endpoint = "research/api/project/{project_pk}/collections"
     schema = ResearchProjectCollection
+    known_filters = {"v1": _RP_COLLECTION_FILTERS, "v2": _RP_COLLECTION_FILTERS}
 
     def where_project(
         self,

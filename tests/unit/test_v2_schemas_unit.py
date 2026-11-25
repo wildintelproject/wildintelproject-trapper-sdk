@@ -135,3 +135,32 @@ def test_users_have_no_filters(name):
     client.get.return_value = paginated_response([])
     with pytest.warns(err.UnknownFilterWarning, match=f"ignores .{name}.*it applies no filter"):
         UsersComponent(client).get(**{name: "ana"})
+
+
+def test_research_project_collection_date_is_a_datetime():
+    from datetime import datetime
+
+    from trapper_client.schemas import ResearchProjectCollection
+
+    row = {"pk": 4, "collection_pk": 5, "name": "cf collection", "owner": "rp_staff", "owner_profile": None,
+           "status": "Private", "date_created": "2026-11-23T23:22:02.934616Z", "description": ""}
+    assert isinstance(ResearchProjectCollection.model_validate(row).date_created, datetime)
+
+
+def test_research_project_collection_filters():
+    import warnings
+    from unittest.mock import MagicMock
+
+    from tests.base_component_tests import paginated_response
+    from trapper_client import err
+    from trapper_client.components.research_project_collections import ResearchProjectsCollectionsComponent
+
+    client = MagicMock()
+    client.server_version = "v1"
+    client.get.return_value = paginated_response([])
+    component = ResearchProjectsCollectionsComponent(client)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", err.UnknownFilterWarning)
+        component.get_project(10, status="Private", owner=True, search="a")
+    with pytest.warns(err.UnknownFilterWarning, match="ignores 'name'"):
+        component.get_project(10, name="x")

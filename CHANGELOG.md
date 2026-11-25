@@ -190,6 +190,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `research_projects.collections` (issue #121): `date_created` is a `datetime`; `UnknownFilterWarning` (the filters are
+  `status`, `owner`, `owners` and `search`); the docstring example used `client.research_projects_collections`, which
+  does not exist; the docs say the list is empty unless the project is approved and the user owns it or has a role.
 - `users` (issue #119): `UnknownFilterWarning` for any filter (Trapper applies none and returned every user); the
   warning says "it applies no filter" for an endpoint with none.
 - `species` (issue #117): `taxon_class` and `order` of v2; `UnknownFilterWarning` (`genus=Lynx` returned every
