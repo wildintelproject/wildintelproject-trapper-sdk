@@ -973,6 +973,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#que-trae-una-fila-en-cada-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué trae una fila en cada versión
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#exportacion-limitada-a-un-proyecto" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2794,6 +2805,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#que-trae-una-fila-en-cada-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Qué trae una fila en cada versión
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#exportacion-limitada-a-un-proyecto" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2827,7 +2849,7 @@
 <h1 id="clasificaciones-de-ia">Clasificaciones de IA</h1>
 <div class="admonition info">
 <p class="admonition-title">Compatibilidad con Trapper</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ (aún sin validar contra un servidor Trapper v2 real). Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — comprobado en los dos. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
 </div>
 <p><code>client.ai_classifications</code> — observaciones de clasificación producidas por un proveedor de IA.</p>
 <p><strong>Endpoints:</strong></p>
@@ -2940,6 +2962,14 @@
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">row</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">ai_classifications</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <p>Consulta <a href="../../usage/">Uso</a> si algo de esto te resulta desconocido: es la misma interfaz en todos los componentes.</p>
+<h2 id="que-trae-una-fila-en-cada-version">Qué trae una fila en cada versión</h2>
+<p>La lista se lee igual en las dos versiones, pero v2 envía menos: no trae <code>owner</code>, <code>owner_profile</code>,
+<code>classification</code> ni <code>created_at</code> (quedan a <code>None</code>), y <code>updated_at</code> puede ser <code>None</code>. v2 añade <code>is_setup</code>, <code>bboxes</code>
+y <code>classification_project</code>.</p>
+<p>Cada observación de <code>dynamic_attrs</code> tiene <code>observation_type</code>, <code>species</code>, <code>count</code> y <code>classification_confidence</code>
+como texto, igual que los envía v1. La confianza es una fracción (<code>"0.93"</code>) en las dos versiones —v2 la envía como
+porcentaje junto al valor y el SDK la convierte—, la misma escala que el filtro <code>confidence</code> (<code>confidence=0.9</code>).
+Una especie ausente, que Trapper escribe como el texto <code>"None"</code>, es <code>None</code>.</p>
 <h2 id="exportacion-limitada-a-un-proyecto">Exportación, limitada a un proyecto</h2>
 <p>A diferencia de los demás componentes, aquí <code>export()</code> tiene una <strong>firma distinta</strong>: exige un
 <code>classification_project_pk</code> (el endpoint subyacente lo necesita y no existe exportación sin proyecto):</p>
@@ -2951,8 +2981,12 @@
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># O recibir instancias de modelo en lugar de un fichero</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">records</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">ai_classifications</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">classification_project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
-<p>Las filas se interpretan con el esquema de exportación de CamtrapDP o con el de Trapper, según si el
-servidor incluye un campo <code>_id</code> interno de Trapper.</p>
+<p>Es una tabla con una fila por observación, con las mismas columnas que la
+<a href="../classifications/">tabla de resultados</a> de <code>client.classification_results</code>, y se lee igual: filas
+<code>AIClassificationRecordExportCamTrap</code> por defecto y filas <code>AIClassificationRecordExportTrapper</code> (con <code>_id</code> y las
+cajas en <code>bboxes</code>) con <code>camtrapdp=False</code>. Un proyecto sin clasificaciones de IA, o sin ninguna que cumpla los
+filtros, no da filas (<code>[]</code>, o un fichero vacío) en lugar del <code>400 "Empty queryset"</code> de Trapper.</p>
+<p><code>raw=True</code> (o <code>validate=False</code>, como antes) guarda el CSV tal como lo envía Trapper.</p>
 <p>Campo adicional en el endpoint de exportación:</p>
 <table>
 <thead>

@@ -971,6 +971,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-a-row-has-on-each-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a row has on each version
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#export-scoped-to-a-project" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2792,6 +2803,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#what-a-row-has-on-each-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a row has on each version
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#export-scoped-to-a-project" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2825,7 +2847,7 @@
 <h1 id="ai-classifications">AI Classifications</h1>
 <div class="admonition info">
 <p class="admonition-title">Trapper compatibility</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ (not yet validated against a live Trapper v2 server). See <a href="../versions/">Trapper versions</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — checked against both. See <a href="../versions/">Trapper versions</a>.</p>
 </div>
 <p><code>client.ai_classifications</code> — classification observations produced by an AI provider.</p>
 <p><strong>Endpoints:</strong></p>
@@ -2938,6 +2960,14 @@
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">row</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">ai_classifications</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div>
 <p>See <a href="../../usage/">Usage</a> if any of this looks unfamiliar — it's the same interface on every component.</p>
+<h2 id="what-a-row-has-on-each-version">What a row has on each version</h2>
+<p>The list reads the same on both versions, but v2 sends less: no <code>owner</code>, <code>owner_profile</code>, <code>classification</code> or
+<code>created_at</code> (they are <code>None</code>), and <code>updated_at</code> may be <code>None</code>. v2 adds <code>is_setup</code>, <code>bboxes</code> and
+<code>classification_project</code>.</p>
+<p>Each observation of <code>dynamic_attrs</code> has <code>observation_type</code>, <code>species</code>, <code>count</code> and <code>classification_confidence</code>
+as text, as v1 sends them. The confidence is a fraction (<code>"0.93"</code>) on both versions — v2 sends it as a percentage
+next to the value, and the SDK converts it —, the same scale as the <code>confidence</code> filter (<code>confidence=0.9</code>).
+A missing species, which Trapper writes as the text <code>"None"</code>, is <code>None</code>.</p>
 <h2 id="export-scoped-to-a-project">Export, scoped to a project</h2>
 <p>Unlike every other component, <code>export()</code> here has a <strong>different signature</strong>: it requires a
 <code>classification_project_pk</code> (the underlying endpoint needs one, and there's no unscoped export):</p>
@@ -2949,8 +2979,12 @@
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Or get model instances instead of a file</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">records</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">ai_classifications</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">classification_project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
-<p>Rows are parsed as either the CamtrapDP-flavoured or Trapper-flavoured export schema, depending on
-whether the server includes a Trapper-internal <code>_id</code> field.</p>
+<p>It is a table with one row per observation, with the same columns as the
+<a href="../classifications/">results table</a> of <code>client.classification_results</code>, and is read the same way:
+<code>AIClassificationRecordExportCamTrap</code> rows by default and <code>AIClassificationRecordExportTrapper</code> rows (with <code>_id</code>
+and the boxes in <code>bboxes</code>) with <code>camtrapdp=False</code>. A project with no AI classifications, or none that match the
+filters, gives no rows (<code>[]</code>, or an empty file) instead of Trapper's <code>400 "Empty queryset"</code>.</p>
+<p><code>raw=True</code> (or <code>validate=False</code>, as before) saves the CSV as Trapper sends it.</p>
 <p>Additional field on the export endpoint:</p>
 <table>
 <thead>
