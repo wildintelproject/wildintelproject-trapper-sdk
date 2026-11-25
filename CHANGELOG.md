@@ -18,6 +18,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - `ClassificationResultsComponent` (issue #100): the class of `client.classification_results`, under a name that says what it reads. It is
   the same class as `ClassificationsComponent`, which stays.
+- `uv run cli trapper up|down|destroy|status|logs|env` (issue #101): deploys a Trapper v1 and a Trapper v2 with Docker Compose (the files are
+  in `dev/trapper/`), always with the same accounts (`sdktest`, `rp_staff`, `rp_user`, `ana`, `luis`, `plainuser`, with tokens) and the
+  research project `SDKT`. `--branch` is the tag of the image of Trapper (`latest`, `development`, `refactor-api-ninja`...), also
+  `--v1-branch` and `--v2-branch`; `--port-offset N` makes another instance next to the others; `env` prints the `WILDINTEL_*` variables
+  of the e2e tests. Without Trapper AI and the citizen science frontend. The test data (locations, deployments, images and
+  classifications) is not deployed yet.
 - The batch downloads of `classification_media` (issue #95) return a `DownloadedFiles`: still the list of the downloaded paths,
   with `.failed` (`{media id: message}`), `.skipped` and `.ok`, and the failures are logged. They used to be swallowed: with the
   default `private_human` two private files were left out and nothing said so. New `on_error="raise"` and `skip_existing=True`
