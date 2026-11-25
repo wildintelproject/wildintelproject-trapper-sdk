@@ -3186,7 +3186,7 @@ Trapper's format.</p>
 <a id="__codelineno-0-114" name="__codelineno-0-114"></a>                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">export_endpoint</span><span class="si">}</span><span class="s2">: Trapper v2 answers 500 to &#39;approved&#39; in the AI results table &quot;</span>
 <a id="__codelineno-0-115" name="__codelineno-0-115"></a>                <span class="s2">&quot;(the field only exists in the list); filter the list instead&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-116" name="__codelineno-0-116"></a>                <span class="n">err</span><span class="o">.</span><span class="n">UnknownFilterWarning</span><span class="p">,</span>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a>                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a>                <span class="n">stacklevel</span><span class="o">=</span><span class="n">err</span><span class="o">.</span><span class="n">user_stacklevel</span><span class="p">(),</span>
 <a id="__codelineno-0-118" name="__codelineno-0-118"></a>            <span class="p">)</span>
 <a id="__codelineno-0-119" name="__codelineno-0-119"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">validate</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">raw</span><span class="p">:</span>
 <a id="__codelineno-0-120" name="__codelineno-0-120"></a>            <span class="c1"># validate=False has always saved Trapper&#39;s CSV (to a default file when none was given): kept.</span>
@@ -3464,7 +3464,7 @@ match the filters) gives no rows: <code>[]</code>, or an empty file.</p>
 <a id="__codelineno-0-114" name="__codelineno-0-114"></a>            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">export_endpoint</span><span class="si">}</span><span class="s2">: Trapper v2 answers 500 to &#39;approved&#39; in the AI results table &quot;</span>
 <a id="__codelineno-0-115" name="__codelineno-0-115"></a>            <span class="s2">&quot;(the field only exists in the list); filter the list instead&quot;</span><span class="p">,</span>
 <a id="__codelineno-0-116" name="__codelineno-0-116"></a>            <span class="n">err</span><span class="o">.</span><span class="n">UnknownFilterWarning</span><span class="p">,</span>
-<a id="__codelineno-0-117" name="__codelineno-0-117"></a>            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<a id="__codelineno-0-117" name="__codelineno-0-117"></a>            <span class="n">stacklevel</span><span class="o">=</span><span class="n">err</span><span class="o">.</span><span class="n">user_stacklevel</span><span class="p">(),</span>
 <a id="__codelineno-0-118" name="__codelineno-0-118"></a>        <span class="p">)</span>
 <a id="__codelineno-0-119" name="__codelineno-0-119"></a>    <span class="k">if</span> <span class="ow">not</span> <span class="n">validate</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">raw</span><span class="p">:</span>
 <a id="__codelineno-0-120" name="__codelineno-0-120"></a>        <span class="c1"># validate=False has always saved Trapper&#39;s CSV (to a default file when none was given): kept.</span>

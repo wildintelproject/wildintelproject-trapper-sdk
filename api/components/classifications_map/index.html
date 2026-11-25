@@ -2802,16 +2802,21 @@
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="ClassificationMap (trapper_client.schemas.ClassificationMap)" href="../../schemas/classifications_map/#trapper_client.schemas.classifications_map.ClassificationMap">ClassificationMap</a>]</code></p>
+              Bases: <code><span title="trapper_client.components._classification_filters.RequireProjectMixin">RequireProjectMixin</span></code>, <code><span title="trapper_client.components._classification_filters.ClassificationFiltersMixin">ClassificationFiltersMixin</span></code>, <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="ClassificationMap (trapper_client.schemas.ClassificationMap)" href="../../schemas/classifications_map/#trapper_client.schemas.classifications_map.ClassificationMap">ClassificationMap</a>]</code></p>
 
 
 
-        <p>Component for <code>/media_classification/api/classifications_map/</code>.</p>
-<p>Retrieve and filter resources pending classification for a given project.</p>
-<p>Main endpoints:
-- <code>GET /media_classification/api/classifications_map</code>: List of resources to classify (paginated)
-- <code>GET /media_classification/api/classifications_map/{pk}</code>: Single record detail</p>
-<p><strong>Available filter fields:</strong></p>
+        <p>The final classifications in a light form (<code>client.classifications_map</code>), as the map of the classification
+UI uses them.</p>
+<ul>
+<li><code>GET /media_classification/api/classifications_map</code> (and <code>/{pk}</code>): the same rows and filters as the list of
+  <code>client.classification_results</code> (every final classification the user can see), but <strong>not paginated</strong> — one
+  answer with every row, <code>page</code> and <code>page_size</code> do nothing — and with less in each row: the resource (its
+  <code>deployment</code> is the <code>deploymentID</code>), the project, and <code>dynamic_attrs</code> with <strong>only the custom attributes</strong>
+  of the classificator (no observation type, species or count: use <code>client.classification_results</code> for them).</li>
+</ul>
+<p><strong>Filters:</strong> those of the classification list (Trapper ignores any other without an error; the SDK emits an
+<code>UnknownFilterWarning</code>):</p>
 <table>
 <thead>
 <tr>
@@ -2824,32 +2829,32 @@
 <tr>
 <td>project</td>
 <td>PK</td>
-<td>Filter by classification project PK</td>
+<td>The project. <strong>Needed for deployment and collection</strong> (<code>ValueError</code> without it)</td>
 </tr>
 <tr>
 <td>owner</td>
 <td>boolean</td>
-<td>true = resources where user is owner/manager</td>
+<td>true = resources where the user is owner/manager</td>
 </tr>
 <tr>
 <td>deployment</td>
 <td>list of PKs</td>
-<td>Filter by deployment PKs</td>
+<td>Deployment PKs of the project</td>
 </tr>
 <tr>
 <td>collection</td>
 <td>list of PKs</td>
-<td>Filter by collection PKs</td>
+<td>PK of the <strong>link</strong> between the project and the collection</td>
 </tr>
 <tr>
 <td>locations_map</td>
 <td>comma-separated PKs</td>
-<td>Filter by location PKs</td>
+<td>Location PKs</td>
 </tr>
 <tr>
 <td>rdate_from / rdate_to</td>
 <td>date</td>
-<td>date_recorded range</td>
+<td><code>date_recorded</code> range</td>
 </tr>
 <tr>
 <td>rtime_from / rtime_to</td>
@@ -2859,37 +2864,35 @@
 <tr>
 <td>ftype</td>
 <td>choice</td>
-<td>Resource type (IMAGE, VIDEO, etc.)</td>
+<td>Resource type (I, V, ...)</td>
 </tr>
 <tr>
-<td>classified</td>
+<td>classified / classified_ai</td>
 <td>boolean</td>
-<td>Filter by whether resource has been classified by humans</td>
-</tr>
-<tr>
-<td>classified_ai</td>
-<td>boolean</td>
-<td>Filter by whether resource has been classified by AI</td>
+<td>Has a classification by a user / by AI</td>
 </tr>
 <tr>
 <td>approved</td>
 <td>boolean</td>
-<td>Whether classification is FINAL approved</td>
+<td>Approved. Works on both versions: v1 calls it <code>status</code> and the SDK sends it as such</td>
+</tr>
+<tr>
+<td>bboxes</td>
+<td>boolean</td>
+<td>Has bounding boxes</td>
 </tr>
 <tr>
 <td>species</td>
 <td>list of PKs</td>
-<td>Filter by species PKs</td>
+<td>Species PKs</td>
 </tr>
 <tr>
-<td>observation_type</td>
+<td>observation_type, sex, age</td>
 <td>choice</td>
-<td>Filter by observation type</td>
+<td>Observation type, sex, age</td>
 </tr>
 </tbody>
 </table>
-<p>Returns a paginated list of resources pending classification with support for
-filtering through query parameters.</p>
 
 
 
@@ -2900,8 +2903,7 @@ filtering through query parameters.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/trapper_client/components/classifications_map.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-11">11</a></span>
-<span class="normal"><a href="#__codelineno-0-12">12</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-12">12</a></span>
 <span class="normal"><a href="#__codelineno-0-13">13</a></span>
 <span class="normal"><a href="#__codelineno-0-14">14</a></span>
 <span class="normal"><a href="#__codelineno-0-15">15</a></span>
@@ -2933,40 +2935,41 @@ filtering through query parameters.</p>
 <span class="normal"><a href="#__codelineno-0-41">41</a></span>
 <span class="normal"><a href="#__codelineno-0-42">42</a></span>
 <span class="normal"><a href="#__codelineno-0-43">43</a></span>
-<span class="normal"><a href="#__codelineno-0-44">44</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassificationsMapComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">ClassificationMap</span><span class="p">]):</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    Component for ``/media_classification/api/classifications_map/``.</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">    Retrieve and filter resources pending classification for a given project.</span>
+<span class="normal"><a href="#__codelineno-0-44">44</a></span>
+<span class="normal"><a href="#__codelineno-0-45">45</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="k">class</span><span class="w"> </span><span class="nc">ClassificationsMapComponent</span><span class="p">(</span><span class="n">RequireProjectMixin</span><span class="p">,</span> <span class="n">ClassificationFiltersMixin</span><span class="p">,</span> <span class="n">TrapperComponent</span><span class="p">[</span><span class="n">ClassificationMap</span><span class="p">]):</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="sd">    The final classifications in a light form (``client.classifications_map``), as the map of the classification</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">    UI uses them.</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16"></a>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="sd">    Main endpoints:</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    - ``GET /media_classification/api/classifications_map``: List of resources to classify (paginated)</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">    - ``GET /media_classification/api/classifications_map/{pk}``: Single record detail</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a>
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">    **Available filter fields:**</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="sd">    - ``GET /media_classification/api/classifications_map`` (and ``/{pk}``): the same rows and filters as the list of</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">      ``client.classification_results`` (every final classification the user can see), but **not paginated** — one</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">      answer with every row, ``page`` and ``page_size`` do nothing — and with less in each row: the resource (its</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">      ``deployment`` is the ``deploymentID``), the project, and ``dynamic_attrs`` with **only the custom attributes**</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">      of the classificator (no observation type, species or count: use ``client.classification_results`` for them).</span>
 <a id="__codelineno-0-22" name="__codelineno-0-22"></a>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">    | Parameter        | Type                     | Description                                                                 |</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    |----------------|--------------------------|-----------------------------------------------------------------------------|</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    | project        | PK                       | Filter by classification project PK                                        |</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    | owner          | boolean                  | true = resources where user is owner/manager                               |</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    | deployment     | list of PKs              | Filter by deployment PKs                                                   |</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    | collection     | list of PKs              | Filter by collection PKs                                                   |</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    | locations_map  | comma-separated PKs      | Filter by location PKs                                                     |</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    | rdate_from / rdate_to | date             | date_recorded range                                                        |</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    | rtime_from / rtime_to | HH:MM            | Time-of-day range                                                          |</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">    | ftype          | choice                   | Resource type (IMAGE, VIDEO, etc.)                                         |</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    | classified     | boolean                  | Filter by whether resource has been classified by humans                   |</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">    | classified_ai  | boolean                  | Filter by whether resource has been classified by AI                       |</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    | approved       | boolean                  | Whether classification is FINAL approved                                   |</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    | species        | list of PKs              | Filter by species PKs                                                      |</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    | observation_type | choice                 | Filter by observation type                                                 |</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    Returns a paginated list of resources pending classification with support for</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    filtering through query parameters.</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">    **Filters:** those of the classification list (Trapper ignores any other without an error; the SDK emits an</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    ``UnknownFilterWarning``):</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25"></a>
+<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    | Parameter | Type | Description |</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    |---|---|---|</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    | project | PK | The project. **Needed for deployment and collection** (``ValueError`` without it) |</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    | owner | boolean | true = resources where the user is owner/manager |</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    | deployment | list of PKs | Deployment PKs of the project |</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    | collection | list of PKs | PK of the **link** between the project and the collection |</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">    | locations_map | comma-separated PKs | Location PKs |</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    | rdate_from / rdate_to | date | ``date_recorded`` range |</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">    | rtime_from / rtime_to | HH:MM | Time-of-day range |</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    | ftype | choice | Resource type (I, V, ...) |</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    | classified / classified_ai | boolean | Has a classification by a user / by AI |</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    | approved | boolean | Approved. Works on both versions: v1 calls it ``status`` and the SDK sends it as such |</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    | bboxes | boolean | Has bounding boxes |</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    | species | list of PKs | Species PKs |</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    | observation_type, sex, age | choice | Observation type, sex, age |</span>
 <a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-42" name="__codelineno-0-42"></a>
 <a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/media_classification/api/classifications_map&quot;</span>
 <a id="__codelineno-0-44" name="__codelineno-0-44"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">ClassificationMap</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="n">ClassificationFiltersMixin</span><span class="o">.</span><span class="n">_filters_for</span><span class="p">(</span><span class="nb">frozenset</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
