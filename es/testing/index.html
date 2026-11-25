@@ -1321,10 +1321,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#desplegar-trapper-v1-y-v2-para-probar" class="md-nav__link">
+  <a href="#desplegar-trapper-v1-v2-y-v2-ninja-sembrar-un-dataset-y-lanzar-los-e2e" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Desplegar Trapper v1 y v2 para probar
+        Desplegar Trapper v1, v2 y v2-ninja, sembrar un dataset y lanzar los e2e
       
     </span>
   </a>
@@ -2833,10 +2833,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#desplegar-trapper-v1-y-v2-para-probar" class="md-nav__link">
+  <a href="#desplegar-trapper-v1-v2-y-v2-ninja-sembrar-un-dataset-y-lanzar-los-e2e" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Desplegar Trapper v1 y v2 para probar
+        Desplegar Trapper v1, v2 y v2-ninja, sembrar un dataset y lanzar los e2e
       
     </span>
   </a>
@@ -2970,40 +2970,89 @@ antes de ejecutarlas:</p>
 
 <p>También puedes copiar <code>tests/env.example</code> a <code>tests/.env</code> y rellenar los valores: pytest lo cargará
 automáticamente.</p>
-<h2 id="desplegar-trapper-v1-y-v2-para-probar">Desplegar Trapper v1 y v2 para probar</h2>
-<p><code>uv run cli trapper</code> despliega con Docker Compose un Trapper v1 y un Trapper v2, siempre con las mismas cuentas, para que
-las pruebas de extremo a extremo tengan contra qué ejecutarse. Necesita Docker y (la primera vez) red hacia el registro.
-<strong>No</strong> despliega Trapper AI ni el frontend de ciencia ciudadana: son otros contenedores.</p>
+<h2 id="desplegar-trapper-v1-v2-y-v2-ninja-sembrar-un-dataset-y-lanzar-los-e2e">Desplegar Trapper v1, v2 y v2-ninja, sembrar un dataset y lanzar los e2e</h2>
+<p><code>uv run cli trapper</code> da a los tests end-to-end algo contra lo que ejecutarse: despliega Trapper con Docker Compose,
+siempre con las mismas cuentas, lo siembra con un dataset de prueba y lanza <code>tests/e2e</code> con las variables que ese
+dataset necesita. Requiere Docker y (la primera vez) red hasta el registro. <strong>No</strong> despliega Trapper AI ni el frontal de
+ciencia ciudadana: son otros contenedores.</p>
+<table>
+<thead>
+<tr>
+<th>Instancia</th>
+<th>Imagen</th>
+<th>nginx</th>
+<th>API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>v1</code></td>
+<td><code>trapper:latest</code> (1.7.4)</td>
+<td><code>8080</code></td>
+<td>la antigua (DRF)</td>
+</tr>
+<tr>
+<td><code>v2</code></td>
+<td><code>trapper:2.0.0a2</code></td>
+<td><code>8180</code></td>
+<td>la antigua (DRF)</td>
+</tr>
+<tr>
+<td><code>ninja</code></td>
+<td><code>trapper:refactor-api-ninja</code> (2.0.0a4)</td>
+<td><code>8280</code></td>
+<td>la nueva (<code>/api/v2/</code>, Django Ninja), y la antigua</td>
+</tr>
+</tbody>
+</table>
 <div class="termy">
 
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>up<span class="w">                            </span>//<span class="w"> </span>v1<span class="w"> </span>y<span class="w"> </span>v2<span class="w"> </span><span class="o">(</span>v1:<span class="w"> </span>latest,<span class="w"> </span>v2:<span class="w"> </span><span class="m">2</span>.0.0a2<span class="o">)</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>up<span class="w"> </span>v2<span class="w"> </span>--branch<span class="w"> </span>development<span class="w">     </span>//<span class="w"> </span>otra<span class="w"> </span>rama<span class="w"> </span>de<span class="w"> </span>Trapper
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>up<span class="w"> </span>--port-offset<span class="w"> </span><span class="m">1000</span><span class="w">          </span>//<span class="w"> </span>otra<span class="w"> </span>instancia:<span class="w"> </span>puertos<span class="w"> </span>+<span class="w"> </span><span class="m">1000</span>,<span class="w"> </span>con<span class="w"> </span>sus<span class="w"> </span>propios<span class="w"> </span>contenedores<span class="w"> </span>y<span class="w"> </span>datos
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="gp">$ </span><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>env<span class="w"> </span>v2<span class="k">)</span><span class="s2">&quot;</span><span class="w">               </span>//<span class="w"> </span>WILDINTEL_*<span class="w"> </span>para<span class="w"> </span>los<span class="w"> </span>tests<span class="w"> </span>e2e
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span><span class="nb">test</span><span class="w"> </span>e2e
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>up<span class="w">                            </span>//<span class="w"> </span>las<span class="w"> </span>tres<span class="w"> </span><span class="o">(</span>o:<span class="w"> </span>up<span class="w"> </span>v1<span class="w"> </span><span class="p">|</span><span class="w"> </span>up<span class="w"> </span>v2<span class="w"> </span><span class="p">|</span><span class="w"> </span>up<span class="w"> </span>ninja<span class="o">)</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>seed<span class="w"> </span>v2<span class="w"> </span>--dataset<span class="w"> </span><span class="m">1</span><span class="w">           </span>//<span class="w"> </span>o<span class="w"> </span>--dataset<span class="w"> </span><span class="m">2</span>,<span class="w"> </span>o<span class="w"> </span>--dataset<span class="w"> </span>all
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>e2e<span class="w"> </span>v2<span class="w"> </span>--dataset<span class="w"> </span><span class="m">1</span><span class="w">            </span>//<span class="w"> </span>tests/e2e<span class="w"> </span>contra<span class="w"> </span>ella
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>e2e<span class="w"> </span>v2<span class="w"> </span>--dataset<span class="w"> </span><span class="m">1</span><span class="w"> </span>--<span class="w"> </span>-k<span class="w"> </span>species<span class="w"> </span>-x<span class="w">    </span>//<span class="w"> </span>tras<span class="w"> </span>--:<span class="w"> </span>opciones<span class="w"> </span>de<span class="w"> </span>pytest
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="gp">$ </span><span class="nb">eval</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>env<span class="w"> </span>v2<span class="w"> </span>--dataset<span class="w"> </span><span class="m">1</span><span class="k">)</span><span class="s2">&quot;</span><span class="w">  </span>//<span class="w"> </span>o<span class="w"> </span>las<span class="w"> </span>variables,<span class="w"> </span>para<span class="w"> </span>lanzar<span class="w"> </span>pytest<span class="w"> </span>a<span class="w"> </span>mano
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="gp">$ </span>uv<span class="w"> </span>run<span class="w"> </span>cli<span class="w"> </span>trapper<span class="w"> </span>status<span class="w"> </span><span class="p">|</span><span class="w"> </span>logs<span class="w"> </span>v2<span class="w"> </span>trapper-celery<span class="w"> </span><span class="p">|</span><span class="w"> </span>down<span class="w"> </span><span class="p">|</span><span class="w"> </span>destroy
 </code></pre></div>
 
 </div>
 
 <ul>
-<li><strong>La rama</strong> es la etiqueta de la imagen <code>registry.gitlab.com/trapper-project/trapper:&lt;rama&gt;</code>: el nombre tal como lo das
-  (<code>2.0.0a2</code>, <code>latest</code>) o el que el CI de Trapper da a una rama (<code>refactor/api-ninja</code> es <code>refactor-api-ninja</code>). El comando
-  comprueba que la imagen existe. No construye Trapper desde el código.</li>
-<li><strong>Varias instancias</strong>: <code>--port-offset N</code> suma <code>N</code> a todos los puertos y crea <strong>otra instancia</strong> (sus contenedores, volúmenes,
-  subred y cuentas), que vive junto a las demás. Los otros comandos necesitan el mismo <code>--port-offset</code> para encontrarla
-  (<code>uv run cli trapper env v2 --port-offset 1000</code>).</li>
-<li><strong>Puertos</strong> (suma <code>--port-offset</code>): v1 en <code>8080</code> (nginx, el que hay que usar: sin él una descarga de fichero contesta
-  <code>200</code> sin cuerpo), <code>8010</code> (la app) y <code>8088</code> (uploader); v2 en <code>8180</code>, <code>8100</code> y <code>8188</code>.</li>
-<li><strong>Cuentas</strong> (contraseña <code>wildintel-sdk-test</code>; Trapper v1 entra con el correo, <code>&lt;usuario&gt;@example.org</code>): <code>sdktest</code>
-  (superusuario, el del token de la API), <code>rp_staff</code> (staff y superusuario), <code>rp_user</code>, <code>ana</code>, <code>luis</code> y <code>plainuser</code>, cada
-  una con su token, y el proyecto de investigación <code>SDKT</code> con <code>sdktest</code> y <code>rp_staff</code> como administradores, <code>ana</code> como
-  experta y <code>luis</code> y <code>rp_user</code> como colaboradores. Ejecutar <code>up</code> otra vez las deja como están.</li>
-<li><code>down</code> para la instancia y conserva sus datos; <code>destroy</code> borra también los datos. Los secretos y los tokens están en
-  <code>dev/trapper/.state/</code>, que git no versiona.</li>
-<li><strong>Lo que una instancia aún no tiene</strong>: localizaciones, deployments, imágenes y clasificaciones. Los tests que las
-  necesitan se saltan o fallan en un servidor vacío (por ejemplo, una exportación de localizaciones contesta <code>400</code> si no
-  hay ninguna, como hace Trapper).</li>
+<li><strong>Los datasets</strong> (<code>dev/trapper/seed/dataset&lt;N&gt;.py</code>), sembrados con el SDK donde Trapper tiene una vía y con
+  <code>manage.py shell</code> donde no. Sembrar otra vez no cambia nada.<ul>
+<li><strong>1, «Mamíferos de Doñana y Sierra Morena»</strong>: pequeño y hecho a mano. 6 localizaciones, 7 deployments, 26 imágenes
+  en dos colecciones de un proyecto de clasificación (de ciencia ciudadana en v2, slug <code>mamiferos-donana-sm</code>), 9
+  especies, 22 clasificaciones aprobadas con sexo y edad, vacías y humanos, 4 pendientes (3 con clasificaciones de un
+  experto y un colaborador que no coinciden), 2 clasificaciones de IA con cajas.</li>
+<li><strong>2, «Cabañeros 2025»</strong>: más de 500 filas en varias listas, para ver qué hace la paginación. 12 localizaciones, 14
+  deployments, 640 imágenes en ráfagas de tres en dos colecciones y dos proyectos de clasificación, 12 especies, 600
+  clasificaciones de usuario (55 pendientes) con vacías, humanos, vehículos, conteos y cajas; 66 filas de IA de dos
+  proveedores.</li>
+</ul>
+</li>
+<li><strong>Las variables de los e2e</strong>: <code>env --dataset N</code> y <code>e2e --dataset N</code> leen las claves primarias de la instancia con el
+  SDK (el proyecto y la colección del dataset, una localización con un recurso suyo, una clasificación de usuario...),
+  para que los tests que las necesitan se ejecuten en vez de saltarse. Sin <code>--dataset</code>, <code>env</code> da solo la URL y las
+  credenciales.</li>
+<li><strong>Un dataset por instancia</strong> mantiene separados los resultados: se pueden sembrar los dos en una, pero algunos tests
+  leen el servidor entero. Usa <code>--name</code> para otra instancia de la misma versión, con su propio <code>--port-offset</code>:
+  <code>uv run cli trapper up v1 --name ds1 --port-offset 3000</code>, y las mismas opciones en <code>seed</code>, <code>env</code> y <code>e2e</code>.</li>
+<li><strong>La rama</strong> (<code>--branch</code>, o <code>--v1-branch</code>, <code>--v2-branch</code>, <code>--ninja-branch</code>) es la etiqueta de la imagen
+  <code>registry.gitlab.com/trapper-project/trapper:&lt;rama&gt;</code>: el nombre tal cual (<code>2.0.0a2</code>, <code>latest</code>) o el que el CI de
+  Trapper da a una rama (<code>refactor/api-ninja</code> es <code>refactor-api-ninja</code>). El comando comprueba que la imagen exista. No
+  compila Trapper desde el código.</li>
+<li><strong>Nombres</strong>: cada instancia es el proyecto de compose <code>wildintel-sdktest-trapper-&lt;nombre&gt;</code> (<code>v1</code>, <code>v2</code>, <code>v2-ninja</code>,
+  <code>v1-ds1</code>, <code>v2-p1000</code>...), así <code>docker ps</code> distingue las instancias de prueba. <code>--port-offset N</code> suma <code>N</code> a todos los
+  puertos y, sin <code>--name</code>, llama a la instancia <code>&lt;versión&gt;-p&lt;N&gt;</code>.</li>
+<li><strong>Puertos</strong> (suma <code>--port-offset</code>): usa nginx (sin él, una descarga de fichero responde <code>200</code> sin cuerpo); la app está
+  en <code>8010</code>/<code>8100</code>/<code>8200</code> y el uploader en <code>8088</code>/<code>8188</code>/<code>8288</code> (v1/v2/ninja).</li>
+<li><strong>Cuentas</strong> (contraseña <code>wildintel-sdk-test</code>; Trapper v1 entra con el e-mail, <code>&lt;usuario&gt;@example.org</code>): <code>sdktest</code>
+  (superusuario, el del token de la API), <code>rp_staff</code> (staff y superusuario), <code>rp_user</code>, <code>ana</code>, <code>luis</code> y <code>plainuser</code>,
+  cada una con su token (también para la API nueva), y el research project <code>SDKT</code> con <code>sdktest</code> y <code>rp_staff</code> como
+  admins, <code>ana</code> como experta y <code>luis</code> y <code>rp_user</code> como colaboradores. Volver a ejecutar <code>up</code> las deja como están.</li>
+<li><code>down</code> para la instancia y conserva sus datos; <code>destroy</code> borra también los datos. Los secretos, los tokens y lo
+  sembrado están en <code>dev/trapper/.state/&lt;nombre&gt;/</code>, que git no versiona.</li>
+<li><strong>Memoria</strong>: cada instancia ocupa unos 2–2,5 GB; para las que no uses.</li>
 </ul>
 <h2 id="filtrar-por-palabra-clave-u-obtener-una-salida-detallada">Filtrar por palabra clave u obtener una salida detallada</h2>
 <div class="termy">
