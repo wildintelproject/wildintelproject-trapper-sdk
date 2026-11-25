@@ -251,3 +251,12 @@ def test_approved_in_the_v1_ai_table_does_not_warn():
     with _warnings.catch_warnings():
         _warnings.simplefilter("error", _err.UnknownFilterWarning)
         component.export(2, approved=True)
+
+
+@pytest.mark.parametrize("call", ["get", "where", "get_all"])
+def test_the_warning_points_at_the_caller(call):
+    """Not at a line of the SDK, whatever the number of SDK functions in between (mixins, where → get)."""
+    component = _component(UserClassificationsComponent, "v1")
+    with pytest.warns(_err.UnknownFilterWarning) as caught:
+        getattr(component, call)(nonsense=1)
+    assert caught[0].filename == __file__

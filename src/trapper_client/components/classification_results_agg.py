@@ -61,7 +61,7 @@ class ClassificationResultsAggComponent(ClassificationFiltersMixin, TrapperCompo
                 f"{self.endpoint}: Trapper v2 answers 500 to {', '.join(repr(b) for b in broken)} (the field only "
                 "exists in the classification list)",
                 err.UnknownFilterWarning,
-                stacklevel=3,
+                stacklevel=err.user_stacklevel(),
             )
         return q
 

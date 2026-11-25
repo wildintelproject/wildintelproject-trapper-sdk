@@ -190,6 +190,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `classifications_map` (issue #113): it is the final classification list, unpaginated and with a light row (the
+  docs said "resources pending classification"); the filters of the classification list (`UnknownFilterWarning`,
+  `approved` sent as `status` on v1, `ValueError` for `deployment`/`collection` without `project`).
+- `UnknownFilterWarning` points at the caller's line again, not at a line of the SDK, whatever the number of SDK
+  functions in between (issue #113).
 - `classification_package` (issue #111): `keywords`, `licenses` and `private_species` raise a `ValueError` (Trapper
   reads one text per parameter and always answered `400`); the docs said `filter_deployments` takes PKs (it is a text
   contained in `deploymentID`), now also `export_filetype="parquet"` and `split_custom_attrs` (v2); the errors for a v1
