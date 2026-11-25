@@ -3115,6 +3115,12 @@ instead of the unscoped endpoint:</p>
 </code></pre></div>
 <p>This is also how you list resources within a <a href="../collections/">collection</a> — <code>CollectionsComponent</code>
 itself only lists <em>collections</em>, not the resources inside one.</p>
+<div class="admonition note">
+<p class="admonition-title">Paging</p>
+<p>On the old routes Trapper orders the resource list by recording time, which is not unique, so its pages can
+repeat and skip rows. <code>where()</code>, <code>all()</code> and <code>get_all()</code> ask for pages of 500 (one request when the list fits)
+and drop repeated rows; a longer list emits an <code>UnstableOrderWarning</code>. On the new API it is ordered by <code>pk</code>.</p>
+</div>
 
 
 

@@ -2849,6 +2849,13 @@ filter rather than <code>get_all()</code>.</p>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">display_name</span><span class="p">)</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">sp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">632</span><span class="p">)</span>
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Paging</p>
+<p>On the old routes the list is ordered by English name, which repeats, so its pages can repeat and skip rows:
+<code>where()</code>, <code>all()</code> and <code>get_all()</code> ask for pages of 500 and drop repeated rows, and emit an
+<code>UnstableOrderWarning</code> when the list takes more than one page (the 36433 species of v2 do). On the new API it is
+ordered by <code>pk</code>.</p>
+</div>
 
 
 

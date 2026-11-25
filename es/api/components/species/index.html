@@ -2886,7 +2886,9 @@ client.classification_results.get(project=2, species=lynx.pk)
 <span class="normal"><a href="#__codelineno-0-38">38</a></span>
 <span class="normal"><a href="#__codelineno-0-39">39</a></span>
 <span class="normal"><a href="#__codelineno-0-40">40</a></span>
-<span class="normal"><a href="#__codelineno-0-41">41</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="k">class</span><span class="w"> </span><span class="nc">SpeciesComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Species</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-41">41</a></span>
+<span class="normal"><a href="#__codelineno-0-42">42</a></span>
+<span class="normal"><a href="#__codelineno-0-43">43</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="k">class</span><span class="w"> </span><span class="nc">SpeciesComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Species</span><span class="p">]):</span>
 <a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">    The species table of Trapper (``client.species``). Its PKs are the ones the ``species`` filter of the</span>
 <a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">    classification components takes.</span>
@@ -2913,8 +2915,10 @@ client.classification_results.get(project=2, species=lynx.pk)
 <a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-38" name="__codelineno-0-38"></a>
 <a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">versioned</span><span class="p">(</span><span class="s2">&quot;tables/api/species&quot;</span><span class="p">,</span> <span class="n">ninja</span><span class="o">=</span><span class="s2">&quot;api/v2/species/&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Species</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="n">_SPECIES_FILTERS</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">:</span> <span class="n">_SPECIES_FILTERS</span><span class="p">}</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="c1">#: Ordered by a key that is not unique on the old routes (issue #132).</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="n">unstable_order</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Species</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="n">_SPECIES_FILTERS</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">:</span> <span class="n">_SPECIES_FILTERS</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
               </details>
 

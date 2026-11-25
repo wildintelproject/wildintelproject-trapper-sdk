@@ -3116,6 +3116,13 @@ en lugar del endpoint general:</p>
 </code></pre></div>
 <p>Así es también como se listan los recursos de una <a href="../collections/">colección</a>: <code>CollectionsComponent</code>
 solo lista <em>colecciones</em>, no los recursos que contienen.</p>
+<div class="admonition note">
+<p class="admonition-title">Paginación</p>
+<p>En las rutas antiguas Trapper ordena la lista de recursos por fecha de grabación, que no es única, así que sus
+páginas pueden repetir y saltarse filas. <code>where()</code>, <code>all()</code> y <code>get_all()</code> piden páginas de 500 (una petición si
+la lista cabe) y quitan las filas repetidas; una lista más larga emite un <code>UnstableOrderWarning</code>. En la API
+nueva se ordena por <code>pk</code>.</p>
+</div>
 
 
 
