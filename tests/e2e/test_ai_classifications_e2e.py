@@ -72,6 +72,14 @@ class TestAIClassificationsComponentE2E(ComponentE2ETestBase):
     def test_export_to_csv_writes_file(self, component, tmp_path):
         pytest.skip("export() takes a classification project: see TestAIClassificationsExportE2E")
 
+    @pytest.mark.e2e
+    def test_export_csv_row_count_matches_get_all(self, component, tmp_path):
+        pytest.skip("export() takes a classification project, and its rows are observations, not list items")
+
+    @pytest.mark.e2e
+    def test_get_with_overwrite_schema(self, component):
+        pytest.skip("the export schema is a union of the results-table rows: it does not read list items")
+
 
 # ── tests específicos de export ───────────────────────────────────────────────
 
@@ -188,7 +196,8 @@ class TestAIClassificationsExportE2E:
         if not all_results:
             pytest.skip("No AI classification results available for this project")
 
-        filtered_results = component.export(int(pk), file=None, approved=True)
+        # not approved: the AI table of Trapper v2 answers 500 to it (the field only exists in the list)
+        filtered_results = component.export(int(pk), file=None, observation_type="animal")
 
         assert len(filtered_results) <= len(all_results)
 

@@ -188,6 +188,20 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `client.ai_classifications` on Trapper v2 and its `export()` on v1 and v2 (issue #104). The v2 list raised
+  `ValidationError` (no `owner`, `classification` or `created_at`; attributes as `{"value", "confidence"}`): those
+  fields are optional and the confidence is a fraction (`"0.93"`) on both versions, the scale of the `confidence`
+  filter. `export()` raised `ValidationError` on both versions (an empty `eventID` turned into `None`; v2's flat
+  boxes): its rows are now the results-table rows of `classification_results` (`AIClassificationRecordExport*`
+  subclass them), a project with no AI classifications gives `[]` or an empty file instead of a `400`, and there
+  is `raw=True`.
+- `camtrapdp=True` gave Trapper's format in `classification_results.get_project_results()` and friends, and in
+  `ai_classifications.export()` (issue #104): Trapper compares it with the text `"True"` and the SDK sent `true`.
+  It is sent as `"True"`/`"False"` now (a boolean or the text `true`/`false`; anything else is a `ValueError`), with
+  the same code as the booleans of the media table.
+- A missing species in `user_classifications` and `ai_classifications` is `None`, not the text `"None"`
+  (issue #104). Their schemas also read the v2 fields `is_setup`, `is_feedback`, `bboxes` and
+  `classification_project`.
 - **Behaviour change:** `private_human`, `private_vehicle`, `trapper_url` and `trapper_url_token` of the media table
   (issue #85). Trapper reads only the text `True` as true, and a Python `True` is sent as `true`, so `private_human=True`
   used to show the files of the humans (the opposite of what it says). They are now sent as `True`/`False`, so a boolean

@@ -278,8 +278,9 @@ class ClassificationResultRecordTrapper(TrapperSchema):
     def parse_bboxes(cls, v):
         if v is None or (isinstance(v, str) and v.strip() == ""):
             return None
-        if isinstance(v, str):
-            parsed = json.loads(v)
+        if isinstance(v, (str, list)):
+            # The CSV has the boxes as JSON text; rows built in Python may have them as a list already.
+            parsed = json.loads(v) if isinstance(v, str) else list(v)
             # Trapper can write a null among the boxes: [[x, y, w, h], null].
             if isinstance(parsed, list):
                 parsed = [b for b in parsed if b is not None]

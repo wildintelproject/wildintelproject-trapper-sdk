@@ -15,7 +15,7 @@ from pydantic import BaseModel
 
 from trapper_client import err
 from trapper_client.api_query import APIQuery
-from trapper_client.components._classification_filters import ClassificationFiltersMixin
+from trapper_client.components._classification_filters import ClassificationFiltersMixin, true_false
 from trapper_client.components.base import TrapperComponent
 from trapper_client.components.classification_projects import ClassificationProjectsComponent
 from trapper_client.retry_utils import retrying_for_download
@@ -142,16 +142,8 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
         for name in self._TRUE_FALSE_PARAMS:
             if name in query:
                 query = dict(query)
-                query[name] = self._true_false(name, query[name])
+                query[name] = true_false(name, query[name])
         return query
-
-    @staticmethod
-    def _true_false(name: str, value: Any) -> str:
-        if isinstance(value, bool):
-            return "True" if value else "False"
-        if isinstance(value, str) and value.strip().lower() in ("true", "false"):
-            return "True" if value.strip().lower() == "true" else "False"
-        raise ValueError(f"{name} must be True or False, not {value!r}")
 
     # ── internal helpers ──────────────────────────────────────────────────────
 

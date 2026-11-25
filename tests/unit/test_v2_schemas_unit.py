@@ -14,11 +14,13 @@ import pytest
 from trapper_client.schemas.classifications import ClassificationProject, Classification
 from trapper_client.schemas.classifications_map import ClassificationMap
 from trapper_client.schemas.classificators import Classificator
+from trapper_client.schemas.ai_classifications import AIClassification, AIObservationAttr
 from trapper_client.schemas.user_classifications import UserClassification, UserObservationAttr
 
 PAYLOADS = json.loads((Path(__file__).parent / "data" / "trapper_v2_payloads.json").read_text(encoding="utf-8"))
 
 SCHEMAS = {
+    "ai_classifications": AIClassification,
     "classification_projects": ClassificationProject,
     "classification_results": Classification,
     "classifications_map": ClassificationMap,
@@ -50,6 +52,36 @@ def test_v2_user_classification_attrs_are_unwrapped():
 def test_attrs_accept_v1_and_v2_shapes(raw, expected):
     a = UserObservationAttr.model_validate(raw)
     assert (a.observation_type, a.species, a.count) == expected
+
+
+def test_v2_ai_classification_reads_like_v1():
+    """v2 has no owner, classification or created_at, and puts the confidence (%) next to the value."""
+    record = AIClassification.model_validate(PAYLOADS["ai_classifications"][0])
+    assert record.owner is None and record.classification is None and record.created_at is None
+    attr = record.dynamic_attrs[0]
+    assert attr.observation_type == "animal"
+    assert attr.species == "European Rabbit (Oryctolagus cuniculus)"
+    assert attr.classification_confidence == "0.93"  # the v1 form: a fraction
+    assert record.ai_provider == "DeepFaune Classifier v1.2" and record.bboxes is True
+
+
+@pytest.mark.parametrize(
+    "raw, confidence",
+    [
+        ({"observation_type": "animal", "species": "Lynx", "classification_confidence": "0.41"}, "0.41"),  # v1
+        ({"observation_type": {"value": "animal", "confidence": 41.0}, "species": {"value": "Lynx", "confidence": 41.0}}, "0.41"),
+        ({"observation_type": {"value": "animal", "confidence": 90.0}, "species": {"value": "Lynx"}}, "0.90"),
+        ({"observation_type": {"value": "blank"}, "species": {"value": "None"}}, None),
+    ],
+)
+def test_ai_confidence_is_a_fraction_on_both_versions(raw, confidence):
+    assert AIObservationAttr.model_validate(raw).classification_confidence == confidence
+
+
+@pytest.mark.parametrize("species", ["None", {"value": "None"}, ""])
+def test_missing_species_is_none(species):
+    """Trapper writes a missing species as the text ``"None"`` (v1 and v2)."""
+    assert UserObservationAttr.model_validate({"observation_type": "blank", "species": species}).species is None
 
 
 def test_v1_only_fields_are_optional():
