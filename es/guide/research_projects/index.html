@@ -3005,6 +3005,15 @@ de clasificación pertenece exactamente a uno.</p>
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1"># Una única colección vinculada</span>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">col</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">research_projects</span><span class="o">.</span><span class="n">find_project_collection</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Cuándo sale vacía la lista</p>
+<p>La lista sale <strong>vacía, no un <code>403</code></strong>, salvo que el proyecto de investigación esté aprobado y el usuario sea su
+propietario o tenga un rol en él (un superusuario no queda exento): el propietario de un proyecto pendiente de
+aprobación no ve ninguna colección.</p>
+</div>
+<p>Filtros: <code>status</code> (<code>Private</code>, <code>OnDemand</code>, <code>Public</code>), <code>owner</code> (<code>true</code> = colecciones que el usuario posee o gestiona),
+<code>owners</code> (PK) y <code>search</code> (nombre de la colección o usuario del propietario). Trapper ignora sin error cualquier
+otro; el SDK emite un <code>UnknownFilterWarning</code>. <code>date_created</code> es un <code>datetime</code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Aquí <code>pk</code> es la pk del <em>vínculo</em>, no la de la colección de almacenamiento</p>
 <p>El <code>pk</code> de <code>find_project_collection</code> es la clave primaria de la fila <code>ResearchProjectCollection</code> que

@@ -3003,6 +3003,14 @@ project belongs to exactly one.</p>
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="c1"># Single linked collection</span>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="n">col</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">research_projects</span><span class="o">.</span><span class="n">find_project_collection</span><span class="p">(</span><span class="n">project_pk</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">pk</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">When the list is empty</p>
+<p>The list is <strong>empty, not a <code>403</code></strong>, unless the research project is approved and the user is its owner or has a
+role in it (a superuser is not exempt): the owner of a project pending approval sees no collection.</p>
+</div>
+<p>Filters: <code>status</code> (<code>Private</code>, <code>OnDemand</code>, <code>Public</code>), <code>owner</code> (<code>true</code> = collections the user owns or manages),
+<code>owners</code> (PKs) and <code>search</code> (collection name or owner's username). Trapper ignores any other without an error; the
+SDK emits an <code>UnknownFilterWarning</code>. <code>date_created</code> is a <code>datetime</code>.</p>
 <div class="admonition warning">
 <p class="admonition-title"><code>pk</code> here is a <em>link</em> pk, not the storage collection pk</p>
 <p><code>find_project_collection</code>'s <code>pk</code> is the primary key of the <code>ResearchProjectCollection</code> row that
