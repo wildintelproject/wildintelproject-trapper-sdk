@@ -324,14 +324,14 @@ class TrapperComponent(Generic[TModel]):
                 query[key] = ",".join(str(v) for v in values)
         return query
 
-    def _warn_unknown_filters(self, query: Dict[str, Any], stacklevel: int = 3) -> None:
+    def _warn_unknown_filters(self, query: Dict[str, Any], stacklevel: int | None = None) -> None:
         """Warn about the parameters of ``query`` that the server would ignore silently, or fail on."""
         broken = sorted(k for k in query if k in self.broken_filters)
         if broken:
             warnings.warn(
                 f"{self.endpoint}: " + "; ".join(f"{k!r}: Trapper {self.broken_filters[k]}" for k in broken),
                 err.UnknownFilterWarning,
-                stacklevel=stacklevel,
+                stacklevel=err.user_stacklevel(),
             )
         if not self.known_filters:
             return
@@ -352,7 +352,7 @@ class TrapperComponent(Generic[TModel]):
                 f"{', '.join(repr(k) for k in unknown)} and returns every item; "
                 f"the filters it applies are {', '.join(sorted(known))}{self.unknown_filter_hint}",
                 err.UnknownFilterWarning,
-                stacklevel=stacklevel,
+                stacklevel=err.user_stacklevel(),
             )
 
     def _merge_query(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> Dict[str, Any]:
@@ -368,7 +368,7 @@ class TrapperComponent(Generic[TModel]):
         q = dict(query or {})
         q.update(kwargs)
         q = self._normalize_query(q)
-        self._warn_unknown_filters(q, stacklevel=4)
+        self._warn_unknown_filters(q)
         return q
 
     def _to_model(self, row: Any, validate: bool, schema: type[TModel] | None = None) -> TModel:

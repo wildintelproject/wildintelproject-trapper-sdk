@@ -114,7 +114,7 @@ class AIClassificationsComponent(RequireProjectMixin, TrapperComponent[AIClassif
                 f"{self.export_endpoint}: Trapper v2 answers 500 to 'approved' in the AI results table "
                 "(the field only exists in the list); filter the list instead",
                 err.UnknownFilterWarning,
-                stacklevel=2,
+                stacklevel=err.user_stacklevel(),
             )
         if not validate and not raw:
             # validate=False has always saved Trapper's CSV (to a default file when none was given): kept.

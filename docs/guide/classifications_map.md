@@ -1,41 +1,45 @@
 # Classifications Map
 
 !!! info "Trapper compatibility"
-    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+    **v1** ✔ · **v2** ✔ — checked against both. See [Trapper versions](versions.md).
 
-`client.classifications_map` — resources pending classification for a given project, as used to
-drive the classification UI's map/queue view.
+`client.classifications_map` — the final classifications in a light form, as the map of the classification UI uses
+them.
 
-**Endpoint:** `GET /media_classification/api/classifications_map` (list + detail).
+**Endpoint:** `GET /media_classification/api/classifications_map` (list + detail). The same rows and filters as the
+list of [classification results](classifications.md) (every final classification the user can see), but:
+
+- **Not paginated**: one answer with every row; `page` and `page_size` do nothing.
+- **Less in each row** (`ClassificationMap`): the resource (its `deployment` is the `deploymentID`), the project,
+  and `dynamic_attrs` with **only the custom attributes** of the classificator — no observation type, species or
+  count. Use `client.classification_results` for them.
 
 ## Filters
 
+Those of the classification list. Trapper ignores any other without an error; the SDK emits an
+`UnknownFilterWarning`.
+
 | Parameter | Type | Description |
 |---|---|---|
-| `project` | PK | Filter by classification project PK |
-| `owner` | boolean | `true` = resources where user is owner/manager |
-| `deployment` | list of PKs | Filter by deployment PKs |
-| `collection` | list of PKs | Filter by collection PKs |
-| `locations_map` | comma-separated PKs | Filter by location PKs |
+| `project` | PK | The project. **Needed for `deployment` and `collection`** (`ValueError` without it) |
+| `owner` | boolean | `true` = resources where the user is owner/manager |
+| `deployment` | list of PKs | Deployment PKs of the project |
+| `collection` | list of PKs | PK of the **link** between the project and the collection |
+| `locations_map` | comma-separated PKs | Location PKs |
 | `rdate_from` / `rdate_to` | date | `date_recorded` range |
 | `rtime_from` / `rtime_to` | HH:MM | Time-of-day range |
-| `ftype` | choice | Resource type (IMAGE, VIDEO, ...) |
-| `classified` | boolean | Classified by humans |
-| `classified_ai` | boolean | Classified by AI |
-| `approved` | boolean | Has a FINAL approved classification |
-| `species` | list of PKs | Filter by species PKs |
-| `observation_type` | choice | Filter by observation type |
+| `ftype` | choice | Resource type (`I`, `V`, ...) |
+| `classified` / `classified_ai` | boolean | Has a classification by a user / by AI |
+| `approved` | boolean | Approved. Works on both versions: v1 calls it `status` and the SDK sends it as such |
+| `bboxes` | boolean | Has bounding boxes |
+| `species` | list of PKs | Species PKs |
+| `observation_type`, `sex`, `age` | choice | Observation type, sex, age |
 
-## The six access patterns
-
-This component has no special methods — it's exactly the generic interface described in
-[Usage](../usage.md):
+## Usage
 
 ```python
-page = client.classifications_map.get(page=1, page_size=50, project=7)
-for row in client.classifications_map.where(project=7, classified=False):
-    print(row)
-result = client.classifications_map.get_all(project=7)
-row = client.classifications_map.find(1)
-client.classifications_map.export(file="classifications_map.csv")
+rows = client.classifications_map.get_all(project=7, approved=True).results
+for row in client.classifications_map.where(project=7, deployment=[3, 4]):
+    print(row.resource.name, row.resource.deployment, row.dynamic_attrs)
+row = client.classifications_map.find(231)
 ```

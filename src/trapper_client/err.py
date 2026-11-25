@@ -72,3 +72,21 @@ HTTP_ERRORS_MAP = {
     504: ServerError,
 }
 
+
+def user_stacklevel() -> int:
+    """The ``stacklevel`` of a warning that points at the user's code, the first frame outside ``trapper_client``.
+
+    A fixed ``stacklevel`` breaks as soon as a call goes through one more SDK function (a mixin's ``get()``, a
+    ``where()`` that calls ``get()``): the warning then names a line of the SDK. Call it right where
+    ``warnings.warn`` is called.
+    """
+    import os
+    import sys
+
+    package = os.path.dirname(os.path.abspath(__file__)) + os.sep
+    frame = sys._getframe(1)  # the function that warns: stacklevel 1
+    level = 1
+    while frame is not None and os.path.abspath(frame.f_code.co_filename).startswith(package):
+        frame = frame.f_back
+        level += 1
+    return level

@@ -1,44 +1,45 @@
 """
-Component for Classification map data endpoint.
+Component for the light, unpaginated list of the final classifications (the map of the classification UI).
 """
 
 from __future__ import annotations
 
+from trapper_client.components._classification_filters import ClassificationFiltersMixin, RequireProjectMixin
 from trapper_client.components.base import TrapperComponent
 from trapper_client.schemas import ClassificationMap
 
 
-class ClassificationsMapComponent(TrapperComponent[ClassificationMap]):
+class ClassificationsMapComponent(RequireProjectMixin, ClassificationFiltersMixin, TrapperComponent[ClassificationMap]):
     """
-    Component for ``/media_classification/api/classifications_map/``.
+    The final classifications in a light form (``client.classifications_map``), as the map of the classification
+    UI uses them.
 
-    Retrieve and filter resources pending classification for a given project.
+    - ``GET /media_classification/api/classifications_map`` (and ``/{pk}``): the same rows and filters as the list of
+      ``client.classification_results`` (every final classification the user can see), but **not paginated** — one
+      answer with every row, ``page`` and ``page_size`` do nothing — and with less in each row: the resource (its
+      ``deployment`` is the ``deploymentID``), the project, and ``dynamic_attrs`` with **only the custom attributes**
+      of the classificator (no observation type, species or count: use ``client.classification_results`` for them).
 
-    Main endpoints:
-    - ``GET /media_classification/api/classifications_map``: List of resources to classify (paginated)
-    - ``GET /media_classification/api/classifications_map/{pk}``: Single record detail
+    **Filters:** those of the classification list (Trapper ignores any other without an error; the SDK emits an
+    ``UnknownFilterWarning``):
 
-    **Available filter fields:**
-
-    | Parameter        | Type                     | Description                                                                 |
-    |----------------|--------------------------|-----------------------------------------------------------------------------|
-    | project        | PK                       | Filter by classification project PK                                        |
-    | owner          | boolean                  | true = resources where user is owner/manager                               |
-    | deployment     | list of PKs              | Filter by deployment PKs                                                   |
-    | collection     | list of PKs              | Filter by collection PKs                                                   |
-    | locations_map  | comma-separated PKs      | Filter by location PKs                                                     |
-    | rdate_from / rdate_to | date             | date_recorded range                                                        |
-    | rtime_from / rtime_to | HH:MM            | Time-of-day range                                                          |
-    | ftype          | choice                   | Resource type (IMAGE, VIDEO, etc.)                                         |
-    | classified     | boolean                  | Filter by whether resource has been classified by humans                   |
-    | classified_ai  | boolean                  | Filter by whether resource has been classified by AI                       |
-    | approved       | boolean                  | Whether classification is FINAL approved                                   |
-    | species        | list of PKs              | Filter by species PKs                                                      |
-    | observation_type | choice                 | Filter by observation type                                                 |
-
-    Returns a paginated list of resources pending classification with support for
-    filtering through query parameters.
+    | Parameter | Type | Description |
+    |---|---|---|
+    | project | PK | The project. **Needed for deployment and collection** (``ValueError`` without it) |
+    | owner | boolean | true = resources where the user is owner/manager |
+    | deployment | list of PKs | Deployment PKs of the project |
+    | collection | list of PKs | PK of the **link** between the project and the collection |
+    | locations_map | comma-separated PKs | Location PKs |
+    | rdate_from / rdate_to | date | ``date_recorded`` range |
+    | rtime_from / rtime_to | HH:MM | Time-of-day range |
+    | ftype | choice | Resource type (I, V, ...) |
+    | classified / classified_ai | boolean | Has a classification by a user / by AI |
+    | approved | boolean | Approved. Works on both versions: v1 calls it ``status`` and the SDK sends it as such |
+    | bboxes | boolean | Has bounding boxes |
+    | species | list of PKs | Species PKs |
+    | observation_type, sex, age | choice | Observation type, sex, age |
     """
 
     endpoint = "/media_classification/api/classifications_map"
     schema = ClassificationMap
+    known_filters = ClassificationFiltersMixin._filters_for(frozenset())
