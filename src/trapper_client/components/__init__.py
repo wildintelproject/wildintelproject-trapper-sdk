@@ -13,7 +13,7 @@ from trapper_client.components.resources import ResourcesComponent
 from trapper_client.components.collections import CollectionsComponent
 from trapper_client.components.research_projects import ResearchProjectsComponent
 from trapper_client.components.classification_projects import ClassificationProjectsComponent
-from trapper_client.components.classifications import ClassificationsComponent
+from trapper_client.components.classifications import ClassificationResultsComponent, ClassificationsComponent
 from trapper_client.components.classification_media import ClassificationMediaComponent
 from trapper_client.components.classification_results_agg import ClassificationResultsAggComponent
 from trapper_client.components.classification_package import ClassificationPackageComponent
@@ -54,6 +54,7 @@ __all__ = [
     "ResearchProjectsComponent",
     "ClassificationProjectsComponent",
     "ClassificationsComponent",
+    "ClassificationResultsComponent",
     "ClassificationMediaComponent",
     "ClassificationRecordExport",
     "ClassificationResultsAggComponent",

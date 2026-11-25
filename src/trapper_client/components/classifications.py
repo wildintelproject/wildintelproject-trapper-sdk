@@ -479,3 +479,9 @@ class ClassificationsComponent(ClassificationFiltersMixin, TrapperComponent[Clas
         message = block.get("message") or "Classification import failed"
         errors = block.get("errors")
         return f"{message}: {errors}" if errors else message
+
+
+#: ``client.classification_results`` is this component: the name says what it reads (the final classifications,
+#: and their results table), and does not look like :class:`UserClassificationsComponent` or
+#: :class:`AIClassificationsComponent`. It is the same class as :class:`ClassificationsComponent`, which stays.
+ClassificationResultsComponent = ClassificationsComponent

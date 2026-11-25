@@ -3,7 +3,8 @@
 !!! info "Compatibilidad con Trapper"
     **v1** ✔ · **v2** ✔ — salvo `import_classifications(overwrite_attrs=True)`, que es **solo v1**. Consulta [Versiones de Trapper](versions.md).
 
-`client.classification_results` — las **clasificaciones finales** de un proyecto de clasificación.
+`client.classification_results` — las **clasificaciones finales** de un proyecto de clasificación. Su clase es
+`ClassificationResultsComponent` (también `ClassificationsComponent`: es la misma clase).
 
 ## Qué representa
 

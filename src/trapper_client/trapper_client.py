@@ -61,7 +61,7 @@ from trapper_client.api_client_base import APIClientBase
 from trapper_client.api_query import APIQuery
 from trapper_client.components import (
     ClassificationProjectsComponent,
-    ClassificationsComponent,
+    ClassificationResultsComponent,
     ClassificationMediaComponent,
     ClassificationRecordExport,
     ClassificationResultsAggComponent,
@@ -101,7 +101,7 @@ class TrapperClient(APIClientBase):
     * :attr:`research_projects` — :class:`~trapper_api_client.components.ResearchProjectsComponent`
     * :attr:`classification_projects` — :class:`~trapper_api_client.components.ClassificationProjectsComponent`
     * :attr:`classification_media` — :class:`~trapper_api_client.components.ClassificationMediaComponent`
-    * :attr:`classification_results` - :class:`~trapper_api_client.components.ClassificationsComponent`
+    * :attr:`classification_results` - :class:`~trapper_api_client.components.ClassificationResultsComponent`
     * :attr:`classification_results_agg` - :class:`~trapper_api_client.components.ClassificationResultsAggComponent`
     * :attr:`classification_package` - :class:`~trapper_api_client.components.ClassificationPackageComponent`
     * :attr:`ai_classifications` - :class:`~trapper_api_client.components.AIClassificationsComponent`
@@ -171,7 +171,7 @@ class TrapperClient(APIClientBase):
         self.research_projects: ResearchProjectsComponent = ResearchProjectsComponent(self)
         self.classification_projects: ClassificationProjectsComponent = ClassificationProjectsComponent(self)
         self.classification_media: ClassificationMediaComponent = ClassificationMediaComponent(self)
-        self.classification_results: ClassificationsComponent = ClassificationsComponent(self)
+        self.classification_results: ClassificationResultsComponent = ClassificationResultsComponent(self)
         self.classification_results_agg: ClassificationResultsAggComponent = ClassificationResultsAggComponent(self)
         self.classification_package: ClassificationPackageComponent = ClassificationPackageComponent(self)
         self.ai_classifications: AIClassificationsComponent = AIClassificationsComponent(self)

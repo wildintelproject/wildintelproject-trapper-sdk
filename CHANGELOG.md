@@ -16,6 +16,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Upcoming release
 
 ### Added
+- `ClassificationResultsComponent` (issue #100): the class of `client.classification_results`, under a name that says what it reads. It is
+  the same class as `ClassificationsComponent`, which stays.
 - `uv run cli trapper up|down|destroy|status|logs|env` (issue #101): deploys a Trapper v1 and a Trapper v2 with Docker Compose (the files are
   in `dev/trapper/`), always with the same accounts (`sdktest`, `rp_staff`, `rp_user`, `ana`, `luis`, `plainuser`, with tokens) and the
   research project `SDKT`. `--branch` is the tag of the image of Trapper (`latest`, `development`, `refactor-api-ninja`...), also
