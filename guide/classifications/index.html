@@ -3017,7 +3017,8 @@
 <p class="admonition-title">Trapper compatibility</p>
 <p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — except <code>import_classifications(overwrite_attrs=True)</code>, which is <strong>v1 only</strong>. See <a href="../versions/">Trapper versions</a>.</p>
 </div>
-<p><code>client.classification_results</code> — the <strong>final classifications</strong> of a classification project.</p>
+<p><code>client.classification_results</code> — the <strong>final classifications</strong> of a classification project. Its class is
+<code>ClassificationResultsComponent</code> (also known as <code>ClassificationsComponent</code>: the same class).</p>
 <h2 id="what-it-represents">What it represents</h2>
 <p>In a classification project every resource has one <strong>final classification</strong>: the record that holds the result for
 that resource (what it shows), taken from the classification someone made or imported and then approved (from

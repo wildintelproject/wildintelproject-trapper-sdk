@@ -3019,7 +3019,8 @@
 <p class="admonition-title">Compatibilidad con Trapper</p>
 <p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — salvo <code>import_classifications(overwrite_attrs=True)</code>, que es <strong>solo v1</strong>. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
 </div>
-<p><code>client.classification_results</code> — las <strong>clasificaciones finales</strong> de un proyecto de clasificación.</p>
+<p><code>client.classification_results</code> — las <strong>clasificaciones finales</strong> de un proyecto de clasificación. Su clase es
+<code>ClassificationResultsComponent</code> (también <code>ClassificationsComponent</code>: es la misma clase).</p>
 <h2 id="que-representa">Qué representa</h2>
 <p>En un proyecto de clasificación cada resource tiene una <strong>clasificación final</strong>: el registro que guarda el resultado de
 ese resource (qué muestra), tomado de la clasificación que alguien hizo o importó y que después se aprobó (según el
