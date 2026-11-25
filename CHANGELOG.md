@@ -188,6 +188,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `classification_results_agg` (issue #109): typed rows (`count`, `days`, `trapRate`, coordinates and dates were
+  text; the 29 columns are declared); `get_project_results_agg(geojson=True)` returned a meaningless row and is a
+  `ValueError` now — new `get_project_geojson()`; no rows instead of a `400 "Empty queryset"`; the filters of the
+  results table (`UnknownFilterWarning`, `approved` sent as `status` on v1, a warning for `classified` on v2, which
+  answers `500`); `export_project_results_agg(raw=True)`. The guide says what a row is (a deployment and species) and
+  documents `count_var`, `all_dep` and `filter_dep`.
 - `user_classifications` and `ai_classifications` (issue #105): `UnknownFilterWarning` for the filters each Trapper
   version ignores (the v1 AI list ignores `rdate_*`, `user`, `sex`, ...; the v1 user list `sex`, `age`, `classified`);
   `deployment`/`collection` without `project` raise a `ValueError` (Trapper answered a `404`/`400` that read as if the

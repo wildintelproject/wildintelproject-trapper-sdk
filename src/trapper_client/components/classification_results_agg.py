@@ -1,28 +1,73 @@
 """
-Component for aggregated classification results exports.
+Component for the trap rates of a classification project (its results aggregated per deployment and species).
 """
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import Any, Dict
 
+from trapper_client import err
+from trapper_client.components._classification_filters import ClassificationFiltersMixin
 from trapper_client.components.base import TrapperComponent
 from trapper_client.schemas import ClassificationAgg, PaginatedResult
 
 
-class ClassificationResultsAggComponent(TrapperComponent[ClassificationAgg]):
+class ClassificationResultsAggComponent(ClassificationFiltersMixin, TrapperComponent[ClassificationAgg]):
     """
-    Component for ``/media_classification/api/classifications/results/agg/{project_pk}/``.
+    The **trap rates** of a classification project (``client.classification_results_agg``).
 
-    Available endpoints:
-    - ``GET /media_classification/api/classifications/results/agg/{project_pk}/``
+    - ``GET /media_classification/api/classifications/results/agg/{project_pk}/``: Trapper takes the final
+      classifications of the project (the ones the filters keep), adds up the count of each species per deployment
+      and divides it by the days the deployment worked. One row per deployment and species, with the deployment's
+      Camtrap DP fields: a gzip CSV (``get_project_results_agg``, ``export_project_results_agg``) or, with
+      ``geojson=True``, a GeoJSON ``FeatureCollection`` with one point per row (``get_project_geojson``).
 
-    This endpoint returns CSV (gzip) by default, or GeoJSON when ``geojson=True``.
+    Deployments without start or end date are left out. With no rows Trapper answers ``400 "Empty queryset"``: the
+    SDK gives no rows instead.
+
+    **Parameters:**
+
+    | Parameter | Type | Default | Description |
+    |---|---|---|---|
+    | count_var | ``"count"`` / ``"countNew"`` | ``"count"`` | What is added up. ``countNew`` only if the classificator has it (``400`` otherwise) |
+    | all_dep | boolean | ``False`` | Every deployment of the project, also the ones with no observation |
+    | filter_dep | text | | Only deployments whose ``deploymentID`` contains it |
+
+    **Filters:** those of the results table of ``client.classification_results`` (``ClassificationFilter``):
+    ``approved`` (sent as ``status`` on v1), ``species``, ``observation_type``, ``deployment``, ``collection``,
+    ``rdate_from``/``rdate_to``, ``ftype``, ``bboxes``, ... Trapper ignores any other without an error; the SDK emits
+    an ``UnknownFilterWarning``. ``classified``/``classified_ai`` answer ``500`` on v2 (warning).
     """
 
     endpoint = "media_classification/api/classifications/results/agg/{project_pk}/"
     schema = ClassificationAgg
+    known_filters = ClassificationFiltersMixin._filters_for(
+        frozenset({"count_var", "all_dep", "filter_dep", "geojson", "search"})
+    )
+
+    #: Filters the v2 table answers ``500`` to (the annotation only exists in the classification list).
+    _BROKEN_ON_V2 = ("classified", "classified_ai")
+
+    def _endpoint_for(self, project_pk: int) -> str:
+        return self.endpoint.replace("{project_pk}", str(project_pk))
+
+    def _query(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+        q = dict(self._merge_query(query, kwargs) or {})
+        broken = [name for name in self._BROKEN_ON_V2 if name in q]
+        if broken and self.client.server_version == "v2":
+            warnings.warn(
+                f"{self.endpoint}: Trapper v2 answers 500 to {', '.join(repr(b) for b in broken)} (the field only "
+                "exists in the classification list)",
+                err.UnknownFilterWarning,
+                stacklevel=3,
+            )
+        return q
+
+    @staticmethod
+    def _is_geojson(q: Dict[str, Any]) -> bool:
+        return str(q.get("geojson", "False")).strip().lower() == "true"
 
     def get_project_results_agg(
         self,
@@ -33,27 +78,58 @@ class ClassificationResultsAggComponent(TrapperComponent[ClassificationAgg]):
         validate: bool = True,
         **kwargs: Any,
     ) -> PaginatedResult[ClassificationAgg]:
-        """Fetch one page of aggregated results for a project.
+        """The trap rates of a project: one row per deployment and species.
+
+        Trapper sends the whole table at once: ``page`` and ``page_size`` are not used by it.
 
         Args:
             project_pk: Classification project primary key.
-            query: Base query parameters.
-            page: Page number to fetch.
-            page_size: Number of items per page.
+            query: Base query parameters (filters, ``count_var``, ``all_dep``, ``filter_dep``).
+            page: Kept for compatibility.
+            page_size: Kept for compatibility.
             validate: Whether to validate each row with Pydantic.
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Paginated result containing ``ClassificationAgg`` items.
+            ``PaginatedResult[ClassificationAgg]``; no rows when nothing matches.
+
+        Raises:
+            ValueError: With ``geojson=True``: use :meth:`get_project_geojson`.
         """
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
+        q = self._query(query, kwargs)
+        if self._is_geojson(q):
+            raise ValueError("geojson=True gives a FeatureCollection, not rows: use get_project_geojson()")
         q.setdefault("page", page)
         q.setdefault("page_size", page_size)
-
-        endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-        data = self.client.get(endpoint, query=q)
+        data = self._get_or_empty(self._endpoint_for(project_pk), q)
         return self._to_paginated(data, validate=validate)
+
+    def get_project_geojson(
+        self, project_pk: int, query: Dict[str, Any] | None = None, **kwargs: Any,
+    ) -> Dict[str, Any]:
+        """The trap rates of a project as a GeoJSON ``FeatureCollection``: one point per deployment and species.
+
+        Each feature has the row's fields (without ``latitude`` and ``longitude``) as properties. An empty
+        ``FeatureCollection`` when nothing matches.
+
+        Args:
+            project_pk: Classification project primary key.
+            query: Base query parameters (filters, ``count_var``, ``all_dep``, ``filter_dep``).
+            **kwargs: Extra query parameters merged into ``query``.
+        """
+        q = self._query(query, kwargs)
+        q["geojson"] = "True"
+        try:
+            data = self.client.get(self._endpoint_for(project_pk), query=q)
+        except Exception as exc:
+            if self._is_empty_result(exc):
+                return {"type": "FeatureCollection", "features": []}
+            raise
+        # The client wraps a JSON object in a one-row envelope.
+        results = data.get("results") if isinstance(data, dict) else None
+        if isinstance(results, list) and len(results) == 1 and isinstance(results[0], dict):
+            return results[0]
+        return data
 
     def export_project_results_agg(
         self,
@@ -61,38 +137,45 @@ class ClassificationResultsAggComponent(TrapperComponent[ClassificationAgg]):
         query: Dict[str, Any] | None = None,
         file: str | Path | None = None,
         validate: bool = True,
+        raw: bool = False,
         **kwargs: Any,
     ) -> Path:
-        """Export aggregated results of one project to CSV.
+        """Save the trap rates of a project to a CSV.
 
         Args:
             project_pk: Classification project primary key.
-            query: Base query parameters.
+            query: Base query parameters (filters, ``count_var``, ``all_dep``, ``filter_dep``).
             file: Output CSV file path. If ``None``, a temp file is created.
-            validate: If ``True``, validates rows before writing CSV.
+            validate: Parse the rows and write them with the SDK's columns. ``False`` saves Trapper's CSV as it
+                comes, like ``raw``.
+            raw: Save the CSV exactly as Trapper sends it (its header and column order).
             **kwargs: Extra query parameters merged into ``query``.
 
         Returns:
-            Path to the generated CSV file.
+            Path to the CSV (empty when nothing matches).
 
         Raises:
-            ValueError: If ``geojson=True`` is requested, because this method only
-                supports CSV export.
+            ValueError: With ``geojson=True``: use :meth:`get_project_geojson`.
         """
-        q = self._merge_query(query, kwargs)
-        q = dict(q or {})
-        if str(q.get("geojson", "False")).lower() == "true":
-            raise ValueError("export_project_results_agg only supports CSV export; use get_project_results_agg with geojson=True")
+        q = self._query(query, kwargs)
+        if self._is_geojson(q):
+            raise ValueError(
+                "export_project_results_agg only supports CSV export; use get_project_geojson() for GeoJSON"
+            )
+        endpoint = self._endpoint_for(project_pk)
+        if raw or not validate:
+            try:
+                return self.client.export_all(endpoint, query=q, file=file)
+            except Exception as exc:
+                if not self._is_empty_result(exc):
+                    raise
+                output_path = self.client._select_file(file)
+                output_path.write_text("")
+                return output_path
 
-        endpoint = self.endpoint.replace("{project_pk}", str(project_pk))
-
-        if not validate:
-            return self.client.export_all(endpoint, query=q, file=file)
-
-        data = self.client.get_all(endpoint, query=q)
+        data = self._get_all_or_empty(endpoint, q)
         parsed = self._to_paginated(data, validate=True)
         output_path = self.client._select_file(file)
         rows = [item.model_dump(mode="json") for item in parsed.results]
         self.client._write_csv(rows, output_path)
         return output_path
-
