@@ -120,3 +120,18 @@ def test_species_unknown_filter_warns():
     client.get.return_value = paginated_response([])
     with pytest.warns(err.UnknownFilterWarning, match="ignores 'genus'"):
         SpeciesComponent(client).get(genus="Lynx")
+
+
+@pytest.mark.parametrize("name", ["search", "username"])
+def test_users_have_no_filters(name):
+    from unittest.mock import MagicMock
+
+    from tests.base_component_tests import paginated_response
+    from trapper_client import err
+    from trapper_client.components.users import UsersComponent
+
+    client = MagicMock()
+    client.server_version = "v1"
+    client.get.return_value = paginated_response([])
+    with pytest.warns(err.UnknownFilterWarning, match=f"ignores .{name}.*it applies no filter"):
+        UsersComponent(client).get(**{name: "ana"})

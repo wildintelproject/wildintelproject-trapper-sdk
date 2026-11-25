@@ -82,6 +82,7 @@ the SDK does in the meantime.
 | 67 | Make `release` and `get_released` of the data package work, and never cache two packages for one key | media_classification |
 | 68 | Do not fail the data package of a project with no admin | media_classification |
 | 69 | Limit the sequences to what the user can see, and fix their `search` | media_classification |
+| 70 | Do not show every account and its email to every user, and let the user list be filtered | accounts |
 
 ---
 
@@ -1282,6 +1283,19 @@ once per classification of it.
 `deployment`; `distinct()` the resources.
 
 **Workaround in the SDK.** `search` is warned about; `deployment` is sent comma-separated; `resources` without repeats.
+
+## 70. Do not show every account and its email to every user, and let the user list be filtered
+
+**Labels:** security, privacy, api
+
+**Problem.** `UserViewSet` returns `User.objects.all()` with `email` to any authenticated user (checked, v1 and v2, with
+a user with no role: the 5 accounts and their emails). It has no filter and no `search`: every parameter is ignored
+without an error, so finding one user means reading them all.
+
+**Proposal.** Show the email only to the user itself and to admins (or the members of shared projects); add
+`username` and `search` filters.
+
+**Workaround in the SDK.** `UnknownFilterWarning` for any filter; the docs show a client-side lookup.
 
 ---
 
