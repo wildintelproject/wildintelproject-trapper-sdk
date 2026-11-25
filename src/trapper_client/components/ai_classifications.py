@@ -1,66 +1,77 @@
 """
-Component for AI classifications data endpoint.
+Component for the AI classifications of Trapper.
 """
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import Any, Dict
 
 from trapper_client import err
-from trapper_client.components._classification_filters import camtrapdp_param
+from trapper_client.components._classification_filters import RequireProjectMixin, camtrapdp_param
 from trapper_client.components.base import TrapperComponent
+from trapper_client.components.user_classifications import _LIST_COMMON
 from trapper_client.schemas import AIClassification, AIClassificationRecordExport
 
 
-class AIClassificationsComponent(TrapperComponent[AIClassification]):
+#: The filters each Trapper version applies to the AI list and to the AI results table (``AIClassificationFilter``).
+AI_CLASSIFICATION_FILTERS = {
+    "v1": _LIST_COMMON | {"confidence", "ai_provider", "camtrapdp"},
+    "v2": _LIST_COMMON | {
+        "confidence", "ai_provider", "camtrapdp", "owner", "user", "feedback", "locations_map", "rdate_from",
+        "rdate_to", "rtime_from", "rtime_to", "sex", "age", "classified", "classified_ai", "observation_level",
+        "avg_confidence_min", "avg_confidence_max",
+    },
+}
+
+
+class AIClassificationsComponent(RequireProjectMixin, TrapperComponent[AIClassification]):
     """
-    Component for ``/media_classification/api/ai-classifications/``.
+    The classifications an AI model made (``client.ai_classifications``), before one is approved as the final one.
 
-    Retrieve, filter, and export ai classifications data from Trapper.
+    - ``GET /media_classification/api/ai-classifications`` (and ``/{pk}``): the **list**, one row per AI
+      classification the user can see. Trapper v2 does not send ``owner``, ``classification`` or ``created_at``.
+    - ``GET /media_classification/api/ai-classifications/results/{project_pk}/``: the **AI results table** of a
+      project, one row per observation, with the columns of the results table of ``client.classification_results``
+      (``export``). ``camtrapdp=False`` gives Trapper's format (with ``_id`` and ``bboxes``).
 
-    Main endpoints:
-    - ``GET /media_classification/api/ai-classifications``: List of AI classifications (paginated)
-    - ``GET /media_classification/api/ai-classifications/{pk}	``: Single AI classification detail
-    - ``GET /media_classification/api/ai-classifications/results/{project_pk}/	``: CSV con resultados AI de un proyecto
+    The confidence of an observation (``classification_confidence``) is a fraction (``"0.93"``) on both versions,
+    the scale of the ``confidence`` filter.
 
-    **Available filter fields:**
+    **Filters** of the list and the table (Trapper ignores any other without an error; the SDK emits an
+    ``UnknownFilterWarning``):
 
-    | Parameter        | Type                     | Description                                                                 |
-    |----------------|--------------------------|-----------------------------------------------------------------------------|
-    | project        | PK                       | Auto-filtrado por URL (no necesario)                                       |
-    | owner          | boolean                  | true = resources where user is owner/manager                               |
-    | deployment     | list of PKs              | Filter by deployment PKs                                                   |
-    | collection     | list of PKs              | Filter by collection PKs                                                   |
-    | locations_map  | comma-separated PKs      | Filter by location PKs                                                     |
-    | rdate_from / rdate_to | date             | date_recorded range                                                        |
-    | rtime_from / rtime_to | HH:MM            | Time-of-day range                                                          |
-    | ftype          | choice                   | Resource type (IMAGE, VIDEO, etc.)                                         |
-    | bboxes         | boolean                  | Has bounding boxes                                                         |
-    | user           | list of PKs              | Filter by owner user PKs                                                   |
-    | approved       | boolean                  | Whether classification is FINAL approved                                   |
-    | feedback       | boolean                  | Whether it is a feedback classification                                    |
-    | species        | list of PKs              | Filter by species PKs                                                      |
-    | observation_type | choice                 | Filter by observation type                                                 |
-    | sex            | choice                   | Filter by sex                                                              |
-    | age            | choice                   | Filter by age                                                              |
-    | confidence     | number                   | dynamic_attrs.classification_confidence >= value                          |
-    | ai_provider    | list of PKs              | Filter by AI provider PKs (choices from AIProvider)                       |
+    | Parameter | Type | Version | Description |
+    |---|---|---|---|
+    | project | PK | both | Classification project. **Needed for deployment and collection** (``ValueError`` without it) |
+    | deployment | list of PKs | both | Deployment PKs of the project |
+    | collection | list of PKs | both | PK of the **link** between the project and the collection |
+    | ai_provider | list of PKs | both | AI provider (model) PKs |
+    | confidence | number 0-1 | both | Some observation has at least this confidence |
+    | approved | boolean | both | It became the final classification. **v2: the table answers 500** (warning) |
+    | bboxes | boolean | both | Has bounding boxes |
+    | ftype | choice | both | Resource type (I, V, ...) |
+    | species | list of PKs | both | Species PKs |
+    | observation_type | choice | both | Observation type |
+    | search | text | both | Species (Latin or English name), resource name or attribute (list only) |
+    | owner, user, feedback | | v2 | As in the user list |
+    | locations_map, rdate_from/rdate_to, rtime_from/rtime_to | | v2 | Location, date and time of the resource |
+    | sex, age, classified, classified_ai | | v2 | As in the user list |
 
-    **Additional fields:**
+    v1 also applies one filter per custom attribute of the project's classificator, when ``project`` is given.
 
-    | Parameter        | Type                     | Description                                                                 |
-    |----------------|--------------------------|-----------------------------------------------------------------------------|
-    | camtrapdp      | boolean                  | Format of output: True = Camtrap DP standard, False = Trapper internal format (default: True) |
-
-    Returns a paginated list of AI classifications with support for filtering
-    through query parameters.
+    **Extra parameter of the table:** ``camtrapdp`` (default ``True``): ``True`` = Camtrap DP rows, ``False`` =
+    Trapper's format.
     """
 
     endpoint = "/media_classification/api/ai-classifications"
     export_endpoint = "/media_classification/api/ai-classifications/results/{project_pk}/"
     schema = AIClassification
     export_schema = AIClassificationRecordExport
+    known_filters = AI_CLASSIFICATION_FILTERS
+    unknown_filter_hint = "; or the name of an attribute of the project's classificator (v1, with project)"
+    project_hint = "or use export(<project pk>) (the project is in its URL)"
 
     def _normalize_query(self, query: Dict[str, Any]) -> Dict[str, Any]:
         """``camtrapdp=True`` as Trapper reads it (``"True"``)."""
@@ -98,6 +109,13 @@ class AIClassificationsComponent(TrapperComponent[AIClassification]):
             ``AIClassificationRecordExportCamTrap`` / ``AIClassificationRecordExportTrapper``.
         """
         endpoint = self.export_endpoint.format(project_pk=classification_project_pk)
+        if "approved" in {**(query or {}), **kwargs} and self.client.server_version == "v2":
+            warnings.warn(
+                f"{self.export_endpoint}: Trapper v2 answers 500 to 'approved' in the AI results table "
+                "(the field only exists in the list); filter the list instead",
+                err.UnknownFilterWarning,
+                stacklevel=2,
+            )
         if not validate and not raw:
             # validate=False has always saved Trapper's CSV (to a default file when none was given): kept.
             q = self._merge_query(query, kwargs)

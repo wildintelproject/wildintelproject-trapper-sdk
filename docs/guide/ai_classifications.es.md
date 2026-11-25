@@ -12,25 +12,27 @@
 
 ## Filtros
 
-| Parámetro | Tipo | Descripción |
-|---|---|---|
-| `owner` | booleano | `true` = recursos donde el usuario es propietario/gestor |
-| `deployment` | lista de PK | Filtra por PK de despliegue |
-| `collection` | lista de PK | Filtra por PK de colección |
-| `locations_map` | PK separadas por comas | Filtra por PK de localización |
-| `rdate_from` / `rdate_to` | fecha | Rango de `date_recorded` |
-| `rtime_from` / `rtime_to` | HH:MM | Rango de hora del día |
-| `ftype` | opción | Tipo de recurso (IMAGE, VIDEO, ...) |
-| `bboxes` | booleano | Tiene cajas delimitadoras |
-| `user` | lista de PK | Filtra por PK de usuario propietario |
-| `approved` | booleano | Tiene una clasificación FINAL aprobada |
-| `feedback` | booleano | Es una clasificación de retroalimentación |
-| `species` | lista de PK | Filtra por PK de especie |
-| `observation_type` | opción | Filtra por tipo de observación |
-| `sex` | opción | Filtra por sexo |
-| `age` | opción | Filtra por edad |
-| `confidence` | número | `dynamic_attrs.classification_confidence >= valor` |
-| `ai_provider` | lista de PK | Filtra por PK de proveedor de IA |
+Los mismos filtros para la lista y para la tabla de resultados de IA (`export()`). Trapper ignora sin error un
+filtro que no aplica y devuelve todas las filas: el SDK emite un `UnknownFilterWarning`.
+
+| Parámetro | Tipo | Versión | Descripción |
+|---|---|---|---|
+| `project` | PK | ambas | Proyecto de clasificación. **Necesario para `deployment` y `collection`** en la lista (`ValueError` sin él) |
+| `deployment` | lista de PK | ambas | PK de despliegues del proyecto |
+| `collection` | lista de PK | ambas | PK del **enlace** entre el proyecto y la colección |
+| `ai_provider` | lista de PK | ambas | PK de proveedores (modelos) de IA |
+| `confidence` | número 0-1 | ambas | Alguna observación tiene al menos esta confianza |
+| `approved` | booleano | ambas | Se convirtió en la clasificación final. **v2: la tabla responde 500** (el SDK avisa) |
+| `bboxes` | booleano | ambas | Tiene cajas delimitadoras |
+| `ftype` | opción | ambas | Tipo de recurso (`I`, `V`, ...) |
+| `species` | lista de PK | ambas | PK de especies |
+| `observation_type` | opción | ambas | Tipo de observación |
+| `search` | texto | ambas | Especie (nombre latino o inglés), nombre del recurso o atributo (lista) |
+| `owner`, `user`, `feedback` | | v2 | Como en la [lista de usuarios](user_classifications.md) |
+| `locations_map`, `rdate_from`/`rdate_to`, `rtime_from`/`rtime_to` | | v2 | Localización, fecha y hora del recurso |
+| `sex`, `age`, `classified`, `classified_ai` | | v2 | Como en la lista de usuarios |
+
+v1 aplica además un filtro por cada atributo propio del clasificador del proyecto, cuando se da `project`.
 
 ## Los seis patrones de acceso
 

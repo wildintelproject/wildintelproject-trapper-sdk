@@ -72,6 +72,12 @@ the SDK does in the meantime.
 | 57 | Do not fetch the Camtrap DP schema from the internet in every classification import | media_classification |
 | 58 | Answer `classified` and `classified_ai` in the results and media tables | media_classification |
 | 59 | Call the filter for an approved classification the same in v1 and v2 | media_classification |
+| 60 | Make `approved` work in the AI results table of v2 | media_classification |
+| 61 | Return the same fields in the AI classification list of v1 and v2 | media_classification |
+| 62 | Use one scale for the confidence of an AI classification | media_classification |
+| 63 | Filter the user and AI lists by deployment or collection without the project | media_classification |
+| 64 | Apply the same filters to the user and AI lists in v1 and v2 | media_classification |
+| 65 | Read `camtrapdp` (and every boolean) as a boolean, and say "no species" with `null` | cross-cutting |
 
 ---
 
@@ -1135,6 +1141,83 @@ other.
 
 **Workaround in the SDK.** `approved=True` is sent as `status` on v1, so the one name works on both; `status` on v2 and any
 other name the server version ignores are warned about (`UnknownFilterWarning`).
+
+## 60. Make `approved` work in the AI results table of v2
+
+**Labels:** bug, api
+
+**Problem.** `AIClassificationFilter` (v2) filters `approved` on the field `approved`, an annotation that only the list view
+(`AIClassificationViewSet.get_queryset`) adds. The AI results table (`ai-classifications/results/<project_pk>/`) uses the
+same filter without it and answers **`500`** (`FieldError: Cannot resolve keyword 'approved'`) to `?approved=true` (checked).
+v1 answers.
+
+**Proposal.** Add the annotation to `AIClassificationResultsView`, or filter on `is_approved` of the derived final one.
+
+**Workaround in the SDK.** `export(approved=...)` on v2 emits an `UnknownFilterWarning` before the request. *(No
+workaround for the filter itself: filter the list.)*
+
+## 61. Return the same fields in the AI classification list of v1 and v2
+
+**Labels:** api, consistency
+
+**Problem.** The v2 AI list (`ai-classifications`) has no `owner`, `owner_profile`, `classification` or `created_at`, and
+sends `updated_at: null`; v1 sends them all. The user list of v2 keeps `owner`. Who ran the model, and when, is lost, and
+a client written for v1 breaks on v2 (the SDK raised `ValidationError`).
+
+**Proposal.** Return the same fields in both (`owner` = who requested the run, `created_at`).
+
+**Workaround in the SDK.** Those fields are optional (`None` on v2).
+
+## 62. Use one scale for the confidence of an AI classification
+
+**Labels:** api, consistency
+
+**Problem.** The `confidence` filter reads a fraction (`confidence=0.9`, both versions; `90` gives nothing). The list gives
+it as a fraction in v1 (`"classification_confidence": "0.93"`, a string) and as a percentage in v2, inside each attribute
+(`"species": {"value": "...", "confidence": 93.0}`), with no `classification_confidence`.
+
+**Proposal.** One scale (a fraction, as the filter and the Camtrap DP `classificationProbability`) and a number, not a
+string.
+
+**Workaround in the SDK.** `classification_confidence` is the fraction as text (`"0.93"`) on both versions.
+
+## 63. Filter the user and AI lists by deployment or collection without the project
+
+**Labels:** api, usability
+
+**Problem.** `deployment` and `collection` of the user and AI lists are checked against the deployments and collections of
+`project`. Without `project`, v1 answers `404 No ClassificationProject matches the given query` and v2 `400 Select a
+valid choice. 3 is not one of the available choices` — both read as if the deployment did not exist. The final
+classification list (`classifications`) does the same.
+
+**Proposal.** Check them against what the user can see when there is no `project`, or answer a `400` that names `project`.
+
+**Workaround in the SDK.** A `ValueError` that asks for `project`, before the request.
+
+## 64. Apply the same filters to the user and AI lists in v1 and v2
+
+**Labels:** api, consistency
+
+**Problem.** In v1 the AI list applies only `project`, `deployment`, `collection`, `ftype`, `species`, `observation_type`,
+`bboxes`, `approved`, `confidence` and `ai_provider` (and custom attributes); `owner`, `user`, `feedback`, `locations_map`,
+`rdate_*`, `rtime_*`, `sex` and `age` are ignored **without an error** (`rdate_from=2030-01-01` returns every row). The v1
+user list has no `sex`, `age`, `classified` or `classified_ai`. v2 applies all of them.
+
+**Proposal.** The same filters in both (v2's set), or a `400` for an unknown one.
+
+**Workaround in the SDK.** `UnknownFilterWarning` for a filter the server's version does not apply.
+
+## 65. Read `camtrapdp` (and every boolean) as a boolean, and say "no species" with `null`
+
+**Labels:** api, cross-cutting
+
+**Problem.** The results tables read `camtrapdp` with `== "True"`: `camtrapdp=true` (what most HTTP clients send for a
+boolean, the SDK included) gives Trapper's format. The same as the media table (entry 47). And the user and AI lists write
+a missing species as the text `"None"` (`str(None)`), in v1 and v2.
+
+**Proposal.** Read booleans with the same parser as the filters (`true`/`false`/`1`/`0`), and send `null` for no species.
+
+**Workaround in the SDK.** `camtrapdp` is sent as `True`/`False`; `"None"` is read as `None`.
 
 ---
 

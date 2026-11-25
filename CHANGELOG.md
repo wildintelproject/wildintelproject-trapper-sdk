@@ -188,6 +188,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `user_classifications` and `ai_classifications` (issue #105): `UnknownFilterWarning` for the filters each Trapper
+  version ignores (the v1 AI list ignores `rdate_*`, `user`, `sex`, ...; the v1 user list `sex`, `age`, `classified`);
+  `deployment`/`collection` without `project` raise a `ValueError` (Trapper answered a `404`/`400` that read as if the
+  deployment did not exist), the same check as `classification_results`; `ai_classifications.export(approved=...)`
+  warns on v2, whose AI table answers `500` to it. Docstrings and guides list the filters of each version.
 - `client.ai_classifications` on Trapper v2 and its `export()` on v1 and v2 (issue #104). The v2 list raised
   `ValidationError` (no `owner`, `classification` or `created_at`; attributes as `{"value", "confidence"}`): those
   fields are optional and the confidence is a fraction (`"0.93"`) on both versions, the scale of the `confidence`

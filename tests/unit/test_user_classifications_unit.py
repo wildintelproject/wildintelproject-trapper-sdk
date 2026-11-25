@@ -5,11 +5,14 @@ All API calls are mocked — no real server needed.
 """
 from __future__ import annotations
 
+import warnings as _warnings
 from unittest.mock import MagicMock
 
 import pytest
 
 from tests.base_component_tests import ComponentUnitTestBase, paginated_response
+from trapper_client import err as _err
+from trapper_client.components.ai_classifications import AIClassificationsComponent as _AI
 from trapper_client.components.user_classifications import UserClassificationsComponent
 from trapper_client.schemas import (
     UserClassification,
@@ -186,3 +189,65 @@ class TestUserClassificationRecord:
 
         assert isinstance(result.resource, ResourceUser)
         assert result.resource.pk == 2379965
+
+
+# ── filters by version and project (issue #105) ──────────────────────────────
+
+def _component(cls, version):
+    client = MagicMock()
+    client.server_version = version
+    client.get.return_value = paginated_response([])
+    client.get_all.return_value = paginated_response([])
+    return cls(client)
+
+
+@pytest.mark.parametrize("cls", [UserClassificationsComponent, _AI])
+@pytest.mark.parametrize("call", ["get", "where", "get_all"])
+def test_deployment_and_collection_need_project(cls, call):
+    component = _component(cls, "v2")
+    with pytest.raises(ValueError, match="need project=<pk>"):
+        getattr(component, call)(deployment=3)
+    with pytest.raises(ValueError, match="deployment and collection"):
+        getattr(component, call)(deployment=3, collection=1)
+
+
+@pytest.mark.parametrize("cls", [UserClassificationsComponent, _AI])
+def test_with_project_there_is_no_error(cls):
+    _component(cls, "v1").get(deployment=3, project=2)
+
+
+@pytest.mark.parametrize(
+    "cls, version, name, warns",
+    [
+        (UserClassificationsComponent, "v1", "sex", True),
+        (UserClassificationsComponent, "v2", "sex", False),
+        (UserClassificationsComponent, "v1", "classified", True),
+        (UserClassificationsComponent, "v1", "feedback", False),
+        (_AI, "v1", "rdate_from", True),
+        (_AI, "v1", "user", True),
+        (_AI, "v2", "rdate_from", False),
+        (_AI, "v1", "confidence", False),
+        (_AI, "v1", "search", False),
+        (_AI, "v2", "nonsense", True),
+    ],
+)
+def test_filters_trapper_ignores_warn(cls, version, name, warns):
+    component = _component(cls, version)
+    with _warnings.catch_warnings(record=True) as caught:
+        _warnings.simplefilter("always")
+        component.get(**{name: "x"})
+    found = [w for w in caught if issubclass(w.category, _err.UnknownFilterWarning)]
+    assert bool(found) is warns
+
+
+def test_approved_in_the_v2_ai_table_warns():
+    component = _component(_AI, "v2")
+    with pytest.warns(_err.UnknownFilterWarning, match="answers 500 to 'approved'"):
+        component.export(2, approved=True)
+
+
+def test_approved_in_the_v1_ai_table_does_not_warn():
+    component = _component(_AI, "v1")
+    with _warnings.catch_warnings():
+        _warnings.simplefilter("error", _err.UnknownFilterWarning)
+        component.export(2, approved=True)

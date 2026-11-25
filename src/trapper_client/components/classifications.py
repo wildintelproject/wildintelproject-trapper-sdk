@@ -13,7 +13,7 @@ from tenacity import Retrying
 
 from trapper_client import err
 from trapper_client.api_query import APIQuery
-from trapper_client.components._classification_filters import ClassificationFiltersMixin
+from trapper_client.components._classification_filters import ClassificationFiltersMixin, RequireProjectMixin
 from trapper_client.components.base import TrapperComponent
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
 from trapper_client.retry_utils import retrying_for_chunk_upload
@@ -25,7 +25,7 @@ from trapper_client.schemas import (
 )
 
 
-class ClassificationsComponent(ClassificationFiltersMixin, TrapperComponent[Classification]):
+class ClassificationsComponent(RequireProjectMixin, ClassificationFiltersMixin, TrapperComponent[Classification]):
     """
     The **final classifications** of a classification project (``client.classification_results``).
 
@@ -77,45 +77,13 @@ class ClassificationsComponent(ClassificationFiltersMixin, TrapperComponent[Clas
     #: ``camtrapdp`` is a parameter of the results table, not a filter.
     known_filters = ClassificationFiltersMixin._filters_for(frozenset({"camtrapdp"}))
 
+    #: Where the project goes instead, in the ``ValueError`` of ``deployment``/``collection`` without ``project``.
+    project_hint = "or use where_project_results() (the project is in its URL)"
+
     endpoint = "/media_classification/api/classifications"
     export_endpoint = "/media_classification/api/classifications/results/{project_pk}/"
     schema = Classification
     export_schema = ClassificationRecordExport
-
-    # ── the list needs a project for deployment and collection ────────────────
-
-    def _require_project(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> None:
-        """``deployment`` and ``collection`` of the list are checked by Trapper against the project's own.
-
-        Without ``project`` it answers ``400 "Select a valid choice. 19 is not one of the available choices"``,
-        which reads as if the deployment did not exist. The project-scoped methods (``overwrite_endpoint``) have it
-        in the URL and need nothing.
-        """
-        if kwargs.get("overwrite_endpoint"):
-            return
-        given = {**(query or {}), **kwargs}
-        needing = [name for name in ("deployment", "collection") if name in given]
-        if needing and "project" not in given:
-            raise ValueError(
-                f"{' and '.join(needing)} of the classification list need project=<pk>: Trapper checks them against "
-                "the project's own and otherwise answers 400 'Select a valid choice'. Add project, or use "
-                "where_project_results() (the project is in its URL)."
-            )
-
-    def get(self, query: Dict[str, Any] | None = None, *args: Any, **kwargs: Any):
-        """One page of the list; see :meth:`TrapperComponent.get`. ``deployment`` and ``collection`` need ``project``."""
-        self._require_project(query, kwargs)
-        return super().get(query, *args, **kwargs)
-
-    def where(self, query: Dict[str, Any] | None = None, *args: Any, **kwargs: Any):
-        """Lazy iteration; see :meth:`TrapperComponent.where`. ``deployment`` and ``collection`` need ``project``."""
-        self._require_project(query, kwargs)
-        return super().where(query, *args, **kwargs)
-
-    def get_all(self, query: Dict[str, Any] | None = None, *args: Any, **kwargs: Any):
-        """Every page; see :meth:`TrapperComponent.get_all`. ``deployment`` and ``collection`` need ``project``."""
-        self._require_project(query, kwargs)
-        return super().get_all(query, *args, **kwargs)
 
     def _resolve_export_endpoint(self, project_pk: int) -> str:
         """Build the export endpoint for a given project pk."""
