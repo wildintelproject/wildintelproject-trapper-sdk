@@ -14,6 +14,8 @@
 | `owner` | boolean | `true` = maps owned by the current user |
 | `search` | string | Free-text search across name, description, owner username |
 
+Trapper ignores any other filter without an error; the SDK emits an `UnknownFilterWarning`.
+
 ## The six access patterns
 
 This component has no special methods — it's exactly the generic interface described in

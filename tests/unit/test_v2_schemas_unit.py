@@ -164,3 +164,28 @@ def test_research_project_collection_filters():
         component.get_project(10, status="Private", owner=True, search="a")
     with pytest.warns(err.UnknownFilterWarning, match="ignores 'name'"):
         component.get_project(10, name="x")
+
+
+@pytest.mark.parametrize("component, good, bad", [
+    ("maps", {"search": "x", "owner": True}, {"name": "x"}),
+    ("locations_geojson", {"colls": 2, "in_bbox": "-7,36,-6,38", "radius": "-6,37,5000", "search": "x"}, {"zzz": 1}),
+])
+def test_v1_map_components_warn_about_ignored_filters(component, good, bad):
+    import warnings
+    from unittest.mock import MagicMock
+
+    from tests.base_component_tests import paginated_response
+    from trapper_client import err
+    from trapper_client.components.locations_geojson import LocationsGeoJsonComponent
+    from trapper_client.components.maps import MapsComponent
+
+    cls = {"maps": MapsComponent, "locations_geojson": LocationsGeoJsonComponent}[component]
+    client = MagicMock()
+    client.server_version = "v1"
+    row = {"type": "FeatureCollection", "features": []} if component == "locations_geojson" else {"pk": 2}
+    client.get.return_value = paginated_response([row])
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", err.UnknownFilterWarning)
+        cls(client).get(**good)
+    with pytest.warns(err.UnknownFilterWarning):
+        cls(client).get(**bad)

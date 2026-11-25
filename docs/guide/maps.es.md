@@ -14,6 +14,8 @@
 | `owner` | booleano | `true` = mapas del usuario actual |
 | `search` | cadena | Búsqueda de texto libre en nombre, descripción y nombre de usuario del propietario |
 
+Trapper ignora sin error cualquier otro filtro; el SDK emite un `UnknownFilterWarning`.
+
 ## Los seis patrones de acceso
 
 Este componente no tiene métodos especiales: es exactamente la interfaz genérica descrita en

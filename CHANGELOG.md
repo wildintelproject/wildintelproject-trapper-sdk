@@ -190,6 +190,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `maps` and `locations_geojson` (v1, issue #125): `UnknownFilterWarning` for the filters Trapper ignores
+  (`locations_geojson.get()` built its query by hand and never warned); the filter table of `locations_geojson`.
 - A non-JSON error answer (Trapper's HTML `500` page) is reported as its title plus the method and URL of the request,
   instead of the whole page in the log and in the exception (issue #123).
 - `research_projects.collections` (issue #121): `date_created` is a `datetime`; `UnknownFilterWarning` (the filters are
