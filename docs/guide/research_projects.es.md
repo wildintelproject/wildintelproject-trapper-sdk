@@ -61,6 +61,15 @@ result = client.research_projects.get_all_project_collections(project_pk=7)
 col = client.research_projects.find_project_collection(project_pk=7, pk=12)
 ```
 
+!!! note "Cuándo sale vacía la lista"
+    La lista sale **vacía, no un `403`**, salvo que el proyecto de investigación esté aprobado y el usuario sea su
+    propietario o tenga un rol en él (un superusuario no queda exento): el propietario de un proyecto pendiente de
+    aprobación no ve ninguna colección.
+
+Filtros: `status` (`Private`, `OnDemand`, `Public`), `owner` (`true` = colecciones que el usuario posee o gestiona),
+`owners` (PK) y `search` (nombre de la colección o usuario del propietario). Trapper ignora sin error cualquier
+otro; el SDK emite un `UnknownFilterWarning`. `date_created` es un `datetime`.
+
 !!! warning "Aquí `pk` es la pk del *vínculo*, no la de la colección de almacenamiento"
     El `pk` de `find_project_collection` es la clave primaria de la fila `ResearchProjectCollection` que
     vincula este proyecto con una colección, no la pk propia de la `Collection` de almacenamiento.

@@ -12,7 +12,7 @@ from trapper_client.enums import (
     SensorMethod,
 )
 
-from .base import TrapperSchema, choice
+from .base import TrapperSchema, choice, read_datetime
 from .users import User
 
 
@@ -38,6 +38,12 @@ class ResearchProjectCollection(TrapperSchema):
     description: str | None = None
     detail_data: str | None = None
     delete_data: str | None = None
+
+    @field_validator("date_created", mode="before")
+    @classmethod
+    def _date(cls, v):
+        """The collection's creation date, as a timezone-aware ``datetime``."""
+        return read_datetime(v)
 
 
 class ResearchProject(TrapperSchema):
