@@ -2808,15 +2808,16 @@
 
 
 
-        <p>Component for <code>/tables/api/species</code>.</p>
-<p>Retrieve and filter the species taxonomy table from Trapper. Species
-PKs returned here are the same ones referenced by the <code>species</code>
-filter on classification-related components (e.g. <code>classifications</code>,
-<code>ai_classifications</code>).</p>
-<p>Main endpoints:
-- <code>GET /tables/api/species</code>: List of species (paginated)
-- <code>GET /tables/api/species/{pk}</code>: Single species detail</p>
-<p><strong>Available filter fields:</strong></p>
+        <p>The species table of Trapper (<code>client.species</code>). Its PKs are the ones the <code>species</code> filter of the
+classification components takes.</p>
+<ul>
+<li><code>GET /tables/api/species</code> (and <code>/{pk}</code>): paginated, ordered by English name. Trapper v1 servers usually
+  have the species someone added (a few); Trapper v2 ships the whole taxonomy (36433 species): use a filter.</li>
+</ul>
+<p>A row has <code>display_name</code> (<code>"Iberian lynx (Lynx pardinus)"</code>), <code>english_name</code>, <code>latin_name</code>, <code>family</code> and
+<code>genus</code>, plus <code>taxon_class</code> and <code>order</code> on v2.</p>
+<p><strong>Filters</strong> (Trapper ignores any other without an error — <code>genus=Lynx</code> returns every species —; the SDK emits
+an <code>UnknownFilterWarning</code>):</p>
 <table>
 <thead>
 <tr>
@@ -2827,22 +2828,26 @@ filter on classification-related components (e.g. <code>classifications</code>,
 </thead>
 <tbody>
 <tr>
-<td>english_name</td>
-<td>string</td>
-<td>Filter by exact english name</td>
-</tr>
-<tr>
 <td>latin_name</td>
 <td>string</td>
-<td>Filter by exact latin name</td>
+<td><strong>Exact and case-sensitive</strong> Latin name (<code>"Lynx pardinus"</code>)</td>
+</tr>
+<tr>
+<td>english_name</td>
+<td>string</td>
+<td><strong>Exact and case-sensitive</strong> English name (v1 <code>"Iberian lynx"</code>, v2 <code>"Iberian Lynx"</code>)</td>
 </tr>
 <tr>
 <td>search</td>
 <td>string</td>
-<td>Free-text search across english_name, latin_name</td>
+<td>Part of the English or Latin name, any case</td>
 </tr>
 </tbody>
 </table>
+<p>Example::</p>
+<div class="highlight"><pre><span></span><code>lynx = client.species.get(latin_name=&quot;Lynx pardinus&quot;).results[0]
+client.classification_results.get(project=2, species=lynx.pk)
+</code></pre></div>
 
 
 
@@ -2853,9 +2858,7 @@ filter on classification-related components (e.g. <code>classifications</code>,
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/trapper_client/components/species.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-11">11</a></span>
-<span class="normal"><a href="#__codelineno-0-12">12</a></span>
-<span class="normal"><a href="#__codelineno-0-13">13</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-13">13</a></span>
 <span class="normal"><a href="#__codelineno-0-14">14</a></span>
 <span class="normal"><a href="#__codelineno-0-15">15</a></span>
 <span class="normal"><a href="#__codelineno-0-16">16</a></span>
@@ -2876,30 +2879,42 @@ filter on classification-related components (e.g. <code>classifications</code>,
 <span class="normal"><a href="#__codelineno-0-31">31</a></span>
 <span class="normal"><a href="#__codelineno-0-32">32</a></span>
 <span class="normal"><a href="#__codelineno-0-33">33</a></span>
-<span class="normal"><a href="#__codelineno-0-34">34</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">SpeciesComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Species</span><span class="p">]):</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    Component for ``/tables/api/species``.</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">    Retrieve and filter the species taxonomy table from Trapper. Species</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">    PKs returned here are the same ones referenced by the ``species``</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="sd">    filter on classification-related components (e.g. ``classifications``,</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    ``ai_classifications``).</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">    Main endpoints:</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">    - ``GET /tables/api/species``: List of species (paginated)</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">    - ``GET /tables/api/species/{pk}``: Single species detail</span>
+<span class="normal"><a href="#__codelineno-0-34">34</a></span>
+<span class="normal"><a href="#__codelineno-0-35">35</a></span>
+<span class="normal"><a href="#__codelineno-0-36">36</a></span>
+<span class="normal"><a href="#__codelineno-0-37">37</a></span>
+<span class="normal"><a href="#__codelineno-0-38">38</a></span>
+<span class="normal"><a href="#__codelineno-0-39">39</a></span>
+<span class="normal"><a href="#__codelineno-0-40">40</a></span>
+<span class="normal"><a href="#__codelineno-0-41">41</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="k">class</span><span class="w"> </span><span class="nc">SpeciesComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">Species</span><span class="p">]):</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">    The species table of Trapper (``client.species``). Its PKs are the ones the ``species`` filter of the</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">    classification components takes.</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    - ``GET /tables/api/species`` (and ``/{pk}``): paginated, ordered by English name. Trapper v1 servers usually</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">      have the species someone added (a few); Trapper v2 ships the whole taxonomy (36433 species): use a filter.</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20"></a>
+<a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">    A row has ``display_name`` (``&quot;Iberian lynx (Lynx pardinus)&quot;``), ``english_name``, ``latin_name``, ``family`` and</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">    ``genus``, plus ``taxon_class`` and ``order`` on v2.</span>
 <a id="__codelineno-0-23" name="__codelineno-0-23"></a>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    **Available filter fields:**</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    | Parameter    | Type   | Description                                       |</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    |--------------|--------|-----------------------------------------------------|</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    | english_name | string | Filter by exact english name                        |</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    | latin_name   | string | Filter by exact latin name                          |</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    | search       | string | Free-text search across english_name, latin_name    |</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    **Filters** (Trapper ignores any other without an error — ``genus=Lynx`` returns every species —; the SDK emits</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    an ``UnknownFilterWarning``):</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26"></a>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    | Parameter | Type | Description |</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    |---|---|---|</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    | latin_name | string | **Exact and case-sensitive** Latin name (``&quot;Lynx pardinus&quot;``) |</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    | english_name | string | **Exact and case-sensitive** English name (v1 ``&quot;Iberian lynx&quot;``, v2 ``&quot;Iberian Lynx&quot;``) |</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    | search | string | Part of the English or Latin name, any case |</span>
 <a id="__codelineno-0-32" name="__codelineno-0-32"></a>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;tables/api/species&quot;</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Species</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    Example::</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">        lynx = client.species.get(latin_name=&quot;Lynx pardinus&quot;).results[0]</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">        client.classification_results.get(project=2, species=lynx.pk)</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;tables/api/species&quot;</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">Species</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="n">_SPECIES_FILTERS</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">:</span> <span class="n">_SPECIES_FILTERS</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
               </details>
 

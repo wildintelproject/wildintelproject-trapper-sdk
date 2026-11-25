@@ -1158,10 +1158,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#los-seis-patrones-de-acceso" class="md-nav__link">
+  <a href="#uso" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Los seis patrones de acceso
+        Uso
       
     </span>
   </a>
@@ -2772,10 +2772,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#los-seis-patrones-de-acceso" class="md-nav__link">
+  <a href="#uso" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Los seis patrones de acceso
+        Uso
       
     </span>
   </a>
@@ -2805,13 +2805,19 @@
 <h1 id="especies">Especies</h1>
 <div class="admonition info">
 <p class="admonition-title">Compatibilidad con Trapper</p>
-<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ (aún sin validar contra un servidor Trapper v2 real). Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
+<p><strong>v1</strong> ✔ · <strong>v2</strong> ✔ — comprobado en los dos. Consulta <a href="../versions/">Versiones de Trapper</a>.</p>
 </div>
-<p><code>client.species</code> — la tabla de taxonomía de especies. Las PK que devuelve son las mismas que usa el
-filtro <code>species</code> de los componentes relacionados con clasificaciones (p. ej.
-<a href="../classifications/"><code>classifications</code></a>, <a href="../ai_classifications/"><code>ai_classifications</code></a>).</p>
-<p><strong>Endpoint:</strong> <code>GET /tables/api/species</code> (listado + detalle).</p>
+<p><code>client.species</code> — la tabla de especies de Trapper. Sus PK son las que recibe el filtro <code>species</code> de los
+componentes de clasificación (<a href="../classifications/"><code>classification_results</code></a>,
+<a href="../ai_classifications/"><code>ai_classifications</code></a>, ...).</p>
+<p><strong>Endpoint:</strong> <code>GET /tables/api/species</code> (listado + detalle), paginado y ordenado por nombre inglés. Un servidor
+Trapper v1 suele tener las especies que alguien añadió (unas pocas); <strong>Trapper v2 trae la taxonomía completa (36433
+especies)</strong>: usa un filtro en lugar de <code>get_all()</code>.</p>
+<p>Una fila (<code>Species</code>) tiene <code>display_name</code> (<code>"Iberian lynx (Lynx pardinus)"</code>), <code>english_name</code>, <code>latin_name</code>, <code>family</code>
+y <code>genus</code>, más <code>taxon_class</code> y <code>order</code> en v2.</p>
 <h2 id="filtros">Filtros</h2>
+<p>Trapper ignora sin error cualquier otro filtro —<code>genus=Lynx</code> devuelve todas las especies—; el SDK emite un
+<code>UnknownFilterWarning</code>.</p>
 <table>
 <thead>
 <tr>
@@ -2822,31 +2828,29 @@ filtro <code>species</code> de los componentes relacionados con clasificaciones 
 </thead>
 <tbody>
 <tr>
-<td><code>english_name</code></td>
-<td>cadena</td>
-<td>Filtra por nombre en inglés exacto</td>
+<td><code>latin_name</code></td>
+<td>texto</td>
+<td>Nombre latino <strong>exacto, distinguiendo mayúsculas</strong> (<code>"Lynx pardinus"</code>)</td>
 </tr>
 <tr>
-<td><code>latin_name</code></td>
-<td>cadena</td>
-<td>Filtra por nombre latino exacto</td>
+<td><code>english_name</code></td>
+<td>texto</td>
+<td>Nombre inglés <strong>exacto, distinguiendo mayúsculas</strong> (v1 <code>"Iberian lynx"</code>, v2 <code>"Iberian Lynx"</code>)</td>
 </tr>
 <tr>
 <td><code>search</code></td>
-<td>cadena</td>
-<td>Búsqueda de texto libre en <code>english_name</code> y <code>latin_name</code></td>
+<td>texto</td>
+<td>Parte del nombre inglés o latino, sin distinguir mayúsculas</td>
 </tr>
 </tbody>
 </table>
-<h2 id="los-seis-patrones-de-acceso">Los seis patrones de acceso</h2>
-<p>Este componente no tiene métodos especiales: es exactamente la interfaz genérica descrita en
-<a href="../../usage/">Uso</a>:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="s2">&quot;fox&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">sp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="s2">&quot;species.csv&quot;</span><span class="p">)</span>
+<h2 id="uso">Uso</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">lince</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">latin_name</span><span class="o">=</span><span class="s2">&quot;Lynx pardinus&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">client</span><span class="o">.</span><span class="n">classification_results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">species</span><span class="o">=</span><span class="n">lince</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="s2">&quot;fox&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="nb">print</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">pk</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">display_name</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">sp</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">species</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">632</span><span class="p">)</span>
 </code></pre></div>
 
 
