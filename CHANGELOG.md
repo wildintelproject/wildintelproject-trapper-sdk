@@ -23,7 +23,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   classificators, final/user/AI classifications, classifications map, sequences, species, users), ordered by `pk`
   unless `sort_by` is given; the other routes still go through the old ones, which Trapper serves too. A component
   declares a route of the new API with `versioned(old, ninja=new)`; `ninja_broken_filters` lists the filters that fail
-  there.
+  there. With `trapper_version="auto"` the first call of a list now learns which API to use (one or two requests,
+  cached): pass `trapper_version` to skip them.
 - `classification_package.download_package()` and `download_project_package()` (issue #111): save the Camtrap DP
   zip (streamed, retried, `.part` file), instead of calling `make_request` on the URL.
 - `ClassificationResultsComponent` (issue #100): the class of `client.classification_results`, under a name that says what it reads. It is
