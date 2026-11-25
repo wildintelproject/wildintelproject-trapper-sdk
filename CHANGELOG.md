@@ -190,6 +190,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- A non-JSON error answer (Trapper's HTML `500` page) is reported as its title plus the method and URL of the request,
+  instead of the whole page in the log and in the exception (issue #123).
 - `research_projects.collections` (issue #121): `date_created` is a `datetime`; `UnknownFilterWarning` (the filters are
   `status`, `owner`, `owners` and `search`); the docstring example used `client.research_projects_collections`, which
   does not exist; the docs say the list is empty unless the project is approved and the user owns it or has a role.
