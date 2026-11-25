@@ -2808,13 +2808,16 @@
 
 
 
-        <p>Component for <code>/accounts/api/users</code>.</p>
-<p>Retrieve Trapper user accounts. Useful to resolve owner/user PKs (e.g.
-from <code>owner</code> filters on other components) to a username or display name.</p>
-<p>Main endpoints:
-- <code>GET /accounts/api/users</code>: List of users (paginated)
-- <code>GET /accounts/api/users/{pk}</code>: Single user detail</p>
-<p>No server-side filters are documented for this endpoint.</p>
+        <p>The user accounts of Trapper (<code>client.users</code>), to turn the user PKs of other components (<code>owner</code>, <code>user</code>)
+into a username or a name.</p>
+<ul>
+<li><code>GET /accounts/api/users</code> (and <code>/{pk}</code>): every account of the server, paginated, for any user with a token.
+  A row has <code>username</code>, <code>first_name</code>, <code>last_name</code>, <code>email</code> and <code>name</code> (the full name, or the username).</li>
+</ul>
+<p><strong>No filters</strong>: Trapper ignores every parameter (<code>search</code>, <code>username</code>, ...) without an error and returns
+every user; the SDK emits an <code>UnknownFilterWarning</code>. Filter on the client::</p>
+<div class="highlight"><pre><span></span><code>ana = next(client.users.where(filter_fn=lambda u: u.username == &quot;ana&quot;))
+</code></pre></div>
 
 
 
@@ -2840,22 +2843,24 @@ from <code>owner</code> filters on other components) to a username or display na
 <span class="normal"><a href="#__codelineno-0-23">23</a></span>
 <span class="normal"><a href="#__codelineno-0-24">24</a></span>
 <span class="normal"><a href="#__codelineno-0-25">25</a></span>
-<span class="normal"><a href="#__codelineno-0-26">26</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">UsersComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">User</span><span class="p">]):</span>
+<span class="normal"><a href="#__codelineno-0-26">26</a></span>
+<span class="normal"><a href="#__codelineno-0-27">27</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">UsersComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">User</span><span class="p">]):</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    Component for ``/accounts/api/users``.</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">    Retrieve Trapper user accounts. Useful to resolve owner/user PKs (e.g.</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">    from ``owner`` filters on other components) to a username or display name.</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    Main endpoints:</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">    - ``GET /accounts/api/users``: List of users (paginated)</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">    - ``GET /accounts/api/users/{pk}``: Single user detail</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    The user accounts of Trapper (``client.users``), to turn the user PKs of other components (``owner``, ``user``)</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="sd">    into a username or a name.</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="sd">    - ``GET /accounts/api/users`` (and ``/{pk}``): every account of the server, paginated, for any user with a token.</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="sd">      A row has ``username``, ``first_name``, ``last_name``, ``email`` and ``name`` (the full name, or the username).</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18"></a>
+<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">    **No filters**: Trapper ignores every parameter (``search``, ``username``, ...) without an error and returns</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20"></a><span class="sd">    every user; the SDK emits an ``UnknownFilterWarning``. Filter on the client::</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21"></a>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">    No server-side filters are documented for this endpoint.</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22"></a><span class="sd">        ana = next(client.users.where(filter_fn=lambda u: u.username == &quot;ana&quot;))</span>
 <a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">    &quot;&quot;&quot;</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24"></a>
 <a id="__codelineno-0-25" name="__codelineno-0-25"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;accounts/api/users&quot;</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">User</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">(),</span> <span class="s2">&quot;v2&quot;</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">()}</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
