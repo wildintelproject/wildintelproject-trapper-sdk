@@ -148,6 +148,13 @@ row = client.classification_results.find(1)
 
 See [Usage](../usage.md) if any of this looks unfamiliar — it's the same interface on every component.
 
+!!! warning "The list has no stable order"
+    Trapper does not order the classification list, so its pages repeat some rows and skip others. `where()`,
+    `all()` and `get_all()` ask for it in pages of 500, the most Trapper sends: a list that fits is read in one
+    request and is complete. A longer one is read page by page with the repeated rows dropped, and an
+    `UnstableOrderWarning` says that some may be missing — narrow it with a filter (`project`, `deployment`, ...).
+    `get()` returns the page you ask for, as it comes.
+
 ## Observation export, scoped to a project
 
 The export endpoint returns a *different* schema than the one above — CamtrapDP or Trapper-flavoured

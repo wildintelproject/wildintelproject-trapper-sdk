@@ -190,6 +190,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- The final classification list repeated some rows and skipped others when paged (issue #108): Trapper does not order
+  it. `where()`/`all()`/`get_all()` of `classification_results` read it in pages of 500 (one request when it fits);
+  a longer list drops the repeated rows and emits the new `UnstableOrderWarning`.
 - `maps` and `locations_geojson` (v1, issue #125): `UnknownFilterWarning` for the filters Trapper ignores
   (`locations_geojson.get()` built its query by hand and never warned); the filter table of `locations_geojson`.
 - A non-JSON error answer (Trapper's HTML `500` page) is reported as its title plus the method and URL of the request,

@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Union
 from tenacity import Retrying
 
 from trapper_client import err
-from trapper_client.api_query import APIQuery
+from trapper_client.api_query import APIQuery, warn_unstable_order
 from trapper_client.components._classification_filters import ClassificationFiltersMixin, RequireProjectMixin
 from trapper_client.components.base import TrapperComponent
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
@@ -84,6 +84,44 @@ class ClassificationsComponent(RequireProjectMixin, ClassificationFiltersMixin, 
     export_endpoint = "/media_classification/api/classifications/results/{project_pk}/"
     schema = Classification
     export_schema = ClassificationRecordExport
+
+    # ── the list has no stable order (issue #108) ─────────────────────────────
+
+    #: The most rows Trapper sends in one page (it caps ``page_size`` at 500).
+    LIST_PAGE_SIZE = 500
+
+    def where(self, query: Dict[str, Any] | None = None, *args: Any, **kwargs: Any):
+        """Lazy iteration over the list; see :meth:`TrapperComponent.where`.
+
+        Trapper does not order the classification list, so its pages repeat some rows and skip others. The SDK
+        asks for it in pages of 500 (the most Trapper sends): a list that fits is read in one request. A longer one
+        is read page by page with the repeated rows dropped, and an ``UnstableOrderWarning`` says that some may be
+        missing: narrow it with a filter.
+        """
+        if kwargs.get("overwrite_endpoint"):
+            return super().where(query, *args, **kwargs)
+        kwargs["page_size"] = max(int(kwargs.get("page_size") or 0), self.LIST_PAGE_SIZE)
+        result = super().where(query, *args, **kwargs)
+        result.unique_by = "pk"
+        return result
+
+    def get_all(self, query: Dict[str, Any] | None = None, *args: Any, **kwargs: Any):
+        """Every row of the list; see :meth:`TrapperComponent.get_all`. In one request when it fits (see :meth:`where`)."""
+        if kwargs.get("overwrite_endpoint"):
+            return super().get_all(query, *args, **kwargs)
+        kwargs["page_size"] = max(int(kwargs.get("page_size") or 0), self.LIST_PAGE_SIZE)
+        result = super().get_all(query, *args, **kwargs)
+        if result.pagination.pages > 1:
+            warn_unstable_order(self.endpoint, result.pagination.model_dump())
+            seen: set = set()
+            unique = []
+            for row in result.results:
+                key = row.get("pk") if isinstance(row, dict) else getattr(row, "pk", None)
+                if key is None or key not in seen:
+                    seen.add(key)
+                    unique.append(row)
+            result.results = unique
+        return result
 
     def _resolve_export_endpoint(self, project_pk: int) -> str:
         """Build the export endpoint for a given project pk."""

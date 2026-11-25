@@ -85,6 +85,7 @@ the SDK does in the meantime.
 | 68 | Do not fail the data package of a project with no admin | media_classification |
 | 69 | Limit the sequences to what the user can see, and fix their `search` | media_classification |
 | 70 | Do not show every account and its email to every user, and let the user list be filtered | accounts |
+| 71 | Order every list by a unique key, so that its pages do not repeat or skip rows | cross-cutting |
 
 ---
 
@@ -1299,6 +1300,22 @@ without an error, so finding one user means reading them all.
 
 **Workaround in the SDK.** `UnknownFilterWarning` for any filter; the docs show a client-side lookup.
 
+## 71. Order every list by a unique key, so that its pages do not repeat or skip rows
+
+**Labels:** bug, api, cross-cutting
+
+**Problem.** The final classification list (`media_classification/api/classifications`) has no ordering: the view
+does not order it, the model has no `ordering`, and `ordering=` is ignored. Postgres gives each page in its own order, so
+paging repeats some rows and skips others (checked: v1 55 rows paged by 10 → 54 different; v2 43 by 3 → 38). On 2.0.0a4
+the resource list does it too (ordered by recording time, which is not unique), on the old and the new routes.
+`page_size` is capped at 500.
+
+**Proposal.** Order every list by a unique key, or add `pk` as the last key of its ordering. The new API's `sort_by`
+already lets a client do it (`?sort_by=pk` pages without repeats).
+
+**Workaround in the SDK.** The classification list is read in pages of 500 (one request when it fits); a longer one
+drops the repeated rows and warns (`UnstableOrderWarning`).
+
 ## Status on the new API (`refactor-api-ninja`, 2.0.0a4)
 
 Checked on 2026-11-25 on a 2.0.0a4 server (image `refactor-api-ninja`) with the data of the v2 test server, through
@@ -1320,7 +1337,7 @@ Only the entries checked are listed; the others are *(unchecked)*.
 | 67 | `release`/`get_released` | **Open** (documented: `get_released` with no release builds one) *(the duplicate cache not re-checked)* |
 | 69 | Sequences: permissions, `search`, `deployment` | **Worse**: still every sequence for every user (now documented) and `search` answers `500`; `deployment` answers `500` even with one PK, and `9,3` a `400` |
 | 70 | Every account and email to every user; user filters | **Partly**: still every account and email (documented); a `pk` filter works, but the documented `search` filters nothing |
-| — | Lists without a stable order (SDK issue #108) | **Solved with `sort_by`**: `?sort_by=pk` pages without repeats (the default order, by recording time, still repeats and skips rows in classifications and resources) |
+| 71 | Lists without a stable order (SDK issue #108) | **Solved with `sort_by`**: `?sort_by=pk` pages without repeats (the default order, by recording time, still repeats and skips rows in classifications and resources) |
 | — | Unknown filters ignored without an error | **Open**: `?zzz=1` returns every row; a bad value of a known filter is now a `400` keyed by parameter |
 
 New on `/api/v2/`: `sort_by`/`reverse`, `all_filtered=true` (the matching PKs), `page_size` up to 500, `400` for a

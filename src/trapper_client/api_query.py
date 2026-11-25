@@ -13,6 +13,21 @@ TModel = TypeVar("TModel", bound=BaseModel)
 logger = logging.getLogger(__name__)
 
 
+def warn_unstable_order(endpoint: str, pagination: dict[str, Any]) -> None:
+    """Say that the rows of a list without a stable order did not fit in one page, so some may be missing."""
+    import warnings
+
+    from trapper_client import err
+
+    warnings.warn(
+        f"{endpoint}: {pagination.get('count', '?')} rows take {pagination.get('pages', '?')} pages of "
+        f"{pagination.get('page_size', '?')}, and Trapper does not order this list: its pages may repeat some rows "
+        "(dropped) and skip others. Narrow it with a filter (project, deployment, ...) to fit in one page.",
+        err.UnstableOrderWarning,
+        stacklevel=err.user_stacklevel(),
+    )
+
+
 def parse_row(row: Any, schema: Any, validate: bool) -> Any:
     """Parse one raw API row into ``schema``.
 
@@ -55,6 +70,9 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
         page_size: Number of items requested per API page.
         empty_if: Optional predicate on the error of a page request: when it is true the endpoint is taken to have
             no rows (an endpoint that answers ``400`` for an empty result) and the iteration just ends.
+        unique_by: For an endpoint without a stable order, whose pages may repeat and skip rows: the field of a row
+            (``"pk"``) by which repeated rows are dropped. When the rows take more than one page, an
+            ``UnstableOrderWarning`` says that some may be missing.
     """
 
     def __init__(
@@ -67,6 +85,7 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
         page_size: int = 50,
         validate: bool = True,
         empty_if: Callable[[Exception], bool] | None = None,
+        unique_by: str | None = None,
     ):
         self.client = client
         self.endpoint = endpoint
@@ -82,6 +101,8 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
         self._exhausted = False
         self.validate = validate
         self.empty_if = empty_if
+        self.unique_by = unique_by
+        self._seen: set[Any] = set()
 
     def __iter__(self) -> "APIQuery[TModel]":
         """Return the iterator itself.
@@ -143,13 +164,23 @@ class APIQuery(Generic[TModel], Iterator[TModel | dict]):
                     self._exhausted = True
                     raise StopIteration
 
+                first_page = self._page == 0
                 self._page = int(pagination.get("page", -1))
                 self._pages = int(pagination.get("pages", 1))
                 self._last_index = 0
+                if first_page and self.unique_by and self._pages > 1:
+                    warn_unstable_order(self.endpoint, pagination)
 
             # Fetch next raw item from buffer
             raw_item = self._last_results[self._last_index]
             self._last_index += 1
+
+            if self.unique_by:
+                key = raw_item.get(self.unique_by) if isinstance(raw_item, dict) else getattr(raw_item, self.unique_by, None)
+                if key is not None:
+                    if key in self._seen:
+                        continue
+                    self._seen.add(key)
 
             # Apply local filter if provided
             if not self.filter_fn or self.filter_fn(raw_item):
