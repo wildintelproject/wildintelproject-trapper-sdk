@@ -33,6 +33,8 @@ Además de los [filtros de localizaciones](locations.md#filtros), este endpoint 
 | `search` | cadena | Busca en `location_id`, `name`, `description`, `county`, `city`, nombre de usuario del propietario y `deployments__deployment_id` |
 | `in_bbox` | `minLon,minLat,maxLon,maxLat` | Filtra las localizaciones dentro de una caja geográfica |
 
+Trapper ignora sin error cualquier otro filtro; el SDK emite un `UnknownFilterWarning`.
+
 ## Ejemplos
 
 ```python

@@ -33,6 +33,8 @@ In addition to the [locations filters](locations.md#filters), this endpoint adds
 | `search` | string | Searches `location_id`, `name`, `description`, `county`, `city`, owner username, `deployments__deployment_id` |
 | `in_bbox` | `minLon,minLat,maxLon,maxLat` | Filter locations within a geographic bounding box |
 
+Trapper ignores any other filter without an error; the SDK emits an `UnknownFilterWarning`.
+
 ## Examples
 
 ```python

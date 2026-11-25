@@ -24,8 +24,12 @@ class MapsComponent(TrapperComponent[Map]):
     |-----------|---------|-----------------------------------------------------------|
     | owner     | boolean | true = maps owned by the current user                     |
     | search    | string  | Free-text search across name, description, owner__username |
+
+    Trapper ignores any other filter without an error; the SDK emits an ``UnknownFilterWarning``. A row has no
+    ``name`` (Trapper does not send it): ``slug`` and ``detail_data`` identify the map.
     """
 
     endpoint = "geomap/api/maps"
     schema = Map
     supported_versions = ("v1",)  # removed in Trapper v2
+    known_filters = {"v1": frozenset({"owner", "search", "pk"})}
