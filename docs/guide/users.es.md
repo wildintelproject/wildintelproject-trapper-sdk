@@ -1,17 +1,24 @@
 # Usuarios
 
 !!! info "Compatibilidad con Trapper"
-    **v1** ✔ · **v2** ✔ — el mismo código en ambas. Consulta [Versiones de Trapper](versions.md).
+    **v1** ✔ · **v2** ✔ — comprobado en los dos. Consulta [Versiones de Trapper](versions.md).
 
 `client.users` — cuentas de usuario de Trapper. Útil para traducir PK de propietario o usuario (por
 ejemplo, de los filtros `owner` de otros componentes) a un nombre de usuario o nombre visible.
 
-**Endpoint:** `GET /accounts/api/users` (listado + detalle). Este endpoint no tiene filtros de servidor
-documentados.
+**Endpoint:** `GET /accounts/api/users` (listado + detalle): todas las cuentas del servidor, para cualquier usuario
+con token. Una fila tiene `username`, `first_name`, `last_name`, `email` y `name` (el nombre completo, o el usuario).
+
+**Sin filtros**: Trapper ignora sin error cualquier parámetro (`search`, `username`, ...) y devuelve todos los
+usuarios; el SDK emite un `UnknownFilterWarning`. Filtra en el cliente:
+
+```python
+ana = next(client.users.where(filter_fn=lambda u: u.username == "ana"))
+```
 
 ## Los seis patrones de acceso
 
-Este componente no tiene métodos especiales ni filtros documentados: es exactamente la interfaz
+Este componente no tiene métodos especiales ni filtros: es exactamente la interfaz
 genérica descrita en [Uso](../usage.md):
 
 ```python

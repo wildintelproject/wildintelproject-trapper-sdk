@@ -1,17 +1,24 @@
 # Users
 
 !!! info "Trapper compatibility"
-    **v1** ✔ · **v2** ✔ — same code on both. See [Trapper versions](versions.md).
+    **v1** ✔ · **v2** ✔ — checked against both. See [Trapper versions](versions.md).
 
 `client.users` — Trapper user accounts. Useful to resolve owner/user PKs (e.g. from `owner`
 filters on other components) to a username or display name.
 
-**Endpoint:** `GET /accounts/api/users` (list + detail). No server-side filters are documented for
-this endpoint.
+**Endpoint:** `GET /accounts/api/users` (list + detail): every account of the server, for any user with a token.
+A row has `username`, `first_name`, `last_name`, `email` and `name` (the full name, or the username).
+
+**No filters**: Trapper ignores every parameter (`search`, `username`, ...) without an error and returns every user;
+the SDK emits an `UnknownFilterWarning`. Filter on the client:
+
+```python
+ana = next(client.users.where(filter_fn=lambda u: u.username == "ana"))
+```
 
 ## The six access patterns
 
-This component has no special methods and no documented filters — it's exactly the generic
+This component has no special methods and no filters — it's exactly the generic
 interface described in [Usage](../usage.md):
 
 ```python

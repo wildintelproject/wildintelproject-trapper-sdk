@@ -350,7 +350,8 @@ class TrapperComponent(Generic[TModel]):
             warnings.warn(
                 f"{self.endpoint}: Trapper {self.client.server_version} ignores "
                 f"{', '.join(repr(k) for k in unknown)} and returns every item; "
-                f"the filters it applies are {', '.join(sorted(known))}{self.unknown_filter_hint}",
+                + (f"the filters it applies are {', '.join(sorted(known))}{self.unknown_filter_hint}" if known
+                   else "it applies no filter"),
                 err.UnknownFilterWarning,
                 stacklevel=err.user_stacklevel(),
             )
