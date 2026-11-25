@@ -160,3 +160,97 @@ class TestGetProjectPackage:
 
         with pytest.raises(err.APIError, match="isn't JSON"):
             component.get_project_package(project_pk=PROJECT_PK)
+
+
+# ── parameters Trapper cannot read, hints, known parameters (issue #111) ─────
+
+URL = "http://trapper.example/accounts/data-package/11/?rt=74f85950"
+
+
+@pytest.mark.parametrize("name", ["keywords", "licenses", "private_species"])
+def test_list_parameters_are_a_value_error(component, client, name):
+    with pytest.raises(ValueError, match=f"Trapper cannot read {name}"):
+        component.get_project_package(PROJECT_PK, **{name: ["a"]})
+    client.make_request.assert_not_called()
+
+
+def test_unknown_parameter_warns(component, client):
+    client.server_version = "v1"
+    _mock_response(client, {"data": {"message": "ok", "errors": None, "package": URL}})
+    with pytest.warns(err.UnknownFilterWarning):
+        component.get_project_package(PROJECT_PK, split_custom_attrs=True)  # v2 only
+
+
+def test_v1_contributors_error_says_what_to_do(component, client):
+    _mock_response(client, {"data": {"message": "Bad request", "package": None, "errors":
+                                     "[package-error] ... [] should be non-empty at property 'contributors'"}}, 400)
+    with pytest.raises(err.BadRequestError, match="admins of the classification project"):
+        component.get_project_package(PROJECT_PK)
+
+
+def test_two_cached_packages_error_says_what_to_do(component, client):
+    _mock_response(client, {"data": {"message": "Bad request", "package": None, "errors":
+                                     "get() returned more than one UserDataPackage -- it returned 2!"}}, 400)
+    with pytest.raises(err.BadRequestError, match="two cached packages"):
+        component.get_project_package(PROJECT_PK)
+
+
+# ── downloads ─────────────────────────────────────────────────────────────────
+
+class _Stream:
+    def __init__(self, status=200, body=b"PK\x03\x04zip", headers=None):
+        self.status_code, self._body, self.headers = status, body, headers or {}
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def iter_bytes(self):
+        yield self._body
+
+
+@pytest.fixture
+def streaming(client):
+    client._client.stream.return_value = _Stream()
+    return client
+
+
+class TestDownload:
+
+    @pytest.mark.parametrize("given", [
+        URL,
+        ResultsDataPackageResponse.model_validate({"data": {"package": URL}}),
+        {"data": {"package": URL}},
+    ])
+    def test_saves_the_zip(self, component, streaming, tmp_path, given):
+        path = component.download_package(given, tmp_path / "p.zip")
+        assert path.read_bytes() == b"PK\x03\x04zip"
+        assert streaming._client.stream.call_args[0] == ("GET", URL)
+        assert not (tmp_path / "p.zip.part").exists()
+
+    def test_a_directory_names_it_after_the_package(self, component, streaming, tmp_path):
+        assert component.download_package(URL, tmp_path).name == "11.zip"
+
+    def test_no_url_is_a_value_error(self, component):
+        with pytest.raises(ValueError, match="no package URL"):
+            component.download_package({"data": {"package": None}}, "x.zip")
+
+    def test_404(self, component, client, tmp_path):
+        client._client.stream.return_value = _Stream(404)
+        with pytest.raises(err.NotFoundError, match="rebuilt"):
+            component.download_package(URL, tmp_path / "p.zip", retry_attempts=1)
+
+    def test_no_proxy(self, component, client, tmp_path):
+        client._client.stream.return_value = _Stream(body=b"", headers={"x-accel-redirect": "/media/x.zip",
+                                                                         "content-length": "0"})
+        with pytest.raises(err.APIError, match="X-Accel-Redirect"):
+            component.download_package(URL, tmp_path / "p.zip", retry_attempts=1)
+        assert not (tmp_path / "p.zip").exists()
+
+    def test_build_and_download(self, component, streaming, tmp_path):
+        _mock_response(streaming, {"data": {"message": "ok", "errors": None, "package": URL}})
+        path = component.download_project_package(PROJECT_PK, tmp_path / "p.zip", clear_cache=True)
+        assert path.exists()
+        assert streaming.make_request.call_args.kwargs["query"]["clear_cache"] is True

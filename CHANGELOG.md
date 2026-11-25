@@ -16,6 +16,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Upcoming release
 
 ### Added
+- `classification_package.download_package()` and `download_project_package()` (issue #111): save the Camtrap DP
+  zip (streamed, retried, `.part` file), instead of calling `make_request` on the URL.
 - `ClassificationResultsComponent` (issue #100): the class of `client.classification_results`, under a name that says what it reads. It is
   the same class as `ClassificationsComponent`, which stays.
 - `uv run cli trapper up|down|destroy|status|logs|env` (issue #101): deploys a Trapper v1 and a Trapper v2 with Docker Compose (the files are
@@ -188,6 +190,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `classification_package` (issue #111): `keywords`, `licenses` and `private_species` raise a `ValueError` (Trapper
+  reads one text per parameter and always answered `400`); the docs said `filter_deployments` takes PKs (it is a text
+  contained in `deploymentID`), now also `export_filetype="parquet"` and `split_custom_attrs` (v2); the errors for a v1
+  project with no admin and for two cached packages say what to do; `UnknownFilterWarning` for unknown parameters.
 - `classification_results_agg` (issue #109): typed rows (`count`, `days`, `trapRate`, coordinates and dates were
   text; the 29 columns are declared); `get_project_results_agg(geojson=True)` returned a meaningless row and is a
   `ValueError` now — new `get_project_geojson()`; no rows instead of a `400 "Empty queryset"`; the filters of the
