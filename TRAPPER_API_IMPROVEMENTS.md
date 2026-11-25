@@ -81,6 +81,7 @@ the SDK does in the meantime.
 | 66 | Read the list parameters of the data package (`keywords`, `licenses`, `private_species`) | media_classification |
 | 67 | Make `release` and `get_released` of the data package work, and never cache two packages for one key | media_classification |
 | 68 | Do not fail the data package of a project with no admin | media_classification |
+| 69 | Limit the sequences to what the user can see, and fix their `search` | media_classification |
 
 ---
 
@@ -1266,6 +1267,21 @@ body and `X-Accel-Redirect` when Trapper is not behind its nginx.
 **Proposal.** Fall back to the project's owner (or the research project's), or answer a `400` that names the cause.
 
 **Workaround in the SDK.** The error adds "give the project an admin role"; the download says when there is no proxy.
+
+## 69. Limit the sequences to what the user can see, and fix their `search`
+
+**Labels:** bug, security, api
+
+**Problem.** `SequenceViewSet.get_queryset` returns `Sequence.objects.all()`: any user with a token sees every sequence
+of the server and the PKs of their resources (checked, v1 and v2, with a user with no role: 14 and 23 sequences). Its
+`search_fields` has `name`, which a sequence does not have: `?search=` answers `500`. `deployment` reads only
+comma-separated PKs (a repeated parameter keeps one), unlike the other list filters. On v2 `resources` repeats a resource
+once per classification of it.
+
+**Proposal.** Filter by the classification projects the user can see; drop `name` from `search_fields`; accept repeated
+`deployment`; `distinct()` the resources.
+
+**Workaround in the SDK.** `search` is warned about; `deployment` is sent comma-separated; `resources` without repeats.
 
 ---
 
