@@ -1242,9 +1242,9 @@ class APIClientBase:
         """
         try:
             body = response.json()
-            message = body.get("_error", {}).get("message", body)
+            message = body.get("_error", {}).get("message", body) if isinstance(body, dict) else body
         except Exception:
-            message = response.text
+            message = self._short_text(response)
 
         self.logger.error(f"Request failed [{response.status_code}] {message}")
 
@@ -1255,6 +1255,29 @@ class APIClientBase:
             raise err.HTTP_ERRORS_MAP[response.status_code](message)
 
         raise err.APIError(message)
+
+    @staticmethod
+    def _short_text(response: httpx.Response, limit: int = 300) -> str:
+        """A non-JSON error answer in a few words: an HTML page's ``<title>``, or the start of the text.
+
+        Trapper answers a ``500`` (and some ``404``s) with a whole HTML page, several KB (v1's embeds its logo);
+        logging and raising all of it buried the cause. The method and URL of the request are added.
+        """
+        import re
+
+        text = response.text or ""
+        title = re.search(r"<title[^>]*>(.*?)</title>", text, re.I | re.S)
+        if title:
+            short = f"an HTML page: {' '.join(title.group(1).split())}"
+        else:
+            short = " ".join(text.split())
+            short = short if len(short) <= limit else short[:limit] + "..."
+        try:
+            request = response.request
+            short += f" ({request.method} {request.url})"
+        except RuntimeError:
+            pass
+        return short
 
     def _merge_query_params(
         self,
