@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, Iterable, TypeVa
 from pydantic import BaseModel
 
 from trapper_client import err
-from trapper_client.api_query import APIQuery, parse_row
+from trapper_client.api_query import APIQuery, parse_row, warn_unstable_order
 from trapper_client.schemas import PaginatedResult, Pagination
 
 if TYPE_CHECKING:
@@ -284,6 +284,18 @@ class TrapperComponent(Generic[TModel]):
     #: not repeat or skip rows (the default order of several lists, by recording time, is not unique).
     ninja_sort_by: str | None = "pk"
 
+    #: The list has no unique order on the old routes, so its pages repeat some rows and skip others (issue #108,
+    #: #132). ``where()``/``all()``/``get_all()`` then ask for pages of 500, the most Trapper sends (a list that fits
+    #: is one request and complete); a longer one drops the repeated rows and emits an ``UnstableOrderWarning``. Not
+    #: on the new API, ordered by ``sort_by=pk``, nor on a call with ``overwrite_endpoint``.
+    unstable_order: bool = False
+
+    #: The most rows Trapper sends in one page (it caps ``page_size`` at 500).
+    LIST_PAGE_SIZE = 500
+
+    def _unstable(self, overwrite_endpoint: str | None) -> bool:
+        return self.unstable_order and not overwrite_endpoint and not is_ninja(self.client)
+
     def _ninja_order(self, query: Dict[str, Any]) -> Dict[str, Any]:
         """``sort_by=pk`` on the new API, unless the caller ordered the list."""
         if self.ninja_sort_by and "sort_by" not in query and is_ninja(self.client):
@@ -529,16 +541,18 @@ class TrapperComponent(Generic[TModel]):
         q = self._ninja_order(q)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema
+        unstable = self._unstable(overwrite_endpoint)
 
         return APIQuery(
             client=self.client,
             endpoint=endpoint,
             query=q,
             filter_fn=filter_fn,
-            page_size=page_size,
+            page_size=max(page_size, self.LIST_PAGE_SIZE) if unstable else page_size,
             schema=schema,
             validate=validate,
             empty_if=self._is_empty_result,
+            unique_by="pk" if unstable else None,
         )
 
     def all(
@@ -592,10 +606,24 @@ class TrapperComponent(Generic[TModel]):
         """
         self._ensure_supported()
         q = self._ninja_order(self._merge_query(query, kwargs))
+        unstable = self._unstable(overwrite_endpoint)
+        if unstable:
+            page_size = max(int(q.get("page_size") or page_size), self.LIST_PAGE_SIZE)
+            q["page_size"] = page_size
         q.setdefault("page_size", page_size)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema
         data = self._get_all_or_empty(endpoint, q)
+        if unstable and int((data.get("pagination") or {}).get("pages", 1)) > 1:
+            warn_unstable_order(endpoint, data["pagination"])
+            seen: set = set()
+            rows = []
+            for row in data.get("results", []):
+                key = row.get("pk") if isinstance(row, dict) else getattr(row, "pk", None)
+                if key is None or key not in seen:
+                    seen.add(key)
+                    rows.append(row)
+            data = {**data, "results": rows}
         return self._to_paginated(data, validate=validate, schema=schema)
 
     def export(

@@ -1306,8 +1306,9 @@ without an error, so finding one user means reading them all.
 
 **Problem.** The final classification list (`media_classification/api/classifications`) has no ordering: the view
 does not order it, the model has no `ordering`, and `ordering=` is ignored. Postgres gives each page in its own order, so
-paging repeats some rows and skips others (checked: v1 55 rows paged by 10 → 54 different; v2 43 by 3 → 38). On 2.0.0a4
-the resource list does it too (ordered by recording time, which is not unique), on the old and the new routes.
+paging repeats some rows and skips others (checked: v1 55 rows paged by 10 → 54 different; v2 43 by 3 → 38). The
+resource list does it too on v2 (ordered by recording time, which is not unique: 45 rows paged by 10 → 43 different), on
+the old and the new routes, and the species list (ordered by English name, which repeats).
 `page_size` is capped at 500.
 
 **Proposal.** Order every list by a unique key, or add `pk` as the last key of its ordering. The new API's `sort_by`
