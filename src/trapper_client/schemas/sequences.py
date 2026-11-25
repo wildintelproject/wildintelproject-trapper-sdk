@@ -1,7 +1,7 @@
 """Schema for the Sequences Trapper endpoint."""
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from trapper_client._deprecated import deprecated_getattr
 
 
@@ -17,6 +17,14 @@ class Sequence(BaseModel):
     sequence_uuid: str
     resources: List[int] = Field(default_factory=list)
     created_at: str
+
+    @field_validator("resources", mode="before")
+    @classmethod
+    def _once_each(cls, v):
+        """Trapper v2 repeats a resource once per classification of it (final, user, AI): keep the first."""
+        if isinstance(v, list):
+            return list(dict.fromkeys(v))
+        return v
 
 
 __getattr__ = deprecated_getattr(__name__)

@@ -190,6 +190,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `sequences` (issue #115): `deployment` is sent comma-separated (a list kept only one deployment); `resources`
+  without the repeats of v2; `UnknownFilterWarning` for unknown filters and for `search`, which answers `500`; the
+  docs say the list is not paginated and not limited to what the user can see.
 - `classifications_map` (issue #113): it is the final classification list, unpaginated and with a light row (the
   docs said "resources pending classification"); the filters of the classification list (`UnknownFilterWarning`,
   `approved` sent as `status` on v1, `ValueError` for `deployment`/`collection` without `project`).
