@@ -206,6 +206,22 @@ See the [Classifications guide](guide/classifications.md) for the full picture, 
 
 ---
 
+## Passing objects where a primary key goes
+
+Every `*_pk` parameter (and the `pk` of `find()`) takes the primary key as an `int` — or a numeric string — and also
+the SDK object it stands for, as the methods return it:
+
+```python
+project = client.classification_projects.find(2)
+client.classification_results.get_project_results(project)        # same as get_project_results(2)
+link = client.classification_projects.get_all_project_collections(project).results[0]
+client.classification_projects.get_all_collection_resources(link)  # the link, a ClassificationProjectCollection
+client.resources.get_all_by_location(client.locations.find(27))
+```
+
+The signatures say which objects each one takes (`project_pk: int | ClassificationProject`). An object of another
+type — a `ClassificationProject` where a research project goes — is a `TypeError` before any request.
+
 ## Generic endpoint
 
 For any endpoint not covered by a component, use `client.where()` directly:

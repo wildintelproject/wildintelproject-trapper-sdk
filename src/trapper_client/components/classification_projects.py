@@ -12,6 +12,8 @@ from trapper_client.schemas import (
     ClassificationProjectCollection,
     ClassifiedResource,
 )
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import ClassificationProject, ClassificationProjectCollection, ClassifiedResource, Collection, Resource  # noqa: F401  (pk parameters)
 
 
 class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
@@ -59,9 +61,10 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
     def _collections_entrypoint(self, pk: int):
         return self.endpoint_collections.format(project_pk=pk)
 
+    @takes_pk(project_pk=ClassificationProject)
     def get_project_collections(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         query: Dict[str, Any] | None = None,
         page: int = 1,
         page_size: int = 50,
@@ -92,9 +95,10 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs,
         )
 
+    @takes_pk(project_pk=ClassificationProject)
     def where_project_collections(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
@@ -120,10 +124,11 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs,
         )
 
+    @takes_pk(project_pk=ClassificationProject, pk=ClassificationProjectCollection)
     def find_project_collection(
         self,
-        project_pk: int,
-        pk: int | str,
+        project_pk: int | ClassificationProject,
+        pk: int | ClassificationProjectCollection,
         query: Dict[str, Any] | None = None,
         validate: bool = True,
         **kwargs: Any,
@@ -145,9 +150,10 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs,
         )
 
+    @takes_pk(project_pk=ClassificationProject)
     def get_all_project_collections(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
@@ -174,10 +180,11 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs,
         )
 
+    @takes_pk(project_pk=ClassificationProject, collection_pk=Collection)
     def find_collection_in_project(
             self,
-            project_pk: int,
-            collection_pk: int,
+            project_pk: int | ClassificationProject,
+            collection_pk: int | Collection,
             **kwargs: Any,
     ) -> int | None:
         """Check whether a collection is linked to a classification project.
@@ -281,9 +288,10 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         ]
         return max(created, key=lambda p: p.pk, default=None)
 
+    @takes_pk(project_pk=ClassificationProject)
     def add_collections(
         self,
-        project_pk: int,
+        project_pk: int | ClassificationProject,
         collection_pks: Iterable[int],
     ) -> list[ClassificationProjectCollection]:
         """Link storage collections to a classification project (**Trapper v1 only**).
@@ -345,7 +353,8 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
                 raise err.APIError(f"Trapper accepted the request but collections {still} are still not linked")
         return [present[pk] for pk in wanted]
 
-    def remove_collection(self, project_pk: int, collection_pk: int) -> bool:
+    @takes_pk(project_pk=ClassificationProject, collection_pk=Collection)
+    def remove_collection(self, project_pk: int | ClassificationProject, collection_pk: int | Collection) -> bool:
         """Unlink a collection from a classification project (**Trapper v1 only**).
 
         Simulates the web action ``media_classification/project/collection/delete/<pk>/``.
@@ -408,9 +417,10 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
     def _resources_entrypoint(self, collection_pk: int) -> str:
         return self.endpoint_resources.format(collection_pk=collection_pk)
 
+    @takes_pk(collection_pk=ClassificationProjectCollection)
     def get_collection_resources(
         self,
-        collection_pk: int,
+        collection_pk: int | ClassificationProjectCollection,
         query: Dict[str, Any] | None = None,
         page: int = 1,
         page_size: int = 50,
@@ -441,9 +451,10 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs,
         )
 
+    @takes_pk(collection_pk=ClassificationProjectCollection)
     def where_collection_resources(
         self,
-        collection_pk: int,
+        collection_pk: int | ClassificationProjectCollection,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
@@ -470,9 +481,10 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs,
         )
 
+    @takes_pk(collection_pk=ClassificationProjectCollection)
     def get_all_collection_resources(
         self,
-        collection_pk: int,
+        collection_pk: int | ClassificationProjectCollection,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
@@ -499,10 +511,11 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
             **kwargs,
         )
 
+    @takes_pk(collection_pk=ClassificationProjectCollection, resource_pk=(Resource, ClassifiedResource,))
     def get_collection_resources_around(
         self,
-        collection_pk: int,
-        resource_pk: int,
+        collection_pk: int | ClassificationProjectCollection,
+        resource_pk: int | Resource | ClassifiedResource,
         size: int = 5,
         query: Dict[str, Any] | None = None,
         validate: bool = True,

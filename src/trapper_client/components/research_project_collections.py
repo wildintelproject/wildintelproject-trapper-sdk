@@ -7,6 +7,8 @@ from typing import Dict, Any, Callable
 from trapper_client.api_query import APIQuery
 from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import PaginatedResult, ResearchProjectCollection
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import Collection, ResearchProject, ResearchProjectCollection  # noqa: F401  (pk parameters)
 
 
 _RP_COLLECTION_FILTERS = frozenset({"owner", "owners", "status", "search", "pk"})
@@ -45,9 +47,10 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
     schema = ResearchProjectCollection
     known_filters = {"v1": _RP_COLLECTION_FILTERS, "v2": _RP_COLLECTION_FILTERS}
 
+    @takes_pk(project_pk=ResearchProject)
     def where_project(
         self,
-        project_pk: int,
+        project_pk: int | ResearchProject,
         query: Dict[str, Any] | None = None,
         filter_fn: Callable | None = None,
         page_size: int = 50,
@@ -67,9 +70,10 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
             **kwargs,
         )
 
+    @takes_pk(project_pk=ResearchProject)
     def get_project(
         self,
-        project_pk: int,
+        project_pk: int | ResearchProject,
         query: Dict[str, Any] | None = None,
         page: int = 1,
         page_size: int = 50,
@@ -89,9 +93,10 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
             **kwargs,
         )
 
+    @takes_pk(project_pk=ResearchProject)
     def get_all_project(
         self,
-        project_pk: int,
+        project_pk: int | ResearchProject,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
@@ -109,10 +114,11 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
             **kwargs,
         )
 
+    @takes_pk(project_pk=ResearchProject, pk=ResearchProjectCollection)
     def find_project(
         self,
-        project_pk: int,
-        pk: int | str,
+        project_pk: int | ResearchProject,
+        pk: int | ResearchProjectCollection,
         query: Dict[str, Any] | None = None,
         validate: bool = True,
         **kwargs: Any,
@@ -129,10 +135,11 @@ class ResearchProjectsCollectionsComponent(TrapperComponent[ResearchProjectColle
             **kwargs
         )
 
+    @takes_pk(project_pk=ResearchProject, collection_pk=Collection)
     def find_collection_in_project(
         self,
-        project_pk: int,
-        collection_pk: int,
+        project_pk: int | ResearchProject,
+        collection_pk: int | Collection,
         **kwargs: Any,
     ) -> int | None:
         """Check whether a collection is linked to a research project."""

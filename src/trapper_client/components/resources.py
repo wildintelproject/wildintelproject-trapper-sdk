@@ -17,6 +17,8 @@ from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.retry_utils import retrying_for_download
 from trapper_client.schemas import PaginatedResult, Resource
 from trapper_client.api_query import APIQuery
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import ClassifiedResource, Collection, Location, Resource  # noqa: F401  (pk parameters)
 
 
 @dataclass
@@ -186,9 +188,10 @@ class ResourcesComponent(TrapperComponent[Resource]):
     #: What each ``kind`` of :meth:`download` is called in that view.
     media_fields = {"original": "file", "preview": "pfile", "thumbnail": "tfile"}
 
+    @takes_pk(pk=(Resource, ClassifiedResource,))
     def download(
         self,
-        pk: int,
+        pk: int | Resource | ClassifiedResource,
         file: str | Path,
         kind: Literal["original", "preview", "thumbnail"] = "original",
         retry_attempts: int = 3,
@@ -286,9 +289,10 @@ class ResourcesComponent(TrapperComponent[Resource]):
 
     # ── collection sub-endpoint ───────────────────────────────────────────────
 
+    @takes_pk(collection_pk=Collection)
     def where_by_collection(
         self,
-        collection_pk: int,
+        collection_pk: int | Collection,
         query: Dict[str, Any] | None = None,
         filter_fn: Callable[[Resource | dict], bool] | None = None,
         page_size: int = 50,
@@ -328,9 +332,10 @@ class ResourcesComponent(TrapperComponent[Resource]):
         )
 
 
+    @takes_pk(collection_pk=Collection)
     def get_by_collection(
         self,
-        collection_pk: int,
+        collection_pk: int | Collection,
         query: Dict[str, Any] | None = None,
         page: int = 1,
         page_size: int = 50,
@@ -365,9 +370,10 @@ class ResourcesComponent(TrapperComponent[Resource]):
             **kwargs
         )
 
+    @takes_pk(collection_pk=Collection)
     def get_all_by_collection(
         self,
-        collection_pk: int,
+        collection_pk: int | Collection,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
@@ -399,10 +405,11 @@ class ResourcesComponent(TrapperComponent[Resource]):
             **kwargs
         )
 
+    @takes_pk(collection_pk=Collection, resource_pk=(Resource, ClassifiedResource,))
     def find_by_collection(
         self,
-        collection_pk: int,
-        resource_pk: int | str,
+        collection_pk: int | Collection,
+        resource_pk: int | Resource | ClassifiedResource,
         validate: bool = True,
     ) -> Resource:
         """Retrieve a single resource by PK within a specific collection.
@@ -432,9 +439,10 @@ class ResourcesComponent(TrapperComponent[Resource]):
 
     # ── location sub-endpoint ─────────────────────────────────────────────────
 
+    @takes_pk(location_pk=Location)
     def where_by_location(
         self,
-        location_pk: int,
+        location_pk: int | Location,
         query: Dict[str, Any] | None = None,
         filter_fn: Callable[[Resource | dict], bool] | None = None,
         page_size: int = 50,
@@ -472,9 +480,10 @@ class ResourcesComponent(TrapperComponent[Resource]):
             **kwargs
         )
 
+    @takes_pk(location_pk=Location)
     def get_by_location(
         self,
-        location_pk: int,
+        location_pk: int | Location,
         query: Dict[str, Any] | None = None,
         page: int = 1,
         page_size: int = 50,
@@ -511,9 +520,10 @@ class ResourcesComponent(TrapperComponent[Resource]):
             **kwargs
         )
 
+    @takes_pk(location_pk=Location)
     def get_all_by_location(
         self,
-        location_pk: int,
+        location_pk: int | Location,
         query: Dict[str, Any] | None = None,
         page_size: int = 50,
         validate: bool = True,
@@ -546,10 +556,11 @@ class ResourcesComponent(TrapperComponent[Resource]):
             **kwargs
         )
 
+    @takes_pk(location_pk=Location, resource_pk=(Resource, ClassifiedResource,))
     def find_by_location(
         self,
-        location_pk: int,
-        resource_pk: int | str,
+        location_pk: int | Location,
+        resource_pk: int | Resource | ClassifiedResource,
         validate: bool = True,
     ) -> Resource:
         """Retrieve a single resource by PK at a specific location.

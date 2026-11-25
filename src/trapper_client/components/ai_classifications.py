@@ -13,6 +13,8 @@ from trapper_client.components._classification_filters import RequireProjectMixi
 from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.components.user_classifications import _LIST_COMMON
 from trapper_client.schemas import AIClassification, AIClassificationRecordExport
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import ClassificationProject  # noqa: F401  (pk parameters)
 
 
 #: The filters each Trapper version applies to the AI list and to the AI results table (``AIClassificationFilter``).
@@ -81,9 +83,10 @@ class AIClassificationsComponent(RequireProjectMixin, TrapperComponent[AIClassif
         """The results table answers ``400 "Empty queryset ..."`` when no row matches (or with no permission)."""
         return isinstance(exc, err.BadRequestError) and "Empty queryset" in str(exc)
 
+    @takes_pk(classification_project_pk=ClassificationProject)
     def export(
             self,
-            classification_project_pk: int,
+            classification_project_pk: int | ClassificationProject,
             query: Dict[str, Any] | None = None,
             file: str | Path | None = None,
             validate: bool = True,

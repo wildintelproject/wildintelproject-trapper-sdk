@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Generic, Iterable, TypeVa
 from pydantic import BaseModel
 
 from trapper_client import err
+from trapper_client._pk import as_pk
 from trapper_client.api_query import APIQuery, parse_row, warn_unstable_order
 from trapper_client.schemas import PaginatedResult, Pagination
 
@@ -721,6 +722,8 @@ class TrapperComponent(Generic[TModel]):
             from the raw payload without running Pydantic validators.
         """
         self._ensure_supported()
+        if isinstance(self.schema, type):
+            pk = as_pk(pk, self.schema, "pk", allow_text=True)  # the object itself works too (issue #75)
         q = self._merge_query(query, kwargs)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema

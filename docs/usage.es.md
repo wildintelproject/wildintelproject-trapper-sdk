@@ -211,6 +211,22 @@ incluido `import_classifications()`.
 
 ---
 
+## Pasar objetos donde va una clave primaria
+
+Todos los parámetros `*_pk` (y el `pk` de `find()`) aceptan la clave primaria como `int` —o un texto numérico— y
+también el objeto del SDK al que corresponde, tal como lo devuelven los métodos:
+
+```python
+proyecto = client.classification_projects.find(2)
+client.classification_results.get_project_results(proyecto)        # igual que get_project_results(2)
+enlace = client.classification_projects.get_all_project_collections(proyecto).results[0]
+client.classification_projects.get_all_collection_resources(enlace)  # el enlace, un ClassificationProjectCollection
+client.resources.get_all_by_location(client.locations.find(27))
+```
+
+Las firmas dicen qué objetos acepta cada uno (`project_pk: int | ClassificationProject`). Un objeto de otro tipo
+—un `ClassificationProject` donde va un proyecto de investigación— es un `TypeError` antes de ninguna petición.
+
 ## Endpoint genérico
 
 Para cualquier endpoint que no cubra un componente, usa `client.where()` directamente:

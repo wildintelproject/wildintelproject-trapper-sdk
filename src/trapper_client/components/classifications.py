@@ -23,6 +23,8 @@ from trapper_client.schemas import (
     ClassificationRecordExport,
     PaginatedResult,
 )
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import ClassificationProject  # noqa: F401  (pk parameters)
 
 
 class ClassificationsComponent(RequireProjectMixin, ClassificationFiltersMixin, TrapperComponent[Classification]):
@@ -92,9 +94,10 @@ class ClassificationsComponent(RequireProjectMixin, ClassificationFiltersMixin, 
         """Build the export endpoint for a given project pk."""
         return self.export_endpoint.format(project_pk=project_pk)
 
+    @takes_pk(project_pk=ClassificationProject)
     def get_project_results(
             self,
-            project_pk: int,
+            project_pk: int | ClassificationProject,
             query: Dict[str, Any] | None = None,
             page: int = 1,
             page_size: int = 50,
@@ -124,9 +127,10 @@ class ClassificationsComponent(RequireProjectMixin, ClassificationFiltersMixin, 
             **kwargs,
         )
 
+    @takes_pk(project_pk=ClassificationProject)
     def where_project_results(
             self,
-            project_pk: int,
+            project_pk: int | ClassificationProject,
             query: Dict[str, Any] | None = None,
             page_size: int = 50,
             validate: bool = True,
@@ -153,9 +157,10 @@ class ClassificationsComponent(RequireProjectMixin, ClassificationFiltersMixin, 
             **kwargs,
         )
 
+    @takes_pk(project_pk=ClassificationProject)
     def export_project_results(
             self,
-            project_pk: int,
+            project_pk: int | ClassificationProject,
             query: Dict[str, Any] | None = None,
             file: str | Path | None = None,
             validate: bool = True,

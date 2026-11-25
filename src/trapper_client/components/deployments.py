@@ -22,6 +22,8 @@ from trapper_client.components.resources import DownloadReport, ResourcesCompone
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
 from trapper_client.retry_utils import retrying_for_chunk_upload
 from trapper_client.schemas import Deployment, DeploymentExport
+from trapper_client._pk import takes_pk
+from trapper_client.schemas import Deployment  # noqa: F401  (pk parameters)
 
 
 class DeploymentsComponent(TrapperComponent[Deployment]):
@@ -512,9 +514,10 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
         self.client._write_csv([row.model_dump(mode="json") for row in rows], output_path)
         return output_path
 
+    @takes_pk(deployment_pk=Deployment)
     def download_resources(
         self,
-        deployment_pk: int,
+        deployment_pk: int | Deployment,
         directory: str | Path,
         kind: Literal["original", "preview", "thumbnail"] = "original",
         filter_fn: Callable[[Any], bool] | None = None,
