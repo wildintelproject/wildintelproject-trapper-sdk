@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 from trapper_client import err
 from trapper_client.api_query import APIQuery
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import (
     PaginatedResult,
     ResearchProject,
@@ -69,7 +69,7 @@ class ResearchProjectsComponent(TrapperComponent[ResearchProject]):
         client.research_projects.export(file="/tmp/research_projects.csv")
     """
 
-    endpoint = "research/api/projects"
+    endpoint = versioned("research/api/projects", ninja="api/v2/research/projects/")
     schema = ResearchProject
 
     def __init__(self, client):

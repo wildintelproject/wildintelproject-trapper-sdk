@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import Sequence
 
 _SEQUENCE_FILTERS = frozenset({"sequence_id", "sequence_uuid", "interval", "collection", "deployment", "pk"})
@@ -39,10 +39,14 @@ class SequencesComponent(TrapperComponent[Sequence]):
     ``search`` answers ``500`` (Trapper searches a ``name`` that sequences do not have): the SDK warns.
     """
 
-    endpoint = "media_classification/api/sequences"
+    endpoint = versioned("media_classification/api/sequences", ninja="api/v2/sequences/")
     schema = Sequence
     known_filters = {"v1": _SEQUENCE_FILTERS, "v2": _SEQUENCE_FILTERS}
     broken_filters = {"search": "answers 500 (it searches a field 'name' that sequences do not have)"}
+    ninja_broken_filters = {
+        "search": "answers 500 (it searches a field 'name' that sequences do not have)",
+        "deployment": "answers 500 on the new API (400 for several comma-separated PKs)",
+    }
 
     def _normalize_query(self, query: Dict[str, Any]) -> Dict[str, Any]:
         """``deployment`` as Trapper reads it: comma-separated PKs."""

@@ -32,6 +32,34 @@ ruta que solo existe en v2:
 
 Para evitar la sonda, pasa `trapper_version="v1"` o `"v2"`.
 
+## La nueva API de Trapper 2 (`ninja`)
+
+Trapper 2 está estrenando una API nueva bajo `/api/v2/...` (rama `refactor-api-ninja`, release `2.0.0a4`), con un
+esquema versionado y documentado. Mientras se construye, el servidor sirve las dos: las rutas antiguas y las nuevas.
+El SDK usa la nueva cuando está disponible:
+
+```python
+client = TrapperClient(access_token="...", base_url="https://trapper.example.org")
+client.server_version   # "v2": es Trapper 2.x
+client.api_flavor       # "ninja" si el servidor sirve la API nueva; si no, "legacy"
+```
+
+Con `trapper_version="auto"`, un servidor v2 que responde a `GET api/v2/probe/auth/` (`200` o `401`; v1 y la primera
+v2 responden `404`) usa la API nueva. `trapper_version="ninja"` la fuerza, y `trapper_version="v2"` mantiene las
+rutas antiguas.
+
+En la API nueva:
+
+- Las listas usan sus rutas: localizaciones, despliegues, recursos (también por colección y por localización),
+  colecciones, proyectos de investigación y sus colecciones, proyectos de clasificación y sus colecciones,
+  clasificadores, clasificaciones finales, de usuario y de IA, el mapa de clasificaciones, secuencias, especies y
+  usuarios. Las tablas, exportaciones e importaciones siguen yendo de momento por las rutas antiguas.
+- Las listas se ordenan por `pk` (`sort_by=pk`) salvo que pases `sort_by`: sus páginas nunca repiten ni se saltan
+  filas. Se aceptan `sort_by`, `reverse` y `all_filtered`.
+- `deployment` y `collection` de las listas de clasificaciones funcionan sin `project`.
+- Las colecciones de un proyecto de investigación que el usuario no puede ver responden `403` (la ruta antigua
+  respondía con una lista vacía).
+
 ## Qué cambia
 
 | Funcionalidad | v1 | v2 |

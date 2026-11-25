@@ -36,6 +36,35 @@ def selected_option(html: str, select_name: str) -> str | None:
     return option.group(1) if option else None
 
 
+class versioned:
+    """A route that is different in the new API (``client.api_flavor == "ninja"``).
+
+    ``endpoint = versioned("geomap/api/locations", ninja="api/v2/locations/")``: read on a component, it is the route
+    for the API its client uses; read on the class, the old one. A route with no ``ninja`` value keeps the old one on
+    the new API too (Trapper still serves the old routes there).
+    """
+
+    def __init__(self, legacy: str, ninja: str | None = None):
+        self.legacy = legacy
+        self.ninja = ninja
+
+    def __set_name__(self, owner: type, name: str) -> None:
+        self.name = name
+
+    def __get__(self, obj: Any, owner: type | None = None) -> str:
+        if obj is None or self.ninja is None:
+            return self.legacy
+        client = getattr(obj, "client", None)
+        if client is not None and getattr(client, "api_flavor", "legacy") == "ninja":
+            return self.ninja
+        return self.legacy
+
+
+def is_ninja(client: Any) -> bool:
+    """Whether ``client`` talks to the new API (a mock client is not)."""
+    return getattr(client, "api_flavor", None) == "ninja"
+
+
 class TrapperComponent(Generic[TModel]):
     """
     Base component for a Trapper API resource.
@@ -248,6 +277,19 @@ class TrapperComponent(Generic[TModel]):
     #: Query parameters that are never filters.
     _PAGING_PARAMS = frozenset({"page", "page_size"})
 
+    #: More of them on the new API: order, the matching PKs only, and the cache of a listing.
+    _NINJA_PAGING_PARAMS = frozenset({"page", "page_size", "sort_by", "reverse", "all_filtered", "clear_cache"})
+
+    #: The ``sort_by`` the SDK sends on the new API when none is given: a unique key, so that the pages of a list do
+    #: not repeat or skip rows (the default order of several lists, by recording time, is not unique).
+    ninja_sort_by: str | None = "pk"
+
+    def _ninja_order(self, query: Dict[str, Any]) -> Dict[str, Any]:
+        """``sort_by=pk`` on the new API, unless the caller ordered the list."""
+        if self.ninja_sort_by and "sort_by" not in query and is_ninja(self.client):
+            query = {**query, "sort_by": self.ninja_sort_by}
+        return query
+
     #: The filters the list endpoint applies, by server version (``{"v1": {...}, "v2": {...}}``).
     #: Trapper ignores any other parameter without an error, so the SDK warns about it
     #: (:class:`~trapper_client.err.UnknownFilterWarning`). ``None`` means "not known": no check.
@@ -256,6 +298,14 @@ class TrapperComponent(Generic[TModel]):
     #: Filters that Trapper does apply but answers with an error (a ``500``), with the reason:
     #: ``{"name": "answers 500"}``. They get an :class:`~trapper_client.err.UnknownFilterWarning` too.
     broken_filters: Dict[str, str] = {}
+
+    #: The same for the new API (``client.api_flavor == "ninja"``), where some were fixed and others broke.
+    ninja_broken_filters: Dict[str, str] = {}
+
+    def _broken_filters(self) -> Dict[str, str]:
+        if not (self.broken_filters or self.ninja_broken_filters):
+            return {}
+        return self.ninja_broken_filters if is_ninja(self.client) else self.broken_filters
 
     #: Text added to the warning about an unknown filter, for a name the SDK cannot know in advance
     #: (``"or an attribute of the project's classificator"``).
@@ -326,10 +376,11 @@ class TrapperComponent(Generic[TModel]):
 
     def _warn_unknown_filters(self, query: Dict[str, Any], stacklevel: int | None = None) -> None:
         """Warn about the parameters of ``query`` that the server would ignore silently, or fail on."""
-        broken = sorted(k for k in query if k in self.broken_filters)
+        broken_filters = self._broken_filters()
+        broken = sorted(k for k in query if k in broken_filters)
         if broken:
             warnings.warn(
-                f"{self.endpoint}: " + "; ".join(f"{k!r}: Trapper {self.broken_filters[k]}" for k in broken),
+                f"{self.endpoint}: " + "; ".join(f"{k!r}: Trapper {broken_filters[k]}" for k in broken),
                 err.UnknownFilterWarning,
                 stacklevel=err.user_stacklevel(),
             )
@@ -337,14 +388,17 @@ class TrapperComponent(Generic[TModel]):
             return
         # Not every call has to learn the server version (that is a request): only a parameter that some
         # version does not apply needs it.
-        common = frozenset.intersection(*self.known_filters.values()) | self._PAGING_PARAMS | set(self.broken_filters)
+        common = frozenset.intersection(*self.known_filters.values()) | self._PAGING_PARAMS | set(broken_filters)
         if all(k in common for k in query):
             return
-        known = self.known_filters.get(self.client.server_version)
+        ninja = is_ninja(self.client)
+        # The new API has filters of its own: without a "ninja" list, nothing is checked there.
+        known = self.known_filters.get("ninja") if ninja else self.known_filters.get(self.client.server_version)
         if known is None:
             return
+        paging = self._NINJA_PAGING_PARAMS if ninja else self._PAGING_PARAMS
         unknown = sorted(
-            k for k in query if k not in known and k not in self._PAGING_PARAMS and k not in self.broken_filters
+            k for k in query if k not in known and k not in paging and k not in broken_filters
         )
         if unknown:
             warnings.warn(
@@ -443,7 +497,7 @@ class TrapperComponent(Generic[TModel]):
         """
         self._ensure_supported()
         q = self._merge_query(query, kwargs)
-        q = dict(q or {})
+        q = self._ninja_order(dict(q or {}))
         q.setdefault("page", page)
         q.setdefault("page_size", page_size)
         endpoint = overwrite_endpoint or self.endpoint
@@ -472,6 +526,7 @@ class TrapperComponent(Generic[TModel]):
         q.update(kwargs)
         q = self._normalize_query(q)
         self._warn_unknown_filters(q)
+        q = self._ninja_order(q)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema
 
@@ -536,7 +591,7 @@ class TrapperComponent(Generic[TModel]):
             A single ``PaginatedResult[TModel]`` containing merged results.
         """
         self._ensure_supported()
-        q = self._merge_query(query, kwargs)
+        q = self._ninja_order(self._merge_query(query, kwargs))
         q.setdefault("page_size", page_size)
         endpoint = overwrite_endpoint or self.endpoint
         schema =  overwrite_schema or self.schema

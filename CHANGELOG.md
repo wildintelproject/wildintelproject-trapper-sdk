@@ -16,6 +16,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## Upcoming release
 
 ### Added
+- **The new API of Trapper 2** (`/api/v2/...`, branch `refactor-api-ninja`; issue #129, phase 1 of #99):
+  `trapper_version="ninja"`, or auto-detected on a v2 server that serves `GET api/v2/probe/auth/`; `server_version`
+  stays `"v2"` and the new `client.api_flavor` is `"legacy"` or `"ninja"`. The read lists use the new routes
+  (locations, deployments, resources, collections, research and classification projects and their collections,
+  classificators, final/user/AI classifications, classifications map, sequences, species, users), ordered by `pk`
+  unless `sort_by` is given; the other routes still go through the old ones, which Trapper serves too. A component
+  declares a route of the new API with `versioned(old, ninja=new)`; `ninja_broken_filters` lists the filters that fail
+  there.
 - `classification_package.download_package()` and `download_project_package()` (issue #111): save the Camtrap DP
   zip (streamed, retried, `.part` file), instead of calling `make_request` on the URL.
 - `ClassificationResultsComponent` (issue #100): the class of `client.classification_results`, under a name that says what it reads. It is
@@ -190,6 +198,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`ClassificationRecordExport`, ...) keep their names.
 
 ### Fixed
+- `classification_projects.*_collection_resources()` failed on Trapper v2: `classification_data.url` is `null` there
+  (issue #129).
 - The final classification list repeated some rows and skipped others when paged (issue #108): Trapper does not order
   it. `where()`/`all()`/`get_all()` of `classification_results` read it in pages of 500 (one request when it fits);
   a longer list drops the repeated rows and emits the new `UnstableOrderWarning`.

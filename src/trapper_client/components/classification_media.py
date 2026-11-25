@@ -127,6 +127,7 @@ class ClassificationMediaComponent(ClassificationFiltersMixin, TrapperComponent[
         frozenset({"trapper_url", "trapper_url_token", "private_human", "private_vehicle"})
     )
     broken_filters = {"private_species": "answers 500 with any value, an empty one included"}
+    ninja_broken_filters = broken_filters  # the table still goes through the old route
 
     #: The parameters Trapper reads with ``== "True"``: any other text, ``true`` included, is false.
     _TRUE_FALSE_PARAMS = ("trapper_url", "trapper_url_token", "private_human", "private_vehicle")

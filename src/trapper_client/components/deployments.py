@@ -16,7 +16,7 @@ from tenacity import Retrying
 
 from trapper_client import err
 from trapper_client.api_query import APIQuery
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.components.locations import LocationsComponent
 from trapper_client.components.resources import DownloadReport, ResourcesComponent, safe_filename
 from trapper_client.csv_chunking import DEFAULT_MAX_CHUNK_BYTES, split_csv_by_size
@@ -70,7 +70,7 @@ class DeploymentsComponent(TrapperComponent[Deployment]):
     (see :meth:`~trapper_client.api_client_base.APIClientBase.session_login`).
     """
 
-    endpoint = "geomap/api/deployments"
+    endpoint = versioned("geomap/api/deployments", ninja="api/v2/deployments/")
 
     # Checked against live Trapper v1 and v2: a parameter that is not here is ignored by the server.
     _V1_FILTERS = frozenset({

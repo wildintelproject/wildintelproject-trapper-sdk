@@ -4,7 +4,7 @@ Component for the /api/cs/projects/ (classification projects) resource.
 from typing import Dict, Any, Iterable
 
 from trapper_client import APIQuery, err
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import (
     ClassificationProject,
     ClassificationProjectCreate,
@@ -51,9 +51,10 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
         client.classification_projects.export(file="/tmp/cs_projects.csv")
     """
 
-    endpoint = "/media_classification/api/projects"
+    endpoint = versioned("/media_classification/api/projects", ninja="api/v2/classification-projects/")
     schema = ClassificationProject
-    endpoint_collections="/media_classification/api/project/{project_pk}/collections"
+    endpoint_collections = versioned("/media_classification/api/project/{project_pk}/collections",
+                                     ninja="api/v2/classification-projects/{project_pk}/collections/")
 
     def _collections_entrypoint(self, pk: int):
         return self.endpoint_collections.format(project_pk=pk)
@@ -401,7 +402,8 @@ class ClassificationProjectsComponent(TrapperComponent[ClassificationProject]):
 
     # ── classification resources sub-endpoint ────────────────────────────────
 
-    endpoint_resources = "media_classification/api/collection/{collection_pk}/resources/"
+    endpoint_resources = versioned("media_classification/api/collection/{collection_pk}/resources/",
+                                   ninja="api/v2/classification-collections/{collection_pk}/resources/")
 
     def _resources_entrypoint(self, collection_pk: int) -> str:
         return self.endpoint_resources.format(collection_pk=collection_pk)

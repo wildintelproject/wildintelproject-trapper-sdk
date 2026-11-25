@@ -7,7 +7,7 @@ from __future__ import annotations
 import re
 from typing import Any, Dict
 
-from trapper_client.components.base import TrapperComponent
+from trapper_client.components.base import TrapperComponent, versioned
 from trapper_client.schemas import ClassificatorCreate, Classificator
 
 
@@ -32,7 +32,7 @@ class ClassificatorsComponent(TrapperComponent[Classificator]):
     through query parameters.
     """
 
-    endpoint = "/media_classification/api/classificators"
+    endpoint = versioned("/media_classification/api/classificators", ninja="api/v2/classificators/")
     schema = Classificator
     create_endpoint = "media_classification/classificator/create/"
     _CREATED_RE = re.compile(r"/classificator/update/(\d+)/")

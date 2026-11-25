@@ -31,6 +31,32 @@ public routes), the client falls back to `GET storage/api/upload-auth/`, a route
 
 Skip the probe by passing `trapper_version="v1"` or `"v2"`.
 
+## The new API of Trapper 2 (`ninja`)
+
+Trapper 2 is getting a new API under `/api/v2/...` (branch `refactor-api-ninja`, release `2.0.0a4`), with a versioned,
+documented schema. While it is being built the server serves both, the old routes and the new ones. The SDK uses the
+new one when it is there:
+
+```python
+client = TrapperClient(access_token="...", base_url="https://trapper.example.org")
+client.server_version   # "v2": it is Trapper 2.x
+client.api_flavor       # "ninja" when the server serves the new API, otherwise "legacy"
+```
+
+With `trapper_version="auto"`, a v2 server that answers `GET api/v2/probe/auth/` (`200` or `401`; v1 and the first v2
+answer `404`) uses the new API. `trapper_version="ninja"` forces it, and `trapper_version="v2"` keeps the old routes.
+
+On the new API:
+
+- The lists use its routes: locations, deployments, resources (also by collection and location), collections,
+  research projects and their collections, classification projects and their collections, classificators, final,
+  user and AI classifications, the classifications map, sequences, species and users. The tables, exports and
+  imports still go through the old routes for now.
+- Lists are ordered by `pk` (`sort_by=pk`) unless you pass `sort_by`: its pages never repeat or skip rows. `sort_by`,
+  `reverse` and `all_filtered` are accepted.
+- `deployment` and `collection` of the classification lists work without `project`.
+- The collections of a research project the user cannot see answer `403` (the old route answered an empty list).
+
 ## What differs
 
 | Feature | v1 | v2 |

@@ -496,6 +496,8 @@ class TestResourceFiltersE2E:
 
     @pytest.mark.e2e
     def test_unknown_filters_warn_and_known_ones_do_not(self, component):
+        if getattr(component.client, "api_flavor", None) == "ninja":
+            pytest.skip("the filters of the new API are not listed yet: nothing is warned about there")
         import warnings
 
         from trapper_client import err
@@ -513,6 +515,9 @@ class TestResourceFiltersE2E:
         """The warning says Trapper answers 500: if this stops failing, the warning has to go."""
         from trapper_client import err
 
+        if getattr(component.client, "api_flavor", None) == "ninja":
+            component.get(page_size=1, deployment__isnull=True)  # fixed on the new API: no warning, no error
+            return
         with pytest.warns(err.UnknownFilterWarning, match="500"), pytest.raises(err.APIError):
             component.get(page_size=1, deployment__isnull=True)
 

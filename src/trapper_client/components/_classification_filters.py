@@ -91,8 +91,8 @@ class RequireProjectMixin:
     project_hint: str = ""
 
     def _require_project(self, query: Dict[str, Any] | None, kwargs: Dict[str, Any]) -> None:
-        if kwargs.get("overwrite_endpoint"):
-            return
+        if kwargs.get("overwrite_endpoint") or getattr(self.client, "api_flavor", None) == "ninja":
+            return  # the lists of the new API take them without project
         given = {**(query or {}), **kwargs}
         needing = [name for name in ("deployment", "collection") if name in given]
         if needing and "project" not in given:
