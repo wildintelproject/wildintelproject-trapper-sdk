@@ -2804,21 +2804,25 @@
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="UserClassification (trapper_client.schemas.UserClassification)" href="../../schemas/user_classifications/#trapper_client.schemas.user_classifications.UserClassification">UserClassification</a>]</code></p>
+              Bases: <code><span title="trapper_client.components._classification_filters.RequireProjectMixin">RequireProjectMixin</span></code>, <code><a class="autorefs autorefs-internal" title="TrapperComponent (trapper_client.components.base.TrapperComponent)" href="../../base_component/#trapper_client.components.base.TrapperComponent">TrapperComponent</a>[<a class="autorefs autorefs-internal" title="UserClassification (trapper_client.schemas.UserClassification)" href="../../schemas/user_classifications/#trapper_client.schemas.user_classifications.UserClassification">UserClassification</a>]</code></p>
 
 
 
-        <p>Component for <code>/media_classification/api/user-classifications/</code>.</p>
-<p>Retrieve and filter user classifications from Trapper.</p>
-<p>Main endpoints:
-- <code>GET /media_classification/api/user-classifications</code>: List of user classifications (paginated)
-- <code>GET /media_classification/api/user-classifications/{pk}</code>: Single user classification detail</p>
-<p><strong>Available filter fields:</strong></p>
+        <p>The classifications people made (<code>client.user_classifications</code>), before one is approved as the final one.</p>
+<ul>
+<li><code>GET /media_classification/api/user-classifications</code> (and <code>/{pk}</code>): every user classification the user
+  can see, one row per classification (a resource can have several, one per person). Read-only.</li>
+</ul>
+<p>A row has the resource, the observations (<code>dynamic_attrs</code>: type, species and count, as text) and whether it
+became the final one (<code>approved</code>). Trapper v2 does not send <code>classification</code> or <code>created_at</code> and adds
+<code>is_feedback</code>, <code>is_setup</code>, <code>bboxes</code> and <code>classification_project</code>.</p>
+<p><strong>Filters</strong> (Trapper ignores any other without an error; the SDK emits an <code>UnknownFilterWarning</code>):</p>
 <table>
 <thead>
 <tr>
 <th>Parameter</th>
 <th>Type</th>
+<th>Version</th>
 <th>Description</th>
 </tr>
 </thead>
@@ -2826,92 +2830,109 @@
 <tr>
 <td>project</td>
 <td>PK</td>
-<td>Auto-filtrado por URL (no necesario)</td>
-</tr>
-<tr>
-<td>owner</td>
-<td>boolean</td>
-<td>true = resources where user is owner/manager</td>
+<td>both</td>
+<td>Classification project. <strong>Needed for deployment and collection</strong> (<code>ValueError</code> without it)</td>
 </tr>
 <tr>
 <td>deployment</td>
 <td>list of PKs</td>
-<td>Filter by deployment PKs</td>
+<td>both</td>
+<td>Deployment PKs of the project</td>
 </tr>
 <tr>
 <td>collection</td>
 <td>list of PKs</td>
-<td>Filter by collection PKs</td>
+<td>both</td>
+<td>PK of the <strong>link</strong> between the project and the collection</td>
 </tr>
 <tr>
-<td>locations_map</td>
-<td>comma-separated PKs</td>
-<td>Filter by location PKs</td>
+<td>user</td>
+<td>list of PKs</td>
+<td>both</td>
+<td>Who classified (user PKs)</td>
 </tr>
 <tr>
-<td>rdate_from / rdate_to</td>
-<td>date</td>
-<td>date_recorded range</td>
-</tr>
-<tr>
-<td>rtime_from / rtime_to</td>
-<td>HH:MM</td>
-<td>Time-of-day range</td>
-</tr>
-<tr>
-<td>ftype</td>
-<td>choice</td>
-<td>Resource type (IMAGE, VIDEO, etc.)</td>
-</tr>
-<tr>
-<td>classified</td>
+<td>owner</td>
 <td>boolean</td>
-<td>classified by humans</td>
-</tr>
-<tr>
-<td>classified_ai</td>
-<td>boolean</td>
-<td>classified by AI</td>
-</tr>
-<tr>
-<td>bboxes</td>
-<td>boolean</td>
-<td>Tiene bboxes</td>
+<td>both</td>
+<td>true = classifications of the user</td>
 </tr>
 <tr>
 <td>approved</td>
 <td>boolean</td>
-<td>Whether classification is FINAL approved</td>
+<td>both</td>
+<td>It became the final classification</td>
 </tr>
 <tr>
 <td>feedback</td>
 <td>boolean</td>
-<td>Whether it is a feedback classification</td>
+<td>both</td>
+<td>It is a feedback classification</td>
+</tr>
+<tr>
+<td>bboxes</td>
+<td>boolean</td>
+<td>both</td>
+<td>Has bounding boxes</td>
+</tr>
+<tr>
+<td>ftype</td>
+<td>choice</td>
+<td>both</td>
+<td>Resource type (I, V, ...)</td>
 </tr>
 <tr>
 <td>species</td>
 <td>list of PKs</td>
-<td>Filter by species PKs</td>
+<td>both</td>
+<td>Species PKs</td>
 </tr>
 <tr>
 <td>observation_type</td>
 <td>choice</td>
-<td>Filter by observation type</td>
+<td>both</td>
+<td>Observation type</td>
 </tr>
 <tr>
-<td>sex</td>
-<td>choice</td>
-<td>Filter by sex</td>
+<td>locations_map</td>
+<td>comma-separated PKs</td>
+<td>both</td>
+<td>Location PKs</td>
 </tr>
 <tr>
-<td>age</td>
+<td>rdate_from / rdate_to</td>
+<td>date</td>
+<td>both</td>
+<td><code>date_recorded</code> range</td>
+</tr>
+<tr>
+<td>rtime_from / rtime_to</td>
+<td>HH:MM</td>
+<td>both</td>
+<td>Time-of-day range</td>
+</tr>
+<tr>
+<td>search</td>
+<td>text</td>
+<td>both</td>
+<td>Species (Latin or English name), resource name or attribute</td>
+</tr>
+<tr>
+<td>sex, age</td>
 <td>choice</td>
-<td>Filter by age</td>
+<td>v2</td>
+<td>Sex, age</td>
+</tr>
+<tr>
+<td>classified / classified_ai</td>
+<td>boolean</td>
+<td>v2</td>
+<td>The resource has a user / AI classification</td>
 </tr>
 </tbody>
 </table>
-<p>Returns a paginated list of user classifications with support for filtering
-through query parameters.</p>
+<p>v2 also applies the fields of its model (<code>is_blank</code>, <code>has_animals</code>, <code>classification_type</code>, ...) and one
+filter per custom attribute of the project's classificator.</p>
 
 
 
@@ -2922,27 +2943,7 @@ through query parameters.</p>
 
               <details class="mkdocstrings-source">
                 <summary>Source code in <code>src/trapper_client/components/user_classifications.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-11">11</a></span>
-<span class="normal"><a href="#__codelineno-0-12">12</a></span>
-<span class="normal"><a href="#__codelineno-0-13">13</a></span>
-<span class="normal"><a href="#__codelineno-0-14">14</a></span>
-<span class="normal"><a href="#__codelineno-0-15">15</a></span>
-<span class="normal"><a href="#__codelineno-0-16">16</a></span>
-<span class="normal"><a href="#__codelineno-0-17">17</a></span>
-<span class="normal"><a href="#__codelineno-0-18">18</a></span>
-<span class="normal"><a href="#__codelineno-0-19">19</a></span>
-<span class="normal"><a href="#__codelineno-0-20">20</a></span>
-<span class="normal"><a href="#__codelineno-0-21">21</a></span>
-<span class="normal"><a href="#__codelineno-0-22">22</a></span>
-<span class="normal"><a href="#__codelineno-0-23">23</a></span>
-<span class="normal"><a href="#__codelineno-0-24">24</a></span>
-<span class="normal"><a href="#__codelineno-0-25">25</a></span>
-<span class="normal"><a href="#__codelineno-0-26">26</a></span>
-<span class="normal"><a href="#__codelineno-0-27">27</a></span>
-<span class="normal"><a href="#__codelineno-0-28">28</a></span>
-<span class="normal"><a href="#__codelineno-0-29">29</a></span>
-<span class="normal"><a href="#__codelineno-0-30">30</a></span>
-<span class="normal"><a href="#__codelineno-0-31">31</a></span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-31">31</a></span>
 <span class="normal"><a href="#__codelineno-0-32">32</a></span>
 <span class="normal"><a href="#__codelineno-0-33">33</a></span>
 <span class="normal"><a href="#__codelineno-0-34">34</a></span>
@@ -2959,44 +2960,70 @@ through query parameters.</p>
 <span class="normal"><a href="#__codelineno-0-45">45</a></span>
 <span class="normal"><a href="#__codelineno-0-46">46</a></span>
 <span class="normal"><a href="#__codelineno-0-47">47</a></span>
-<span class="normal"><a href="#__codelineno-0-48">48</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">UserClassificationsComponent</span><span class="p">(</span><span class="n">TrapperComponent</span><span class="p">[</span><span class="n">UserClassification</span><span class="p">]):</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="sd">    Component for ``/media_classification/api/user-classifications/``.</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="sd">    Retrieve and filter user classifications from Trapper.</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16"></a>
-<a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="sd">    Main endpoints:</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="sd">    - ``GET /media_classification/api/user-classifications``: List of user classifications (paginated)</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19"></a><span class="sd">    - ``GET /media_classification/api/user-classifications/{pk}``: Single user classification detail</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20"></a>
-<a id="__codelineno-0-21" name="__codelineno-0-21"></a><span class="sd">    **Available filter fields:**</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22"></a>
-<a id="__codelineno-0-23" name="__codelineno-0-23"></a><span class="sd">    | Parameter        | Type                     | Description                                                                 |</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24"></a><span class="sd">    |----------------|--------------------------|-----------------------------------------------------------------------------|</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25"></a><span class="sd">    | project        | PK                       | Auto-filtrado por URL (no necesario)                                       |</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">    | owner          | boolean                  | true = resources where user is owner/manager                               |</span>
-<a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    | deployment     | list of PKs              | Filter by deployment PKs                                                   |</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">    | collection     | list of PKs              | Filter by collection PKs                                                   |</span>
-<a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    | locations_map  | comma-separated PKs      | Filter by location PKs                                                     |</span>
-<a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">    | rdate_from / rdate_to | date             | date_recorded range                                                        |</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    | rtime_from / rtime_to | HH:MM            | Time-of-day range                                                          |</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">    | ftype          | choice                   | Resource type (IMAGE, VIDEO, etc.)                                         |</span>
-<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    | classified     | boolean                  | classified by humans                                                       |</span>
-<a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="sd">    | classified_ai  | boolean                  | classified by AI                                                           |</span>
-<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    | bboxes         | boolean                  | Tiene bboxes                                                               |</span>
-<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">    | approved       | boolean                  | Whether classification is FINAL approved                                   |</span>
-<a id="__codelineno-0-37" name="__codelineno-0-37"></a><span class="sd">    | feedback       | boolean                  | Whether it is a feedback classification                                    |</span>
-<a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    | species        | list of PKs              | Filter by species PKs                                                      |</span>
-<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    | observation_type | choice                 | Filter by observation type                                                 |</span>
-<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    | sex            | choice                   | Filter by sex                                                              |</span>
-<a id="__codelineno-0-41" name="__codelineno-0-41"></a><span class="sd">    | age            | choice                   | Filter by age                                                              |</span>
-<a id="__codelineno-0-42" name="__codelineno-0-42"></a>
-<a id="__codelineno-0-43" name="__codelineno-0-43"></a><span class="sd">    Returns a paginated list of user classifications with support for filtering</span>
-<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    through query parameters.</span>
-<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-46" name="__codelineno-0-46"></a>
-<a id="__codelineno-0-47" name="__codelineno-0-47"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/media_classification/api/user-classifications&quot;</span>
-<a id="__codelineno-0-48" name="__codelineno-0-48"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">UserClassification</span>
+<span class="normal"><a href="#__codelineno-0-48">48</a></span>
+<span class="normal"><a href="#__codelineno-0-49">49</a></span>
+<span class="normal"><a href="#__codelineno-0-50">50</a></span>
+<span class="normal"><a href="#__codelineno-0-51">51</a></span>
+<span class="normal"><a href="#__codelineno-0-52">52</a></span>
+<span class="normal"><a href="#__codelineno-0-53">53</a></span>
+<span class="normal"><a href="#__codelineno-0-54">54</a></span>
+<span class="normal"><a href="#__codelineno-0-55">55</a></span>
+<span class="normal"><a href="#__codelineno-0-56">56</a></span>
+<span class="normal"><a href="#__codelineno-0-57">57</a></span>
+<span class="normal"><a href="#__codelineno-0-58">58</a></span>
+<span class="normal"><a href="#__codelineno-0-59">59</a></span>
+<span class="normal"><a href="#__codelineno-0-60">60</a></span>
+<span class="normal"><a href="#__codelineno-0-61">61</a></span>
+<span class="normal"><a href="#__codelineno-0-62">62</a></span>
+<span class="normal"><a href="#__codelineno-0-63">63</a></span>
+<span class="normal"><a href="#__codelineno-0-64">64</a></span>
+<span class="normal"><a href="#__codelineno-0-65">65</a></span>
+<span class="normal"><a href="#__codelineno-0-66">66</a></span>
+<span class="normal"><a href="#__codelineno-0-67">67</a></span>
+<span class="normal"><a href="#__codelineno-0-68">68</a></span>
+<span class="normal"><a href="#__codelineno-0-69">69</a></span>
+<span class="normal"><a href="#__codelineno-0-70">70</a></span>
+<span class="normal"><a href="#__codelineno-0-71">71</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="k">class</span><span class="w"> </span><span class="nc">UserClassificationsComponent</span><span class="p">(</span><span class="n">RequireProjectMixin</span><span class="p">,</span> <span class="n">TrapperComponent</span><span class="p">[</span><span class="n">UserClassification</span><span class="p">]):</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33"></a><span class="sd">    The classifications people made (``client.user_classifications``), before one is approved as the final one.</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34"></a>
+<a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="sd">    - ``GET /media_classification/api/user-classifications`` (and ``/{pk}``): every user classification the user</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36"></a><span class="sd">      can see, one row per classification (a resource can have several, one per person). Read-only.</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37"></a>
+<a id="__codelineno-0-38" name="__codelineno-0-38"></a><span class="sd">    A row has the resource, the observations (``dynamic_attrs``: type, species and count, as text) and whether it</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39"></a><span class="sd">    became the final one (``approved``). Trapper v2 does not send ``classification`` or ``created_at`` and adds</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40"></a><span class="sd">    ``is_feedback``, ``is_setup``, ``bboxes`` and ``classification_project``.</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41"></a>
+<a id="__codelineno-0-42" name="__codelineno-0-42"></a><span class="sd">    **Filters** (Trapper ignores any other without an error; the SDK emits an ``UnknownFilterWarning``):</span>
+<a id="__codelineno-0-43" name="__codelineno-0-43"></a>
+<a id="__codelineno-0-44" name="__codelineno-0-44"></a><span class="sd">    | Parameter | Type | Version | Description |</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45"></a><span class="sd">    |---|---|---|---|</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46"></a><span class="sd">    | project | PK | both | Classification project. **Needed for deployment and collection** (``ValueError`` without it) |</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47"></a><span class="sd">    | deployment | list of PKs | both | Deployment PKs of the project |</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48"></a><span class="sd">    | collection | list of PKs | both | PK of the **link** between the project and the collection |</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49"></a><span class="sd">    | user | list of PKs | both | Who classified (user PKs) |</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50"></a><span class="sd">    | owner | boolean | both | true = classifications of the user |</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51"></a><span class="sd">    | approved | boolean | both | It became the final classification |</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52"></a><span class="sd">    | feedback | boolean | both | It is a feedback classification |</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53"></a><span class="sd">    | bboxes | boolean | both | Has bounding boxes |</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54"></a><span class="sd">    | ftype | choice | both | Resource type (I, V, ...) |</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55"></a><span class="sd">    | species | list of PKs | both | Species PKs |</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56"></a><span class="sd">    | observation_type | choice | both | Observation type |</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57"></a><span class="sd">    | locations_map | comma-separated PKs | both | Location PKs |</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58"></a><span class="sd">    | rdate_from / rdate_to | date | both | ``date_recorded`` range |</span>
+<a id="__codelineno-0-59" name="__codelineno-0-59"></a><span class="sd">    | rtime_from / rtime_to | HH:MM | both | Time-of-day range |</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60"></a><span class="sd">    | search | text | both | Species (Latin or English name), resource name or attribute |</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="sd">    | sex, age | choice | v2 | Sex, age |</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="sd">    | classified / classified_ai | boolean | v2 | The resource has a user / AI classification |</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63"></a>
+<a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">    v2 also applies the fields of its model (``is_blank``, ``has_animals``, ``classification_type``, ...) and one</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65"></a><span class="sd">    filter per custom attribute of the project&#39;s classificator.</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67"></a>
+<a id="__codelineno-0-68" name="__codelineno-0-68"></a>    <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;/media_classification/api/user-classifications&quot;</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69"></a>    <span class="n">schema</span> <span class="o">=</span> <span class="n">UserClassification</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70"></a>    <span class="n">known_filters</span> <span class="o">=</span> <span class="n">USER_CLASSIFICATION_FILTERS</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="n">unknown_filter_hint</span> <span class="o">=</span> <span class="s2">&quot;; or the name of an attribute of the project&#39;s classificator (v2)&quot;</span>
 </code></pre></div></td></tr></table></div>
               </details>
 

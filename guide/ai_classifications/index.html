@@ -2856,102 +2856,105 @@
 <li><code>GET /media_classification/api/ai-classifications/results/{project_pk}/</code> — CSV/model export for one project</li>
 </ul>
 <h2 id="filters">Filters</h2>
+<p>The same filters for the list and the AI results table (<code>export()</code>). Trapper ignores a filter it does not apply,
+without an error, and returns every row: the SDK emits an <code>UnknownFilterWarning</code>.</p>
 <table>
 <thead>
 <tr>
 <th>Parameter</th>
 <th>Type</th>
+<th>Version</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>owner</code></td>
-<td>boolean</td>
-<td><code>true</code> = resources where user is owner/manager</td>
+<td><code>project</code></td>
+<td>PK</td>
+<td>both</td>
+<td>Classification project. <strong>Needed for <code>deployment</code> and <code>collection</code></strong> in the list (<code>ValueError</code> without it)</td>
 </tr>
 <tr>
 <td><code>deployment</code></td>
 <td>list of PKs</td>
-<td>Filter by deployment PKs</td>
+<td>both</td>
+<td>Deployment PKs of the project</td>
 </tr>
 <tr>
 <td><code>collection</code></td>
 <td>list of PKs</td>
-<td>Filter by collection PKs</td>
-</tr>
-<tr>
-<td><code>locations_map</code></td>
-<td>comma-separated PKs</td>
-<td>Filter by location PKs</td>
-</tr>
-<tr>
-<td><code>rdate_from</code> / <code>rdate_to</code></td>
-<td>date</td>
-<td><code>date_recorded</code> range</td>
-</tr>
-<tr>
-<td><code>rtime_from</code> / <code>rtime_to</code></td>
-<td>HH:MM</td>
-<td>Time-of-day range</td>
-</tr>
-<tr>
-<td><code>ftype</code></td>
-<td>choice</td>
-<td>Resource type (IMAGE, VIDEO, ...)</td>
-</tr>
-<tr>
-<td><code>bboxes</code></td>
-<td>boolean</td>
-<td>Has bounding boxes</td>
-</tr>
-<tr>
-<td><code>user</code></td>
-<td>list of PKs</td>
-<td>Filter by owner user PKs</td>
-</tr>
-<tr>
-<td><code>approved</code></td>
-<td>boolean</td>
-<td>Has a FINAL approved classification</td>
-</tr>
-<tr>
-<td><code>feedback</code></td>
-<td>boolean</td>
-<td>Is a feedback classification</td>
-</tr>
-<tr>
-<td><code>species</code></td>
-<td>list of PKs</td>
-<td>Filter by species PKs</td>
-</tr>
-<tr>
-<td><code>observation_type</code></td>
-<td>choice</td>
-<td>Filter by observation type</td>
-</tr>
-<tr>
-<td><code>sex</code></td>
-<td>choice</td>
-<td>Filter by sex</td>
-</tr>
-<tr>
-<td><code>age</code></td>
-<td>choice</td>
-<td>Filter by age</td>
-</tr>
-<tr>
-<td><code>confidence</code></td>
-<td>number</td>
-<td><code>dynamic_attrs.classification_confidence &gt;= value</code></td>
+<td>both</td>
+<td>PK of the <strong>link</strong> between the project and the collection</td>
 </tr>
 <tr>
 <td><code>ai_provider</code></td>
 <td>list of PKs</td>
-<td>Filter by AI provider PKs</td>
+<td>both</td>
+<td>AI provider (model) PKs</td>
+</tr>
+<tr>
+<td><code>confidence</code></td>
+<td>number 0-1</td>
+<td>both</td>
+<td>Some observation has at least this confidence</td>
+</tr>
+<tr>
+<td><code>approved</code></td>
+<td>boolean</td>
+<td>both</td>
+<td>It became the final classification. <strong>v2: the table answers 500</strong> (the SDK warns)</td>
+</tr>
+<tr>
+<td><code>bboxes</code></td>
+<td>boolean</td>
+<td>both</td>
+<td>Has bounding boxes</td>
+</tr>
+<tr>
+<td><code>ftype</code></td>
+<td>choice</td>
+<td>both</td>
+<td>Resource type (<code>I</code>, <code>V</code>, ...)</td>
+</tr>
+<tr>
+<td><code>species</code></td>
+<td>list of PKs</td>
+<td>both</td>
+<td>Species PKs</td>
+</tr>
+<tr>
+<td><code>observation_type</code></td>
+<td>choice</td>
+<td>both</td>
+<td>Observation type</td>
+</tr>
+<tr>
+<td><code>search</code></td>
+<td>text</td>
+<td>both</td>
+<td>Species (Latin or English name), resource name or attribute (list)</td>
+</tr>
+<tr>
+<td><code>owner</code>, <code>user</code>, <code>feedback</code></td>
+<td></td>
+<td>v2</td>
+<td>As in the <a href="../user_classifications/">user list</a></td>
+</tr>
+<tr>
+<td><code>locations_map</code>, <code>rdate_from</code>/<code>rdate_to</code>, <code>rtime_from</code>/<code>rtime_to</code></td>
+<td></td>
+<td>v2</td>
+<td>Location, date and time of the resource</td>
+</tr>
+<tr>
+<td><code>sex</code>, <code>age</code>, <code>classified</code>, <code>classified_ai</code></td>
+<td></td>
+<td>v2</td>
+<td>As in the user list</td>
 </tr>
 </tbody>
 </table>
+<p>v1 also applies one filter per custom attribute of the project's classificator, when <code>project</code> is given.</p>
 <h2 id="the-six-access-patterns">The six access patterns</h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">page</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">ai_classifications</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">page_size</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">ai_provider</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">client</span><span class="o">.</span><span class="n">ai_classifications</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">species</span><span class="o">=</span><span class="mi">42</span><span class="p">):</span>
